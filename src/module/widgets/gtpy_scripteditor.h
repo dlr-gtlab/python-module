@@ -1,0 +1,265 @@
+/* GTlab - Gas Turbine laboratory
+ * Source File: gtpy_scripteditor.h
+ * copyright 2009-2018 by DLR
+ *
+ *  Created on: 12.08.2019
+ *  Author: Marvin Noethen (AT-TW)
+ *  Tel.: +49 2203 601 2692
+ */
+
+#ifndef GTPY_SCRIPTEDITOR_H
+#define GTPY_SCRIPTEDITOR_H
+
+#include "gt_codeeditor.h"
+#include "gtpy_contextmanager.h"
+
+class GtpyCompleter;
+
+/**
+ * @brief The GtpyScriptEditor class
+ */
+class GtpyScriptEditor: public GtCodeEditor
+{
+    Q_OBJECT
+
+public:
+    /**
+     * @brief GtpyScriptEditor
+     * @param type Type of context in which the scripts written in the
+     * editor are evaluated.
+     * @param parent Parent of the editor.
+     */
+    GtpyScriptEditor(GtpyContextManager::Context type,
+                     QWidget* parent = Q_NULLPTR);
+
+    /**
+     * @brief Handles the tooltips after error messages.
+     * @param event received event
+     * @return true if the event was recognized and processed
+     */
+    virtual bool event(QEvent* event) Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Returns the written script.
+     * @return the written script
+     */
+    QString script();
+
+    /**
+     * @brief Inserts given text to current cursor position.
+     * @param text Text to be inserted.
+     */
+    void insertToCurrentCursorPos(const QString& text);
+
+    /**
+     * @brief Replaces the value of function call of the function named
+     * functionName into the block delimited by header and caption.
+     * @param header Upper limit of the block.
+     * @param caption Lower limit of the block.
+     * @param newVal New value that has to set.
+     * @param functionName Name of function
+     * @param pyObjName Name of python object
+     */
+    void replaceIntoBlock(const QString& header, const QString& caption,
+                          const QString& newVal, const QString& functionName,
+                          const QString& pyObjName);
+
+    /**
+     * @brief Replaces old header and old caption of a block with given new
+     * header and new caption.
+     * @param oldHeader Old header string
+     * @param newHeader New header string
+     * @param oldCaption Old caption string
+     * @param newCaption New caption string
+     */
+    void replaceBlockHeaders(const QString& oldHeader, const QString& newHeader,
+                      const QString& oldCaption, const QString& newCaption);
+
+    /**
+     * @brief Searchs for the given regular expression and replaces it
+     * with replaceBy.
+     * @param searchRegExp Regular expression that should be matched.
+     * @param replaceBy Text to insert.
+     * @param all If it is true, all strings in the document will be replaced.
+     * Otherwise it only replaces the first one found.
+     */
+    void searchAndReplace(const QRegExp& searchRegExp, const QString& replaceBy,
+                          bool all = true);
+    /**
+     * @brief Searchs for the given string searchFor and replaces it
+     * with replaceBy.
+     * @param searchFor Text to replace.
+     * @param replaceBy Text to insert.
+     * @param all If it is true, all strings in the document will be replaced.
+     * Otherwise it only replaces the first one found.
+     */
+    void searchAndReplace(const QString& searchFor, const QString& replaceBy,
+                          bool all = true);
+public slots:
+    /**
+     * @brief Searchs for the given text and highlights this.
+     * @param searchText Text which should be searched.
+     * @param moveToNextFound Whether cursor should move to the next found.
+     */
+    void searchHighlighting(const QString& searchText,
+                            bool moveToNextFound = true);
+
+    /**
+     * @brief Removes the highlighting of a searched word or text part.
+     */
+    void removeSearchHighlighting();
+
+    /**
+     * @brief Sets m_SearchActivated to true.
+     */
+    void textSearchingActivated();
+
+    /**
+     * @brief Moves cursor to the next found of searching.
+     */
+    void moveCursorToNextFound();
+
+    /**
+     * @brief Moves cursor to the last found of searching.
+     */
+    void moveCursorToLastFound();
+
+protected:
+    /**
+     * @brief Called when user presses a key.
+     * @param e Event which was send by pressing a key.
+     */
+    void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Called when the editor loses the focus. Deletes the highlithing of
+     * the current line.
+     * @param event Event sent by losing the focus.
+     */
+    void focusOutEvent(QFocusEvent* event) Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Called when the editor gets the focused. Highlights the current
+     * line.
+     * @param event Event sent by getting the focus.
+     */
+    void focusInEvent(QFocusEvent* event) Q_DECL_OVERRIDE;
+
+private slots:
+    /**
+     * @brief Highlights the current line.
+     */
+    void lineHighlighting();
+
+    /**
+     * @brief Highlights the given line as error line (red).
+     * @param codeLine number of line which should be highligted
+     * @param type of context in which the error has been triggered
+     */
+    void highlightErrorLine(int codeLine,
+                            const GtpyContextManager::Context& type);
+
+    /**
+     * @brief Receives the error messages.
+     * @param message that has been send
+     * @param type of context in which the error has been triggered
+     */
+    void appendErrorMessage(const QString& message,
+                            const GtpyContextManager::Context& type);
+
+    /**
+     * @brief Sets the number of error line to invalid value (-1).
+     */
+    void resetErrorLine();
+
+    /**
+     * @brief Inserts the selected completion into the text editor.
+     * @param index of completion
+     */
+    void insertCompletion();
+
+private:
+    /// Pointer to cmpleter
+    GtpyCompleter* m_cpl;
+
+    /// Number of error line
+    int m_errorLine;
+
+    /// Whether the text search is activated
+    bool m_SearchActivated;
+
+    /// Text that was last searched for
+    QString m_lastSearch;
+
+    /// Error message
+    QString m_errorMessage;
+
+    /// Python Context
+    GtpyContextManager::Context m_contextType;
+
+    /**
+     * @brief Returns the python code of a function call as string value.
+     * @param newVal Value that to be set.
+     * @param functionName Name of the called function.
+     * @param pyObjName Name of the object that holds the function.
+     * @return Python code as string value.
+     */
+    QString functionCallPyCode(const QString& newVal,
+                               const QString& functionName,
+                               const QString& pyObjName);
+
+    /**
+     * @brief The line in which the cursor is currently located is
+     * commented out or commented out. (Python comment character "#")
+     * @param commentOut true if "#" has to insert
+     */
+    void commentLine(bool commentOut);
+
+    /**
+     * @brief Comments out the selected block.
+     */
+    void commentOutBlock();
+
+    /**
+     * @brief Calls completer to handle completion.
+     */
+    void handleCompletion();
+
+    /**
+     * @brief Sets error message variable to empty string.
+     */
+    void resetErrorMessage();
+
+    /**
+     * @brief Checks whether the line in which the cursor is currently located
+     *  is commented out.
+     * @return True if current line is commented out.
+     */
+    bool isCurrentLineCommentedOut();
+
+    /**
+     * @brief Checks whether the line in which the cursor is currently located
+     * is highlighted.
+     * @return True if current line is highlighted.
+     */
+    bool isCurrentLineHighlighted();
+
+    /**
+     * @brief Removes the highlighting of the current line.
+     */
+    void removeCurrentLineHighlighting();
+
+signals:
+    /**
+     * @brief Will emited if eval shortcut (ctrl+E) has been received.
+     */
+    void evalShortcutTriggered();
+
+    /**
+     * @brief Will emited if find shortcut (ctrl+F) has been received.
+     * @param text Selected text.
+     */
+    void searchShortcutTriggered(const QString& text);
+};
+
+#endif // GTPY_SCRIPTEDITOR_H
