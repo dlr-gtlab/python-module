@@ -26,7 +26,6 @@ INCLUDEPATH += $${DEV_TOOLS}/ThirdPartyLibraries/PythonQt/PythonQt_373/include
 LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/PythonQt/PythonQt_373/lib
 DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/PythonQt/PythonQt_373/lib
 
-
 # Google Test
 INCLUDEPATH += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/include
 win32 {
@@ -42,7 +41,5 @@ unix {
     LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
     DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
 }
-
-#
 
 ######################################################################
