@@ -11,14 +11,32 @@
 #### LOCAL SETTINGS
 include( local_settings.pri )
 
-INCLUDEPATH += $${DEV_TOOLS}/include
-LIBS        += -L$${DEV_TOOLS}/lib
-DEPENDPATH  += $${DEV_TOOLS}/lib
+contains(LINK_DEV_TOOLS, true) {
+    message("LINK_DEV_TOOLS = true")
+    INCLUDEPATH += $${DEV_TOOLS}/include
+    LIBS        += -L$${DEV_TOOLS}/lib
+    DEPENDPATH  += $${DEV_TOOLS}/lib
+} else {
+    INCLUDEPATH += $${GTLAB_PROJECT}/src/datamodel \
+    $${GTLAB_PROJECT}/src/datamodel/property \
+    $${GTLAB_PROJECT}/src/utilities/logging \
+    $${GTLAB_PROJECT}/src/core \
+    $${GTLAB_PROJECT}/src/core/settings \
+    $${GTLAB_PROJECT}/src/core/python \
+    $${GTLAB_PROJECT}/src/calculators \
+    $${GTLAB_PROJECT}/src/mdi \
+    $${GTLAB_PROJECT}/src/mdi/tools \
+    $${GTLAB_PROJECT}/src/mdi/post \
+    $${GTLAB_PROJECT}/src/mdi/dock_widgets/process \
+    $${GTLAB_PROJECT}/src/mdi/dock_widgets/process/pages
+
+    LIBS += -L$${GTLAB_PROJECT}/build
+}
 
 #### THIRD PARTY LIBRARIES
 # Python
 INCLUDEPATH += $${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_373/include
-LIBS += $${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_373/libs/python37.lib
+LIBS += -L$${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_373/libs
 LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_373
 DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_373
 # PythonQt

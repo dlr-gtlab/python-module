@@ -8,9 +8,7 @@
 #### DO NOT CHANGE!
 ######################################################################
 
-include( ../../../../settings.pri )
-
-BUILD_DEST_TEMP = ../../../../build
+include( $${PWD}/../../settings.pri )
 
 TARGET = GTlabPython
 
@@ -22,18 +20,25 @@ CONFIG += c++11
 
 DEFINES += GT_PYTHON_DLL
 
-CONFIG(debug, debug|release){
-    DESTDIR = $${BUILD_DEST_TEMP}/modules/debug-python
-    OBJECTS_DIR = $${BUILD_DEST_TEMP}/modules/debug-python/obj
-    MOC_DIR = $${BUILD_DEST_TEMP}/modules/debug-python/moc
-    RCC_DIR = $${BUILD_DEST_TEMP}/modules/debug-python/rcc
-    UI_DIR = $${BUILD_DEST_TEMP}/modules/debug-python/ui
+contains(LINK_DEV_TOOLS, true) {
+    message("LINK_DEV_TOOLS = true")
+    BUILD_DEST = ../../build
 } else {
-    DESTDIR = $${BUILD_DEST_TEMP}/modules/release-python
-    OBJECTS_DIR = $${BUILD_DEST_TEMP}/modules/release-python/obj
-    MOC_DIR = $${BUILD_DEST_TEMP}/modules/release-python/moc
-    RCC_DIR = $${BUILD_DEST_TEMP}/modules/release-python/rcc
-    UI_DIR = $${BUILD_DEST_TEMP}/modules/release-python/ui
+    BUILD_DEST = $${GTLAB_PROJECT}/build/modules
+}
+
+CONFIG(debug, debug|release){
+    DESTDIR = $${BUILD_DEST}/debug-python
+    OBJECTS_DIR = $${BUILD_DEST}/debug-python/obj
+    MOC_DIR = $${BUILD_DEST}/debug-python/moc
+    RCC_DIR = $${BUILD_DEST}/debug-python/rcc
+    UI_DIR = $${BUILD_DEST}/debug-python/ui
+} else {
+    DESTDIR = $${BUILD_DEST}/release-python
+    OBJECTS_DIR = $${BUILD_DEST}/release-python/obj
+    MOC_DIR = $${BUILD_DEST}/release-python/moc
+    RCC_DIR = $${BUILD_DEST}/release-python/rcc
+    UI_DIR = $${BUILD_DEST}/release-python/ui
 }
 
 INCLUDEPATH += .\
@@ -45,21 +50,9 @@ INCLUDEPATH += .\
     wizards/script_calculator \
     wizrads/python_task \
     models \
-    widgets \
-    ../../../datamodel \
-    ../../../datamodel/property \
-    ../../../utilities/logging \
-    ../../../core \
-    ../../../core/settings \
-    ../../../core/python \
-    ../../../calculators \
-    ../../../mdi \
-    ../../../mdi/tools \
-    ../../../mdi/post \
-    ../../../mdi/dock_widgets/process \
-    ../../../mdi/dock_widgets/process/pages
+    widgets
 
-DESTDIR = $${BUILD_DEST_TEMP}/modules
+DESTDIR = $${BUILD_DEST}
 
 HEADERS += \
     gt_python.h \
@@ -110,6 +103,6 @@ SOURCES += \
     utilities/gtpy_contextmanager.cpp \
     utilities/gtpy_calculatorfactory.cpp
 
-LIBS += -L$${BUILD_DEST_TEMP} -lGTlabLogging -lGTlabNumerics -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabPhysics -lGTlabCore -lPythonQt-Qt5-Python373
+LIBS += -lGTlabLogging -lGTlabNumerics -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabPhysics -lGTlabCore -lPythonQt-Qt5-Python373
 
 ######################################################################
