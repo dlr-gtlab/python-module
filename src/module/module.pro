@@ -10,8 +10,6 @@
 
 include( $${PWD}/../../settings.pri )
 
-BUILD_DEST = ../../build
-
 TARGET = GTlabPython
 
 QT += core widgets xml svg
@@ -22,18 +20,25 @@ CONFIG += c++11
 
 DEFINES += GT_PYTHON_DLL
 
-CONFIG(debug, debug|release){
-    DESTDIR = $${BUILD_DEST}/modules/debug-python
-    OBJECTS_DIR = $${BUILD_DEST}/modules/debug-python/obj
-    MOC_DIR = $${BUILD_DEST}/modules/debug-python/moc
-    RCC_DIR = $${BUILD_DEST}/modules/debug-python/rcc
-    UI_DIR = $${BUILD_DEST}/modules/debug-python/ui
+contains(LINK_DEV_TOOLS, true) {
+    message("LINK_DEV_TOOLS = true")
+    BUILD_DEST = ../../build
 } else {
-    DESTDIR = $${BUILD_DEST}/modules/release-python
-    OBJECTS_DIR = $${BUILD_DEST}/modules/release-python/obj
-    MOC_DIR = $${BUILD_DEST}/modules/release-python/moc
-    RCC_DIR = $${BUILD_DEST}/modules/release-python/rcc
-    UI_DIR = $${BUILD_DEST}/modules/release-python/ui
+    BUILD_DEST = $${GTLAB_PROJECT}/build/modules
+}
+
+CONFIG(debug, debug|release){
+    DESTDIR = $${BUILD_DEST}/debug-python
+    OBJECTS_DIR = $${BUILD_DEST}/debug-python/obj
+    MOC_DIR = $${BUILD_DEST}/debug-python/moc
+    RCC_DIR = $${BUILD_DEST}/debug-python/rcc
+    UI_DIR = $${BUILD_DEST}/debug-python/ui
+} else {
+    DESTDIR = $${BUILD_DEST}/release-python
+    OBJECTS_DIR = $${BUILD_DEST}/release-python/obj
+    MOC_DIR = $${BUILD_DEST}/release-python/moc
+    RCC_DIR = $${BUILD_DEST}/release-python/rcc
+    UI_DIR = $${BUILD_DEST}/release-python/ui
 }
 
 INCLUDEPATH += .\
