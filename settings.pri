@@ -7,16 +7,18 @@
 ######################################################################
 #### DO NOT CHANGE!
 ######################################################################
-
+#
 #### LOCAL SETTINGS
 include( local_settings.pri )
 
-contains(LINK_DEV_TOOLS, true) {
-    message("LINK_DEV_TOOLS = true")
+contains(COMPILE_MODE, module|gtlab) {
+
     INCLUDEPATH += $${DEV_TOOLS}/include
     LIBS        += -L$${DEV_TOOLS}/lib
     DEPENDPATH  += $${DEV_TOOLS}/lib
-} else {
+}
+
+contains(COMPILE_MODE, gtlabProject|moduleTests) {
     INCLUDEPATH += $${GTLAB_PROJECT}/src/datamodel \
     $${GTLAB_PROJECT}/src/datamodel/property \
     $${GTLAB_PROJECT}/src/utilities/logging \

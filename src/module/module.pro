@@ -20,25 +20,33 @@ CONFIG += c++11
 
 DEFINES += GT_PYTHON_DLL
 
-contains(LINK_DEV_TOOLS, true) {
-    message("LINK_DEV_TOOLS = true")
-    BUILD_DEST = ../../build
-} else {
+BUILD_DEST_TEMP = ../../build
+
+contains(COMPILE_MODE, module|moduleTests) {
+    BUILD_DEST = $${BUILD_DEST_TEMP}
+}
+
+equals(COMPILE_MODE, gtlabProject) {
     BUILD_DEST = $${GTLAB_PROJECT}/build/modules
+    BUILD_DEST_TEMP = $${BUILD_DEST}
+}
+
+equals(COMPILE_MODE, gtlab) {
+    BUILD_DEST = $${GTLAB_PATH}/bin/modules
 }
 
 CONFIG(debug, debug|release){
-    DESTDIR = $${BUILD_DEST}/debug-python
-    OBJECTS_DIR = $${BUILD_DEST}/debug-python/obj
-    MOC_DIR = $${BUILD_DEST}/debug-python/moc
-    RCC_DIR = $${BUILD_DEST}/debug-python/rcc
-    UI_DIR = $${BUILD_DEST}/debug-python/ui
+    DESTDIR = $${BUILD_DEST_TEMP}/debug-python
+    OBJECTS_DIR = $${BUILD_DEST_TEMP}/debug-python/obj
+    MOC_DIR = $${BUILD_DEST_TEMP}/debug-python/moc
+    RCC_DIR = $${BUILD_DEST_TEMP}/debug-python/rcc
+    UI_DIR = $${BUILD_DEST_TEMP}/debug-python/ui
 } else {
-    DESTDIR = $${BUILD_DEST}/release-python
-    OBJECTS_DIR = $${BUILD_DEST}/release-python/obj
-    MOC_DIR = $${BUILD_DEST}/release-python/moc
-    RCC_DIR = $${BUILD_DEST}/release-python/rcc
-    UI_DIR = $${BUILD_DEST}/release-python/ui
+    DESTDIR = $${BUILD_DEST_TEMP}/release-python
+    OBJECTS_DIR = $${BUILD_DEST_TEMP}/release-python/obj
+    MOC_DIR = $${BUILD_DEST_TEMP}/release-python/moc
+    RCC_DIR = $${BUILD_DEST_TEMP}/release-python/rcc
+    UI_DIR = $${BUILD_DEST_TEMP}/release-python/ui
 }
 
 INCLUDEPATH += .\
