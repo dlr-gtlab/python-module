@@ -52,5 +52,5 @@ it possible to pass Python scripts to a Python interpreter.
     process control. The output of the evaluation is displayed on the console 
     below the editor. When executing the Python Task via process control, the 
     output is displayed on the Python Console described above (Fig. 1). 
-    The Python task enables the flexible interconnection of calculators. 
+    The Python task enables the flexible interconnection of calculators.
     In addition, data from the central data model can be read and modified.
