@@ -58,15 +58,17 @@ design can be controlled with Python scripts.
     wizards of all available calculators can be called by using the
     'Add' button. If the configuration of a calculator via its wizard is 
     completed, the Python code corresponding to the configuration will be 
-    automatically inserted into the editor. A calculator instance can be executed by 
-    calling its run() method. During the evaluation (Ctrl+E) the run() 
-    method returns False and the calculators are not executed. 
+    automatically inserted into the editor. A calculator instance can be 
+    executed by calling its run() method. During the evaluation (Ctrl+E) 
+    the run() method returns False and the calculators are not executed. 
     The calculators are only executed when the Python Task is executed via
     process control. The Python task enables the flexible interconnection of 
-    calculators.
+    calculators. The calculators can be executed iteratively and depending on 
+    previously calculated result data. All advantages of Python are available 
+    for additional calculations and modifications of the data model.
     
     <figure class="image">
-        <img src="/images/python_task.png" 
+        <img src="/images/python_task.PNG" 
         alt="Python Task" width="600" height="450">
         <figcaption> <i>Fig. 3: Python Task</i></figcaption>
     </figure>
