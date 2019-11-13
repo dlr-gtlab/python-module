@@ -1,17 +1,18 @@
 # GTlab Python Module
 
-This module integrates Python into GTlab. Python is an interpreted programming 
+This module embeds Python into GTlab. Python is an interpreted programming 
 language that is suitable for script programming. Scripts are small 
 programs that are usually implemented within one source code file. A Python 
-interpreter reads the source files and executes the instructions defined in 
-them. The GTlab Python Module integrates three interfaces into GTlab which make
-it possible to execute Python scripts using a Python interpreter. By using the 
-interfaces the central data model can be modified and the preliminary engine
-design can be controlled with Python scripts.
+Interpreter reads the source code file and executes the instructions defined in 
+them. The Python Module offers the possibility to define and execute process chains 
+by using Python. This increases the flexibility of process chains and enables 
+the extension of GTlab's calculation method without source code access and C++ 
+knowledge. To use these advantages the Python Module extends GTlab by the 
+following three interfaces. 
 
 * <b>Python Console</b> 
 
-    The GTlab Python Module integrates a Python Console into GTlab. This is 
+    The Python Module integrates a Python Console into GTlab. This is 
     available via the Python Console tab next to the Application tab (Fig. 1). 
     The Python Console allows you to navigate through projects and read and 
     modify data from the central data model using Python code. It provides an 
@@ -45,7 +46,7 @@ design can be controlled with Python scripts.
     <figure class="image">
         <img src="/images/python_script_calculator.png" 
         alt="Python Script Calculator" width="600" height="450">
-        <figcaption> <i>Fig. 2: Python Script Calculator</i></figcaption>
+        <figcaption> <i>Fig. 2: Python Script Calculator Wizard</i></figcaption>
     </figure>
 
 * <b>Python Task</b> 
@@ -70,5 +71,14 @@ design can be controlled with Python scripts.
     <figure class="image">
         <img src="/images/python_task.PNG" 
         alt="Python Task" width="600" height="450">
-        <figcaption> <i>Fig. 3: Python Task</i></figcaption>
+        <figcaption> <i>Fig. 3: Python Task Wizard</i></figcaption>
     </figure>
+--> Batch mode
+
+
+
+### Embedding Python into the Python Module
+For embedding Python into the Python Module the library 
+[PythonQt](https://mevislab.github.io/pythonqt/ "This link takes you to the homepage of PythonQt.")
+was used. 
+
