@@ -6,9 +6,9 @@ programs that are usually implemented within one source code file. A Python
 Interpreter reads the source code file and executes the instructions defined in 
 them. The Python Module offers the possibility to define and execute process chains 
 by using Python. This increases the flexibility of process chains and enables 
-the extension of GTlab's calculation method without source code access and C++ 
-knowledge. To use these advantages the Python Module extends GTlab by the 
-following three interfaces. 
+the extension of GTlab's preliminary design calculation methods without source 
+code access and C++ knowledge. To use these advantages the Python Module extends
+GTlab by the following three interfaces. 
 
 * <b>Python Console</b> 
 
@@ -22,6 +22,7 @@ following three interfaces.
         <img src="/images/python_console.png" alt="Python Console">
         <figcaption> <i>Fig. 1: Python Console</i></figcaption>
     </figure>
+
 
 * <b>Python Script Calculator</b> 
 
@@ -63,22 +64,31 @@ following three interfaces.
     executed by calling its run() method. During the evaluation (Ctrl+E) 
     the run() method returns False and the calculators are not executed. 
     The calculators are only executed when the Python Task is executed via
-    process control. The Python task enables the flexible interconnection of 
-    calculators. The calculators can be executed iteratively and depending on 
-    previously calculated result data. All advantages of Python are available 
-    for additional calculations and modifications of the data model.
+    process control. The benefit of this task is to enable the flexible 
+    interconnection of calculators. The calculators can be executed iteratively 
+    and depending on previously calculated result data. All advantages of Python 
+    are available for additional calculations and modifications of the data 
+    model.
     
     <figure class="image">
         <img src="/images/python_task.PNG" 
         alt="Python Task" width="600" height="450">
         <figcaption> <i>Fig. 3: Python Task Wizard</i></figcaption>
     </figure>
---> Batch mode
 
-
-
-### Embedding Python into the Python Module
+### PythonQt for embedding Python 
 For embedding Python into the Python Module the library 
 [PythonQt](https://mevislab.github.io/pythonqt/ "This link takes you to the homepage of PythonQt.")
-was used. 
+was used. It is designed to embed a Python Interpreter into an existing C++
+application so users can control parts of the application using Python at 
+runtime. PythonQt makes use of the 
+[Meta-Object System](https://doc.qt.io/archives/qt-4.8/metaobjects.html "This link takes you to a description of the Meat-Object System.")
+of Qt to transfer C++ objects to the Python environment.
+
+
+### Compiling the Python Module
+To compile the Python module, you must copy the file local_setting.pri from the 
+features folder and paste it next to the project file gtlab_python.pro. 
+
+
 
