@@ -8,9 +8,7 @@
 #### DO NOT CHANGE!
 ######################################################################
 
-include( ../../../../settings.pri )
-
-BUILD_DEST_TEMP = ../../../../build
+include( ../../settings.pri )
 
 win32 {
     RC_FILE = batch-script.rc
@@ -23,6 +21,21 @@ TEMPLATE = app
 CONFIG += console
 CONFIG += silent
 CONFIG += c++11
+
+BUILD_DEST_TEMP = ../../build
+
+contains(COMPILE_MODE, module|moduleTests) {
+    BUILD_DEST = $${BUILD_DEST_TEMP}
+}
+
+equals(COMPILE_MODE, gtlabRepository) {
+    BUILD_DEST = $${GTLAB_REPO}/build
+    BUILD_DEST_TEMP = $${BUILD_DEST}
+}
+
+equals(COMPILE_MODE, gtlab) {
+    BUILD_DEST = $${GTLAB_PATH}/bin
+}
 
 CONFIG(debug, debug|release){
     DESTDIR = $${BUILD_DEST_TEMP}/debug-batch-script
@@ -38,28 +51,22 @@ CONFIG(debug, debug|release){
     UI_DIR = $${BUILD_DEST_TEMP}/release-batch-script/ui
 }
 INCLUDEPATH += .\
-    ../../../datamodel \
-    ../../../calculators \
-    ../../../core \
-    ../../../mdi \
-    ../../../utilities/logging \
-    ../../../utilities/numerics \
-    ../../../utilities/numerics/bspline \
-    ../../../datamodel/property \
-    ../src \
-    ../src/utilities
+    ../module \
+    ../module/utilities
 
 
-DESTDIR = $${BUILD_DEST_TEMP}
+DESTDIR = $${BUILD_DEST}
 
 HEADERS +=
 
 SOURCES += \
     batch-script.cpp
 
-LIBS += -L$${BUILD_DEST_TEMP} -lGTlabNumerics -lGTlabPhysics -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators -lGTlabCore -lqwt -lGTlabMdi -lGTlabNetwork
+contains(COMPILE_MODE, gtlabRepository|gtlab) {
+    BUILD_DEST = $${BUILD_DEST}/modules
+}
 
-LIBS += -L$${DESTDIR}/modules -lGTlabPython
+LIBS += -L$${BUILD_DEST} -lGTlabNumerics -lGTlabPhysics -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators -lGTlabCore -lGTlabMdi -lGTlabNetwork -lGTlabPython
 
 # add search paths to shared libraries
 unix: QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN:\$$ORIGIN/modules\''
