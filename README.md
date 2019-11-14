@@ -88,7 +88,29 @@ of Qt to transfer C++ objects to the Python environment.
 
 ### Compiling the Python Module
 To compile the Python module, you must copy the file local_setting.pri from the 
-features folder and paste it next to the project file gtlab_python.pro. 
+features directory and paste it next to the project file gtlab_python.pro. 
+The local_settings.pri contains the following three paths that you must adapt
+for your local system. 
 
+  * DEV_TOOLS  = path\to\your\local\GTlab-DevTools
+    
+  * GTLAB_REPO = path\to\a\local\stored\GTlab-Repository
+    
+  * GTLAB_PATH = path\to\the\installed\version\of\GTlab 
 
+The path to the DevTools is always needed because the compiled version of 
+PythonQt and Python is stored in it. Whether you have to specify the path 
+to the repository or the path to the installed GTlab version depends on which 
+compile mode you choose. You can specify the compile mode with the value of the
+variable COMPILE_MODE. The compile mode determines whether the header files of 
+the DevTools or a GTlab repository are used. It also determines in which build 
+directory the binaries will be stored. 
 
+There are four modes:
+
+|   COMPILE_MODE  | description                                                                                                                                   | paths to specify         |
+|  ---            |  ------                                                                                                                                       | ------                   |
+| module          | header files of DevTools are used;<br> a build directory which contains the binaries will be created at the Python Module directory           | DEV_TOOLS                |
+| moduleTests     | header files of a GTlab reposetory are used;<br> a build directory which contains the binaries will be created at the Python Module directory | DEV_TOOLS<br> GTLAB_REPO |
+| gtlab           | header files of DevTools are used;<br> the binaries will be stored in the bin directory of the installed GTlab version                        | DEV_TOOLS<br> GTLAB_PATH |
+| gtlabRepository | header files of a GTlab reposetory are used;<br> the binaries will be stored in the \build\modules\ directory of the GTlab repository         | DEV_TOOLS<br> GTLAB_REPO |
