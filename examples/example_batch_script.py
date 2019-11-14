@@ -1,7 +1,6 @@
+print ("##############-script-starts-###############")
+
 init()
-
-print "##############-----------###############"
-
 
 #if Project is not None:  
 #	Project.runProcess("New Task")
@@ -12,12 +11,16 @@ print "##############-----------###############"
 #Project.PreDesign.HPC.findProperty("mass").setValueFromVariant(myMassVar)
 #print Project.PreDesign.HPC.findProperty("mass")
 
-proj = openProject("MeanlineTest")
+openProject("v2500_hydrogen")
 
-val = proj.PreDesign.HPC.findProperty("mass")
+pro = currentProject()
 
-print val.valueToVariant()
+val = pro.PreDesign.HPC_FN_18000.findGtProperty("mass")
 
-val.setValueFromVariant(5)
+print (val.valueToVariant())
 
-print val.valueToVariant()
+val.setValueFromVariant(90)
+
+print (val.valueToVariant())
+
+print ("##############-script-ends-###############")
