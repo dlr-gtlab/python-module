@@ -99,7 +99,7 @@ for your local system.
   * GTLAB_PATH = path\to\the\installed\version\of\GTlab 
 
 The path to the DevTools is always needed because the compiled version of 
-PythonQt and Python is stored in it. Whether you have to specify the path 
+PythonQt and Python is stored in the DevTools. Whether you have to specify the path 
 to the repository or the path to the installed GTlab version depends on which 
 compile mode you choose. You can specify the compile mode with the value of the
 variable COMPILE_MODE. The compile mode determines whether the header files of 
