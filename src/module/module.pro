@@ -26,8 +26,8 @@ contains(COMPILE_MODE, module|moduleTests) {
     BUILD_DEST = $${BUILD_DEST_TEMP}
 }
 
-equals(COMPILE_MODE, gtlabProject) {
-    BUILD_DEST = $${GTLAB_PROJECT}/build/modules
+equals(COMPILE_MODE, gtlabRepository) {
+    BUILD_DEST = $${GTLAB_REPO}/build/modules
     BUILD_DEST_TEMP = $${BUILD_DEST}
 }
 
