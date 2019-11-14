@@ -18,21 +18,21 @@ contains(COMPILE_MODE, module|gtlab) {
     DEPENDPATH  += $${DEV_TOOLS}/lib
 }
 
-contains(COMPILE_MODE, gtlabProject|moduleTests) {
-    INCLUDEPATH += $${GTLAB_PROJECT}/src/datamodel \
-    $${GTLAB_PROJECT}/src/datamodel/property \
-    $${GTLAB_PROJECT}/src/utilities/logging \
-    $${GTLAB_PROJECT}/src/core \
-    $${GTLAB_PROJECT}/src/core/settings \
-    $${GTLAB_PROJECT}/src/core/python \
-    $${GTLAB_PROJECT}/src/calculators \
-    $${GTLAB_PROJECT}/src/mdi \
-    $${GTLAB_PROJECT}/src/mdi/tools \
-    $${GTLAB_PROJECT}/src/mdi/post \
-    $${GTLAB_PROJECT}/src/mdi/dock_widgets/process \
-    $${GTLAB_PROJECT}/src/mdi/dock_widgets/process/pages
+contains(COMPILE_MODE, gtlabRepository|moduleTests) {
+    INCLUDEPATH += $${GTLAB_REPO}/src/datamodel \
+    $${GTLAB_REPO}/src/datamodel/property \
+    $${GTLAB_REPO}/src/utilities/logging \
+    $${GTLAB_REPO}/src/core \
+    $${GTLAB_REPO}/src/core/settings \
+    $${GTLAB_REPO}/src/core/python \
+    $${GTLAB_REPO}/src/calculators \
+    $${GTLAB_REPO}/src/mdi \
+    $${GTLAB_REPO}/src/mdi/tools \
+    $${GTLAB_REPO}/src/mdi/post \
+    $${GTLAB_REPO}/src/mdi/dock_widgets/process \
+    $${GTLAB_REPO}/src/mdi/dock_widgets/process/pages
 
-    LIBS += -L$${GTLAB_PROJECT}/build
+    LIBS += -L$${GTLAB_REPO}/build
 }
 
 #### THIRD PARTY LIBRARIES
