@@ -73,6 +73,8 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     PythonQt::self()->registerClass(&GtCalculator::staticMetaObject, "example");
     PythonQt::self()->registerClass(&GtDataZone0D::staticMetaObject, "example");
 
+    registerTypeConverters();
+
     m_decorator = new GtpyDecorator(this);
 
     PythonQt::self()->addDecorators(m_decorator);
@@ -930,6 +932,15 @@ GtpyContextManager::setStandardCompletions()
     m_standardCompletions = results;
 }
 
+void
+GtpyContextManager::registerTypeConverters()
+{
+    int objectPtrMapId = qRegisterMetaType<QMap<int, double>>("QMap<int, double>");
+
+    PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
+                         GtpyTypeConversion::convertQMapIntAndDoubleToPyObject);
+}
+
 QMultiMap<QString, GtpyFunction>
 GtpyContextManager::calculatorCompletions(const GtpyContextManager::Context&
                                               type)
@@ -1450,4 +1461,39 @@ GtpyContextManager::instance()
     }
 
     return retval;
+}
+
+PyObject*
+GtpyTypeConversion::convertQMapIntAndDoubleToPyObject(const void* inObject, int)
+{
+    QMap<int, double>& map = *((QMap<int, double>*)inObject);
+    return mapToPython<QMap<int,double>>(map);
+}
+
+template<typename Map>
+PyObject*
+GtpyTypeConversion::mapToPython(const Map& map)
+{
+    PyObject* result = PyDict_New();
+
+    typename Map::const_iterator t = map.constBegin();
+
+    PyObject* key;
+    PyObject* val;
+
+    for ( ; t != map.constEnd(); t++)
+    {
+      // converts key and value to QVariant and then to PyObject*
+      key = PythonQtConv::QVariantToPyObject(QVariant(t.key()));
+      val = PythonQtConv::QVariantToPyObject(QVariant(t.value()));
+
+      // sets key and val to the result dict
+      PyDict_SetItem(result, key, val);
+
+      // decrement the reference count for key and val
+      Py_DECREF(key);
+      Py_DECREF(val);
+    }
+    qDebug() << "result == " << result;
+    return result;
 }

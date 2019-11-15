@@ -296,6 +296,12 @@ private:
     void setStandardCompletions();
 
     /**
+     * @brief Registers the type converters in PythonQt that implemented in
+     * the GtpyTypeConversion class.
+     */
+    void registerTypeConverters();
+
+    /**
      * @brief Returns the constractor functions for the calculators.
      * @param type Python context identifier.
      * @return Constructor functions for the calculators.
@@ -399,5 +405,29 @@ signals:
 };
 
 Q_DECLARE_METATYPE(GtpyContextManager::Context);
+
+/**
+ * @brief The GtpyTypeConversion class
+ */
+class GtpyTypeConversion
+{
+public:
+    /**
+     * @brief Converts QMap<int, double> instances to a Python object.
+     * @param inObject QMap instance.
+     * @return Given QMap instance as Python object.
+     */
+    static PyObject* convertQMapIntAndDoubleToPyObject(const void* inObject,
+                                                       int /*metaTypeId*/);
+private:
+    /**
+     * @brief Template function for converting QMap instances into Python
+     * objects independent of the key/value type.
+     * @param m QMap instance.
+     * @return Given QMap instance as Python object.
+     */
+    template <typename Map>
+    static PyObject* mapToPython (const Map& map);
+};
 
 #endif // GTPY_CONTEXTMANAGER_H
