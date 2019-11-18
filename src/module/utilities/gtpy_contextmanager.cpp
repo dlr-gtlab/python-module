@@ -1544,7 +1544,11 @@ GtpyTypeConversion::pythonToMap(PyObject* obj, void* outMap)
     {
         QMap<Key, Val>& map = *((QMap<Key, Val>*) outMap);
 
-        PyObject* items = PyMapping_Items(obj);
+        QString tempFunc = "items";
+        QByteArray ba = tempFunc.toLocal8Bit();
+        char* func = ba.data();
+
+        PyObject* items = PyObject_CallMethod(obj, func, NULL);
 
         if (items)
         {

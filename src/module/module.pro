@@ -111,6 +111,6 @@ SOURCES += \
     utilities/gtpy_contextmanager.cpp \
     utilities/gtpy_calculatorfactory.cpp
 
-LIBS += -lGTlabLogging -lGTlabNumerics -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabPhysics -lGTlabCore -lPythonQt-Qt5-Python373
+LIBS += -lGTlabLogging -lGTlabNumerics -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabPhysics -lGTlabCore -lPythonQt-Qt5-Python$${PY_VERSION}
 
 ######################################################################

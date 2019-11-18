@@ -18,3 +18,6 @@ GTLAB_PATH = D:\GTlab
 
 # compile mode (module|moduleTests|gtlab|gtlabRepository)
 COMPILE_MODE = gtlab
+
+# python version (273|373)
+PY_VERSION = 373
