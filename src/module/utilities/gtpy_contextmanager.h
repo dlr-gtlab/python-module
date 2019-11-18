@@ -296,6 +296,12 @@ private:
     void setStandardCompletions();
 
     /**
+     * @brief Registers the type converters in PythonQt that implemented in
+     * the GtpyTypeConversion class.
+     */
+    void registerTypeConverters();
+
+    /**
      * @brief Returns the constractor functions for the calculators.
      * @param type Python context identifier.
      * @return Constructor functions for the calculators.
@@ -399,5 +405,54 @@ signals:
 };
 
 Q_DECLARE_METATYPE(GtpyContextManager::Context);
+
+/**
+ * @brief The GtpyTypeConversion class
+ */
+class GtpyTypeConversion
+{
+public:
+    /**
+     * @brief Converts QMap<int, double> instances to a Python object.
+     * @param inObject QMap instance.
+     * @return Given QMap instance as Python object.
+     */
+    static PyObject* convertFromQMapIntDouble(const void* inObject,
+                                                       int /*metaTypeId*/);
+
+    static bool convertToQMapIntDouble(PyObject* obj, void* outMap,
+                                       int /*metaTypeId*/, bool /*strict*/);
+
+    static PyObject* convertFromQMapStringDouble(const void* inObject,
+                                                       int /*metaTypeId*/);
+
+    static bool convertToQMapStringDouble(PyObject* obj, void* outMap,
+                                       int /*metaTypeId*/, bool /*strict*/);
+
+    static PyObject* convertFromQMapStringInt(const void* inObject,
+                                                       int /*metaTypeId*/);
+
+    static bool convertToQMapStringInt(PyObject* obj, void* outMap,
+                                       int /*metaTypeId*/, bool /*strict*/);
+
+private:
+    /**
+     * @brief Template function for converting QMap instances into Python
+     * objects independent of the key/value type.
+     * @param map Pointer to map instance.
+     * @return Given map instance as Python object.
+     */
+
+    template<typename Key, typename Val>
+    static PyObject* mapToPython (const void* map);
+
+    /**
+     * @brief pythonToMap
+     * @param val
+     * @param result
+     */
+    template <typename Key, typename Val>
+    static bool pythonToMap(PyObject* obj, void* outMap);
+};
 
 #endif // GTPY_CONTEXTMANAGER_H
