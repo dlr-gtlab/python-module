@@ -114,3 +114,11 @@ There are four modes:
 | moduleTests     | header files of a GTlab reposetory are used;<br> a build directory which contains the binaries will be created at the Python Module directory | DEV_TOOLS<br> GTLAB_REPO |
 | gtlab           | header files of DevTools are used;<br> the binaries will be stored in the bin directory of the installed GTlab version                        | DEV_TOOLS<br> GTLAB_PATH |
 | gtlabRepository | header files of a GTlab reposetory are used;<br> the binaries will be stored in the \build\modules\ directory of the GTlab repository         | DEV_TOOLS<br> GTLAB_REPO |
+
+By setting the PY_VERSION flag you can specify the Python version that you want 
+to use. 
+
+| Python version | Flag |
+| ----           | ---  |
+| Python 2.7     | 273  |
+| Python 3.7     | 373  |

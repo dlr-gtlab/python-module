@@ -35,16 +35,21 @@ contains(COMPILE_MODE, gtlabRepository|moduleTests) {
     LIBS += -L$${GTLAB_REPO}/build
 }
 
+PY_PATH    = $${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_$${PY_VERSION}
+PY_QT_PATH = $${DEV_TOOLS}/ThirdPartyLibraries/PythonQt/PythonQt_$${PY_VERSION}
+
 #### THIRD PARTY LIBRARIES
+
 # Python
-INCLUDEPATH += $${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_373/include
-LIBS += -L$${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_373/libs
-LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_373
-DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_373
+INCLUDEPATH += $${PY_PATH}/include
+LIBS += -L$${PY_PATH}/libs
+LIBS        += -L$${PY_PATH}
+DEPENDPATH  += $${PY_PATH}
+
 # PythonQt
-INCLUDEPATH += $${DEV_TOOLS}/ThirdPartyLibraries/PythonQt/PythonQt_373/include
-LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/PythonQt/PythonQt_373/lib
-DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/PythonQt/PythonQt_373/lib
+INCLUDEPATH += $${PY_QT_PATH}/include
+LIBS        += -L$${PY_QT_PATH}/lib
+DEPENDPATH  += $${PY_QT_PATH}/lib
 
 # Google Test
 INCLUDEPATH += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/include
