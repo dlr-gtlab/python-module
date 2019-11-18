@@ -935,10 +935,13 @@ GtpyContextManager::setStandardCompletions()
 void
 GtpyContextManager::registerTypeConverters()
 {
-    int objectPtrMapId = qRegisterMetaType<QMap<int, double>>("QMap<int, double>");
+    int objectPtrMapId = qRegisterMetaType<QMap<int, double>>(
+                "QMap<int, double>");
 
     PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
-                         GtpyTypeConversion::convertQMapIntAndDoubleToPyObject);
+                         GtpyTypeConversion::convertFromQMapIntDouble);
+    PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
+                         GtpyTypeConversion::convertToQMapIntDouble);
 }
 
 QMultiMap<QString, GtpyFunction>
@@ -1464,36 +1467,110 @@ GtpyContextManager::instance()
 }
 
 PyObject*
-GtpyTypeConversion::convertQMapIntAndDoubleToPyObject(const void* inObject, int)
+GtpyTypeConversion::convertFromQMapIntDouble(const void* inObject, int)
 {
-    QMap<int, double>& map = *((QMap<int, double>*)inObject);
-    return mapToPython<QMap<int,double>>(map);
+    return mapToPython<int, double>(inObject);
 }
 
-template<typename Map>
-PyObject*
-GtpyTypeConversion::mapToPython(const Map& map)
+bool
+GtpyTypeConversion::convertToQMapIntDouble(PyObject* obj, void* outMap,
+                                           int, bool)
 {
+    return pythonToMap<int, double> (obj, outMap);
+}
+
+PyObject*
+GtpyTypeConversion::convertFromQMapStringDouble(const void* inObject, int)
+{
+    return mapToPython<QString, double>(inObject);
+}
+
+bool
+GtpyTypeConversion::convertToQMapStringDouble(PyObject* obj, void* outMap,
+                                              int, bool)
+{
+    return pythonToMap<QString, double>(obj, outMap);
+}
+
+PyObject*
+GtpyTypeConversion::convertFromQMapStringInt(const void* inObject, int)
+{
+    return mapToPython<QString, int>(inObject);
+}
+
+bool
+GtpyTypeConversion::convertToQMapStringInt(PyObject* obj, void* outMap, int, bool)
+{
+    return pythonToMap<QString, int>(obj, outMap);
+}
+
+template<typename Key, typename Val>
+PyObject*
+GtpyTypeConversion::mapToPython(const void* inObject)
+{
+    QMap<Key, Val>& map = *((QMap<Key, Val>*) inObject);
+
     PyObject* result = PyDict_New();
 
-    typename Map::const_iterator t = map.constBegin();
+    QMap<Key, Val>::const_iterator t = map.constBegin();
 
     PyObject* key;
     PyObject* val;
 
     for ( ; t != map.constEnd(); t++)
     {
-      // converts key and value to QVariant and then to PyObject*
-      key = PythonQtConv::QVariantToPyObject(QVariant(t.key()));
-      val = PythonQtConv::QVariantToPyObject(QVariant(t.value()));
+        // converts key and value to QVariant and then to PyObject*
+        key = PythonQtConv::QVariantToPyObject(QVariant(t.key()));
+        val = PythonQtConv::QVariantToPyObject(QVariant(t.value()));
 
-      // sets key and val to the result dict
-      PyDict_SetItem(result, key, val);
+        // sets key and val to the result dict
+        PyDict_SetItem(result, key, val);
 
-      // decrement the reference count for key and val
-      Py_DECREF(key);
-      Py_DECREF(val);
+        // decrement the reference count for key and val
+        Py_DECREF(key);
+        Py_DECREF(val);
     }
-    qDebug() << "result == " << result;
+
     return result;
+}
+
+template <typename Key, typename Val>
+bool
+GtpyTypeConversion::pythonToMap(PyObject* obj, void* outMap)
+{
+    bool success = false;
+
+    if (PyMapping_Check(obj))
+    {
+        QMap<Key, Val>& map = *((QMap<Key, Val>*) outMap);
+
+        PyObject* items = PyMapping_Items(obj);
+
+        if (items)
+        {
+            int count = PyList_Size(items);
+
+            PyObject* pyValue;
+            PyObject* pyKey;
+            PyObject* pyTuple;
+
+            for (int i = 0;i<count;i++)
+            {
+                pyTuple = PyList_GetItem(items,i);
+                pyKey = PyTuple_GetItem(pyTuple, 0);
+                pyValue = PyTuple_GetItem(pyTuple, 1);
+
+                QVariant key = PythonQtConv::PyObjToQVariant(pyKey);
+                QVariant val = PythonQtConv::PyObjToQVariant(pyValue);
+
+                map.insert(key.value<Key>(), val.value<Val>());
+            }
+
+            Py_DECREF(items);
+
+            success = true;
+        }
+    }
+
+    return success;
 }

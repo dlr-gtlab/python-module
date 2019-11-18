@@ -417,17 +417,42 @@ public:
      * @param inObject QMap instance.
      * @return Given QMap instance as Python object.
      */
-    static PyObject* convertQMapIntAndDoubleToPyObject(const void* inObject,
+    static PyObject* convertFromQMapIntDouble(const void* inObject,
                                                        int /*metaTypeId*/);
+
+    static bool convertToQMapIntDouble(PyObject* obj, void* outMap,
+                                       int /*metaTypeId*/, bool /*strict*/);
+
+    static PyObject* convertFromQMapStringDouble(const void* inObject,
+                                                       int /*metaTypeId*/);
+
+    static bool convertToQMapStringDouble(PyObject* obj, void* outMap,
+                                       int /*metaTypeId*/, bool /*strict*/);
+
+    static PyObject* convertFromQMapStringInt(const void* inObject,
+                                                       int /*metaTypeId*/);
+
+    static bool convertToQMapStringInt(PyObject* obj, void* outMap,
+                                       int /*metaTypeId*/, bool /*strict*/);
+
 private:
     /**
      * @brief Template function for converting QMap instances into Python
      * objects independent of the key/value type.
-     * @param m QMap instance.
-     * @return Given QMap instance as Python object.
+     * @param map Pointer to map instance.
+     * @return Given map instance as Python object.
      */
-    template <typename Map>
-    static PyObject* mapToPython (const Map& map);
+
+    template<typename Key, typename Val>
+    static PyObject* mapToPython (const void* map);
+
+    /**
+     * @brief pythonToMap
+     * @param val
+     * @param result
+     */
+    template <typename Key, typename Val>
+    static bool pythonToMap(PyObject* obj, void* outMap);
 };
 
 #endif // GTPY_CONTEXTMANAGER_H
