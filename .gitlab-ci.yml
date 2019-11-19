@@ -1,0 +1,20 @@
+stages:
+  - build
+  
+buildWindows:
+  stage: build
+  script:
+    - .\tests\build\build.bat 1>buildLog.txt
+    - .\tests\badges\badges.bat --bw .\buildLog.txt .
+  tags:
+    - Windows7
+  artifacts:
+    paths:
+      - build/GTlabPython.dll
+      - build/GTlabPython.exp
+      - build/GTlabPython.ilk
+      - build/GTlabPython.lib
+      - build/GTlabPython.pdb
+      - "New_BuildWarn-W.svg"
+    expire_in: 1 week
+      

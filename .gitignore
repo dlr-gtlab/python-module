@@ -6,3 +6,4 @@ local_settings.pri
 !features/local_settings.pri
 *.pro.user
 *.autosave
+!tests/build/build.bat
