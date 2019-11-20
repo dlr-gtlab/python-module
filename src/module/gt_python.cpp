@@ -155,7 +155,7 @@ GtPythonModule::tasks()
     pythonTask->id = QStringLiteral("Python Task");
     pythonTask->version = 0.1;
     pythonTask->author = QStringLiteral("Marvin Nöthen");
-    pythonTask->icon = gtApp->icon(QStringLiteral("processIcon.png"));
+    pythonTask->icon = gtApp->icon(QStringLiteral("pythonIcon_16.png"));
 
     GtCustomProcessWizard* pythonWizard = new GtCustomProcessWizard;
     pythonWizard->setPage(1, GtpyTaskWizardPage::staticMetaObject);
