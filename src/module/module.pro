@@ -85,7 +85,8 @@ HEADERS += \
     utilities/gtpy_decorator.h \
     utilities/gtpy_contextmanager.h \
     utilities/gtpy_calculatorfactory.h \
-    gt_pythonmodule_exports.h
+    gt_pythonmodule_exports.h \
+    utilities/gtpy_codegenerator.h
 
 SOURCES += \
     gt_python.cpp \
@@ -109,7 +110,8 @@ SOURCES += \
     wizards/python_task/gtpy_taskwizardpage.cpp \
     utilities/gtpy_decorator.cpp \
     utilities/gtpy_contextmanager.cpp \
-    utilities/gtpy_calculatorfactory.cpp
+    utilities/gtpy_calculatorfactory.cpp \
+    utilities/gtpy_codegenerator.cpp
 
 LIBS += -lGTlabLogging -lGTlabNumerics -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabPhysics -lGTlabCore -lPythonQt-Qt5-Python$${PY_VERSION}
 

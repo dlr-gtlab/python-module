@@ -29,9 +29,6 @@ class GtpyTaskWizardPage : public GtpyAbstractScriptingWizardPage
     Q_OBJECT
 
 public:
-    static const QString GtpyTaskWizardPage::ARROW_LEFT;
-    static const QString GtpyTaskWizardPage::ARROW_RIGHT;
-
     /**
      * @brief GtpyTaskWizardPage
      */
@@ -85,10 +82,8 @@ private:
     void updateLastUsedElementList(const QString& str);
 
     /**
-     * @brief Creates the Python code representing the calculator settings
-     * and inserts it into the script. It compares the setting of the
-     * claculator with the given memento. Only the changes are inserted
-     * into the script.
+     * @brief Uses GtpyCodeGenerator to create the Python code representing the
+     * calculator settings and inserts it into the script.
      * @param calc Edit calculator object.
      * @param before Memento object of the calculator before editing.
      */
@@ -124,6 +119,9 @@ private:
 
     /// Calculator object names identified by UUIDs
     QHash<QString, QString> m_calcIds;
+
+    static const QString GtpyTaskWizardPage::ARROW_LEFT;
+    static const QString GtpyTaskWizardPage::ARROW_RIGHT;
 
 private slots:
     /**

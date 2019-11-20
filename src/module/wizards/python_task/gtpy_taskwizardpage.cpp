@@ -19,6 +19,7 @@
 #include "gtpy_taskitemmodel.h"
 #include "gtpy_taskstylemodel.h"
 #include "gtpy_tasktreeview.h"
+#include "gtpy_codegenerator.h"
 
 // GTlab framework includes
 #include "gt_stylesheets.h"
@@ -40,6 +41,12 @@
 #include "gt_objectmementodiff.h"
 #include "gt_calculator.h"
 #include "gt_processfiltermodel.h"
+
+
+
+#include "gt_calculatordata.h"
+
+
 
 #include "gtpy_taskwizardpage.h"
 
@@ -211,7 +218,7 @@ GtpyTaskWizardPage::configCalculator(GtCalculator* calc)
         return;
     }
 
-    GtObjectMemento before = calc->toMemento();
+    QString calcNameBefor = calc->objectName();
 
     GtCalculatorProvider provider(calc);
     GtProcessWizard wizard(project, &provider);
@@ -230,110 +237,52 @@ GtpyTaskWizardPage::configCalculator(GtCalculator* calc)
 
     calc->fromMemento(memento);
 
-    GtObjectMementoDiff diff(before, calc->toMemento());
+    QString calcNameNew = calc->objectName();
 
-    QDomElement root = diff.documentElement();
-
-    while (!root.isNull())
-    {
-        if (root.attribute("uuid") == calc->uuid())
-        {
-            break;
-        }
-
-        root = root.nextSiblingElement();
-    }
-
-    QRegExp regExp("[^A-Za-z0-9]+");
-
-    if (!root.isNull())
+    if (calcNameNew != calcNameBefor)
     {
         QString headline;
 
-        QDomElement changeElement = root.firstChildElement(
-                                        "diff-attribute-change");
+        QString className = calc->metaObject()->className();
+        headline = calc->objectName();
 
-        if (changeElement.attribute("id") == "name")
-        {
-            QString className = root.attribute("class");
-            headline = changeElement.firstChildElement("newVal").text();
-            QString oldObjName = changeElement.firstChildElement(
-                                     "oldVal").text();
-
-            onProcessComponentRenamed(className, oldObjName, headline);
-        }
-        else
-        {
-            headline = root.attribute("name");
-        }
-
-        headline = " " + headline + " ";
-
-        int headlineSize = headline.size();
-
-        headline = ("#" + GtpyTaskWizardPage::ARROW_LEFT + headline +
-                       GtpyTaskWizardPage::ARROW_RIGHT);
-
-        QString capiton;
-
-        for (int i = 0; i < headlineSize; i++)
-        {
-            capiton.append("-");
-        }
-
-        capiton = ("#" + GtpyTaskWizardPage::ARROW_LEFT + capiton +
-                   GtpyTaskWizardPage::ARROW_RIGHT);
-
-        changeElement = root.firstChildElement("diff-property-change");
-
-        while (!changeElement.isNull())
-        {
-            QString ident = changeElement.attribute("name");
-
-            GtAbstractProperty* prop = calc->findProperty(ident);
-
-            if (prop != Q_NULLPTR)
-            {
-                int pos = regExp.indexIn(ident);
-
-                while (pos >= 0)
-                {
-                    ident = ident.remove(pos, 1);
-                    pos = regExp.indexIn(ident);
-                }
-
-                ident.replace(0, 1, ident.at(0).toUpper());
-
-                ident.insert(0, "set");
-
-                QString val = propValToString(prop);
-
-                funcIntoCalcBlock(headline, capiton, val, ident);
-            }
-
-            changeElement = changeElement.
-                            nextSiblingElement("diff-property-change");
-        }
+        onProcessComponentRenamed(className, calcNameBefor, calcNameNew);
     }
 
-    QString newHeadline = " " + calc->objectName() + " ";
+    QString headline = " " + calcNameNew + " ";
 
-    int newHeadlineSize = newHeadline.size();
+    int newHeadlineSize = headline.size();
 
-    newHeadline = ("#" + GtpyTaskWizardPage::ARROW_LEFT + newHeadline+
+    headline = ("#" + GtpyTaskWizardPage::ARROW_LEFT + headline+
                    GtpyTaskWizardPage::ARROW_RIGHT);
 
-    QString newCaption;
+    QString caption;
 
     for (int i = 0; i < newHeadlineSize; i++)
     {
-        newCaption.append("-");
+        caption.append("-");
     }
 
-    newCaption = ("#" + GtpyTaskWizardPage::ARROW_LEFT + newCaption +
+    caption = ("#" + GtpyTaskWizardPage::ARROW_LEFT + caption +
                GtpyTaskWizardPage::ARROW_RIGHT);
 
-    replaceHelperProperties(newHeadline, newCaption, calc);
+    GtCalculatorData calcData = gtCalculatorFactory->calculatorData(
+                                    calc->metaObject()->className());
+
+    GtCalculator* testCalc = dynamic_cast<GtCalculator*>(
+                                 calcData->metaData().newInstance());
+
+    testCalc->setUuid(calc->uuid());
+
+    QString pyCode = GtpyCodeGenerator::instance()->calculatorPyCode(calc,
+                                                        testCalc->toMemento());
+    delete testCalc;
+    testCalc = Q_NULLPTR;
+
+    int lastLineBreak = pyCode.lastIndexOf(QChar('\n'));
+    pyCode.remove(lastLineBreak, 1);
+
+    replaceCalcPyCode(headline, caption, pyCode);
 }
 
 void
@@ -438,97 +387,17 @@ GtpyTaskWizardPage::insertConstructor(GtCalculator* calc,
         return;
     }
 
-    QString objName = calc->objectName();
-    QString className = calc->metaObject()->className();
+    QString objName = " " + calc->objectName() + " ";
 
-    QRegExp regExp("[^A-Za-z0-9]+");
+    QString pyCode = ("#" + GtpyTaskWizardPage::ARROW_LEFT + objName +
+                      GtpyTaskWizardPage::ARROW_RIGHT + "\n");
 
-    QString pyCode;
-
-    QString tempObjName = objName;
-
-    if (tempObjName.isEmpty())
-    {
-        tempObjName = className;
-    }
-
-    int pos = regExp.indexIn(tempObjName);
-
-    while (pos >= 0)
-    {
-        tempObjName = tempObjName.remove(pos, 1);
-        pos = regExp.indexIn(tempObjName);
-    }
-
-    tempObjName.replace(0, 1, objName.at(0).toLower());
-
-    QString headline = " " + objName + " ";
-
-    pyCode += ("#" + GtpyTaskWizardPage::ARROW_LEFT + headline +
-               GtpyTaskWizardPage::ARROW_RIGHT + "\n");
-
-    pyCode += (tempObjName + " = " + className + "(\"" +
-             objName + "\")\n");
-
-    GtObjectMementoDiff diff(before, calc->toMemento());
-
-    QDomElement root = diff.documentElement();
-
-    while (!root.isNull())
-    {
-        if (root.attribute("uuid") == calc->uuid())
-        {
-            break;
-        }
-
-        root = root.nextSiblingElement();
-    }
-
-    if (!root.isNull())
-    {
-        QDomElement changeElement = root.firstChildElement("diff-property-change");
-
-        while (!changeElement.isNull())
-        {
-            QString ident = changeElement.attribute("name");
-
-            GtAbstractProperty* prop = calc->findProperty(ident);
-
-            if (prop != Q_NULLPTR)
-            {
-                int pos = regExp.indexIn(ident);
-
-                while (pos >= 0)
-                {
-                    ident = ident.remove(pos, 1);
-                    pos = regExp.indexIn(ident);
-                }
-
-                ident.replace(0, 1, ident.at(0).toUpper());
-
-                ident.insert(0, "set");
-
-
-                QString val = propValToString(prop);
-
-                pyCode += (tempObjName + "." + ident + "(" + val + ")\n");
-
-                changeElement = changeElement.
-                                nextSiblingElement("diff-property-change");
-            }
-        }
-    }
-
-    QString helperPy = helperPyCode(calc, tempObjName);
-
-    if (!helperPy.isEmpty())
-    {
-        pyCode += ("\n" + helperPy);
-    }
+    pyCode += GtpyCodeGenerator::instance()->calculatorPyCode(
+                         calc, before);
 
     QString caption;
 
-    for (int i = 0; i < headline.size(); i++)
+    for (int i = 0; i < objName.size(); i++)
     {
         caption.append("-");
     }

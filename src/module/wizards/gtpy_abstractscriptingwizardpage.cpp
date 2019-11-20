@@ -388,244 +388,164 @@ GtpyAbstractScriptingWizardPage::editorText()
 }
 
 void
-GtpyAbstractScriptingWizardPage::funcIntoCalcBlock(const QString& header,
+GtpyAbstractScriptingWizardPage::replaceCalcPyCode(const QString& header,
                                                    const QString& caption,
-                                                   const QString& newVal,
-                                                   const QString& functionName)
+                                                   const QString& pyCode)
 {
-    if (header.isEmpty() || caption.isEmpty() || newVal.isEmpty() ||
-            functionName.isEmpty())
+    QTextCursor cursor = m_editor->textCursor();
+
+    cursor.clearSelection();
+
+    cursor.movePosition(QTextCursor::Start);
+
+    cursor = m_editor->document()->find(header, cursor);
+
+    if (cursor.position() > -1)
     {
-        return;
-    }
+        cursor.movePosition(QTextCursor::Down);
+        cursor.movePosition(QTextCursor::StartOfLine);
 
-    QTextCursor startCursor = m_editor->textCursor();
+        int startPos = cursor.position();
 
-    startCursor.clearSelection();
+        cursor = m_editor->document()->find(caption, cursor);
 
-    startCursor.movePosition(QTextCursor::Start);
-
-    startCursor = m_editor->document()->find(header, startCursor);
-
-    if (startCursor.position() > -1)
-    {
-        QString selectedText;
-
-        bool moveDown = startCursor.movePosition(QTextCursor::Down);
-
-        if (moveDown)
+        if (cursor.position() > -1)
         {
-            startCursor.movePosition(QTextCursor::StartOfLine);
+            cursor.movePosition(QTextCursor::Up);
+            cursor.movePosition(QTextCursor::EndOfLine);
 
-            startCursor.movePosition(QTextCursor::EndOfLine,
-                                     QTextCursor::KeepAnchor);
+            int endPos = cursor.position();
 
-            selectedText = startCursor.selectedText();
+            cursor.setPosition(startPos);
+            cursor.setPosition(endPos, QTextCursor::KeepAnchor);
 
-            selectedText.replace(" ", "");
-
-            int index = selectedText.indexOf("=");
-
-            if (index > -1)
-            {
-                QString pyObjName = selectedText.mid(0, index);
-
-                m_editor->replaceIntoBlock(header, caption,
-                                           newVal, functionName, pyObjName);
-            }
+            cursor.insertText(pyCode);
         }
     }
 }
 
-void
-GtpyAbstractScriptingWizardPage::replaceHelperProperties(const QString& header,
-                                                         const QString& caption,
-                                                         GtObject* obj)
-{
-    if (obj == Q_NULLPTR)
-    {
-        return;
-    }
+//QString
+//GtpyAbstractScriptingWizardPage::helperPyCode(GtObject* obj,
+//                                              const QString& pyObjName)
+//{
+//    if (obj == Q_NULLPTR)
+//    {
+//        return QString();
+//    }
 
-    if (header.isEmpty() || caption.isEmpty())
-    {
-        return;
-    }
+//    QString pyCode;
 
-    QTextCursor startCursor = m_editor->textCursor();
+//    QRegExp regExp("[^A-Za-z0-9]+");
 
-    startCursor.clearSelection();
+//    QStringList helperNames = gtCalculatorHelperFactory->connectedHelper(
+//                                  obj->metaObject()->className());
 
-    startCursor.movePosition(QTextCursor::Start);
+//    if (helperNames.isEmpty())
+//    {
+//        return QString();
+//    }
 
-    startCursor = m_editor->document()->find(header, startCursor);
+//    QList<GtObject*> children = obj->findDirectChildren<GtObject*>();
 
-    if (startCursor.position() > -1)
-    {
-        QString selectedText;
+//    bool initRun = true;
 
-        bool moveDown = startCursor.movePosition(QTextCursor::Down);
+//    foreach (GtObject* child, children)
+//    {
+//        if (child != Q_NULLPTR)
+//        {
+//            QString childClassName = child->metaObject()->className();
 
-        if (moveDown)
-        {
-            startCursor.movePosition(QTextCursor::StartOfLine);
+//            if (helperNames.contains(childClassName))
+//            {
+//                QString helperObjName = child->objectName();
 
-            startCursor.movePosition(QTextCursor::EndOfLine,
-                                     QTextCursor::KeepAnchor);
+//                if (helperObjName.isEmpty())
+//                {
+//                    helperObjName = childClassName;
+//                }
 
-            selectedText = startCursor.selectedText();
+//                int pos = regExp.indexIn(helperObjName);
 
-            selectedText.replace(" ", "");
+//                while (pos >= 0)
+//                {
+//                    helperObjName = helperObjName.remove(pos, 1);
+//                    pos = regExp.indexIn(helperObjName);
+//                }
 
-            int index = selectedText.indexOf("=");
+//                helperObjName.replace(0, 1, helperObjName.at(0).toLower());
 
-            if (index > -1)
-            {
-                QString pyObjName = selectedText.mid(0, index);
+//                if (initRun)
+//                {
+//                    initRun = false;
+//                }
+//                else
+//                {
+//                    pyCode += "\n";
+//                }
 
-                QTextCursor endCursor = m_editor->document()->find(
-                                            caption, startCursor);
+//                pyCode += (helperObjName + " = " + pyObjName + ".create" +
+//                           childClassName + "(\"" +
+//                           child->objectName() + "\")\n");
 
-                endCursor.movePosition(QTextCursor::Up);
+//                const QMetaObject* metaobject = child->metaObject();
 
-                endCursor.movePosition(QTextCursor::EndOfLine);
+//                for (int i = 0; i < metaobject->propertyCount(); i ++)
+//                {
+//                    QMetaProperty metaproperty = metaobject->property(i);
+//                    const char* name = metaproperty.name();
 
-                QTextCursor helperCursor = m_editor->document()->find(
-                                            pyObjName + ".create", startCursor);
+//                    QString nameStr = QString::fromUtf8(name);
 
-                helperCursor.movePosition(QTextCursor::StartOfLine);
+//                    if (nameStr != "objectName")
+//                    {
+//                        QVariant value = child->property(name);
 
-                helperCursor.setPosition(endCursor.position(),
-                                         QTextCursor::KeepAnchor);
+//                        QString typeName = QString::fromUtf8(
+//                                               child->property(name).typeName());
 
-                helperCursor.insertText(helperPyCode(obj, pyObjName));
-            }
-        }
-    }
-}
+//                        if (typeName == "QString")
+//                        {
+//                            pyCode += (helperObjName + "." + nameStr + " = \"" +
+//                                       GtpyContextManager::instance()->qvariantToPyStr(value) + "\"\n");
+//                        }
+//                        else
+//                        {
+//                            pyCode += (helperObjName + "." + nameStr + " = " +
+//                                       GtpyContextManager::instance()->qvariantToPyStr(value) + "\n");
+//                        }
+//                    }
+//                }
 
-QString
-GtpyAbstractScriptingWizardPage::helperPyCode(GtObject* obj,
-                                              const QString& pyObjName)
-{
-    if (obj == Q_NULLPTR)
-    {
-        return QString();
-    }
+//                QList<GtAbstractProperty*> props = child->properties();
 
-    QString pyCode;
+//                foreach (GtAbstractProperty* prop, props)
+//                {
+//                    if (prop != Q_NULLPTR)
+//                    {
+//                        QString ident = prop->ident();
 
-    QRegExp regExp("[^A-Za-z0-9]+");
+//                        QString val = propValToString(prop);
 
-    QStringList helperNames = gtCalculatorHelperFactory->connectedHelper(
-                                  obj->metaObject()->className());
+//                        pyCode += (helperObjName + "." +
+//                                   GtpyContextManager::instance()->setPropertyValueFuncName() +"(\""
+//                                   + ident + "\", " + val + ")\n");
 
-    if (helperNames.isEmpty())
-    {
-        return QString();
-    }
+//                    }
+//                }
 
-    QList<GtObject*> children = obj->findDirectChildren<GtObject*>();
+//                QString childHelperCode = helperPyCode(child, helperObjName);
 
-    bool initRun = true;
+//                if (!childHelperCode.isEmpty())
+//                {
+//                    pyCode += "\n";
+//                    pyCode += childHelperCode;
+//                }
+//            }
+//        }
+//    }
 
-    foreach (GtObject* child, children)
-    {
-        if (child != Q_NULLPTR)
-        {
-            QString childClassName = child->metaObject()->className();
-
-            if (helperNames.contains(childClassName))
-            {
-                QString helperObjName = child->objectName();
-
-                if (helperObjName.isEmpty())
-                {
-                    helperObjName = childClassName;
-                }
-
-                int pos = regExp.indexIn(helperObjName);
-
-                while (pos >= 0)
-                {
-                    helperObjName = helperObjName.remove(pos, 1);
-                    pos = regExp.indexIn(helperObjName);
-                }
-
-                helperObjName.replace(0, 1, helperObjName.at(0).toLower());
-
-                if (initRun)
-                {
-                    initRun = false;
-                }
-                else
-                {
-                    pyCode += "\n";
-                }
-
-                pyCode += (helperObjName + " = " + pyObjName + ".create" +
-                           childClassName + "(\"" +
-                           child->objectName() + "\")\n");
-
-                const QMetaObject* metaobject = child->metaObject();
-
-                for (int i = 0; i < metaobject->propertyCount(); i ++)
-                {
-                    QMetaProperty metaproperty = metaobject->property(i);
-                    const char* name = metaproperty.name();
-
-                    QString nameStr = QString::fromUtf8(name);
-
-                    if (nameStr != "objectName")
-                    {
-                        QVariant value = child->property(name);
-
-                        QString typeName = QString::fromUtf8(
-                                               child->property(name).typeName());
-
-                        if (typeName == "QString")
-                        {
-                            pyCode += (helperObjName + "." + nameStr + " = \"" +
-                                       GtpyContextManager::instance()->qvariantToPyStr(value) + "\"\n");
-                        }
-                        else
-                        {
-                            pyCode += (helperObjName + "." + nameStr + " = " +
-                                       GtpyContextManager::instance()->qvariantToPyStr(value) + "\n");
-                        }
-                    }
-                }
-
-                QList<GtAbstractProperty*> props = child->properties();
-
-                foreach (GtAbstractProperty* prop, props)
-                {
-                    if (prop != Q_NULLPTR)
-                    {
-                        QString ident = prop->ident();
-
-                        QString val = propValToString(prop);
-
-                        pyCode += (helperObjName + "." +
-                                   GtpyContextManager::instance()->setPropertyValueFuncName() +"(\""
-                                   + ident + "\", " + val + ")\n");
-
-                    }
-                }
-
-                QString childHelperCode = helperPyCode(child, helperObjName);
-
-                if (!childHelperCode.isEmpty())
-                {
-                    pyCode += "\n";
-                    pyCode += childHelperCode;
-                }
-            }
-        }
-    }
-
-    return pyCode;
-}
+//    return pyCode;
+//}
 
 void
 GtpyAbstractScriptingWizardPage::replaceBlockHeaders(const QString& oldHeader,

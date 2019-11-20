@@ -98,33 +98,14 @@ protected:
     QString editorText();
 
     /**
-     * @brief Replaces the value of the function named functionName into the
-     * block delimited by header and caption with the given newVal.
+     * @brief Replaces the calculator settings between header and caption with
+     * pyCode.
      * @param header Upper limit of the block.
      * @param caption Lower limit of the block.
-     * @param newVal New value that has to set.
-     * @param functionName Name of function
+     * @param pyCode Calculator setting.
      */
-    void funcIntoCalcBlock(const QString& header, const QString& caption,
-                          const QString& newVal, const QString& functionName);
-
-    /**
-     * @brief Replaces the settings of properties of helper objects between
-     * header and caption.
-     * @param header Upper limit of the block.
-     * @param caption Lower limit of the block.
-     * @param obj Helper object
-     */
-    void replaceHelperProperties(const QString& header, const QString& caption,
-                                 GtObject* obj);
-
-    /**
-     * @brief Generates the python code to initialize a helper object.
-     * @param obj Helper object
-     * @param pyObjName Name of object into python environment.
-     * @return The generated python code as string value.
-     */
-    QString helperPyCode(GtObject* obj, const QString& pyObjName);
+    void replaceCalcPyCode(const QString& header, const QString& caption,
+                           const QString& pyCode);
 
     /**
      * @brief Replaces old header and old caption of a block with given new

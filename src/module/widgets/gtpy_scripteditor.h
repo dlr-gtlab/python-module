@@ -18,7 +18,7 @@ class GtpyCompleter;
 /**
  * @brief The GtpyScriptEditor class
  */
-class GtpyScriptEditor: public GtCodeEditor
+class GtpyScriptEditor : public GtCodeEditor
 {
     Q_OBJECT
 
