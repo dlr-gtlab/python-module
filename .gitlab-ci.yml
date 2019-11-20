@@ -1,5 +1,6 @@
 stages:
   - build
+  - codingstyle
   
 buildWindows:
   stage: build
@@ -18,3 +19,17 @@ buildWindows:
       - "New_BuildWarn-W.svg"
     expire_in: 1 week
       
+codingstyle:
+  stage: codingstyle
+  script:
+    - .\tests\codingstyle\runCodingstyle.bat 1>codingStyleLog.txt
+    - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
+  tags:
+    - Windows7
+  dependencies:
+  artifacts:
+    paths:
+      - "nsiqcppstyle_report.xml"
+      - codingStyleLog.txt
+      - "New_CodingStyle.svg"
+    expire_in: 1 week
