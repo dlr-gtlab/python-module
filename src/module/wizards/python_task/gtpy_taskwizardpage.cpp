@@ -628,15 +628,15 @@ GtpyTaskWizardPage::onProcessComponentRenamed(QString className,
 
     replaceBlockHeaders(oldHeadline, newHeadline, oldCaption, newCaption);
 
-    QString search = className + "(\"" + oldName + "\")";
-    QString replace = className + "(\"" + newName + "\")";
-
-    searchAndReplaceEditorText(search, replace, true);
-
-//    QString pattern = "(" + className + "\\( *\"" + oldName + "\" *\\))";
+//    QString search = className + "(\"" + oldName + "\")";
 //    QString replace = className + "(\"" + newName + "\")";
 
-//    searchAndReplaceEditorText(QRegExp(pattern), replace, true);
+//    searchAndReplaceEditorText(search, replace, true);
+
+    QString pattern = "(" + className + "\\( *\"" + oldName + "\" *\\))";
+    QString replace = className + "(\"" + newName + "\")";
+
+    searchAndReplaceEditorText(QRegExp(pattern), replace, true);
 }
 
 void

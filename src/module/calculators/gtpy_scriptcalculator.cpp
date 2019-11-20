@@ -104,14 +104,6 @@ GtpyScriptCalculator::setScript(const QString& script)
     m_script = script;
 }
 
-bool
-GtpyScriptCalculator::evalScript(const QString& script, bool outputToConsole)
-{
-    return GtpyContextManager::instance()->evalScript(
-                GtpyContextManager::ScriptEditorContext,
-                script, outputToConsole);
-}
-
 QStringList
 GtpyScriptCalculator::packageNames()
 {

@@ -52,15 +52,6 @@ public:
     void setScript(const QString& script);
 
     /**
-     * @brief Evaluate the given script in python context of the calculator.
-     * @param script Script which should be evaluated.
-     * @param outputToConsol Whether evaluation output should show in console.
-     *  Default value is false.
-     * @return True if evaluation was successful.
-     */
-    bool evalScript(const QString& script, bool outputToConsole = false);
-
-    /**
      * @brief Returns names of available packages.
      * @return List of names of available packages.
      */
