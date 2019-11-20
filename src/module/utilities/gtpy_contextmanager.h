@@ -188,6 +188,8 @@ private:
     static const QString TASK_VAR;
     static const QString CALC_FAC_VAR;
     static const QString HELPER_FAC_VAR;
+    static const QString CLASS_WRAPPER_MODULE;
+    static const QString LOGGING_MODULE;
 
     /**
      * @brief Enables the calculator access for the Python context indicated by
@@ -210,6 +212,11 @@ private:
      * @return Pointer to Python Context.
      */
     PythonQtObjectPtr context(int type);
+
+    /**
+     * @brief Initializes the logging module.
+     */
+    void initLoggingModule();
 
     /**
      * @brief Initializes additional functionalities for the batch context.
@@ -245,14 +252,15 @@ private:
     void initTaskRunContext();
 
     /**
-     * @brief Enables the use of GTlab logging functions in the Python context
-     * indicated by type.
+     * @brief Imports the logging functions to the context identified by type.
+     * Stores the appConsole value that specifies whether the logging functions
+     * send the output to the application console.
      * @param type Python context identifier.
-     * @param enableGtLogging If true, the logging messages are sent to the
+     * @param appConsole If true, the logging messages are sent to the
      * GTlab application console.
      */
-    void enableGtLogging(const GtpyContextManager::Context& type,
-                       bool enableGtLogging);
+    void loggingToAppConsole(const GtpyContextManager::Context& type,
+                             bool appConsole);
 
     /**
      * @brief Searches the line number out of an error message.
@@ -311,10 +319,16 @@ private:
     /// Map of Python context
     QMap<int, PythonQtObjectPtr> m_contextMap;
 
-    /// standard completions for pytho completer
+    /// Whether the contexts send messages to the application console
+    QMap<GtpyContextManager::Context, bool> m_appLogging;
+
+    /// Logging Module
+    PythonQtObjectPtr m_loggingModule;
+
+    /// Standard completions for pytho completer
     QMultiMap<QString, GtpyFunction> m_standardCompletions;
 
-    /// contains completions of importable modules
+    /// Contains completions of importable modules
     QMultiMap<QString, GtpyFunction> m_importableModulesCompletions;
 
     /// Decorator instance
