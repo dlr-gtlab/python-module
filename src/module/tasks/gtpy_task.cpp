@@ -18,12 +18,16 @@
 #include "gtpy_task.h"
 
 GtpyTask::GtpyTask():
-    m_script("script", "Skript")
+    m_script("script", "Skript"),
+    m_calcDefinitions("calcDefinitions", "Calculator Definitions")
 {
     setObjectName("Python Task");
 
     registerProperty(m_script);
+    registerProperty(m_calcDefinitions);
+
     m_script.hide();
+    m_calcDefinitions.hide();
 
     foreach (const QString& modId, getModuleIds())
     {
@@ -138,4 +142,18 @@ GtpyTask::getModuleIds()
     }
 
     return project->moduleIds();
+}
+
+QString
+GtpyTask::calcDefinitions() const
+{
+    return m_calcDefinitions;
+}
+
+void
+GtpyTask::setCalcDefinitions(QString& calcDefinitions)
+{
+    calcDefinitions.replace("\n", "\r");
+
+    m_calcDefinitions = calcDefinitions;
 }
