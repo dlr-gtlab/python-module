@@ -104,7 +104,6 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
 
     Q_UNUSED(highlighter)
 
-
     addTabWidget(calcEditor, "Calculators");
 }
 
@@ -279,18 +278,7 @@ GtpyTaskWizardPage::configCalculator(GtCalculator* calc)
     caption = ("#" + GtpyTaskWizardPage::ARROW_LEFT + caption +
                GtpyTaskWizardPage::ARROW_RIGHT);
 
-    GtCalculatorData calcData = gtCalculatorFactory->calculatorData(
-                                    calc->metaObject()->className());
-
-    GtCalculator* testCalc = dynamic_cast<GtCalculator*>(
-                                 calcData->metaData().newInstance());
-
-    testCalc->setUuid(calc->uuid());
-
-    QString pyCode = GtpyCodeGenerator::instance()->calculatorPyCode(calc,
-                                                        testCalc->toMemento());
-    delete testCalc;
-    testCalc = Q_NULLPTR;
+    QString pyCode = GtpyCodeGenerator::instance()->calculatorPyCode(calc);
 
     int lastLineBreak = pyCode.lastIndexOf(QChar('\n'));
     pyCode.remove(lastLineBreak, 1);
@@ -350,7 +338,7 @@ GtpyTaskWizardPage::addCalculator()
 
     if (appendCalcToTask(calc))
     {
-        insertConstructor(calc, m_createdCalcMemento);
+        insertConstructor(calc/*, m_createdCalcMemento*/);
     }
     else
     {
@@ -392,8 +380,7 @@ GtpyTaskWizardPage::updateLastUsedElementList(const QString& str)
 }
 
 void
-GtpyTaskWizardPage::insertConstructor(GtCalculator* calc,
-                                       GtObjectMemento before)
+GtpyTaskWizardPage::insertConstructor(GtCalculator* calc)
 {
     if (calc == Q_NULLPTR)
     {
@@ -405,8 +392,7 @@ GtpyTaskWizardPage::insertConstructor(GtCalculator* calc,
     QString pyCode = ("#" + GtpyTaskWizardPage::ARROW_LEFT + objName +
                       GtpyTaskWizardPage::ARROW_RIGHT + "\n");
 
-    pyCode += GtpyCodeGenerator::instance()->calculatorPyCode(
-                         calc, before);
+    pyCode += GtpyCodeGenerator::instance()->calculatorPyCode(calc);
 
     QString caption;
 
@@ -748,7 +734,6 @@ GtpyTaskWizardPage::actionTriggered(QObject* obj)
 
     if (gtCalculatorFactory->calculatorDataExists(className))
     {
-
         GtCalculatorData calcData =
             gtCalculatorFactory->calculatorData(className);
 
@@ -773,8 +758,6 @@ GtpyTaskWizardPage::actionTriggered(QObject* obj)
         }
 
         calc->setFactory(gtProcessFactory);
-
-        GtObjectMemento mementoBefore = calc->toMemento();
 
         GtCalculatorProvider provider(calc);
         GtProcessWizard wizard(gtApp->currentProject(), &provider);
@@ -807,12 +790,11 @@ GtpyTaskWizardPage::actionTriggered(QObject* obj)
 
         if (appendCalcToTask(calc))
         {
-            insertConstructor(calc, mementoBefore);
+            insertConstructor(calc);
         }
         else
         {
             delete calc;
-            calc = Q_NULLPTR;
         }
     }
 }

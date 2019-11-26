@@ -87,7 +87,7 @@ private:
      * @param calc Edit calculator object.
      * @param before Memento object of the calculator before editing.
      */
-    void insertConstructor(GtCalculator* calc, GtObjectMemento before);
+    void insertConstructor(GtCalculator* calc);
 
     /**
      * @brief Appends the given calculator to the Python Task.

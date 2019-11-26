@@ -19,6 +19,7 @@
 #include "gt_stringproperty.h"
 #include "gt_modeproperty.h"
 #include "gt_objectlinkproperty.h"
+#include "gt_calculatorfactory.h"
 #include "gt_calculatorhelperfactory.h"
 
 #include "gtpy_contextmanager.h"
@@ -44,15 +45,55 @@ GtpyCodeGenerator::instance()
 }
 
 QString
-GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc, GtObjectMemento before)
+GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc)
 {
     if (calc == Q_NULLPTR)
     {
         return QString();
     }
 
-    QString objName = calc->objectName();
     QString className = calc->metaObject()->className();
+
+    GtObjectMemento before;
+
+    if (gtCalculatorFactory->calculatorDataExists(className))
+    {
+        GtCalculatorData calcData =
+            gtCalculatorFactory->calculatorData(className);
+
+        if (!calcData->isValid())
+        {
+            return QString();
+        }
+
+        QObject* newObj = calcData->metaData().newInstance();
+
+        if (newObj == Q_NULLPTR)
+        {
+            return QString();
+        }
+
+        GtCalculator* defaultCalc = qobject_cast<GtCalculator*>(newObj);
+
+        if (defaultCalc == Q_NULLPTR)
+        {
+            delete newObj;
+            return QString();
+        }
+
+        defaultCalc->setFactory(gtCalculatorFactory);
+        defaultCalc->setUuid(calc->uuid());
+
+        before = defaultCalc->toMemento();
+
+        delete defaultCalc;
+    }
+    else
+    {
+        return QString();
+    }
+
+    QString objName = calc->objectName();
 
     QRegExp regExp("[^A-Za-z0-9]+");
 
@@ -84,7 +125,6 @@ GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc, GtObjectMemento before)
 
     while (!root.isNull())
     {
-
         if (root.attribute("uuid") == calc->uuid())
         {
             break;
