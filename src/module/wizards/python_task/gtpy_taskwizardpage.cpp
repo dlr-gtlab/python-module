@@ -300,19 +300,10 @@ GtpyTaskWizardPage::addCalculator()
     GtProcessWizard wizard(project, &provider);
     wizard.resize(560, 500);
 
-    connect(&wizard, SIGNAL(currentIdChanged(int)), this,
-            SLOT(calculatorSelected(int)));
-
     if (!wizard.exec())
     {
-        disconnect(&wizard, SIGNAL(currentIdChanged(int)), this,
-                SLOT(calculatorSelected(int)));
-
         return;
     }
-
-    disconnect(&wizard, SIGNAL(currentIdChanged(int)), this,
-            SLOT(calculatorSelected(int)));
 
     GtObjectMemento memento = provider.componentData();
 
@@ -338,7 +329,7 @@ GtpyTaskWizardPage::addCalculator()
 
     if (appendCalcToTask(calc))
     {
-        insertConstructor(calc/*, m_createdCalcMemento*/);
+        insertConstructor(calc);
     }
     else
     {
@@ -795,47 +786,6 @@ GtpyTaskWizardPage::actionTriggered(QObject* obj)
         else
         {
             delete calc;
-        }
-    }
-}
-
-void
-GtpyTaskWizardPage::calculatorSelected(int page)
-{
-    GtProcessWizard* wiz = qobject_cast<GtProcessWizard*>(sender());
-
-    if (wiz == Q_NULLPTR)
-    {
-        return;
-    }
-
-    GtAbstractProcessProvider* prov = wiz->provider();
-
-    if (prov == Q_NULLPTR)
-    {
-        return;
-    }
-
-    if (!m_createdCalcMemento.isNull())
-    {
-        if (m_createdCalcMemento.uuid() == prov->componentData().uuid())
-        {
-            return;
-        }
-    }
-
-    if (wiz->pageIds().count() == 2)
-    {
-        if (page == 1 || page == 2)
-        {
-            m_createdCalcMemento = prov->componentData();
-        }
-    }
-    else if (wiz->pageIds().count() > 2)
-    {
-        if (page == 1)
-        {
-            m_createdCalcMemento = prov->componentData();
         }
     }
 }
