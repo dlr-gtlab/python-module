@@ -278,6 +278,7 @@ GtpyAbstractScriptingWizardPage::initializePage()
         if (obj != Q_NULLPTR)
         {
             GtObject* clone = obj->clone();
+            clone->setParent(this);
 
             GtpyContextManager::instance()->addObject(
                         m_contextType, clone->objectName(), clone);
@@ -292,7 +293,7 @@ GtpyAbstractScriptingWizardPage::validatePage()
 {
     //evalScript(false);
 
-    GtpyContextManager::instance()->removeAllAddedObjects(m_contextType);
+    GtpyContextManager::instance()->relsetContext(m_contextType);
 
     return validation();
 }

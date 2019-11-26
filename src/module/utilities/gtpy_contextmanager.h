@@ -74,12 +74,6 @@ public:
     static GtpyContextManager* instance();
 
     /**
-     * @brief Used to obtain the Python version currently active
-     * @return Major and minorversion of current Python instance (e.g '3.7')
-     */
-    QString pythonVersion() const;
-
-    /**
      * @brief Evaluates the given script into the given python context.
      * @param type Python context identifier.
      * @param script
@@ -173,6 +167,12 @@ public:
      */
     void initContexts();
 
+    /**
+     * @brief Resets the Python context indicated by type to its initial state.
+     * @param type Python context identifier.
+     */
+    void relsetContext(const GtpyContextManager::Context& type);
+
 protected:
     /**
      * @brief The GtpyContextManager constructor.
@@ -192,6 +192,24 @@ private:
     static const QString LOGGING_MODULE;
 
     /**
+     * @brief Contains the dafault configuration for every context.
+     * Ensures that the Python context indicated by type cannot be imported
+     * into other modules.
+     * @param type Python context identifier.
+     * @param contextName The name of the Python context.
+     */
+    void defaultContextConfig(const GtpyContextManager::Context& type,
+                              QString contextName);
+
+    /**
+     * @brief Calls the function containing the specific configuration for the
+     * Python context indicated by the type.
+     * @param type Python context identifier.
+     */
+    void specificContextConfig(const GtpyContextManager::Context& type);
+
+
+    /**
      * @brief Enables the calculator access for the Python context indicated by
      *  type.
      * @param type Python context identifier.
@@ -205,13 +223,6 @@ private:
      * @return Pointer to Python Context.
      */
     PythonQtObjectPtr context(const GtpyContextManager::Context& type);
-
-    /**
-     * @brief Returns a pointer to the Python context indicated by type.
-     * @param type Python context identifier.
-     * @return Pointer to Python Context.
-     */
-    PythonQtObjectPtr context(int type);
 
     /**
      * @brief Initializes the logging module.
@@ -252,6 +263,13 @@ private:
     void initTaskRunContext();
 
     /**
+     * @brief Imports the default modules to the Python context identified by
+     * type.
+     * @param type Python context identifier.
+     */
+    void importDefaultModules(const GtpyContextManager::Context& type);
+
+    /**
      * @brief Imports the logging functions to the context identified by type.
      * Stores the appConsole value that specifies whether the logging functions
      * send the output to the application console.
@@ -259,7 +277,7 @@ private:
      * @param appConsole If true, the logging messages are sent to the
      * GTlab application console.
      */
-    void loggingToAppConsole(const GtpyContextManager::Context& type,
+    void loggingToConsole(const GtpyContextManager::Context& type,
                              bool appConsole);
 
     /**
@@ -298,6 +316,13 @@ private:
     void setImportableModulesCompletions();
 
     /**
+     * @brief Returns the constractor functions for the calculators.
+     * @param type Python context identifier.
+     * @return Constructor functions for the calculators.
+     */
+    QMultiMap<QString, GtpyFunction> calculatorCompletions(const Context& type);
+
+    /**
      * @brief Sets custom completions and builtin completions to member
      *  variable. Removes duplicates in these
      */
@@ -309,15 +334,15 @@ private:
      */
     void registerTypeConverters();
 
+
     /**
-     * @brief Returns the constractor functions for the calculators.
-     * @param type Python context identifier.
-     * @return Constructor functions for the calculators.
+     * @brief Used to obtain the Python version currently active
+     * @return Major and minorversion of current Python instance (e.g '3.7')
      */
-    QMultiMap<QString, GtpyFunction> calculatorCompletions(const Context& type);
+    QString pythonVersion() const;
 
     /// Map of Python context
-    QMap<int, PythonQtObjectPtr> m_contextMap;
+    QMap<GtpyContextManager::Context, PythonQtObjectPtr> m_contextMap;
 
     /// Whether the contexts send messages to the application console
     QMap<GtpyContextManager::Context, bool> m_appLogging;
@@ -347,7 +372,7 @@ private:
     bool m_errorEmitted;
 
     /// Lists of added objects for all contexts
-    QMap<int, QStringList> m_addedObjectNames;
+    QMap<GtpyContextManager::Context, QStringList> m_addedObjectNames;
 
     /// Calculator accessible contexts
     QList<GtpyContextManager::Context> m_calcAccessibleContexts;
@@ -395,7 +420,7 @@ signals:
 
     /**
      * @brief Sends python messages.
-     * @param message Pyhton message.
+     * @param message Python message.
      * @param type Python context in which the message was occurred.
      */
     void pythonMessage(const QString& message,
