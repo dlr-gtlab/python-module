@@ -20,6 +20,7 @@
 #include "gtpy_taskstylemodel.h"
 #include "gtpy_tasktreeview.h"
 #include "gtpy_codegenerator.h"
+#include "gtpy_scripteditor.h"
 
 // GTlab framework includes
 #include "gt_stylesheets.h"
@@ -41,12 +42,8 @@
 #include "gt_objectmementodiff.h"
 #include "gt_calculator.h"
 #include "gt_processfiltermodel.h"
-
-
-
+#include "gt_pyhighlighter.h"
 #include "gt_calculatordata.h"
-
-
 
 #include "gtpy_taskwizardpage.h"
 
@@ -93,6 +90,22 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
     connect(addElementButton, SIGNAL(clicked(bool)), SLOT(addElement()));
     connect(m_actionMapper, SIGNAL(mapped(QObject*)),
             SLOT(actionTriggered(QObject*)));
+
+    GtpyScriptEditor* calcEditor = new GtpyScriptEditor(m_contextType, this);
+
+    QTextOption defaultOps = calcEditor->document()->defaultTextOption();
+    defaultOps.setFlags(defaultOps.flags() | QTextOption::ShowTabsAndSpaces /*|
+                        QTextOption::ShowLineAndParagraphSeparators*/);
+
+    calcEditor->document()->setDefaultTextOption(defaultOps);
+    calcEditor->setStyleSheet("QPlainTextEdit {  border: 0px; }");
+
+    GtPyHighlighter* highlighter = new GtPyHighlighter(calcEditor->document());
+
+    Q_UNUSED(highlighter)
+
+
+    addTabWidget(calcEditor, "Calculators");
 }
 
 void
