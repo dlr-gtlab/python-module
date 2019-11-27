@@ -104,7 +104,9 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
 
     Q_UNUSED(highlighter)
 
-    addTabWidget(calcEditor, "Calculators");
+    calcEditor->hide();
+
+//    addTabWidget(calcEditor, "Calculators");
 }
 
 void
