@@ -663,6 +663,8 @@ GtpyAbstractScriptingWizardPage::addTabWidget(QWidget* wid,
 bool
 GtpyAbstractScriptingWizardPage::evalScript(bool outputToConsole)
 {
+    GtpyContextManager::instance()->deleteCalcsFromTask(m_contextType);
+
     bool success = GtpyContextManager::instance()->evalScript(
                     m_contextType, m_editor->script(), outputToConsole, false);
 

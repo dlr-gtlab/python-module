@@ -357,10 +357,23 @@ GtpyContextManager::addTaskValue(const GtpyContextManager::Context& type,
     }
     else
     {
-        evalScript(type, TASK_VAR + QStringLiteral(" = None"), false);
+        evalScript(type, TASK_VAR + QStringLiteral(" = None"), false, false);
     }
 
     return true;
+}
+
+void
+GtpyContextManager::deleteCalcsFromTask(
+        const GtpyContextManager::Context& type)
+{
+    if (!m_calcAccessibleContexts.contains(type))
+    {
+        return;
+    }
+
+    evalScript(type, QStringLiteral("__task.deleteAllCalculators()"), false,
+               false);
 }
 
 QString

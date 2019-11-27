@@ -144,7 +144,13 @@ public:
      */
     bool addTaskValue(const GtpyContextManager::Context& type, GtTask* task);
 
-    void deleteCalcsFromTask(const GtpyContextManager::Context& type) const;
+    /**
+     * @brief Checks whether the Python context indicated by type as access to
+     *  calculators. If the context has access, this function deletes all
+     * calculator instances that are children of the task instance (TASK_VAR).
+     * @param type Python context identifier.
+     */
+    void deleteCalcsFromTask(const GtpyContextManager::Context& type);
 
     /**
      * @brief Converts QVariant value val to QString value.
