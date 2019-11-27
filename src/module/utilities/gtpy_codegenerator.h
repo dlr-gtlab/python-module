@@ -33,12 +33,12 @@ public:
     /**
      * @brief Creates the Python code representing the calculator settings and
      * returns it. The the setting of the claculator will be compared with the
-     * given memento. Only the changes are inserted into the script.
+     * default settings of the calculator. Only the changes are inserted into
+     * the script.
      * @param calc Edit calculator object.
-     * @param before Memento object of the calculator before editing.
      * @return Python code representing the calculator settings.
      */
-    QString calculatorPyCode(GtCalculator* calc, GtObjectMemento before);
+    QString calculatorPyCode(GtCalculator* calc);
 
 protected:
     /**

@@ -19,6 +19,7 @@ class GtpyScriptEditor;
 class GtpyConsole;
 class GtSearchWidget;
 class QSplitter;
+class QTabWidget;
 class GtObject;
 class GtAbstractProperty;
 class GtProcessComponent;
@@ -183,6 +184,16 @@ protected:
      */
     void enableSaveButton(bool enable = true);
 
+    /**
+     * @brief Adds a tab containing the given widget to the editor tab widget.
+     * @param wid Widget to add to the editor tab widget.
+     * @param label Label of the new tab.
+     */
+    void addTabWidget(QWidget* wid, const QString& label);
+
+    /// Python Context Type
+    GtpyContextManager::Context m_contextType;
+
 protected slots:
     /**
      * @brief Evaluates the current script from the editor
@@ -231,11 +242,11 @@ private:
 
     QSplitter* m_editorSplitter;
 
-    /// Python Context Type
-    GtpyContextManager::Context m_contextType;
-
     /// Separator Widget
     QWidget* m_separator;
+
+    /// Editor Tab Widget
+    QTabWidget* m_tabWidget;
 
     /// Package Names
     QStringList m_packageNames;

@@ -20,6 +20,7 @@
 #include "gtpy_taskstylemodel.h"
 #include "gtpy_tasktreeview.h"
 #include "gtpy_codegenerator.h"
+#include "gtpy_scripteditor.h"
 
 // GTlab framework includes
 #include "gt_stylesheets.h"
@@ -41,12 +42,8 @@
 #include "gt_objectmementodiff.h"
 #include "gt_calculator.h"
 #include "gt_processfiltermodel.h"
-
-
-
+#include "gt_pyhighlighter.h"
 #include "gt_calculatordata.h"
-
-
 
 #include "gtpy_taskwizardpage.h"
 
@@ -93,6 +90,23 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
     connect(addElementButton, SIGNAL(clicked(bool)), SLOT(addElement()));
     connect(m_actionMapper, SIGNAL(mapped(QObject*)),
             SLOT(actionTriggered(QObject*)));
+
+    GtpyScriptEditor* calcEditor = new GtpyScriptEditor(m_contextType, this);
+
+    QTextOption defaultOps = calcEditor->document()->defaultTextOption();
+    defaultOps.setFlags(defaultOps.flags() | QTextOption::ShowTabsAndSpaces /*|
+                        QTextOption::ShowLineAndParagraphSeparators*/);
+
+    calcEditor->document()->setDefaultTextOption(defaultOps);
+    calcEditor->setStyleSheet("QPlainTextEdit {  border: 0px; }");
+
+    GtPyHighlighter* highlighter = new GtPyHighlighter(calcEditor->document());
+
+    Q_UNUSED(highlighter)
+
+    calcEditor->hide();
+
+//    addTabWidget(calcEditor, "Calculators");
 }
 
 void
@@ -266,18 +280,7 @@ GtpyTaskWizardPage::configCalculator(GtCalculator* calc)
     caption = ("#" + GtpyTaskWizardPage::ARROW_LEFT + caption +
                GtpyTaskWizardPage::ARROW_RIGHT);
 
-    GtCalculatorData calcData = gtCalculatorFactory->calculatorData(
-                                    calc->metaObject()->className());
-
-    GtCalculator* testCalc = dynamic_cast<GtCalculator*>(
-                                 calcData->metaData().newInstance());
-
-    testCalc->setUuid(calc->uuid());
-
-    QString pyCode = GtpyCodeGenerator::instance()->calculatorPyCode(calc,
-                                                        testCalc->toMemento());
-    delete testCalc;
-    testCalc = Q_NULLPTR;
+    QString pyCode = GtpyCodeGenerator::instance()->calculatorPyCode(calc);
 
     int lastLineBreak = pyCode.lastIndexOf(QChar('\n'));
     pyCode.remove(lastLineBreak, 1);
@@ -299,19 +302,10 @@ GtpyTaskWizardPage::addCalculator()
     GtProcessWizard wizard(project, &provider);
     wizard.resize(560, 500);
 
-    connect(&wizard, SIGNAL(currentIdChanged(int)), this,
-            SLOT(calculatorSelected(int)));
-
     if (!wizard.exec())
     {
-        disconnect(&wizard, SIGNAL(currentIdChanged(int)), this,
-                SLOT(calculatorSelected(int)));
-
         return;
     }
-
-    disconnect(&wizard, SIGNAL(currentIdChanged(int)), this,
-            SLOT(calculatorSelected(int)));
 
     GtObjectMemento memento = provider.componentData();
 
@@ -337,7 +331,7 @@ GtpyTaskWizardPage::addCalculator()
 
     if (appendCalcToTask(calc))
     {
-        insertConstructor(calc, m_createdCalcMemento);
+        insertConstructor(calc);
     }
     else
     {
@@ -379,8 +373,7 @@ GtpyTaskWizardPage::updateLastUsedElementList(const QString& str)
 }
 
 void
-GtpyTaskWizardPage::insertConstructor(GtCalculator* calc,
-                                       GtObjectMemento before)
+GtpyTaskWizardPage::insertConstructor(GtCalculator* calc)
 {
     if (calc == Q_NULLPTR)
     {
@@ -392,8 +385,7 @@ GtpyTaskWizardPage::insertConstructor(GtCalculator* calc,
     QString pyCode = ("#" + GtpyTaskWizardPage::ARROW_LEFT + objName +
                       GtpyTaskWizardPage::ARROW_RIGHT + "\n");
 
-    pyCode += GtpyCodeGenerator::instance()->calculatorPyCode(
-                         calc, before);
+    pyCode += GtpyCodeGenerator::instance()->calculatorPyCode(calc);
 
     QString caption;
 
@@ -735,7 +727,6 @@ GtpyTaskWizardPage::actionTriggered(QObject* obj)
 
     if (gtCalculatorFactory->calculatorDataExists(className))
     {
-
         GtCalculatorData calcData =
             gtCalculatorFactory->calculatorData(className);
 
@@ -760,8 +751,6 @@ GtpyTaskWizardPage::actionTriggered(QObject* obj)
         }
 
         calc->setFactory(gtProcessFactory);
-
-        GtObjectMemento mementoBefore = calc->toMemento();
 
         GtCalculatorProvider provider(calc);
         GtProcessWizard wizard(gtApp->currentProject(), &provider);
@@ -794,53 +783,11 @@ GtpyTaskWizardPage::actionTriggered(QObject* obj)
 
         if (appendCalcToTask(calc))
         {
-            insertConstructor(calc, mementoBefore);
+            insertConstructor(calc);
         }
         else
         {
             delete calc;
-            calc = Q_NULLPTR;
-        }
-    }
-}
-
-void
-GtpyTaskWizardPage::calculatorSelected(int page)
-{
-    GtProcessWizard* wiz = qobject_cast<GtProcessWizard*>(sender());
-
-    if (wiz == Q_NULLPTR)
-    {
-        return;
-    }
-
-    GtAbstractProcessProvider* prov = wiz->provider();
-
-    if (prov == Q_NULLPTR)
-    {
-        return;
-    }
-
-    if (!m_createdCalcMemento.isNull())
-    {
-        if (m_createdCalcMemento.uuid() == prov->componentData().uuid())
-        {
-            return;
-        }
-    }
-
-    if (wiz->pageIds().count() == 2)
-    {
-        if (page == 1 || page == 2)
-        {
-            m_createdCalcMemento = prov->componentData();
-        }
-    }
-    else if (wiz->pageIds().count() > 2)
-    {
-        if (page == 1)
-        {
-            m_createdCalcMemento = prov->componentData();
         }
     }
 }

@@ -54,6 +54,10 @@ public:
      */
     QStringList packageNames();
 
+    QString calcDefinitions() const;
+
+    void setCalcDefinitions(QString& calcDefinitions);
+
 protected:
     /**
      * @brief Checks if parent of task is a process data instance. Is this true
@@ -71,6 +75,8 @@ private:
 
     /// Script.
     GtStringProperty m_script;
+
+    GtStringProperty m_calcDefinitions;
 
     /// Dynamic properties regarding project modules
     QList<GtObjectPathProperty*> m_dynamicPathProps;

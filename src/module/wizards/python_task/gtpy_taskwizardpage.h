@@ -87,7 +87,7 @@ private:
      * @param calc Edit calculator object.
      * @param before Memento object of the calculator before editing.
      */
-    void insertConstructor(GtCalculator* calc, GtObjectMemento before);
+    void insertConstructor(GtCalculator* calc);
 
     /**
      * @brief Appends the given calculator to the Python Task.
@@ -113,9 +113,6 @@ private:
 
     /// Mapper for action signals.
     QSignalMapper* m_actionMapper;
-
-    /// Calculator memento.
-    GtObjectMemento m_createdCalcMemento;
 
     /// Calculator object names identified by UUIDs
     QHash<QString, QString> m_calcIds;
@@ -155,12 +152,6 @@ private slots:
      * @param obj Triggered aciton.
      */
     void actionTriggered(QObject* obj);
-
-    /**
-     * @brief calculatorSelected
-     * @param page
-     */
-    void calculatorSelected(int page);
 
     /**
      * @brief Enables name observation for the calculator specified in child.

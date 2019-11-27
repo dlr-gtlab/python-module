@@ -18,12 +18,16 @@
 #include "gtpy_task.h"
 
 GtpyTask::GtpyTask():
-    m_script("script", "Skript")
+    m_script("script", "Skript"),
+    m_calcDefinitions("calcDefinitions", "Calculator Definitions")
 {
     setObjectName("Python Task");
 
     registerProperty(m_script);
+    registerProperty(m_calcDefinitions);
+
     m_script.hide();
+    m_calcDefinitions.hide();
 
     foreach (const QString& modId, getModuleIds())
     {
@@ -49,8 +53,11 @@ GtpyTask::GtpyTask():
 bool
 GtpyTask::runIteration()
 {
-    GtpyContextManager::instance()->addTaskValue(
-                GtpyContextManager::TaskRunContext, this);
+    GtpyContextManager::Context type = GtpyContextManager::TaskRunContext;
+
+    GtpyContextManager::instance()->resetContext(type);
+
+    GtpyContextManager::instance()->addTaskValue(type, this);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -58,9 +65,8 @@ GtpyTask::runIteration()
 
         if (package != Q_NULLPTR)
         {
-            GtpyContextManager::instance()->addObject(
-                        GtpyContextManager::TaskRunContext,
-                        package->objectName(), package);
+            GtpyContextManager::instance()->addObject(type,
+                                         package->objectName(), package);
         }
     }
 
@@ -68,9 +74,7 @@ GtpyTask::runIteration()
 
     bool success;
 
-    success = GtpyContextManager::instance()->evalScript(
-                  GtpyContextManager::TaskRunContext,
-                  script(), true);
+    success = GtpyContextManager::instance()->evalScript(type, script(), true);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -78,8 +82,7 @@ GtpyTask::runIteration()
 
         if (package != Q_NULLPTR)
         {
-            GtpyContextManager::instance()->removeObject(
-                        GtpyContextManager::TaskRunContext,
+            GtpyContextManager::instance()->removeObject(type,
                         package->objectName());
         }
     }
@@ -138,4 +141,18 @@ GtpyTask::getModuleIds()
     }
 
     return project->moduleIds();
+}
+
+QString
+GtpyTask::calcDefinitions() const
+{
+    return m_calcDefinitions;
+}
+
+void
+GtpyTask::setCalcDefinitions(QString& calcDefinitions)
+{
+    calcDefinitions.replace("\n", "\r");
+
+    m_calcDefinitions = calcDefinitions;
 }

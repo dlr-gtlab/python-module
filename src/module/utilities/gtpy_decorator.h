@@ -192,6 +192,14 @@ public slots:
      */
     bool close(GtProject* pro, bool save = false);
 
+    ///-------> functions of GtTask <-------\\\
+
+    /**
+     * @brief Deletes all calculator appended to the given task.
+     * @param task pointer to GtTask
+     */
+    void deleteAllCalculators(GtTask* task);
+
     ///-------> functions of GtObject <-------\\\
 
     /**

@@ -14,10 +14,12 @@
 #include <QCompleter>
 #include <QLabel>
 #include <QSplitter>
+#include <QTabWidget>
 #include <QFileDialog>
 #include <QTextStream>
 #include <QTextOption>
 #include <QMetaProperty>
+#include <QTabBar>
 
 // python includes
 #include "gtpy_scripteditor.h"
@@ -42,7 +44,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
         GtpyContextManager::Context type) :
     m_contextType(type),
     m_editor(Q_NULLPTR),
-    m_editorSplitter(Q_NULLPTR)
+    m_editorSplitter(Q_NULLPTR),
+    m_tabWidget(Q_NULLPTR)
 {
     setTitle(tr("Python Script Editor"));
 
@@ -61,17 +64,21 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
                         QTextOption::ShowLineAndParagraphSeparators*/);
 
     m_editor->document()->setDefaultTextOption(defaultOps);
+    m_editor->setStyleSheet("QPlainTextEdit {  border: 0px; }");
 
     GtPyHighlighter* highlighter = new GtPyHighlighter(m_editor->document());
 
     Q_UNUSED(highlighter)
 
-    m_editorSplitter->addWidget(m_editor);
+    m_tabWidget = new QTabWidget(this);
+    m_tabWidget->addTab(m_editor, "Script");
+    m_tabWidget->tabBar()->setVisible(false);
 
-    m_editorSplitter->setCollapsible(m_editorSplitter->indexOf(m_editor),
+    m_editorSplitter->addWidget(m_tabWidget);
+    m_editorSplitter->setCollapsible(m_editorSplitter->indexOf(m_tabWidget),
                                      false);
-    m_editorSplitter->setStretchFactor(m_editorSplitter->indexOf(m_editor), 3);
-
+    m_editorSplitter->setStretchFactor(m_editorSplitter->indexOf(m_tabWidget),
+                                       3);
     splitter->addWidget(m_editorSplitter);
 
     m_separator = new QWidget(this);
@@ -260,6 +267,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 void
 GtpyAbstractScriptingWizardPage::initializePage()
 {    
+    GtpyContextManager::instance()->resetContext(m_contextType);
+
     initialization();
 
     foreach (QString packageName, m_packageNames)
@@ -271,6 +280,7 @@ GtpyAbstractScriptingWizardPage::initializePage()
         if (obj != Q_NULLPTR)
         {
             GtObject* clone = obj->clone();
+            clone->setParent(this);
 
             GtpyContextManager::instance()->addObject(
                         m_contextType, clone->objectName(), clone);
@@ -284,8 +294,6 @@ bool
 GtpyAbstractScriptingWizardPage::validatePage()
 {
     //evalScript(false);
-
-    GtpyContextManager::instance()->removeAllAddedObjects(m_contextType);
 
     return validation();
 }
@@ -423,129 +431,6 @@ GtpyAbstractScriptingWizardPage::replaceCalcPyCode(const QString& header,
         }
     }
 }
-
-//QString
-//GtpyAbstractScriptingWizardPage::helperPyCode(GtObject* obj,
-//                                              const QString& pyObjName)
-//{
-//    if (obj == Q_NULLPTR)
-//    {
-//        return QString();
-//    }
-
-//    QString pyCode;
-
-//    QRegExp regExp("[^A-Za-z0-9]+");
-
-//    QStringList helperNames = gtCalculatorHelperFactory->connectedHelper(
-//                                  obj->metaObject()->className());
-
-//    if (helperNames.isEmpty())
-//    {
-//        return QString();
-//    }
-
-//    QList<GtObject*> children = obj->findDirectChildren<GtObject*>();
-
-//    bool initRun = true;
-
-//    foreach (GtObject* child, children)
-//    {
-//        if (child != Q_NULLPTR)
-//        {
-//            QString childClassName = child->metaObject()->className();
-
-//            if (helperNames.contains(childClassName))
-//            {
-//                QString helperObjName = child->objectName();
-
-//                if (helperObjName.isEmpty())
-//                {
-//                    helperObjName = childClassName;
-//                }
-
-//                int pos = regExp.indexIn(helperObjName);
-
-//                while (pos >= 0)
-//                {
-//                    helperObjName = helperObjName.remove(pos, 1);
-//                    pos = regExp.indexIn(helperObjName);
-//                }
-
-//                helperObjName.replace(0, 1, helperObjName.at(0).toLower());
-
-//                if (initRun)
-//                {
-//                    initRun = false;
-//                }
-//                else
-//                {
-//                    pyCode += "\n";
-//                }
-
-//                pyCode += (helperObjName + " = " + pyObjName + ".create" +
-//                           childClassName + "(\"" +
-//                           child->objectName() + "\")\n");
-
-//                const QMetaObject* metaobject = child->metaObject();
-
-//                for (int i = 0; i < metaobject->propertyCount(); i ++)
-//                {
-//                    QMetaProperty metaproperty = metaobject->property(i);
-//                    const char* name = metaproperty.name();
-
-//                    QString nameStr = QString::fromUtf8(name);
-
-//                    if (nameStr != "objectName")
-//                    {
-//                        QVariant value = child->property(name);
-
-//                        QString typeName = QString::fromUtf8(
-//                                               child->property(name).typeName());
-
-//                        if (typeName == "QString")
-//                        {
-//                            pyCode += (helperObjName + "." + nameStr + " = \"" +
-//                                       GtpyContextManager::instance()->qvariantToPyStr(value) + "\"\n");
-//                        }
-//                        else
-//                        {
-//                            pyCode += (helperObjName + "." + nameStr + " = " +
-//                                       GtpyContextManager::instance()->qvariantToPyStr(value) + "\n");
-//                        }
-//                    }
-//                }
-
-//                QList<GtAbstractProperty*> props = child->properties();
-
-//                foreach (GtAbstractProperty* prop, props)
-//                {
-//                    if (prop != Q_NULLPTR)
-//                    {
-//                        QString ident = prop->ident();
-
-//                        QString val = propValToString(prop);
-
-//                        pyCode += (helperObjName + "." +
-//                                   GtpyContextManager::instance()->setPropertyValueFuncName() +"(\""
-//                                   + ident + "\", " + val + ")\n");
-
-//                    }
-//                }
-
-//                QString childHelperCode = helperPyCode(child, helperObjName);
-
-//                if (!childHelperCode.isEmpty())
-//                {
-//                    pyCode += "\n";
-//                    pyCode += childHelperCode;
-//                }
-//            }
-//        }
-//    }
-
-//    return pyCode;
-//}
 
 void
 GtpyAbstractScriptingWizardPage::replaceBlockHeaders(const QString& oldHeader,
@@ -762,9 +647,24 @@ GtpyAbstractScriptingWizardPage::enableSaveButton(bool enable)
     m_shortCutSave->setVisible(enable);
 }
 
+void
+GtpyAbstractScriptingWizardPage::addTabWidget(QWidget* wid,
+                                              const QString& label)
+{
+    if (wid == Q_NULLPTR || m_tabWidget == Q_NULLPTR)
+    {
+        return;
+    }
+
+    m_tabWidget->tabBar()->setVisible(true);
+    m_tabWidget->addTab(wid, label);
+}
+
 bool
 GtpyAbstractScriptingWizardPage::evalScript(bool outputToConsole)
 {
+    GtpyContextManager::instance()->deleteCalcsFromTask(m_contextType);
+
     bool success = GtpyContextManager::instance()->evalScript(
                     m_contextType, m_editor->script(), outputToConsole, false);
 

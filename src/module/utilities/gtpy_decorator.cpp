@@ -520,6 +520,26 @@ GtpyDecorator::close(GtProject* pro, bool save)
     return true;
 }
 
+void
+GtpyDecorator::deleteAllCalculators(GtTask* task)
+{
+    if (task == Q_NULLPTR)
+    {
+        return;
+    }
+
+    QList<GtCalculator*> calcs = task->findDirectChildren<GtCalculator*>();
+
+    int lastIndex = calcs.size() - 1;
+
+    for (lastIndex; lastIndex >= 0; lastIndex--)
+    {
+        GtCalculator* calc = calcs.at(lastIndex);
+        calcs.removeAt(lastIndex);
+        delete calc;
+    }
+}
+
 GtObject*
 GtpyDecorator::findGtChild(GtObject* obj, const QString& childName)
 {
