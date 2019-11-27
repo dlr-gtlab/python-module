@@ -83,9 +83,10 @@ public:
      * @return
      */
     bool evalScript(const GtpyContextManager::Context& type,
-                    const QString& script, bool output = true,
-                    bool outputToEveryConsol = true,
-                    EvalOptions option = EvalFile);
+                    const QString& script, const bool output = true,
+                    const bool outputToEveryConsol = true,
+                    const GtpyContextManager::EvalOptions& option =
+            EvalFile);
 
     /**
      * @brief introspection
@@ -112,7 +113,8 @@ public:
      * @return Whether the addition was successful.
      */
     bool addObject(const GtpyContextManager::Context& type,
-                   const QString& name, QObject* obj, bool saveName = true);
+                   const QString& name, QObject* obj,
+                   const bool saveName = true);
 
     /**
      * @brief Removes the object with the given name from the Python context
@@ -142,25 +144,28 @@ public:
      */
     bool addTaskValue(const GtpyContextManager::Context& type, GtTask* task);
 
+    void deleteCalcsFromTask(const GtpyContextManager::Context& type) const;
+
     /**
      * @brief Converts QVariant value val to QString value.
      * @param val Value to convert.
      * @return QString value.
      */
-    QString qvariantToPyStr(const QVariant& val);
+    QString qvariantToPyStr(const QVariant& val) const;
 
     /**
-     * @brief Returns the name of the find child function defined in decorator class.
+     * @brief Returns the name of the find child function defined in decorator
+     *  class.
      * @return Name of find child function as QString.
      */
-    QString findChildFuncName();
+    QString findChildFuncName() const;
 
     /**
      * @brief Returns the name of the set property value function defined in
      * decorator class.
      * @return Name of set property value function as QString.
      */
-    QString setPropertyValueFuncName();
+    QString setPropertyValueFuncName() const;
 
     /**
      * @brief Initializes a Python context for each value of the enum Context.
@@ -171,7 +176,7 @@ public:
      * @brief Resets the Python context indicated by type to its initial state.
      * @param type Python context identifier.
      */
-    void relsetContext(const GtpyContextManager::Context& type);
+    void resetContext(const GtpyContextManager::Context& type);
 
 protected:
     /**
@@ -199,7 +204,7 @@ private:
      * @param contextName The name of the Python context.
      */
     void defaultContextConfig(const GtpyContextManager::Context& type,
-                              QString contextName);
+                              const QString& contextName);
 
     /**
      * @brief Calls the function containing the specific configuration for the
@@ -222,7 +227,7 @@ private:
      * @param type Python context identifier.
      * @return Pointer to Python Context.
      */
-    PythonQtObjectPtr context(const GtpyContextManager::Context& type);
+    PythonQtObjectPtr context(const GtpyContextManager::Context& type) const;
 
     /**
      * @brief Initializes the logging module.
@@ -285,9 +290,10 @@ private:
      * @param message The error message.
      * @return The line number in which an error was detected.
      */
-    int lineOutOfMessage(const QString& message);
+    int lineOutOfMessage(const QString& message) const;
 
-//    void recursiveSubHelperRegistration(const GtpyContextManager::Context& type,
+//    void recursiveSubHelperRegistration(const GtpyContextManager::Context&
+    //type,
 //                                        const QString& helperClassName,
 //                                        const QString& calcName);
 
@@ -296,19 +302,19 @@ private:
      * @param object
      * @return
      */
-    QMultiMap<QString, GtpyFunction> introspectObject(PyObject* object);
+    QMultiMap<QString, GtpyFunction> introspectObject(PyObject* object) const;
 
     /**
      * @brief Used to define extra functions or keywords for the completer
      * @return custom completions
      */
-    QMultiMap<QString, GtpyFunction> customCompletions();
+    QMultiMap<QString, GtpyFunction> customCompletions() const;
 
     /**
      * @brief Used to obtain the built-in functions of python
      * @return builtin fucntions of python
      */
-    QMultiMap<QString, GtpyFunction> builtInCompletions();
+    QMultiMap<QString, GtpyFunction> builtInCompletions() const;
 
     /**
      * @brief Obtains importable modules and sets it to member variable
@@ -320,7 +326,8 @@ private:
      * @param type Python context identifier.
      * @return Constructor functions for the calculators.
      */
-    QMultiMap<QString, GtpyFunction> calculatorCompletions(const Context& type);
+    QMultiMap<QString, GtpyFunction> calculatorCompletions(
+            const Context& type) const;
 
     /**
      * @brief Sets custom completions and builtin completions to member
@@ -332,7 +339,7 @@ private:
      * @brief Registers the type converters in PythonQt that implemented in
      * the GtpyTypeConversion class.
      */
-    void registerTypeConverters();
+    void registerTypeConverters() const;
 
 
     /**
@@ -400,7 +407,7 @@ private slots:
      * @brief Keeps GTlab running when a python script calls sys.exit().
      * @param exep Exception.
      */
-    void onSystemExitExceptionRaised(int exep);
+    void onSystemExitExceptionRaised(const int exep) const;
 
 signals:
     /**
@@ -450,6 +457,7 @@ Q_DECLARE_METATYPE(GtpyContextManager::Context);
  */
 class GtpyTypeConversion
 {
+
 public:
     /**
      * @brief Converts QMap<int, double> instances to a Python object.
@@ -457,20 +465,45 @@ public:
      * @return Given QMap instance as Python object.
      */
     static PyObject* convertFromQMapIntDouble(const void* inObject,
-                                                       int /*metaTypeId*/);
+                                              const int /*metaTypeId*/);
 
+    /**
+     * @brief Converts Python object to QMap<int, double>.
+     * @param obj Python object.
+     * @param outMap QMap output.
+     * @return Whether the conversion was successful or not.
+     */
     static bool convertToQMapIntDouble(PyObject* obj, void* outMap,
                                        int /*metaTypeId*/, bool /*strict*/);
 
+    /**
+     * @brief Converts QMap<QString, double> instances to a Python object.
+     * @param inObject QMap instance.
+     * @return Given QMap instance as Python object.
+     */
     static PyObject* convertFromQMapStringDouble(const void* inObject,
                                                        int /*metaTypeId*/);
-
+    /**
+     * @brief Converts Python object to QMap<QString, double>.
+     * @param obj Python object.
+     * @param outMap QMap output.
+     * @return Whether the conversion was successful or not.
+     */
     static bool convertToQMapStringDouble(PyObject* obj, void* outMap,
                                        int /*metaTypeId*/, bool /*strict*/);
-
+    /**
+     * @brief Converts QMap<QString, int> instances to a Python object.
+     * @param inObject QMap instance.
+     * @return Given QMap instance as Python object.
+     */
     static PyObject* convertFromQMapStringInt(const void* inObject,
                                                        int /*metaTypeId*/);
-
+    /**
+     * @brief Converts Python object to QMap<QString, int>.
+     * @param obj Python object.
+     * @param outMap QMap output.
+     * @return Whether the conversion was successful or not.
+     */
     static bool convertToQMapStringInt(PyObject* obj, void* outMap,
                                        int /*metaTypeId*/, bool /*strict*/);
 
@@ -481,17 +514,86 @@ private:
      * @param map Pointer to map instance.
      * @return Given map instance as Python object.
      */
-
     template<typename Key, typename Val>
-    static PyObject* mapToPython (const void* map);
+    static PyObject* mapToPython (const void* inMap)
+    {
+        QMap<Key, Val>& map = *((QMap<Key, Val>*) inMap);
+
+        PyObject* result = PyDict_New();
+
+        QMap<Key, Val>::const_iterator t = map.constBegin();
+
+        PyObject* key;
+        PyObject* val;
+
+        for ( ; t != map.constEnd(); t++)
+        {
+            // converts key and value to QVariant and then to PyObject*
+            key = PythonQtConv::QVariantToPyObject(QVariant(t.key()));
+            val = PythonQtConv::QVariantToPyObject(QVariant(t.value()));
+
+            // sets key and val to the result dict
+            PyDict_SetItem(result, key, val);
+
+            // decrement the reference count for key and val
+            Py_DECREF(key);
+            Py_DECREF(val);
+        }
+
+        return result;
+    }
 
     /**
-     * @brief pythonToMap
-     * @param val
-     * @param result
+     * @brief Template function for converting Python objects into QMap
+     * instances independent of the key/value type.
+     * @param obj Python object to convert.
+     * @param outMap QMap output.
+     * @return Whether the conversion was successful or not.
      */
     template <typename Key, typename Val>
-    static bool pythonToMap(PyObject* obj, void* outMap);
+    static bool pythonToMap(PyObject* obj, void* outMap)
+    {
+        bool success = false;
+
+        if (PyMapping_Check(obj))
+        {
+            QMap<Key, Val>& map = *((QMap<Key, Val>*) outMap);
+
+            QString tempFunc = "items";
+            QByteArray ba = tempFunc.toLocal8Bit();
+            char* func = ba.data();
+
+            PyObject* items = PyObject_CallMethod(obj, func, NULL);
+
+            if (items)
+            {
+                int count = PyList_Size(items);
+
+                PyObject* pyValue;
+                PyObject* pyKey;
+                PyObject* pyTuple;
+
+                for (int i = 0;i<count;i++)
+                {
+                    pyTuple = PyList_GetItem(items,i);
+                    pyKey = PyTuple_GetItem(pyTuple, 0);
+                    pyValue = PyTuple_GetItem(pyTuple, 1);
+
+                    QVariant key = PythonQtConv::PyObjToQVariant(pyKey);
+                    QVariant val = PythonQtConv::PyObjToQVariant(pyValue);
+
+                    map.insert(key.value<Key>(), val.value<Val>());
+                }
+
+                Py_DECREF(items);
+
+                success = true;
+            }
+        }
+
+        return success;
+    }
+
 };
 
 #endif // GTPY_CONTEXTMANAGER_H

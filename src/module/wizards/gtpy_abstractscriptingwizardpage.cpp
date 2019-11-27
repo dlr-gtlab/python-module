@@ -267,6 +267,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 void
 GtpyAbstractScriptingWizardPage::initializePage()
 {    
+    GtpyContextManager::instance()->resetContext(m_contextType);
+
     initialization();
 
     foreach (QString packageName, m_packageNames)
@@ -292,8 +294,6 @@ bool
 GtpyAbstractScriptingWizardPage::validatePage()
 {
     //evalScript(false);
-
-    GtpyContextManager::instance()->relsetContext(m_contextType);
 
     return validation();
 }

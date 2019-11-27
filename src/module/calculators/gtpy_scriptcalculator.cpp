@@ -54,14 +54,17 @@ GtpyScriptCalculator::~GtpyScriptCalculator()
 bool
 GtpyScriptCalculator::run()
 {
+    GtpyContextManager::Context type = GtpyContextManager::CalculatorRunContext;
+
+    GtpyContextManager::instance()->resetContext(type);
+
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
         GtPackage* package = data<GtPackage*>(pathProp->path());
 
         if (package != Q_NULLPTR)
         {
-            GtpyContextManager::instance()->addObject(
-                        GtpyContextManager::CalculatorRunContext,
+            GtpyContextManager::instance()->addObject(type,
                         package->objectName(), package);
         }
     }
@@ -71,9 +74,7 @@ GtpyScriptCalculator::run()
 
     bool success;
 
-    success = GtpyContextManager::instance()->evalScript
-              (GtpyContextManager::CalculatorRunContext,
-               script(), true);
+    success = GtpyContextManager::instance()->evalScript(type, script(), true);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -81,9 +82,8 @@ GtpyScriptCalculator::run()
 
         if (package != Q_NULLPTR)
         {
-            GtpyContextManager::instance()->removeObject(
-                        GtpyContextManager::CalculatorRunContext,
-                        package->objectName());
+            GtpyContextManager::instance()->removeObject(type,
+                                             package->objectName());
         }
     }
 

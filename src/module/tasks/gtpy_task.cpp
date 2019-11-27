@@ -53,8 +53,11 @@ GtpyTask::GtpyTask():
 bool
 GtpyTask::runIteration()
 {
-    GtpyContextManager::instance()->addTaskValue(
-                GtpyContextManager::TaskRunContext, this);
+    GtpyContextManager::Context type = GtpyContextManager::TaskRunContext;
+
+    GtpyContextManager::instance()->resetContext(type);
+
+    GtpyContextManager::instance()->addTaskValue(type, this);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -62,9 +65,8 @@ GtpyTask::runIteration()
 
         if (package != Q_NULLPTR)
         {
-            GtpyContextManager::instance()->addObject(
-                        GtpyContextManager::TaskRunContext,
-                        package->objectName(), package);
+            GtpyContextManager::instance()->addObject(type,
+                                         package->objectName(), package);
         }
     }
 
@@ -72,9 +74,7 @@ GtpyTask::runIteration()
 
     bool success;
 
-    success = GtpyContextManager::instance()->evalScript(
-                  GtpyContextManager::TaskRunContext,
-                  script(), true);
+    success = GtpyContextManager::instance()->evalScript(type, script(), true);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -82,8 +82,7 @@ GtpyTask::runIteration()
 
         if (package != Q_NULLPTR)
         {
-            GtpyContextManager::instance()->removeObject(
-                        GtpyContextManager::TaskRunContext,
+            GtpyContextManager::instance()->removeObject(type,
                         package->objectName());
         }
     }

@@ -121,8 +121,9 @@ GtpyContextManager::instance()
 bool
 GtpyContextManager::evalScript(const GtpyContextManager::Context& type,
                                const QString& script,
-                               bool output, bool outputToEveryConsol,
-                               EvalOptions option)
+                               const bool output,
+                               const bool outputToEveryConsol,
+                               const EvalOptions& option)
 {
     m_currentContex = type;
 
@@ -253,8 +254,8 @@ GtpyContextManager::introspection(const GtpyContextManager::Context& type,
 
 bool
 GtpyContextManager::addObject(const GtpyContextManager::Context& type,
-                                  const QString& name, QObject* obj,
-                              bool saveName)
+                              const QString& name, QObject* obj,
+                              const bool saveName)
 {
     if (name.isEmpty())
     {
@@ -363,7 +364,7 @@ GtpyContextManager::addTaskValue(const GtpyContextManager::Context& type,
 }
 
 QString
-GtpyContextManager::qvariantToPyStr(const QVariant& val)
+GtpyContextManager::qvariantToPyStr(const QVariant& val) const
 {
     PyObject* pyObj = PythonQtConv::QVariantToPyObject(val);
 
@@ -371,13 +372,13 @@ GtpyContextManager::qvariantToPyStr(const QVariant& val)
 }
 
 QString
-GtpyContextManager::findChildFuncName()
+GtpyContextManager::findChildFuncName() const
 {
     return m_decorator->getFunctionName(FIND_GT_CHILD_TAG);
 }
 
 QString
-GtpyContextManager::setPropertyValueFuncName()
+GtpyContextManager::setPropertyValueFuncName() const
 {
     return m_decorator->getFunctionName(SET_PROPERTY_VALUE_TAG);
 }
@@ -402,9 +403,8 @@ GtpyContextManager::initContexts()
 }
 
 void
-GtpyContextManager::relsetContext(const GtpyContextManager::Context& type)
+GtpyContextManager::resetContext(const GtpyContextManager::Context& type)
 {
-    qDebug() << "RESET!!! " << type;
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
                              metaObj.indexOfEnumerator("Context"));
@@ -417,7 +417,7 @@ GtpyContextManager::relsetContext(const GtpyContextManager::Context& type)
 
 void
 GtpyContextManager::defaultContextConfig(
-        const GtpyContextManager::Context& type, QString contextName)
+        const GtpyContextManager::Context& type, const QString& contextName)
 {
     PythonQtObjectPtr context = PythonQt::self()->createModuleFromScript(
                                     contextName);
@@ -592,7 +592,7 @@ GtpyContextManager::enableCalculatorAccess(
 }
 
 PythonQtObjectPtr
-GtpyContextManager::context(const GtpyContextManager::Context& type)
+GtpyContextManager::context(const GtpyContextManager::Context& type) const
 {
     return m_contextMap.value(type, Q_NULLPTR);
 }
@@ -819,7 +819,7 @@ GtpyContextManager::loggingToConsole(const GtpyContextManager::Context& type,
 }
 
 int
-GtpyContextManager::lineOutOfMessage(const QString& message)
+GtpyContextManager::lineOutOfMessage(const QString& message) const
 {
     bool ok = false;
 
@@ -902,7 +902,7 @@ GtpyContextManager::lineOutOfMessage(const QString& message)
 //}
 
 QMultiMap<QString, GtpyFunction>
-GtpyContextManager::introspectObject(PyObject* object)
+GtpyContextManager::introspectObject(PyObject* object) const
 {
     QMultiMap<QString, GtpyFunction> results;
 
@@ -1232,7 +1232,7 @@ GtpyContextManager::introspectObject(PyObject* object)
 }
 
 QMultiMap<QString, GtpyFunction>
-GtpyContextManager::customCompletions()
+GtpyContextManager::customCompletions() const
 {
     QMultiMap<QString, GtpyFunction> results;
 
@@ -1285,7 +1285,7 @@ GtpyContextManager::customCompletions()
 }
 
 QMultiMap<QString, GtpyFunction>
-GtpyContextManager::builtInCompletions()
+GtpyContextManager::builtInCompletions() const
 {
     QMultiMap<QString, GtpyFunction> results;
 
@@ -1354,22 +1354,22 @@ GtpyContextManager::setImportableModulesCompletions()
 
     QMultiMap<QString, GtpyFunction> results;
 
-    PythonQtObjectPtr context = this->context(m_currentContex);
+    PythonQtObjectPtr con = context(m_currentContex);
 
-    if (context.isNull())
+    if (con.isNull())
     {
         return;
     }
 
-    context.evalScript(QStringLiteral("import pkgutil"));
-    context.evalScript(QStringLiteral("def __importableModules():\n") +
+    con.evalScript(QStringLiteral("import pkgutil"));
+    con.evalScript(QStringLiteral("def __importableModules():\n") +
                        QStringLiteral("\tmodules = pkgutil.iter_modules()\n") +
                        QStringLiteral("\tx = (i.name for i in modules)\n") +
                        QStringLiteral("\treturn list(x)"));
 
-    QVariant v = context.call(QStringLiteral("__importableModules"));
+    QVariant v = con.call(QStringLiteral("__importableModules"));
 
-    context.evalScript(QStringLiteral("del pkgutil"));
+    con.evalScript(QStringLiteral("del pkgutil"));
 
     if (v.isNull())
     {
@@ -1412,8 +1412,8 @@ GtpyContextManager::setImportableModulesCompletions()
 }
 
 QMultiMap<QString, GtpyFunction>
-GtpyContextManager::calculatorCompletions(const GtpyContextManager::Context&
-                                              type)
+GtpyContextManager::calculatorCompletions(
+        const GtpyContextManager::Context& type) const
 {
     QMultiMap<QString, GtpyFunction> results;
 
@@ -1464,7 +1464,7 @@ GtpyContextManager::setStandardCompletions()
 }
 
 void
-GtpyContextManager::registerTypeConverters()
+GtpyContextManager::registerTypeConverters() const
 {
     int objectPtrMapId = qRegisterMetaType<QMap<int, double>>(
                 "QMap<int, double>");
@@ -1473,6 +1473,22 @@ GtpyContextManager::registerTypeConverters()
                          GtpyTypeConversion::convertFromQMapIntDouble);
     PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
                          GtpyTypeConversion::convertToQMapIntDouble);
+
+    objectPtrMapId = qRegisterMetaType<QMap<QString, double>>(
+                "QMap<QString, double>");
+
+    PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
+                         GtpyTypeConversion::convertFromQMapStringDouble);
+    PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
+                         GtpyTypeConversion::convertToQMapStringDouble);
+
+    objectPtrMapId = qRegisterMetaType<QMap<QString, int>>(
+                "QMap<QString, int>");
+
+    PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
+                         GtpyTypeConversion::convertFromQMapStringInt);
+    PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
+                         GtpyTypeConversion::convertToQMapStringInt);
 }
 
 QString GtpyContextManager::pythonVersion() const
@@ -1530,13 +1546,13 @@ GtpyContextManager::onPythonMessage(const QString& message)
 }
 
 void
-GtpyContextManager::onSystemExitExceptionRaised(int /*exep*/)
+GtpyContextManager::onSystemExitExceptionRaised(const int /*exep*/) const
 {
     //Has to exist to keep GTlab running when a python script calls sys.exit()
 }
 
 PyObject*
-GtpyTypeConversion::convertFromQMapIntDouble(const void* inObject, int)
+GtpyTypeConversion::convertFromQMapIntDouble(const void* inObject, const int)
 {
     return mapToPython<int, double>(inObject);
 }
@@ -1568,82 +1584,8 @@ GtpyTypeConversion::convertFromQMapStringInt(const void* inObject, int)
 }
 
 bool
-GtpyTypeConversion::convertToQMapStringInt(PyObject* obj, void* outMap, int, bool)
+GtpyTypeConversion::convertToQMapStringInt(PyObject* obj, void* outMap,
+                                           int, bool)
 {
     return pythonToMap<QString, int>(obj, outMap);
-}
-
-template<typename Key, typename Val>
-PyObject*
-GtpyTypeConversion::mapToPython(const void* inObject)
-{
-    QMap<Key, Val>& map = *((QMap<Key, Val>*) inObject);
-
-    PyObject* result = PyDict_New();
-
-    QMap<Key, Val>::const_iterator t = map.constBegin();
-
-    PyObject* key;
-    PyObject* val;
-
-    for ( ; t != map.constEnd(); t++)
-    {
-        // converts key and value to QVariant and then to PyObject*
-        key = PythonQtConv::QVariantToPyObject(QVariant(t.key()));
-        val = PythonQtConv::QVariantToPyObject(QVariant(t.value()));
-
-        // sets key and val to the result dict
-        PyDict_SetItem(result, key, val);
-
-        // decrement the reference count for key and val
-        Py_DECREF(key);
-        Py_DECREF(val);
-    }
-
-    return result;
-}
-
-template <typename Key, typename Val>
-bool
-GtpyTypeConversion::pythonToMap(PyObject* obj, void* outMap)
-{
-    bool success = false;
-
-    if (PyMapping_Check(obj))
-    {
-        QMap<Key, Val>& map = *((QMap<Key, Val>*) outMap);
-
-        QString tempFunc = "items";
-        QByteArray ba = tempFunc.toLocal8Bit();
-        char* func = ba.data();
-
-        PyObject* items = PyObject_CallMethod(obj, func, NULL);
-
-        if (items)
-        {
-            int count = PyList_Size(items);
-
-            PyObject* pyValue;
-            PyObject* pyKey;
-            PyObject* pyTuple;
-
-            for (int i = 0;i<count;i++)
-            {
-                pyTuple = PyList_GetItem(items,i);
-                pyKey = PyTuple_GetItem(pyTuple, 0);
-                pyValue = PyTuple_GetItem(pyTuple, 1);
-
-                QVariant key = PythonQtConv::PyObjToQVariant(pyKey);
-                QVariant val = PythonQtConv::PyObjToQVariant(pyValue);
-
-                map.insert(key.value<Key>(), val.value<Val>());
-            }
-
-            Py_DECREF(items);
-
-            success = true;
-        }
-    }
-
-    return success;
 }
