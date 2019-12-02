@@ -34,6 +34,7 @@
 #include "gt_modeproperty.h"
 #include "gt_objectlinkproperty.h"
 #include "gt_datamodel.h"
+#include "gt_filedialog.h"
 
 #include "gt_pyhighlighter.h"
 #include "gt_searchwidget.h"
@@ -687,9 +688,8 @@ GtpyAbstractScriptingWizardPage::validation()
 void
 GtpyAbstractScriptingWizardPage::onImportScript()
 {
-    QString filename = QFileDialog::getOpenFileName(this,
-                       tr("Open Python Script"),
-                       gtApp->applicationTempDir().path(),
+    QString filename = GtFileDialog::getOpenFileName(this,
+                       tr("Open Python Script"), QString(),
                        tr("Python Script (*.py)"));
 
     if (filename.isEmpty())
@@ -727,8 +727,8 @@ GtpyAbstractScriptingWizardPage::onImportScript()
 void
 GtpyAbstractScriptingWizardPage::onExportScript()
 {
-    QString filename = QFileDialog::getSaveFileName(this, tr("Save Script"),
-                  "pythonScript.py", "*.py");
+    QString filename = GtFileDialog::getSaveFileName(this, tr("Save Script"),
+                  QString(), "*.py", "pythonTaskScript.py");
 
     if (!filename.endsWith(".py"))
     {
