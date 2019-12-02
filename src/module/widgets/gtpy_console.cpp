@@ -26,8 +26,7 @@
 
 GtpyConsole::GtpyConsole(GtpyContextManager::Context type,
                          QWidget* parent) :
-    QTextEdit(parent), m_python(Q_NULLPTR), m_defaultPrompt("> "),
-    m_toEveryConsole(false)
+    QTextEdit(parent), m_python(Q_NULLPTR), m_defaultPrompt("> ")
 {
     setFrameStyle(QFrame::NoFrame);
 
@@ -56,8 +55,8 @@ GtpyConsole::GtpyConsole(GtpyContextManager::Context type,
                                           GtpyContextManager::Context)),
             this, SLOT(stdErr(const QString&, GtpyContextManager::Context)));
     connect(m_python, SIGNAL(startedScriptEvaluation(
-                                 GtpyContextManager::Context, bool)), this,
-            SLOT(cursorToEnd(GtpyContextManager::Context, bool)));
+                                 GtpyContextManager::Context)), this,
+            SLOT(cursorToEnd(GtpyContextManager::Context)));
     connect(m_python, SIGNAL(scriptEvaluated(GtpyContextManager::Context)),
             this, SLOT(onCodeExecuted(GtpyContextManager::Context)));
 
@@ -93,8 +92,7 @@ void
 GtpyConsole::stdErr(const QString& message,
                                  GtpyContextManager::Context type)
 {
-    if (m_contextType == type ||
-            (m_toEveryConsole && m_additionalContextOutput.contains(type)))
+    if (m_contextType == type || m_additionalContextOutput.contains(type))
     {
         setTextColor(QColor(214, 0, 0));
 
@@ -414,12 +412,12 @@ GtpyConsole::executeCode(const QString& code)
 
     if (code.indexOf("\n") != -1)
     {
-        m_python->evalScript(m_contextType, code, true, true,
+        m_python->evalScript(m_contextType, code, true,
                              GtpyContextManager::EvalFile);
     }
     else
     {
-        m_python->evalScript(m_contextType, code, true, true,
+        m_python->evalScript(m_contextType, code, true,
                              GtpyContextManager::EvalSingleString);
     }
 
@@ -575,7 +573,7 @@ GtpyConsole::stdOut(const QString& message,
                                  GtpyContextManager::Context type)
 {
     if (m_contextType == type ||
-            (m_toEveryConsole && m_additionalContextOutput.contains(type)))
+            (m_additionalContextOutput.contains(type)))
     {
         m_stdOut += message;
         int idx;
@@ -590,26 +588,13 @@ GtpyConsole::stdOut(const QString& message,
 }
 
 void
-GtpyConsole::cursorToEnd(const GtpyContextManager::Context& type,
-                         bool everyConsole)
+GtpyConsole::cursorToEnd(const GtpyContextManager::Context& type)
 {
-    if (type == m_contextType)
+    if (type == m_contextType || m_additionalContextOutput.contains(type))
     {
-        m_toEveryConsole = everyConsole;
         QTextCursor cursor = this->textCursor();
         cursor.movePosition(QTextCursor::End);
         setTextCursor(cursor);
-    }
-    else if (m_additionalContextOutput.contains(type))
-    {
-        m_toEveryConsole = everyConsole;
-
-        if (m_toEveryConsole)
-        {
-            QTextCursor cursor = this->textCursor();
-            cursor.movePosition(QTextCursor::End);
-            setTextCursor(cursor);
-        }
     }
 }
 
@@ -617,8 +602,7 @@ void
 GtpyConsole::appendCommandPrompt(
     GtpyContextManager::Context type, bool storeOnly)
 {
-    if (type == m_contextType ||
-            (m_toEveryConsole && m_additionalContextOutput.contains(type)))
+    if (type == m_contextType || m_additionalContextOutput.contains(type))
     {
         if (storeOnly)
         {
@@ -653,8 +637,7 @@ GtpyConsole::appendCommandPrompt(
 void
 GtpyConsole::onCodeExecuted(GtpyContextManager::Context type)
 {
-    if (type == m_contextType ||
-            (m_toEveryConsole && m_additionalContextOutput.contains(type)))
+    if (type == m_contextType || m_additionalContextOutput.contains(type))
     {
         if (!m_stdOut.isEmpty())
         {

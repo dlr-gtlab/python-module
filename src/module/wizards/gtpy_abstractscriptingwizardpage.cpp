@@ -266,7 +266,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
 void
 GtpyAbstractScriptingWizardPage::initializePage()
-{    
+{
     GtpyContextManager::instance()->resetContext(m_contextType);
 
     initialization();
@@ -508,7 +508,6 @@ GtpyAbstractScriptingWizardPage::enableEvaluation(bool enable)
         }
         else
         {
-            qDebug() << "disconnect";
             disconnect(m_editor, SIGNAL(evalShortcutTriggered()), this,
                        SLOT(evalScript()));
         }
@@ -666,7 +665,7 @@ GtpyAbstractScriptingWizardPage::evalScript(bool outputToConsole)
     GtpyContextManager::instance()->deleteCalcsFromTask(m_contextType);
 
     bool success = GtpyContextManager::instance()->evalScript(
-                    m_contextType, m_editor->script(), outputToConsole, false);
+                    m_contextType, m_editor->script(), outputToConsole);
 
     endEval(success);
 

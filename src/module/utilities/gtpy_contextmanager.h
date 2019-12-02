@@ -84,9 +84,7 @@ public:
      */
     bool evalScript(const GtpyContextManager::Context& type,
                     const QString& script, const bool output = true,
-                    const bool outputToEveryConsol = true,
-                    const GtpyContextManager::EvalOptions& option =
-            EvalFile);
+                    const GtpyContextManager::EvalOptions& option = EvalFile);
 
     /**
      * @brief introspection
@@ -201,6 +199,7 @@ private:
     static const QString HELPER_FAC_VAR;
     static const QString CLASS_WRAPPER_MODULE;
     static const QString LOGGING_MODULE;
+    static const QString CALC_MODULE;
 
     /**
      * @brief Contains the dafault configuration for every context.
@@ -219,15 +218,6 @@ private:
      */
     void specificContextConfig(const GtpyContextManager::Context& type);
 
-
-    /**
-     * @brief Enables the calculator access for the Python context indicated by
-     *  type.
-     * @param type Python context identifier.
-     */
-    void enableCalculatorAccess(
-            const GtpyContextManager::Context& type);
-
     /**
      * @brief Returns a pointer to the Python context indicated by type.
      * @param type Python context identifier.
@@ -235,6 +225,7 @@ private:
      */
     PythonQtObjectPtr context(const GtpyContextManager::Context& type) const;
 
+    void initCalculatorModule();
     /**
      * @brief Initializes the logging module.
      */
@@ -288,8 +279,26 @@ private:
      * @param appConsole If true, the logging messages are sent to the
      * GTlab application console.
      */
-    void loggingToConsole(const GtpyContextManager::Context& type,
+    void importLoggingFuncs(const GtpyContextManager::Context& type,
                              bool appConsole);
+    /**
+     * @brief Imports the calculator module to the context identified by type.
+     * @param type Python context identifier.
+     */
+    void importCalcModule(const GtpyContextManager::Context& type);
+
+    /**
+     * @brief Registers calculator module in the modules dict of the Python
+     *  module sys.
+     * @param type Python context identifier.
+     */
+    void registerCalcModuleInSys(const GtpyContextManager::Context& type);
+
+    /**
+     * @brief Removes the calculator module out of the modules dict of the
+     * Python module sys.
+     */
+    void removeCalcModuleFromSys();
 
     /**
      * @brief Searches the line number out of an error message.
@@ -442,11 +451,8 @@ signals:
     /**
      * @brief Emitted if script evaluation starts.
      * @param type Python context in which the evaluation starts.
-     * @param outputToEveryConsole True, if output is to be sent to all
-     * consoles.
      */
-    void startedScriptEvaluation(const GtpyContextManager::Context& type,
-                                 bool outputToEveryConsole);
+    void startedScriptEvaluation(const GtpyContextManager::Context& type);
 
     /**
      * @brief Emitted after script evaluation.

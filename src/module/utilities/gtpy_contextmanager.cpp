@@ -54,13 +54,15 @@ const QString GtpyContextManager::CLASS_WRAPPER_MODULE =
     QStringLiteral("GtClasses");
 const QString GtpyContextManager::LOGGING_MODULE =
     QStringLiteral("GtLogging");
-
+const QString GtpyContextManager::CALC_MODULE =
+    QStringLiteral("GtCalculators");
 
 GtpyContextManager::GtpyContextManager(QObject* parent) :
     QObject(parent), m_decorator(Q_NULLPTR),
     m_currentContex(GtpyContextManager::GlobalContext),
     m_sendErrorMessages(true),
-    m_errorEmitted(false)
+    m_errorEmitted(false),
+    m_loggingModule(Q_NULLPTR)
 {
     qRegisterMetaType<GtpyContextManager::Context>
     ("GtpyContextManager::Context");
@@ -101,8 +103,6 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
             SLOT(onPythonMessage(const QString&)));
     connect(PythonQt::self(), SIGNAL(systemExitExceptionRaised(int)), this,
             SLOT(onSystemExitExceptionRaised(int)));
-
-    initLoggingModule();
 }
 
 GtpyContextManager*
@@ -122,7 +122,6 @@ bool
 GtpyContextManager::evalScript(const GtpyContextManager::Context& type,
                                const QString& script,
                                const bool output,
-                               const bool outputToEveryConsol,
                                const EvalOptions& option)
 {
     m_currentContex = type;
@@ -131,7 +130,7 @@ GtpyContextManager::evalScript(const GtpyContextManager::Context& type,
 
     if (m_sendOutputMessages)
     {
-        emit startedScriptEvaluation(m_currentContex, outputToEveryConsol);
+        emit startedScriptEvaluation(m_currentContex);
     }
 
     PythonQtObjectPtr currentContext = context(type);
@@ -152,12 +151,23 @@ GtpyContextManager::evalScript(const GtpyContextManager::Context& type,
                                 "PyLogger._PyLogger__outputToConsole = False"));
     }
 
+    if (m_calcAccessibleContexts.contains(type))
+    {
+        QString pyCode =
+                "if '" + CALC_MODULE + "' in locals():\n" +
+                "    import sys\n" +
+                "    sys.modules['" + CALC_MODULE + "'] = " + CALC_MODULE +
+                "\n" +
+                "    del sys\n";
+
+        currentContext.evalScript(pyCode);
+    }
+
     bool hadError = false;
 
     if (!script.isEmpty())
     {
         currentContext.evalScript(script, option);
-
         hadError = PythonQt::self()->hadError();
     }
 
@@ -168,6 +178,11 @@ GtpyContextManager::evalScript(const GtpyContextManager::Context& type,
     }
 
     m_errorEmitted = false;
+
+    if (m_calcAccessibleContexts.contains(type))
+    {
+        removeCalcModuleFromSys();
+    }
 
     return !hadError;
 }
@@ -220,7 +235,7 @@ GtpyContextManager::introspection(const GtpyContextManager::Context& type,
 
         m_sendErrorMessages = false;
 
-        bool eval = evalScript(type, script, false, false, EvalSingleString);
+        bool eval = evalScript(type, script, false, EvalSingleString);
 
         m_sendErrorMessages = true;
 
@@ -354,10 +369,18 @@ GtpyContextManager::addTaskValue(const GtpyContextManager::Context& type,
     if (task != Q_NULLPTR)
     {
         addObject(type, TASK_VAR, task, false);
+
+        QString pyCode =
+            CALC_MODULE + QStringLiteral(".") + TASK_VAR +
+                QStringLiteral(" = ") + TASK_VAR +  QStringLiteral("\n") +
+            QStringLiteral("del ") + TASK_VAR + QStringLiteral("\n");
+
+        evalScript(type, pyCode , false);
     }
     else
     {
-        evalScript(type, TASK_VAR + QStringLiteral(" = None"), false, false);
+        evalScript(type, CALC_MODULE + QStringLiteral(".") + TASK_VAR +
+                   QStringLiteral(" = None"), false);
     }
 
     return true;
@@ -372,8 +395,8 @@ GtpyContextManager::deleteCalcsFromTask(
         return;
     }
 
-    evalScript(type, QStringLiteral("__task.deleteAllCalculators()"), false,
-               false);
+    evalScript(type, CALC_MODULE + QStringLiteral(".") + TASK_VAR
+               + QStringLiteral(".deleteAllCalculators()"), false);
 }
 
 QString
@@ -399,6 +422,9 @@ GtpyContextManager::setPropertyValueFuncName() const
 void
 GtpyContextManager::initContexts()
 {
+    initCalculatorModule();
+    initLoggingModule();
+
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
                              metaObj.indexOfEnumerator("Context"));
@@ -413,19 +439,30 @@ GtpyContextManager::initContexts()
 
         defaultContextConfig(type, contextName);
     }
+
+    removeCalcModuleFromSys();
 }
 
 void
 GtpyContextManager::resetContext(const GtpyContextManager::Context& type)
 {
+    if (m_calcAccessibleContexts.contains(type))
+    {
+        registerCalcModuleInSys(type);
+    }
+
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
                              metaObj.indexOfEnumerator("Context"));
 
     QString contextName = QString::fromUtf8(metaEnum.key(type));
 
-
     defaultContextConfig(type, contextName);
+
+    if (m_calcAccessibleContexts.contains(type))
+    {
+        removeCalcModuleFromSys();
+    }
 }
 
 void
@@ -437,12 +474,13 @@ GtpyContextManager::defaultContextConfig(
 
     m_contextMap.insert(type, context);
 
-    evalScript(type, QStringLiteral("import sys"), false, false);
-    evalScript(type, QStringLiteral("sys.modules['") + contextName +
-               QStringLiteral("']=None"), false, false);
-    evalScript(type, QStringLiteral("del sys"), false, false);
+    QString pyCode =
+            "import sys\n"
+            "sys.modules['" + contextName +
+            "'] = None\n" +
+            "del sys\n";
 
-    evalScript(type, QStringLiteral("import re"), false, false);
+    context.evalScript(pyCode);
 
     m_addedObjectNames.insert(type, QStringList());
 
@@ -478,25 +516,27 @@ GtpyContextManager::specificContextConfig(
     }
 }
 
-void
-GtpyContextManager::enableCalculatorAccess(
-        const GtpyContextManager::Context& type)
+PythonQtObjectPtr
+GtpyContextManager::context(const GtpyContextManager::Context& type) const
 {
-    if (m_decorator == Q_NULLPTR)
-    {
-        return;
-    }
+    return m_contextMap.value(type, Q_NULLPTR);
+}
+
+void
+GtpyContextManager::initCalculatorModule()
+{
+    PythonQtObjectPtr calcModule =
+            PythonQt::self()->createModuleFromScript(CALC_MODULE);
 
     GtpyCalculatorFactory* factory = new GtpyCalculatorFactory(this);
 
-    evalScript(type, TASK_VAR + QStringLiteral(" = None"), false, false);
+    calcModule.evalScript(TASK_VAR + QStringLiteral(" = None"));
 
-    addObject(type, CALC_FAC_VAR, factory, false);
+    calcModule.addObject(CALC_FAC_VAR, factory);
 
-    addObject(type, HELPER_FAC_VAR,
-              gtCalculatorHelperFactory, false);
+    calcModule.addObject(HELPER_FAC_VAR, gtCalculatorHelperFactory);
 
-    evalScript(type,
+    calcModule.evalScript(
 
         QStringLiteral("class HelperWrapper: \n") +
         QStringLiteral("    def __init__(self, helper): \n") +
@@ -518,11 +558,11 @@ GtpyContextManager::enableCalculatorAccess(
         QStringLiteral("        else:\n") +
         QStringLiteral("            setattr(self.__dict__['_helper'], name, value)\n") +
         QStringLiteral("    def __dir__(self): \n") +
-        QStringLiteral("        return sorted(set(dir(type(self)) + dir(self._helper)))")
+        QStringLiteral("        return sorted(set(dir(type(self)) + dir(self._helper)))"));
 
-               , false, false);
+    calcModule.evalScript(QStringLiteral("import re"));
 
-    evalScript(type,
+    calcModule.evalScript(
 
         QStringLiteral("class CalcWrapper: \n") +
         QStringLiteral("    def __init__(self, calc):\n") +
@@ -565,9 +605,7 @@ GtpyContextManager::enableCalculatorAccess(
         QStringLiteral("        else:\n") +
         QStringLiteral("            setattr(self.__dict__['_calc'], name, value)\n") +
         QStringLiteral("    def __dir__(self): \n") +
-        QStringLiteral("        return sorted(list(self.__dict__.keys()) + dir(self._calc))\n")
-
-               , false, false);
+        QStringLiteral("        return sorted(list(self.__dict__.keys()) + dir(self._calc))\n"));
 
 
     foreach (GtCalculatorData calcData,
@@ -582,7 +620,7 @@ GtpyContextManager::enableCalculatorAccess(
         QString className = QString::fromUtf8(
                                 calcData->metaData().className());
 
-        evalScript(type,
+        calcModule.evalScript(
 
             QStringLiteral("def ") + className +
             QStringLiteral("(name = '") + calcData->id +
@@ -593,21 +631,8 @@ GtpyContextManager::enableCalculatorAccess(
             className + QStringLiteral("\", name, ") + TASK_VAR +
                    QStringLiteral(")\n") +
 
-            QStringLiteral("    return CalcWrapper(tempCalc)")
-
-                   , false, false);
+            QStringLiteral("    return CalcWrapper(tempCalc)"));
     }
-
-    if (!m_calcAccessibleContexts.contains(type))
-    {
-        m_calcAccessibleContexts << type;
-    }
-}
-
-PythonQtObjectPtr
-GtpyContextManager::context(const GtpyContextManager::Context& type) const
-{
-    return m_contextMap.value(type, Q_NULLPTR);
 }
 
 void
@@ -682,33 +707,34 @@ GtpyContextManager::initLoggingModule()
                    QStringLiteral("     return PyLogger.getInstance(4)\n"));
 }
 
-
-
 void
 GtpyContextManager::initBatchContext()
 {
     Context type = BatchContext;
+    PythonQtObjectPtr con = context(type);
+
+    if (con == Q_NULLPTR)
+    {
+        return;
+    }
 
     importDefaultModules(type);
 
     if (gtApp != Q_NULLPTR)
     {
-        addObject(type, QStringLiteral("GTlab"), gtApp);
+        addObject(type, "GTlab", gtApp);
 
-        evalScript(type, QStringLiteral("def openProject(projectName):") +
-                       QStringLiteral("return GTlab.openProject(projectName)"),
-                   false, false);
+        QString pyCode =
+            "def openProject(projectName):\n"
+            "    return GTlab.openProject(projectName)\n"
+            "def currentProject():\n"
+            "    return GTlab.currentProject()\n"
+            "def init(id = ''):\n"
+            "    return GTlab.init(id)\n"
+            "def switchSession(id = ''):\n"
+            "    return GTlab.switchSession(id)\n";
 
-        evalScript(type, QStringLiteral("def currentProject():") +
-                       QStringLiteral("return GTlab.currentProject()"),
-                   false, false);
-
-        evalScript(type, QStringLiteral("def init(id = ''):") +
-                       QStringLiteral("return GTlab.init(id)"), false, false);
-
-        evalScript(type, QStringLiteral("def switchSession(id = ''):") +
-                       QStringLiteral("return GTlab.switchSession(id)"),
-                   false, false);
+        con.evalScript(pyCode);
     }
     else
     {
@@ -716,13 +742,19 @@ GtpyContextManager::initBatchContext()
                          "Batch context can not register the GTlab object.");
     }
 
-    loggingToConsole(type, true);
+    importLoggingFuncs(type, true);
 }
 
 void
 GtpyContextManager::initGlobalContext()
 {
     Context type = GlobalContext;
+    PythonQtObjectPtr con = context(type);
+
+    if (con == Q_NULLPTR)
+    {
+        return;
+    }
 
     importDefaultModules(type);
 
@@ -730,21 +762,17 @@ GtpyContextManager::initGlobalContext()
     {
         addObject(type, QStringLiteral("GTlab"), gtApp);
 
-        evalScript(type, QStringLiteral("def openProject(projectName):") +
-                       QStringLiteral("return GTlab.openProject(projectName)"),
-                   false, false);
+        QString pyCode =
+            "def openProject(projectName):\n"
+            "    return GTlab.openProject(projectName)\n"
+            "def currentProject():\n"
+            "    return GTlab.currentProject()\n"
+            "def init(id = ''):\n"
+            "    return GTlab.init(id)\n"
+            "def switchSession(id = ''):\n"
+            "    return GTlab.switchSession(id)\n";
 
-        evalScript(type, QStringLiteral("def currentProject(): ") +
-                       QStringLiteral("return GTlab.currentProject()"),
-                   false, false);
-
-        evalScript(type, QStringLiteral("def init(id = ''):") +
-                       QStringLiteral("return GTlab.init(id)"),
-                   false, false);
-
-        evalScript(type, QStringLiteral("def switchSession(id = ''):") +
-                       QStringLiteral("return GTlab.switchSession(id)"),
-                   false, false);
+        con.evalScript(pyCode);
     }
     else
     {
@@ -752,11 +780,14 @@ GtpyContextManager::initGlobalContext()
                          "Batch context can not register the GTlab object.");
     }
 
-    evalScript(type, QStringLiteral("import sys"), false, false);
-    evalScript(type, QStringLiteral("sys.argv.append('')"), false, false);
-    evalScript(type, QStringLiteral("del sys"), false, false);
+    QString pyCode =
+        QStringLiteral("import sys\n") +
+        QStringLiteral("sys.argv.append('')\n") +
+        QStringLiteral("del sys\n");
 
-    loggingToConsole(type, true);
+    con.evalScript(pyCode);
+
+    importLoggingFuncs(type, true);
 }
 
 void
@@ -766,7 +797,7 @@ GtpyContextManager::initScriptEditorContext()
 
     importDefaultModules(type);
 
-    loggingToConsole(type, false);
+    importLoggingFuncs(type, false);
 }
 
 void
@@ -776,7 +807,7 @@ GtpyContextManager::initCalculatorRunContext()
 
     importDefaultModules(type);
 
-    loggingToConsole(type, true);
+    importLoggingFuncs(type, true);
 }
 
 void
@@ -786,9 +817,9 @@ GtpyContextManager::initTaskEditorContext()
 
     importDefaultModules(type);
 
-    loggingToConsole(type, false);
+    importLoggingFuncs(type, false);
 
-    enableCalculatorAccess(type);
+    importCalcModule(type);
 }
 
 void
@@ -798,37 +829,122 @@ GtpyContextManager::initTaskRunContext()
 
     importDefaultModules(type);
 
-    loggingToConsole(type, true);
+    importLoggingFuncs(type, true);
 
-    enableCalculatorAccess(type);
+    importCalcModule(type);
 }
 
 void
 GtpyContextManager::importDefaultModules(
         const GtpyContextManager::Context& type)
 {
-    evalScript(type, QStringLiteral("from PythonQt import ") +
-               CLASS_WRAPPER_MODULE, false, false);
-    evalScript(type, QStringLiteral("from PythonQt import QtCore"),
-               false, false);
+    PythonQtObjectPtr con = context(type);
+
+    if (con == Q_NULLPTR)
+    {
+        return;
+    }
+
+    QString pyCode =
+        QStringLiteral("from PythonQt import ") +
+            CLASS_WRAPPER_MODULE + QStringLiteral("\n") +
+        QStringLiteral("from PythonQt import QtCore");
+
+    con.evalScript(pyCode);
 }
 
 void
-GtpyContextManager::loggingToConsole(const GtpyContextManager::Context& type,
+GtpyContextManager::importLoggingFuncs(const GtpyContextManager::Context& type,
                                         bool appConsole)
 {
-    evalScript(type, QStringLiteral("from ") + LOGGING_MODULE +
-               QStringLiteral(" import gtDebug"), false, false);
-    evalScript(type, QStringLiteral("from ") + LOGGING_MODULE +
-               QStringLiteral(" import gtInfo"), false, false);
-    evalScript(type, QStringLiteral("from ") + LOGGING_MODULE +
-               QStringLiteral(" import gtError"), false, false);
-    evalScript(type, QStringLiteral("from ") + LOGGING_MODULE +
-               QStringLiteral(" import gtFatal"), false, false);
-    evalScript(type, QStringLiteral("from ") + LOGGING_MODULE +
-               QStringLiteral(" import gtWarning"), false, false);
+    PythonQtObjectPtr con = context(type);
+
+    if (con == Q_NULLPTR)
+    {
+        return;
+    }
+
+    QString pyCode =
+        QStringLiteral("from ") + LOGGING_MODULE +
+            QStringLiteral(" import gtDebug\n") +
+        QStringLiteral("from ") + LOGGING_MODULE +
+            QStringLiteral(" import gtInfo\n") +
+        QStringLiteral("from ") + LOGGING_MODULE +
+            QStringLiteral(" import gtError\n") +
+        QStringLiteral("from ") + LOGGING_MODULE +
+            QStringLiteral(" import gtFatal\n") +
+        QStringLiteral("from ") + LOGGING_MODULE +
+            QStringLiteral(" import gtWarning\n");
+
+    con.evalScript(pyCode);
 
     m_appLogging.insert(type, appConsole);
+}
+
+void
+GtpyContextManager::importCalcModule(const GtpyContextManager::Context& type)
+{
+    if (!m_calcAccessibleContexts.contains(type))
+    {
+        m_calcAccessibleContexts << type;
+    }
+
+    PythonQtObjectPtr con = context(type);
+
+    if (con == Q_NULLPTR)
+    {
+        return;
+    }
+
+    QString pyCode =
+        "import sys\n"
+        "if '" + CALC_MODULE + "' in sys.modules:\n"
+        "    if sys.modules['" + CALC_MODULE + "'] is not None:\n"
+        "        import " + CALC_MODULE + "\n"
+        "        from " + CALC_MODULE + " import *\n"
+        "        del " + CALC_FAC_VAR + "\n"
+        "        del " + HELPER_FAC_VAR + "\n"
+        "del sys\n";
+
+    con.evalScript(pyCode);
+}
+
+void
+GtpyContextManager::registerCalcModuleInSys(const GtpyContextManager::Context& type)
+{
+    PythonQtObjectPtr con = context(type);
+
+    if (con == Q_NULLPTR)
+    {
+        return;
+    }
+
+    QString pyCode =
+            "if '" + CALC_MODULE + "' in locals():\n" +
+            "    import sys\n" +
+            "    sys.modules['" + CALC_MODULE + "'] = " + CALC_MODULE + "\n" +
+            "    del sys\n";
+
+    con.evalScript(pyCode);
+}
+
+void
+GtpyContextManager::removeCalcModuleFromSys()
+{
+    PythonQtObjectPtr con = context(GtpyContextManager::GlobalContext);
+
+    if (con == Q_NULLPTR)
+    {
+        return;
+    }
+
+    QString pyCode =
+        "import sys\n"
+        "if '" + CALC_MODULE + "' in sys.modules:\n" +
+        "    sys.modules['" + CALC_MODULE + "'] = None\n" +
+        "del sys\n";
+
+    con.evalScript(pyCode);
 }
 
 int

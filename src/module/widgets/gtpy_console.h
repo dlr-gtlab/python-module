@@ -106,8 +106,6 @@ private:
 
     QList<GtpyContextManager::Context> m_additionalContextOutput;
 
-    bool m_toEveryConsole;
-
     /// Cursor Position
     int m_cursorPosition;
 
@@ -177,8 +175,7 @@ private slots:
      * @brief Sets the cursor to the end of the console.
      * @param type Type of python context that triggered the cursor move.
      */
-    void cursorToEnd(const GtpyContextManager::Context& type,
-                     bool everyConsole);
+    void cursorToEnd(const GtpyContextManager::Context& type);
 
     /**
      * @brief Appends a new command prompt to the end of the console.
