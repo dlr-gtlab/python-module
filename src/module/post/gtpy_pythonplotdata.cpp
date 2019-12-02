@@ -21,7 +21,9 @@ GtpyPythonPlotData::script() const
 }
 
 void
-GtpyPythonPlotData::setScript(const QString& script)
+GtpyPythonPlotData::setScript(QString& script)
 {
+    script.replace("\n", "\r");
+
     m_script = script;
 }
