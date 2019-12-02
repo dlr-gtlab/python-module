@@ -37,7 +37,7 @@ public:
      * @brief Sets given script.
      * @param script Script string.
      */
-    void setScript(const QString& script);
+    void setScript(QString& script);
 
 private:
     /// python script
