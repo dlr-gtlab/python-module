@@ -304,8 +304,6 @@ GtpyCodeGenerator::helperPyCode(GtObject* obj, const QString& pyObjName)
 
     QString pyCode;
 
-    QRegExp regExp("[^A-Za-z0-9]+");
-
     QStringList helperNames = gtCalculatorHelperFactory->connectedHelper(
                                   obj->metaObject()->className());
 
@@ -332,6 +330,22 @@ GtpyCodeGenerator::helperPyCode(GtObject* obj, const QString& pyObjName)
                 {
                     helperObjName = childClassName;
                 }
+
+                QList<GtObject*> sameNamedChildren = obj->findDirectChildren<
+                                           GtObject*>(helperObjName);
+                int count = 1;
+
+                foreach (GtObject* sameNamedChild, sameNamedChildren)
+                {
+                    if (sameNamedChild != child)
+                    {
+                        sameNamedChild->setObjectName(helperObjName +
+                                                      QString::number(count));
+                        count++;
+                    }
+                }
+
+                QRegExp regExp("[^A-Za-z0-9]+");
 
                 int pos = regExp.indexIn(helperObjName);
 
