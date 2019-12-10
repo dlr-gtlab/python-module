@@ -2,22 +2,42 @@
 #            / ____/_  __/ /___  / /_
 #           / / __  / / / / __ `/ __ \
 #          / /_/ / / / / / /_/ / /_/ /
-#          \____/ /_/ /_/\__,_/_.___/              
+#          \____/ /_/ /_/\__,_/_.___/
+
+BUILD_BATCH     =   true
+BUILD_UNITTESTS =   true
+
+# python version (273|373)
+PY_VERSION = 373
 
 # path to dev tools
 DEV_TOOLS = D:\GTlab-DevTools
 
-# path to GTlab project
-GTLAB_REPO = D:\devel\GTlab-Repository
+#   applicationDir: build in directory TARGET_DIRECTORY
+#                   or into modules subdir for GTlab Modules
+#   localDir: build locale in build-directory
+#
+# MODES: (applicationDir|localDir)
+BUILD_TARGET = localDir
 
-# path to GtLab
-GTLAB_PATH = D:\GTlab
+TARGET_DIRECTORY = G:\AT-TW\GTlab\NightlyBuild\lib
 
-# build settings
-BUILD_UNITTESTS = false
+#
+#   devTools: use Libs and headers for GTLab Core and modules from
+#             DEV_TOOLS
+#
+#   nightlyBuild: use Libs and headers for GTLab Core and modules from
+#                 NIGHTLYBUILD_DIR
+#
+#   repository: use Libs and headers for other modules from REPO_PATHS
+#               and for core from NIGHTLYBUILD_DIR
+#
+# MODES: (devTools|nightlyBuild|repository)
+GTLAB_LIBS = devTools
 
-# compile mode (module|moduleTests|gtlab|gtlabRepository)
-COMPILE_MODE = module
+NIGHTLY_BUILD_DIR = G:\AT-TW\GTlab\NightlyBuild
 
-# python version (273|373)
-PY_VERSION = 373
+# path to GTlab Core repository
+GTLAB_CORE = D:\devel\MNO_PythonRefactoring
+
+

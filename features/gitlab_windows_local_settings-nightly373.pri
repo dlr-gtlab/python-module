@@ -11,16 +11,16 @@ BUILD_UNITTESTS =   false
 PY_VERSION = 373
 
 # path to dev tools
-DEV_TOOLS = PATH/TO/DEVTOOLS
+DEV_TOOLS = D:\GTlab-DevTools
 
 #   applicationDir: build in directory TARGET_DIRECTORY
 #                   or into modules subdir for GTlab Modules
 #   localDir: build locale in build-directory
 #
 # MODES: (applicationDir|localDir)
-BUILD_TARGET = localDir
+BUILD_TARGET = applicationDir
 
-TARGET_DIRECTORY = PATH/TO/TARGET/DIRECTORY
+TARGET_DIRECTORY = G:\AT-TW\GTlab\NightlyBuild\lib
 
 #
 #   devTools: use Libs and headers for GTLab Core and modules from
@@ -33,11 +33,11 @@ TARGET_DIRECTORY = PATH/TO/TARGET/DIRECTORY
 #               and for core from NIGHTLYBUILD_DIR
 #
 # MODES: (devTools|nightlyBuild|repository)
-GTLAB_LIBS = devTools
+GTLAB_LIBS = nightlyBuild
 
-NIGHTLY_BUILD_DIR = PATH/TO/NIGHTLYBUILDS
+NIGHTLY_BUILD_DIR = G:\AT-TW\GTlab\NightlyBuild
 
 # path to GTlab Core repository
-GTLAB_CORE = PATH/TO/GTLAB/CORE/REPOSITORY
+GTLAB_CORE = D:\devel\MNO_PythonRefactoring
 
 

@@ -10,11 +10,21 @@
 
 include( ../../settings.pri )
 
-win32 {
-    RC_FILE = batch-script.rc
+BUILD_DEST_TEMP = ../../build
+
+equals(BUILD_TARGET, applicationDir) {
+    BUILD_DEST = $${TARGET_DIRECTORY}
+    LIBS += -L$${BUILD_DEST}/modules
+    DEPENDPATH  += $${BUILD_DEST}/modules
 }
 
-TARGET = GTlabPythonConsole
+equals(BUILD_TARGET, localDir) {
+    BUILD_DEST = $${BUILD_DEST_TEMP}
+    LIBS += -L$${BUILD_DEST}
+    DEPENDPATH  += $${BUILD_DEST}
+}
+
+TARGET = GTlabPythonConsole$${PY_VERSION}
 
 QT += core xml gui widgets
 TEMPLATE = app
@@ -22,19 +32,8 @@ CONFIG += console
 CONFIG += silent
 CONFIG += c++11
 
-BUILD_DEST_TEMP = ../../build
-
-contains(COMPILE_MODE, module|moduleTests) {
-    BUILD_DEST = $${BUILD_DEST_TEMP}
-}
-
-equals(COMPILE_MODE, gtlabRepository) {
-    BUILD_DEST = $${GTLAB_REPO}/build
-    BUILD_DEST_TEMP = $${BUILD_DEST}
-}
-
-equals(COMPILE_MODE, gtlab) {
-    BUILD_DEST = $${GTLAB_PATH}/bin
+win32 {
+    RC_FILE = batch-script.rc
 }
 
 CONFIG(debug, debug|release){
@@ -50,10 +49,10 @@ CONFIG(debug, debug|release){
     RCC_DIR = $${BUILD_DEST_TEMP}/release-batch-script/rcc
     UI_DIR = $${BUILD_DEST_TEMP}/release-batch-script/ui
 }
+
 INCLUDEPATH += .\
     ../module \
     ../module/utilities
-
 
 DESTDIR = $${BUILD_DEST}
 
@@ -62,11 +61,7 @@ HEADERS +=
 SOURCES += \
     batch-script.cpp
 
-contains(COMPILE_MODE, gtlabRepository|gtlab) {
-    BUILD_DEST = $${BUILD_DEST}/modules
-}
-
-LIBS += -L$${BUILD_DEST} -lGTlabNumerics -lGTlabPhysics -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators -lGTlabCore -lGTlabMdi -lGTlabNetwork -lGTlabPython
+LIBS += -lGTlabPython$${PY_VERSION} -lGTlabCore -lGTlabMdi
 
 # add search paths to shared libraries
 unix: QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN:\$$ORIGIN/modules\''
