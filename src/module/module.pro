@@ -10,7 +10,17 @@
 
 include( $${PWD}/../../settings.pri )
 
-TARGET = GTlabPython
+BUILD_DEST_TEMP = ../../build
+
+equals(BUILD_TARGET, applicationDir) {
+    BUILD_DEST = $${TARGET_DIRECTORY}/modules
+}
+
+equals(BUILD_TARGET, localDir) {
+    BUILD_DEST = $${BUILD_DEST_TEMP}
+}
+
+TARGET = GTlabPython$${PY_VERSION}
 
 QT += core widgets xml svg
 TEMPLATE = lib
@@ -19,21 +29,6 @@ CONFIG += silent
 CONFIG += c++11
 
 DEFINES += GT_PYTHON_DLL
-
-BUILD_DEST_TEMP = ../../build
-
-contains(COMPILE_MODE, module|moduleTests) {
-    BUILD_DEST = $${BUILD_DEST_TEMP}
-}
-
-equals(COMPILE_MODE, gtlabRepository) {
-    BUILD_DEST = $${GTLAB_REPO}/build/modules
-    BUILD_DEST_TEMP = $${BUILD_DEST}
-}
-
-equals(COMPILE_MODE, gtlab) {
-    BUILD_DEST = $${GTLAB_PATH}/bin/modules
-}
 
 CONFIG(debug, debug|release){
     DESTDIR = $${BUILD_DEST_TEMP}/debug-python
@@ -113,6 +108,6 @@ SOURCES += \
     utilities/gtpy_calculatorfactory.cpp \
     utilities/gtpy_codegenerator.cpp
 
-LIBS += -lGTlabLogging -lGTlabNumerics -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabPhysics -lGTlabCore -lPythonQt-Qt5-Python$${PY_VERSION}
+LIBS += -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabCore -lPythonQt-Qt5-Python$${PY_VERSION}
 
 ######################################################################

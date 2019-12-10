@@ -11,16 +11,26 @@
 include( local_settings.pri )
 
 TEMPLATE = subdirs
-CONFIG += ordered console
+CONFIG += console
 CONFIG += c++11
 
-SUBDIRS += src/module
-SUBDIRS += src/batch
+
+SUBDIRS += module
+module.subdir = src/module
+
+#### BATCH ####
+contains(BUILD_BATCH, true) {
+    message("BUILD_BATCH = true")
+    SUBDIRS += batch
+    batch.subdir = src/batch
+    batch.depends = module
+}
 
 #### UNIT TESTS ####
 contains(BUILD_UNITTESTS, true) {
     message("BUILD_UNITTESTS = true")
-    SUBDIRS += tests/unittests
+    SUBDIRS += unittests
+    unittests.subdir = tests/unittests
+    unittests.depends = module
 }
-
 ######################################################################

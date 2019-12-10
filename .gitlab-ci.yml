@@ -18,7 +18,26 @@ buildWindows:
       - build/GTlabPython.pdb
       - "New_BuildWarn-W.svg"
     expire_in: 1 week
-      
+
+#nightlyBuildPy273:
+#  stage: build
+#  script:
+#    - .\tests\build\build-nightly273.bat
+#  tags:
+#    - Windows7
+#  only:
+#    - master
+
+nightlyBuildPy373:
+  stage: build
+  script:
+    - .\tests\build\build-nightly373.bat
+    - .\tests\build\copyHeaders.bat
+  tags:
+    - Windows7
+  only:
+    - master
+
 codingstyle:
   stage: codingstyle
   script:

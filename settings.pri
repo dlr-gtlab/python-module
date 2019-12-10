@@ -11,28 +11,38 @@
 #### LOCAL SETTINGS
 include( local_settings.pri )
 
-contains(COMPILE_MODE, module|gtlab) {
+#### GTlab
 
+equals(GTLAB_LIBS, devTools) {
     INCLUDEPATH += $${DEV_TOOLS}/include
     LIBS        += -L$${DEV_TOOLS}/lib
     DEPENDPATH  += $${DEV_TOOLS}/lib
 }
 
-contains(COMPILE_MODE, gtlabRepository|moduleTests) {
-    INCLUDEPATH += $${GTLAB_REPO}/src/datamodel \
-    $${GTLAB_REPO}/src/datamodel/property \
-    $${GTLAB_REPO}/src/utilities/logging \
-    $${GTLAB_REPO}/src/core \
-    $${GTLAB_REPO}/src/core/settings \
-    $${GTLAB_REPO}/src/core/python \
-    $${GTLAB_REPO}/src/calculators \
-    $${GTLAB_REPO}/src/mdi \
-    $${GTLAB_REPO}/src/mdi/tools \
-    $${GTLAB_REPO}/src/mdi/post \
-    $${GTLAB_REPO}/src/mdi/dock_widgets/process \
-    $${GTLAB_REPO}/src/mdi/dock_widgets/process/pages
+equals(GTLAB_LIBS, nightlyBuild) {
+    INCLUDEPATH += $${NIGHTLY_BUILD_DIR}/include/core
+    INCLUDEPATH += $${NIGHTLY_BUILD_DIR}/include/logging
+    LIBS        += -L$${NIGHTLY_BUILD_DIR}/lib
+    DEPENDPATH  += $${NIGHTLY_BUILD_DIR}/lib
+}
 
-    LIBS += -L$${GTLAB_REPO}/build
+equals(GTLAB_LIBS, repository) {
+
+#### GTlab core
+    LIBS        += -L$${GTLAB_CORE}/build
+    DEPENDPATH  += $${GTLAB_CORE}/build
+    INCLUDEPATH += $${GTLAB_CORE}/src/datamodel \
+    $${GTLAB_CORE}/src/datamodel/property \
+    $${GTLAB_CORE}/src/utilities/logging \
+    $${GTLAB_CORE}/src/core \
+    $${GTLAB_CORE}/src/core/settings \
+    $${GTLAB_CORE}/src/core/python \
+    $${GTLAB_CORE}/src/calculators \
+    $${GTLAB_CORE}/src/mdi \
+    $${GTLAB_CORE}/src/mdi/tools \
+    $${GTLAB_CORE}/src/mdi/post \
+    $${GTLAB_CORE}/src/mdi/dock_widgets/process \
+    $${GTLAB_CORE}/src/mdi/dock_widgets/process/pages
 }
 
 PY_PATH    = $${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_$${PY_VERSION}
