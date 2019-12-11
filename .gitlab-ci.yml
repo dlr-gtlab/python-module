@@ -23,6 +23,7 @@ buildWindows:
 #  stage: build
 #  script:
 #    - .\tests\build\build-nightly273.bat
+#    - .\tests\build\copyHeaders273.bat
 #  tags:
 #    - Windows7
 #  only:
@@ -32,7 +33,7 @@ nightlyBuildPy373:
   stage: build
   script:
     - .\tests\build\build-nightly373.bat
-    - .\tests\build\copyHeaders.bat
+    - .\tests\build\copyHeaders373.bat
   tags:
     - Windows7
   only:

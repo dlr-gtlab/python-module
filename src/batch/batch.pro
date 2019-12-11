@@ -10,19 +10,7 @@
 
 include( ../../settings.pri )
 
-BUILD_DEST_TEMP = ../../build
-
-equals(BUILD_TARGET, applicationDir) {
-    BUILD_DEST = $${TARGET_DIRECTORY}
-    LIBS += -L$${BUILD_DEST}/modules
-    DEPENDPATH  += $${BUILD_DEST}/modules
-}
-
-equals(BUILD_TARGET, localDir) {
-    BUILD_DEST = $${BUILD_DEST_TEMP}
-    LIBS += -L$${BUILD_DEST}
-    DEPENDPATH  += $${BUILD_DEST}
-}
+BUILD_DEST = ../../build
 
 TARGET = GTlabPythonConsole$${PY_VERSION}
 
@@ -37,17 +25,17 @@ win32 {
 }
 
 CONFIG(debug, debug|release){
-    DESTDIR = $${BUILD_DEST_TEMP}/debug-batch-script
-    OBJECTS_DIR = $${BUILD_DEST_TEMP}/debug-batch-script/obj
-    MOC_DIR = $${BUILD_DEST_TEMP}/debug-batch-script/moc
-    RCC_DIR = $${BUILD_DEST_TEMP}/debug-batch-script/rcc
-    UI_DIR = $${BUILD_DEST_TEMP}/debug-batch-script/ui
+    DESTDIR = $${MOC_BUILD_DEST}/debug-batch-script
+    OBJECTS_DIR = $${MOC_BUILD_DEST}/debug-batch-script/obj
+    MOC_DIR = $${MOC_BUILD_DEST}/debug-batch-script/moc
+    RCC_DIR = $${MOC_BUILD_DEST}/debug-batch-script/rcc
+    UI_DIR = $${MOC_BUILD_DEST}/debug-batch-script/ui
 } else {
-    DESTDIR = $${BUILD_DEST_TEMP}/release-batch-script
-    OBJECTS_DIR = $${BUILD_DEST_TEMP}/release-batch-script/obj
-    MOC_DIR = $${BUILD_DEST_TEMP}/release-batch-script/moc
-    RCC_DIR = $${BUILD_DEST_TEMP}/release-batch-script/rcc
-    UI_DIR = $${BUILD_DEST_TEMP}/release-batch-script/ui
+    DESTDIR = $${MOC_BUILD_DEST}/release-batch-script
+    OBJECTS_DIR = $${MOC_BUILD_DEST}/release-batch-script/obj
+    MOC_DIR = $${MOC_BUILD_DEST}/release-batch-script/moc
+    RCC_DIR = $${MOC_BUILD_DEST}/release-batch-script/rcc
+    UI_DIR = $${MOC_BUILD_DEST}/release-batch-script/ui
 }
 
 INCLUDEPATH += .\
@@ -61,6 +49,7 @@ HEADERS +=
 SOURCES += \
     batch-script.cpp
 
+LIBS += -L$${MODULE_BUILD_DEST}
 LIBS += -lGTlabPython$${PY_VERSION} -lGTlabCore -lGTlabMdi
 
 # add search paths to shared libraries

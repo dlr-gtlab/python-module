@@ -1,5 +1,7 @@
 Makefile*
 build/
+lib/
+include/
 debug/
 release/
 local_settings.pri
