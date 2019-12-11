@@ -11,70 +11,95 @@
 #### LOCAL SETTINGS
 include( local_settings.pri )
 
+TARGET_DIR_NAME = python$${PY_VERSION}
+
+MODULE_BUILD_DEST = ../../lib/$${TARGET_DIR_NAME}
+MOC_BUILD_DEST = ../../build
+
 #### GTlab
+LIBS        += -L$${GTLAB_CORE_PATH}/lib/core
+DEPENDPATH  += $${GTLAB_CORE_PATH}/lib/core
+INCLUDEPATH += $${GTLAB_CORE_PATH}/include/core
 
-equals(GTLAB_LIBS, devTools) {
-    INCLUDEPATH += $${DEV_TOOLS}/include
-    LIBS        += -L$${DEV_TOOLS}/lib
-    DEPENDPATH  += $${DEV_TOOLS}/lib
-}
-
-equals(GTLAB_LIBS, nightlyBuild) {
-    INCLUDEPATH += $${NIGHTLY_BUILD_DIR}/include/core
-    INCLUDEPATH += $${NIGHTLY_BUILD_DIR}/include/logging
-    LIBS        += -L$${NIGHTLY_BUILD_DIR}/lib
-    DEPENDPATH  += $${NIGHTLY_BUILD_DIR}/lib
-}
-
-equals(GTLAB_LIBS, repository) {
-
-#### GTlab core
-    LIBS        += -L$${GTLAB_CORE}/build
-    DEPENDPATH  += $${GTLAB_CORE}/build
-    INCLUDEPATH += $${GTLAB_CORE}/src/datamodel \
-    $${GTLAB_CORE}/src/datamodel/property \
-    $${GTLAB_CORE}/src/utilities/logging \
-    $${GTLAB_CORE}/src/core \
-    $${GTLAB_CORE}/src/core/settings \
-    $${GTLAB_CORE}/src/core/python \
-    $${GTLAB_CORE}/src/calculators \
-    $${GTLAB_CORE}/src/mdi \
-    $${GTLAB_CORE}/src/mdi/tools \
-    $${GTLAB_CORE}/src/mdi/post \
-    $${GTLAB_CORE}/src/mdi/dock_widgets/process \
-    $${GTLAB_CORE}/src/mdi/dock_widgets/process/pages
-}
-
-PY_PATH    = $${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_$${PY_VERSION}
-PY_QT_PATH = $${DEV_TOOLS}/ThirdPartyLibraries/PythonQt/PythonQt_$${PY_VERSION}
+LIBS        += -L$${GTLAB_LOGGING_PATH}/lib/logging
+DEPENDPATH  += $${GTLAB_LOGGING_PATH}/lib/logging
+INCLUDEPATH += $${GTLAB_LOGGING_PATH}/include/logging
 
 #### THIRD PARTY LIBRARIES
-
 # Python
-INCLUDEPATH += $${PY_PATH}/include
-LIBS += -L$${PY_PATH}/libs
-LIBS        += -L$${PY_PATH}
-DEPENDPATH  += $${PY_PATH}
+LIBS += -L$${PYTHON_PATH}/libs
+LIBS        += -L$${PYTHON_PATH}
+DEPENDPATH  += $${PYTHON_PATH}
+INCLUDEPATH += $${PYTHON_PATH}/include
 
 # PythonQt
-INCLUDEPATH += $${PY_QT_PATH}/include
-LIBS        += -L$${PY_QT_PATH}/lib
-DEPENDPATH  += $${PY_QT_PATH}/lib
-
-# Google Test
-INCLUDEPATH += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/include
-win32 {
-    CONFIG(debug, debug|release){
-        LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/libDebug
-        DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/libDebug
-    } else {
-        LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
-        DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
-    }
-}
-unix {
-    LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
-    DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
-}
+INCLUDEPATH += $${PYTHON_QT_PATH}/include
+LIBS        += -L$${PYTHON_QT_PATH}/lib
+DEPENDPATH  += $${PYTHON_QT_PATH}/lib
 
 ######################################################################
+
+defineTest(copyHeaders) {
+
+    files = $$1
+    dir = $${PWD}/../../include/$${TARGET_DIR_NAME}
+    win32:dir ~= s,/,\\,g
+
+    !exists($$dir) {
+
+        QMAKE_POST_LINK += $$QMAKE_MKDIR $$shell_quote($$dir) $$escape_expand(\\n\\t)
+    }
+
+    for(file, files) {
+
+        exists($$file) {
+
+            win32:file ~= s,/,\\,g
+            message(Copy: $$file)
+            QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$file) $$shell_quote($$dir) $$escape_expand(\\n\\t)
+        }
+    }
+
+    export(QMAKE_POST_LINK)
+
+    return(true)
+}
+
+defineTest(copyToEnvironmentPathModules) {
+    environmentPath = $${GTLAB_ENVIRONMENT_PATH}/modules
+
+    copyToEnvironmentPath($$1, $$environmentPath)
+}
+
+defineTest(copyToEnvironmentPath) {
+
+    !isEmpty(GTLAB_ENVIRONMENT_PATH) {
+
+        dllPath = $$1
+        win32:dllPath ~= s,/,\\,g
+
+        args = $$ARGS
+
+        count(args, 2) {
+            environmentPath = $$2
+        } else {
+            environmentPath = $${GTLAB_ENVIRONMENT_PATH}
+        }
+
+        win32:environmentPath ~= s,/,\\,g
+
+        exists($$environmentPath) {
+
+            QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$dllPath) $$shell_quote($$environmentPath) $$escape_expand(\\n\\t)
+
+            export(QMAKE_POST_LINK)
+
+            return(true)
+        } else {
+            warning(GTLAB_ENVIRONMENT_PATH ($${environmentPath}) does not exist!)
+        }
+    }
+
+    return(false)
+}
+
