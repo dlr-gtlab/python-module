@@ -45,10 +45,7 @@ defineTest(copyHeaders) {
     dir = $${PWD}/../../include/$${TARGET_DIR_NAME}
     win32:dir ~= s,/,\\,g
 
-    !exists($$dir) {
-
-        QMAKE_POST_LINK += $$QMAKE_MKDIR $$shell_quote($$dir) $$escape_expand(\\n\\t)
-    }
+    QMAKE_POST_LINK += $$QMAKE_CHK_DIR_EXISTS $$shell_quote($$dir) $$QMAKE_MKDIR $$shell_quote($$dir) $$escape_expand(\\n\\t)
 
     for(file, files) {
 
