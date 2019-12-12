@@ -49,7 +49,7 @@ public:
      * @brief Sets new script.
      * @param New script.
      */
-    void setScript(QString& script);
+    void setScript(QString script);
 
     /**
      * @brief Returns names of available packages.

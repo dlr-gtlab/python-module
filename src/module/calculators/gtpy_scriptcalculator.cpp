@@ -99,7 +99,7 @@ GtpyScriptCalculator::script() const
 }
 
 void
-GtpyScriptCalculator::setScript(QString& script)
+GtpyScriptCalculator::setScript(QString script)
 {
     script.replace("\n", "\r");
 
