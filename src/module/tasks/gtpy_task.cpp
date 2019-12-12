@@ -99,7 +99,7 @@ GtpyTask::script() const
 }
 
 void
-GtpyTask::setScript(QString& script)
+GtpyTask::setScript(QString script)
 {
     script.replace("\n", "\r");
 
