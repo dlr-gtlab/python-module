@@ -19,15 +19,15 @@ buildWindows:
       - "New_BuildWarn-W.svg"
     expire_in: 1 week
 
-#nightlyBuildPy273:
-#  stage: build
-#  script:
-#    - .\tests\build\build-nightly273.bat
-#    - .\tests\build\copyHeaders273.bat
-#  tags:
-#    - Windows7
-#  only:
-#    - master
+nightlyBuildPy273:
+  stage: build
+  script:
+    - .\tests\build\build-nightly273.bat
+    - .\tests\build\copyHeaders273.bat
+  tags:
+    - Windows7
+  only:
+    - master
 
 nightlyBuildPy373:
   stage: build
