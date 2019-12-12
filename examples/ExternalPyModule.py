@@ -1,3 +1,5 @@
+#For using this external module in a Python Task insert the following lines 
+#to the GTlab Python Editor.
 #import sys
 #sys.path.append('D:\\devel\\Git\\GTlab_Python_Module\\examples')
 #import ExternalPyModule
@@ -5,7 +7,7 @@
 from GtCalculators import *
 from GtLogging import gtDebug
 
-def createDesignPointCalc():
+def createCalc():
 	# <-- Off-Design Point Calculator -->
 	offDesignPointCalculator = GtpOffDesignCalculator("Off-Design Point Calculator")
 	
@@ -13,16 +15,10 @@ def createDesignPointCalc():
 	eQS.controlsUUIDsSteady = ()
 	eQS.designMode = False
 	
-	bYPASSDUCTPLCdesign = eQS.createGtpBoundaryCondition("BYPASSDUCT.PLCdesign")
-	bYPASSDUCTPLCdesign.BCname = "BYPASSDUCT.PLCdesign"
-	bYPASSDUCTPLCdesign.BCval = 0.0
-	bYPASSDUCTPLCdesign.BCunit = "[-]"
-	
-	bYPASSDUCTQU = eQS.createGtpBoundaryCondition("BYPASSDUCT.QU")
-	bYPASSDUCTQU.BCname = "BYPASSDUCT.QU"
-	bYPASSDUCTQU.BCval = 0.0
-	bYPASSDUCTQU.BCunit = "[W]"
+	bURNERETAdesign = eQS.createGtpBoundaryCondition("BURNER.ETAdesign")
+	bURNERETAdesign.BCname = "BURNER.ETAdesign"
+	bURNERETAdesign.BCval = 0.0
+	bURNERETAdesign.BCunit = "[-]"
 	# <--------------------------------->
 	
-	gtDebug() << "Design Point Calculator created!"
 	return offDesignPointCalculator

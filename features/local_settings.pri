@@ -13,8 +13,8 @@ PY_VERSION = 373
 DEV_TOOLS = PATH/TO/DEVTOOLS
 
 # path to GTlab Core repository
-GTLAB_CORE_PATH    = G:\GTlab\Nightly_Builds
-GTLAB_LOGGING_PATH = G:\GTlab\Nightly_Builds
+GTLAB_CORE_PATH    = &&{DEV_TOOLS}
+GTLAB_LOGGING_PATH = &&{DEV_TOOLS}
 
 # Third Party
 PYTHON_PATH = $${DEV_TOOLS}\ThirdPartyLibraries\Python\Python_$${PY_VERSION}
