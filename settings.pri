@@ -39,6 +39,9 @@ DEPENDPATH  += $${PYTHON_QT_PATH}/lib
 
 ######################################################################
 
+## FUNCTION DEFINITION FOR COPY FUNCTION
+mkpath($${PWD}/include/$${TARGET_DIR_NAME})
+
 defineTest(copyHeaders) {
 
     files = $$1
@@ -52,7 +55,6 @@ defineTest(copyHeaders) {
         exists($$file) {
 
             win32:file ~= s,/,\\,g
-            message(Copy: $$file)
             QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$file) $$shell_quote($$dir) $$escape_expand(\\n\\t)
         }
     }
