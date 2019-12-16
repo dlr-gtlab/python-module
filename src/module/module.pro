@@ -74,7 +74,6 @@ HEADERS += \
     utilities/gtpy_calculatorfactory.h \
     gt_pythonmodule_exports.h \
     utilities/gtpy_codegenerator.h \
-    utilities/gtpy_evalloadinghelper.h \
     utilities/gtpy_scriptrunnable.h
 
 SOURCES += \
@@ -101,7 +100,6 @@ SOURCES += \
     utilities/gtpy_contextmanager.cpp \
     utilities/gtpy_calculatorfactory.cpp \
     utilities/gtpy_codegenerator.cpp \
-    utilities/gtpy_evalloadinghelper.cpp \
     utilities/gtpy_scriptrunnable.cpp
 
 LIBS += -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabCore -lPythonQt-Qt5-Python$${PY_VERSION}
