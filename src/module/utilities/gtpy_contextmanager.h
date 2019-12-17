@@ -73,6 +73,8 @@ public:
      */
     static GtpyContextManager* instance();
 
+    ~GtpyContextManager();
+
     /**
      * @brief Evaluates the given script into the given python context.
      * @param type Python context identifier.
@@ -398,6 +400,8 @@ private:
 
     /// Calculator accessible contexts
     QList<GtpyContextManager::Context> m_calcAccessibleContexts;
+
+    PyThreadState* m_pyThreadState;
 
 private slots:
     /**

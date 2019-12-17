@@ -199,7 +199,7 @@ protected slots:
      * @brief Evaluates the current script from the editor
      * in the Python context of the calculator.
      */
-    bool evalScript(bool outputToConsole = true);
+    void evalScript(bool outputToConsole = true);
 
 private:
     /**
@@ -303,6 +303,8 @@ private slots:
      * must be implemented.
      */
     virtual void onSaveButtonClicked() = 0;
+
+    void evaluationFinished();
 };
 
 #endif // GTPY_ABSTRACTSCRIPTINGWIZARDPAGE_H

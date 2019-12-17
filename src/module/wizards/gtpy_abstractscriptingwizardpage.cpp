@@ -20,10 +20,12 @@
 #include <QTextOption>
 #include <QMetaProperty>
 #include <QTabBar>
+#include <QThreadPool>
 
 // python includes
 #include "gtpy_scripteditor.h"
 #include "gtpy_console.h"
+#include "gtpy_scriptrunnable.h"
 
 // GTlab framework includes
 #include "gt_object.h"
@@ -289,6 +291,7 @@ GtpyAbstractScriptingWizardPage::initializePage()
     }
 
 //    evalScript(false);
+    qDebug() << "initializePage()";
 }
 
 bool
@@ -660,17 +663,37 @@ GtpyAbstractScriptingWizardPage::addTabWidget(QWidget* wid,
     m_tabWidget->addTab(wid, label);
 }
 
-bool
+void
 GtpyAbstractScriptingWizardPage::evalScript(bool outputToConsole)
 {
+    m_evalButton->setEnabled(false);
+    m_editor->setReadOnly(true);
+
     GtpyContextManager::instance()->deleteCalcsFromTask(m_contextType);
 
-    bool success = GtpyContextManager::instance()->evalScript(
-                    m_contextType, m_editor->script(), outputToConsole);
+    GtpyScriptRunnable* runnable = new GtpyScriptRunnable(m_contextType);
 
-    endEval(success);
+    runnable->setParent(this);
+    runnable->setScript(m_editor->script());
 
-    return success;
+    QThreadPool* tp = QThreadPool::globalInstance();
+
+    // start runnable
+    tp->start(runnable);
+
+    // make runnable not delete herself
+    runnable->setAutoDelete(false);
+
+    // connect runnable signals to wizard slots
+    connect(runnable, &GtpyScriptRunnable::runnableFinished,
+            this, &GtpyAbstractScriptingWizardPage::evaluationFinished);
+
+//    bool success = GtpyContextManager::instance()->evalScript(
+//                    m_contextType, m_editor->script(), outputToConsole);
+
+//    endEval(success);
+
+    return;
 }
 
 void
@@ -805,5 +828,31 @@ GtpyAbstractScriptingWizardPage::onSearchTextEdit()
     {
         m_forwardButton->setEnabled(true);
         m_backwardButton->setEnabled(true);
+    }
+}
+
+void
+GtpyAbstractScriptingWizardPage::evaluationFinished()
+{
+    qDebug() << "Evaluation finished!!!";
+
+    m_evalButton->setEnabled(true);
+    m_editor->setReadOnly(false);
+
+    GtpyScriptRunnable* runnable = qobject_cast<GtpyScriptRunnable*>(sender());
+
+    if (runnable)
+    {
+        bool success = runnable->successful();
+
+        // connect runnable signals to task runner slots
+        disconnect(runnable, &GtpyScriptRunnable::runnableFinished,
+                this, &GtpyAbstractScriptingWizardPage::evaluationFinished);
+
+        delete runnable;
+
+        qDebug() << success;
+
+        endEval(success);
     }
 }
