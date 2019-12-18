@@ -14,7 +14,6 @@ TEMPLATE = subdirs
 CONFIG += console
 CONFIG += c++11
 
-
 SUBDIRS += module
 module.subdir = src/module
 

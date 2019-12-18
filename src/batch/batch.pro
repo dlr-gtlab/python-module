@@ -51,6 +51,7 @@ SOURCES += \
 
 LIBS += -L$${MODULE_BUILD_DEST}
 LIBS += -lGTlabPython$${PY_VERSION} -lGTlabCore -lGTlabMdi
+LIBS += -lGTlabDatamodel -lGTlabCalculators
 
 # add search paths to shared libraries
 unix: QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN:\$$ORIGIN/modules\''

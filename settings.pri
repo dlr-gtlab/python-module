@@ -31,6 +31,7 @@ LIBS += -L$${PYTHON_PATH}/libs
 LIBS        += -L$${PYTHON_PATH}
 DEPENDPATH  += $${PYTHON_PATH}
 INCLUDEPATH += $${PYTHON_PATH}/include
+unix: INCLUDEPATH += $${PYTHON_PATH}/include/python3.7m
 
 # PythonQt
 INCLUDEPATH += $${PYTHON_QT_PATH}/include
@@ -39,22 +40,48 @@ DEPENDPATH  += $${PYTHON_QT_PATH}/lib
 
 ######################################################################
 
+## FUNCTION DEFINITION FOR COPY FUNCTION
+mkpath($${PWD}/include/$${TARGET_DIR_NAME})
+
 defineTest(copyHeaders) {
 
     files = $$1
     dir = $${PWD}/../../include/$${TARGET_DIR_NAME}
     win32:dir ~= s,/,\\,g
 
-    QMAKE_POST_LINK += $$QMAKE_CHK_DIR_EXISTS $$shell_quote($$dir) $$QMAKE_MKDIR $$shell_quote($$dir) $$escape_expand(\\n\\t)
+    win32 {
 
-    for(file, files) {
+        QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote(*.h) $$shell_quote($$dir) $$escape_expand(\\n\\t)
 
-        exists($$file) {
+        dirNames =
 
-            win32:file ~= s,/,\\,g
-            message(Copy: $$file)
-            QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$file) $$shell_quote($$dir) $$escape_expand(\\n\\t)
+        for(file, files) {
+
+            exists($$file) {
+
+                dirName = $$dirname(file)
+
+                !isEmpty(dirName) {
+
+                    !contains(dirNames, $$dirName) {
+
+                        dirNames += $$dirName
+                        sourceDir = $${PWD}/$${dirName}/*.h
+
+                        win32:sourceDir ~= s,/,\\,g
+
+                        exists($${sourceDir}) {
+
+                            QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($${sourceDir}) $$shell_quote($$dir) $$escape_expand(\\n\\t)
+                        }
+                    }
+                }
+            }
         }
+
+    }
+    unix {
+        QMAKE_POST_LINK += find . -name $$shell_quote(*.h) -exec cp $$shell_quote({}) $$shell_quote($$dir) \; $$escape_expand(\\n\\t)
     }
 
     export(QMAKE_POST_LINK)
@@ -87,12 +114,14 @@ defineTest(copyToEnvironmentPath) {
 
         exists($$environmentPath) {
 
-            QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$dllPath) $$shell_quote($$environmentPath) $$escape_expand(\\n\\t)
+            win32: QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$dllPath) $$shell_quote($$environmentPath) $$escape_expand(\\n\\t)
+            unix:  QMAKE_POST_LINK += find $$LIB_BUILD_DEST -name $$shell_quote(*.so*) -exec cp $$shell_quote({}) $$shell_quote($$environmentPath) \; $$escape_expand(\\n\\t)
 
             export(QMAKE_POST_LINK)
 
             return(true)
         } else {
+
             warning(GTLAB_ENVIRONMENT_PATH ($${environmentPath}) does not exist!)
         }
     }
