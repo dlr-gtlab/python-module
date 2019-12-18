@@ -117,8 +117,8 @@ private:
     /// Calculator object names identified by UUIDs
     QHash<QString, QString> m_calcIds;
 
-    static const QString GtpyTaskWizardPage::ARROW_LEFT;
-    static const QString GtpyTaskWizardPage::ARROW_RIGHT;
+    static const QString ARROW_LEFT;
+    static const QString ARROW_RIGHT;
 
 private slots:
     /**

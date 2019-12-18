@@ -100,9 +100,14 @@ SOURCES += \
     utilities/gtpy_calculatorfactory.cpp \
     utilities/gtpy_codegenerator.cpp
 
-LIBS += -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabCore -lPythonQt-Qt5-Python$${PY_VERSION}
+LIBS += -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabCore
 
+# THIRD PARTY
+win32: LIBS += -lPythonQt-Qt5-Python$${PY_VERSION}
+unix: LIBS += -lPythonQt-Qt5-Python3.7
 ######################################################################
 
 copyHeaders($$HEADERS)
-copyToEnvironmentPathModules($${MODULE_BUILD_DEST}/$${TARGET}.dll)
+unix:   copyToEnvironmentPathModules($${MODULE_BUILD_DEST}/$${TARGET}.so*)
+win32:  copyToEnvironmentPathModules($${MODULE_BUILD_DEST}/$${TARGET}.dll)
+######################################################################
