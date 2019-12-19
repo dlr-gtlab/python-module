@@ -75,7 +75,8 @@ HEADERS += \
     gt_pythonmodule_exports.h \
     utilities/gtpy_codegenerator.h \
     utilities/gtpy_scriptrunnable.h \
-    utilities/gtpy_threadsupport.h
+    utilities/gtpy_gilscope.h \
+    utilities/gtpy_interruptrunnable.h
 
 SOURCES += \
     gt_python.cpp \
@@ -102,7 +103,8 @@ SOURCES += \
     utilities/gtpy_calculatorfactory.cpp \
     utilities/gtpy_codegenerator.cpp \
     utilities/gtpy_scriptrunnable.cpp \
-    utilities/gtpy_threadsupport.cpp
+    utilities/gtpy_gilscope.cpp \
+    utilities/gtpy_interruptrunnable.cpp
 
 LIBS += -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabCore -lPythonQt-Qt5-Python$${PY_VERSION}
 

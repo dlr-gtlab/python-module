@@ -7,7 +7,7 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include "gtpy_threadsupport.h"
+#include "gtpy_gilscope.h"
 
 bool GtpyGilScope::m_enableGILScope = false;
 

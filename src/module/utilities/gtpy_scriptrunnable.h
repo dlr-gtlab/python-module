@@ -32,12 +32,20 @@ public:
     void setScript(const QString& script);
 
     bool successful();
+
 private:
     QString m_script;
 
     bool m_successfulRun;
 
+    QMutex m_mutex;
+
+    long m_threadId;
+
     GtpyContextManager::Context m_contextType;
+
+public slots:
+    void interrupt();
 
 signals:
     void runnableFinished();

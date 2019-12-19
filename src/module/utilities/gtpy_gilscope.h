@@ -10,25 +10,31 @@
 #ifndef GTPY_THREADSUPPORT_H
 #define GTPY_THREADSUPPORT_H
 
-#include <PythonQtPythonInclude.h>
+#include "PythonQtPythonInclude.h"
+
+#include <QObject>
 
 #define GTPY_GIL_SCOPE GtpyGilScope internal_gilscope;
 
-class GtpyGilScope
+class GtpyGilScope : public QObject
 {
+    Q_OBJECT
+
 public:
     GtpyGilScope();
 
     ~GtpyGilScope();
 
-    void release();
-
     static void setGILScopeEnabled(bool flag);
 
     static bool isGILScopeEnabled();
 
+private slots:
+    void release();
+
 private:
     PyGILState_STATE m_state;
+
     bool m_ensured;
 
     static bool m_enableGILScope;

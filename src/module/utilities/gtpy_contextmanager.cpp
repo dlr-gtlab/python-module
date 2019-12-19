@@ -11,6 +11,7 @@
 #include <QMetaMethod>
 #include <QMetaEnum>
 #include <QSettings>
+#include <QThreadPool>
 
 #include "PythonQt.h"
 #include "PythonQtObjectPtr.h"
@@ -25,14 +26,15 @@
 #include "gt_task.h"
 #include "gt_calculator.h"
 #include "gt_coreapplication.h"
-#include "gtpy_decorator.h"
 #include "gt_calculatordata.h"
 #include "gt_calculatorfactory.h"
 #include "gt_datazone0d.h"
+#include "gt_calculatorhelperfactory.h"
 
 #include "gtpy_calculatorfactory.h"
-#include "gtpy_threadsupport.h"
-#include "gt_calculatorhelperfactory.h"
+#include "gtpy_gilscope.h"
+#include "gtpy_decorator.h"
+#include "gtpy_interruptrunnable.h"
 
 #include "gtpy_contextmanager.h"
 
@@ -201,6 +203,27 @@ GtpyContextManager::evalScript(const GtpyContextManager::Context& type,
     }
 
     return !hadError;
+}
+
+bool
+GtpyContextManager::evalScriptInterruptible(
+        const GtpyContextManager::Context& type, const QString& script,
+        const bool output, const GtpyContextManager::EvalOptions& option)
+{
+    qDebug() << "SCRIPT______";
+    qDebug() << script;
+    QString interruptibleCode = script;
+
+    interruptibleCode.replace("\r", "\n");
+
+    interruptibleCode.prepend("try:\n");
+    interruptibleCode = interruptibleCode.replace("\n","\n\t");
+    interruptibleCode += "\nexcept KeyboardInterrupt:\n"
+                         "    print ('--Interrupted--')\n";
+
+    qDebug() << interruptibleCode;
+
+    return evalScript(type, interruptibleCode, output, option);
 }
 
 QMultiMap<QString, GtpyFunction>
@@ -385,6 +408,9 @@ bool
 GtpyContextManager::addTaskValue(const GtpyContextManager::Context& type,
                                  GtTask* task)
 {
+    qDebug() << "GIL !!!!!!";
+    GTPY_GIL_SCOPE
+
     if (!m_calcAccessibleContexts.contains(type))
     {
         return false;
@@ -392,14 +418,17 @@ GtpyContextManager::addTaskValue(const GtpyContextManager::Context& type,
 
     if (task != Q_NULLPTR)
     {
+        qDebug() << "add obj";
         addObject(type, TASK_VAR, task, false);
-
+        qDebug() << "obj added";
         QString pyCode =
             CALC_MODULE + QStringLiteral(".") + TASK_VAR +
                 QStringLiteral(" = ") + TASK_VAR +  QStringLiteral("\n") +
             QStringLiteral("del ") + TASK_VAR + QStringLiteral("\n");
 
         evalScript(type, pyCode , false);
+
+        qDebug() << "script evaled";
     }
     else
     {
@@ -407,6 +436,7 @@ GtpyContextManager::addTaskValue(const GtpyContextManager::Context& type,
                    QStringLiteral(" = None"), false);
     }
 
+    qDebug() << "add return";
     return true;
 }
 
@@ -472,6 +502,9 @@ GtpyContextManager::initContexts()
 void
 GtpyContextManager::resetContext(const GtpyContextManager::Context& type)
 {
+    GTPY_GIL_SCOPE
+    qDebug() << "reset func !!!";
+
     if (m_calcAccessibleContexts.contains(type))
     {
         registerCalcModuleInSys(type);
@@ -489,6 +522,27 @@ GtpyContextManager::resetContext(const GtpyContextManager::Context& type)
     {
         removeCalcModuleFromSys();
     }
+}
+
+long
+GtpyContextManager::currentPyThreadId()
+{
+    GTPY_GIL_SCOPE
+
+    return PyThreadState_Get()->thread_id;
+}
+
+void
+GtpyContextManager::interruptPyThread(long id)
+{
+
+    qDebug() << "interrupt function called";
+    GtpyInterruptRunnable* runnable = new GtpyInterruptRunnable(id);
+
+    QThreadPool* tp = QThreadPool::globalInstance();
+
+    // start runnable
+    tp->start(runnable);
 }
 
 void

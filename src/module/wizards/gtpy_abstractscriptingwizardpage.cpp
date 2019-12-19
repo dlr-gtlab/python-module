@@ -48,7 +48,9 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     m_contextType(type),
     m_editor(Q_NULLPTR),
     m_editorSplitter(Q_NULLPTR),
-    m_tabWidget(Q_NULLPTR)
+    m_tabWidget(Q_NULLPTR),
+    m_isEvaluating(false),
+    m_runnable(Q_NULLPTR)
 {
     setTitle(tr("Python Script Editor"));
 
@@ -155,19 +157,19 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     //Evaluation Button
     m_evalButton = new QPushButton;
-    m_evalButton->setIcon(gtApp->icon("updateIcon_16.png"));
-    m_evalButton->setToolTip(tr("Evaluate Python Script"));
+    m_evalButton->setIcon(gtApp->icon("runProcessIcon_24.png"));
+    m_evalButton->setToolTip(tr("Evaluate Python script"));
 
-    QLabel* shortCutLabel = new QLabel("<font color='grey'>  Ctrl+E</font>");
-    QFont font = shortCutLabel->font();
+    m_shortCutEval = new QLabel("<font color='grey'>  Ctrl+E</font>");
+    QFont font = m_shortCutEval->font();
     font.setItalic(true);
     font.setPointSize(7);
-    shortCutLabel->setFont(font);
+    m_shortCutEval->setFont(font);
 
     QVBoxLayout* evalButtonLay = new QVBoxLayout;
 
     evalButtonLay->addWidget(m_evalButton);
-    evalButtonLay->addWidget(shortCutLabel);
+    evalButtonLay->addWidget(m_shortCutEval);
 
     toolBarLayout->addLayout(evalButtonLay);
 
@@ -179,9 +181,6 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     fontSave.setItalic(true);
     fontSave.setPointSize(7);
     m_shortCutSave->setFont(fontSave);
-    QSizePolicy sizePolicy = m_shortCutSave->sizePolicy();
-    sizePolicy.setRetainSizeWhenHidden(true);
-    m_shortCutSave->setSizePolicy(sizePolicy);
 
     m_saveButton = new QPushButton;
     m_saveButton->setIcon(gtApp->icon("saveProjectIcon.png"));
@@ -241,7 +240,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     setLayout(layout);
 
     connect(m_editor, SIGNAL(evalShortcutTriggered()), this,
-            SLOT(evalScript()));
+            SLOT(onEvalButtonClicked()));
     connect(m_editor, SIGNAL(searchShortcutTriggered(QString)), this,
             SLOT(setSearchedText(QString)));
     connect(m_searchWidget, SIGNAL(textEdited(QString)), m_editor,
@@ -260,7 +259,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
             SLOT(onSearchForward()));
     connect(m_consoleClearButton, SIGNAL(clicked(bool)),
             m_pythonConsole, SLOT(clearConsole()));
-    connect(m_evalButton, SIGNAL(clicked(bool)), this, SLOT(evalScript()));
+    connect(m_evalButton, SIGNAL(clicked(bool)), this,
+            SLOT(onEvalButtonClicked()));
     connect(importButton, SIGNAL(clicked(bool)), this, SLOT(onImportScript()));
     connect(exportButton, SIGNAL(clicked(bool)), this, SLOT(onExportScript()));
     connect(m_saveButton, SIGNAL(clicked(bool)), this,
@@ -289,15 +289,16 @@ GtpyAbstractScriptingWizardPage::initializePage()
                         m_contextType, clone->objectName(), clone);
         }
     }
-
-//    evalScript(false);
-    qDebug() << "initializePage()";
 }
 
 bool
 GtpyAbstractScriptingWizardPage::validatePage()
 {
-    //evalScript(false);
+    if (m_runnable)
+    {
+        m_runnable->interrupt();
+        m_runnable->setAutoDelete(true);
+    }
 
     return validation();
 }
@@ -319,7 +320,15 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
     if (((e->modifiers() & Qt::ControlModifier) &&
          e->key() == Qt::Key_E))
     {
-        evalScript(true);
+        onEvalButtonClicked();
+        return;
+    }
+
+    // Interrupt shortcut
+    if (((e->modifiers() & Qt::ControlModifier) &&
+         e->key() == Qt::Key_I))
+    {
+        onEvalButtonClicked();
         return;
     }
 
@@ -494,31 +503,6 @@ GtpyAbstractScriptingWizardPage::setConsoleVisible(bool visible)
 }
 
 void
-GtpyAbstractScriptingWizardPage::enableEvaluation(bool enable)
-{
-    if (m_evalButton != Q_NULLPTR)
-    {
-        m_evalButton->setVisible(enable);
-
-        if (m_editor == Q_NULLPTR)
-        {
-            return;
-        }
-
-        if (enable)
-        {
-            connect(m_editor, SIGNAL(evalShortcutTriggered()), this,
-                    SLOT(evalScript()));
-        }
-        else
-        {
-            disconnect(m_editor, SIGNAL(evalShortcutTriggered()), this,
-                       SLOT(evalScript()));
-        }
-    }
-}
-
-void
 GtpyAbstractScriptingWizardPage::insertToCurrentCursorPos(const QString& text)
 {
     if (m_editor == Q_NULLPTR)
@@ -549,7 +533,8 @@ GtpyAbstractScriptingWizardPage::propValToString(GtAbstractProperty* prop)
     }
     else if (qobject_cast<GtObjectLinkProperty*>(prop))
     {
-        GtObject* obj = gtDataModel->objectByUuid(prop->valueToVariant().toString());
+        GtObject* obj = gtDataModel->objectByUuid(
+                            prop->valueToVariant().toString());
 
         if (obj)
         {
@@ -613,25 +598,29 @@ GtpyAbstractScriptingWizardPage::propValToString(GtAbstractProperty* prop)
             }
             else
             {
-                val =  GtpyContextManager::instance()->qvariantToPyStr(prop->valueToVariant());
+                val =  GtpyContextManager::instance()->qvariantToPyStr(
+                           prop->valueToVariant());
             }
         }
     }
     else if (qobject_cast<GtStringProperty*>(prop))
     {
         val = "\"";
-        val +=  GtpyContextManager::instance()->qvariantToPyStr(prop->valueToVariant());
+        val +=  GtpyContextManager::instance()->qvariantToPyStr(
+                    prop->valueToVariant());
         val += "\"";
     }
     else if (dynamic_cast<GtProperty<QString>*>(prop))
     {
         val = "\"";
-        val +=  GtpyContextManager::instance()->qvariantToPyStr(prop->valueToVariant());
+        val +=  GtpyContextManager::instance()->qvariantToPyStr(
+                    prop->valueToVariant());
         val += "\"";
     }
     else
     {
-        val = GtpyContextManager::instance()->qvariantToPyStr(prop->valueToVariant());
+        val = GtpyContextManager::instance()->qvariantToPyStr(
+                  prop->valueToVariant());
     }
 
     return val;
@@ -666,34 +655,49 @@ GtpyAbstractScriptingWizardPage::addTabWidget(QWidget* wid,
 void
 GtpyAbstractScriptingWizardPage::evalScript(bool outputToConsole)
 {
-    m_evalButton->setEnabled(false);
-    m_editor->setReadOnly(true);
+    if (m_isEvaluating)
+    {
+        return;
+    }
+
+    m_isEvaluating = true;
 
     GtpyContextManager::instance()->deleteCalcsFromTask(m_contextType);
 
-    GtpyScriptRunnable* runnable = new GtpyScriptRunnable(m_contextType);
+    m_runnable = new GtpyScriptRunnable(m_contextType);
 
-    runnable->setParent(this);
-    runnable->setScript(m_editor->script());
+    m_runnable->setScript(m_editor->script());
+
+    // make runnable not delete herself
+    m_runnable->setAutoDelete(false);
+
+    // connect runnable signals to wizard slots
+    connect(m_runnable, SIGNAL(runnableFinished()),
+            this, SLOT(evaluationFinished()));
 
     QThreadPool* tp = QThreadPool::globalInstance();
 
     // start runnable
-    tp->start(runnable);
-
-    // make runnable not delete herself
-    runnable->setAutoDelete(false);
-
-    // connect runnable signals to wizard slots
-    connect(runnable, &GtpyScriptRunnable::runnableFinished,
-            this, &GtpyAbstractScriptingWizardPage::evaluationFinished);
-
-//    bool success = GtpyContextManager::instance()->evalScript(
-//                    m_contextType, m_editor->script(), outputToConsole);
-
-//    endEval(success);
+    tp->start(m_runnable);
 
     return;
+}
+
+void
+GtpyAbstractScriptingWizardPage::onEvalButtonClicked()
+{
+    if (m_isEvaluating)
+    {
+        if (m_runnable)
+        {
+            m_runnable->interrupt();
+            showEvalButton(true);
+            return;
+        }
+    }
+
+    evalScript(true);
+    showEvalButton(false);
 }
 
 void
@@ -706,6 +710,25 @@ bool
 GtpyAbstractScriptingWizardPage::validation()
 {
     return true;
+}
+
+void
+GtpyAbstractScriptingWizardPage::showEvalButton(bool show)
+{
+    if (show)
+    {
+        m_evalButton->setIcon(gtApp->icon("runProcessIcon_24.png"));
+        m_evalButton->setToolTip(tr("Evaluate Python script"));
+
+        m_shortCutEval->setText("<font color='grey'>  Ctrl+E</font>");
+    }
+    else
+    {
+        m_evalButton->setIcon(gtApp->icon("stopIcon.png"));
+        m_evalButton->setToolTip(tr("Interrupt evaluation"));
+
+        m_shortCutEval->setText("<font color='grey'>  Ctrl+I</font>");
+    }
 }
 
 void
@@ -834,24 +857,20 @@ GtpyAbstractScriptingWizardPage::onSearchTextEdit()
 void
 GtpyAbstractScriptingWizardPage::evaluationFinished()
 {
-    qDebug() << "Evaluation finished!!!";
+    showEvalButton(true);
 
-    m_evalButton->setEnabled(true);
-    m_editor->setReadOnly(false);
+    m_isEvaluating = false;
 
-    GtpyScriptRunnable* runnable = qobject_cast<GtpyScriptRunnable*>(sender());
-
-    if (runnable)
+    if (m_runnable)
     {
-        bool success = runnable->successful();
+        bool success = m_runnable->successful();
 
         // connect runnable signals to task runner slots
-        disconnect(runnable, &GtpyScriptRunnable::runnableFinished,
+        disconnect(m_runnable, &GtpyScriptRunnable::runnableFinished,
                 this, &GtpyAbstractScriptingWizardPage::evaluationFinished);
 
-        delete runnable;
-
-        qDebug() << success;
+        delete m_runnable;
+        m_runnable = Q_NULLPTR;
 
         endEval(success);
     }

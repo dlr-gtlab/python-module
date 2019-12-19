@@ -8,7 +8,7 @@
  */
 
 #include "gtpy_scriptrunnable.h"
-#include <QDebug>
+#include "gtpy_gilscope.h"
 
 GtpyScriptRunnable::GtpyScriptRunnable(
     GtpyContextManager::Context contextType) : m_successfulRun(false),
@@ -19,14 +19,22 @@ GtpyScriptRunnable::GtpyScriptRunnable(
 
 GtpyScriptRunnable::~GtpyScriptRunnable()
 {
-    qDebug() << "RUNNABLE DESTROIED " << m_successfulRun;
+
 }
 
 void
 GtpyScriptRunnable::run()
 {
-    m_successfulRun = GtpyContextManager::instance()->evalScript(
-                          m_contextType, m_script, true);
+    GTPY_GIL_SCOPE
+
+    GtpyContextManager* python = GtpyContextManager::instance();
+
+    m_mutex.lock();
+    m_threadId = python->currentPyThreadId();
+    m_mutex.unlock();
+
+    m_successfulRun = python->evalScriptInterruptible(m_contextType,
+                                                      m_script, true);
 
     emit runnableFinished();
 }
@@ -47,5 +55,16 @@ bool
 GtpyScriptRunnable::successful()
 {
     return m_successfulRun;
+}
+
+void
+GtpyScriptRunnable::interrupt()
+{
+    GTPY_GIL_SCOPE
+
+    m_successfulRun = false;
+    m_mutex.lock();
+    GtpyContextManager::instance()->interruptPyThread(m_threadId);
+    m_mutex.unlock();
 }
 

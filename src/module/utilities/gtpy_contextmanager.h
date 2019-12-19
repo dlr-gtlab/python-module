@@ -88,6 +88,10 @@ public:
                     const QString& script, const bool output = true,
                     const GtpyContextManager::EvalOptions& option = EvalFile);
 
+    bool evalScriptInterruptible(const GtpyContextManager::Context& type,
+                      const QString& script, const bool output = true,
+                      const GtpyContextManager::EvalOptions& option = EvalFile);
+
     /**
      * @brief introspection
      * @param type
@@ -183,6 +187,10 @@ public:
      * @param type Python context identifier.
      */
     void resetContext(const GtpyContextManager::Context& type);
+
+    long currentPyThreadId();
+
+    void interruptPyThread(long id);
 
 protected:
     /**
