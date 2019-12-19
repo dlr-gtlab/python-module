@@ -150,14 +150,6 @@ protected:
      */
     void setConsoleVisible(bool visible = true);
 
-//    /**
-//     * @brief Enables the evaluation of the script which is written
-//     * in the editor.
-//     * @param enable If it is true, the evaluation will be enabled. Otherwise
-//     * it will be disabled.
-//     */
-//    void enableEvaluation(bool enable = true);
-
     /**
      * @brief Inserts text at current cursor position of editor widget.
      * @param text Text that should be set to editor.

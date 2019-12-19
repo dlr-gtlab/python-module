@@ -715,6 +715,11 @@ GtpyAbstractScriptingWizardPage::validation()
 void
 GtpyAbstractScriptingWizardPage::showEvalButton(bool show)
 {
+    if (m_evalButton == Q_NULLPTR)
+    {
+        return;
+    }
+
     if (show)
     {
         m_evalButton->setIcon(gtApp->icon("runProcessIcon_24.png"));

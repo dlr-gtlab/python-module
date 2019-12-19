@@ -70,6 +70,11 @@ private:
     /// Dynamic properties regarding project modules
     QList<GtObjectPathProperty*> m_dynamicPathProps;
 
+    long m_pyThreadId;
+
+private slots:
+    void onStateChanged(GtProcessComponent::STATE state);
+
 };
 
 #endif // GTPY_SCRIPTCALCULATOR_H

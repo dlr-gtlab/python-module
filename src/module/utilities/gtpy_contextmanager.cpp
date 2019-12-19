@@ -210,8 +210,6 @@ GtpyContextManager::evalScriptInterruptible(
         const GtpyContextManager::Context& type, const QString& script,
         const bool output, const GtpyContextManager::EvalOptions& option)
 {
-    qDebug() << "SCRIPT______";
-    qDebug() << script;
     QString interruptibleCode = script;
 
     interruptibleCode.replace("\r", "\n");
@@ -220,8 +218,6 @@ GtpyContextManager::evalScriptInterruptible(
     interruptibleCode = interruptibleCode.replace("\n","\n\t");
     interruptibleCode += "\nexcept KeyboardInterrupt:\n"
                          "    print ('--Interrupted--')\n";
-
-    qDebug() << interruptibleCode;
 
     return evalScript(type, interruptibleCode, output, option);
 }
@@ -408,7 +404,6 @@ bool
 GtpyContextManager::addTaskValue(const GtpyContextManager::Context& type,
                                  GtTask* task)
 {
-    qDebug() << "GIL !!!!!!";
     GTPY_GIL_SCOPE
 
     if (!m_calcAccessibleContexts.contains(type))
@@ -418,17 +413,14 @@ GtpyContextManager::addTaskValue(const GtpyContextManager::Context& type,
 
     if (task != Q_NULLPTR)
     {
-        qDebug() << "add obj";
         addObject(type, TASK_VAR, task, false);
-        qDebug() << "obj added";
+
         QString pyCode =
             CALC_MODULE + QStringLiteral(".") + TASK_VAR +
                 QStringLiteral(" = ") + TASK_VAR +  QStringLiteral("\n") +
             QStringLiteral("del ") + TASK_VAR + QStringLiteral("\n");
 
         evalScript(type, pyCode , false);
-
-        qDebug() << "script evaled";
     }
     else
     {
@@ -436,7 +428,6 @@ GtpyContextManager::addTaskValue(const GtpyContextManager::Context& type,
                    QStringLiteral(" = None"), false);
     }
 
-    qDebug() << "add return";
     return true;
 }
 
@@ -503,7 +494,6 @@ void
 GtpyContextManager::resetContext(const GtpyContextManager::Context& type)
 {
     GTPY_GIL_SCOPE
-    qDebug() << "reset func !!!";
 
     if (m_calcAccessibleContexts.contains(type))
     {
@@ -535,8 +525,6 @@ GtpyContextManager::currentPyThreadId()
 void
 GtpyContextManager::interruptPyThread(long id)
 {
-
-    qDebug() << "interrupt function called";
     GtpyInterruptRunnable* runnable = new GtpyInterruptRunnable(id);
 
     QThreadPool* tp = QThreadPool::globalInstance();

@@ -78,8 +78,6 @@ GtpyTask::runIteration()
 
     m_pyThreadId = GtpyContextManager::instance()->currentPyThreadId();
 
-    qDebug() << "id = " << m_pyThreadId;
-
     bool success;
 
     success = GtpyContextManager::instance()->evalScriptInterruptible(type, script(), true);
@@ -109,13 +107,9 @@ GtpyTask::script() const
 void
 GtpyTask::setScript(QString script)
 {
-    qDebug() << script;
     script.replace("\n", "\r");
 
     m_script = script;
-
-    qDebug() << "script saved!!!";
-    qDebug() << m_script;
 }
 
 QStringList
@@ -158,8 +152,6 @@ GtpyTask::getModuleIds()
 void
 GtpyTask::onStateChanged(STATE state)
 {
-    qDebug() << "STATE = " << this->currentState();
-
     if (m_pyThreadId < 0)
     {
         return;
@@ -167,8 +159,6 @@ GtpyTask::onStateChanged(STATE state)
 
     if (state == GtProcessComponent::TERMINATION_REQUESTED)
     {
-        qDebug() << "interrupt " << m_pyThreadId;
-//        qDebug() << "current thread == " << GtpyContextManager::instance()->currentPyThreadId();
         GtpyContextManager::instance()->interruptPyThread(m_pyThreadId);
     }
 }
