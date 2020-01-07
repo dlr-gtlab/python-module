@@ -240,7 +240,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     setLayout(layout);
 
     connect(m_editor, SIGNAL(evalShortcutTriggered()), this,
-            SLOT(onEvalButtonClicked()));
+            SLOT(onEvalShortCutTriggered()));
     connect(m_editor, SIGNAL(searchShortcutTriggered(QString)), this,
             SLOT(setSearchedText(QString)));
     connect(m_searchWidget, SIGNAL(textEdited(QString)), m_editor,
@@ -320,7 +320,8 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
     if (((e->modifiers() & Qt::ControlModifier) &&
          e->key() == Qt::Key_E))
     {
-        onEvalButtonClicked();
+        onEvalShortCutTriggered();
+
         return;
     }
 
@@ -328,7 +329,11 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
     if (((e->modifiers() & Qt::ControlModifier) &&
          e->key() == Qt::Key_I))
     {
-        onEvalButtonClicked();
+        if (m_isEvaluating)
+        {
+            onEvalButtonClicked();
+        }
+
         return;
     }
 
@@ -520,7 +525,8 @@ GtpyAbstractScriptingWizardPage::propValToString(GtAbstractProperty* prop)
 
     if (qobject_cast<GtModeProperty*>(prop))
     {
-        QString valTemp = GtpyContextManager::instance()->qvariantToPyStr(prop->valueToVariant());
+        QString valTemp = GtpyContextManager::instance()->qvariantToPyStr(
+                              prop->valueToVariant());
 
         if (valTemp.isEmpty())
         {
@@ -575,7 +581,7 @@ GtpyAbstractScriptingWizardPage::propValToString(GtAbstractProperty* prop)
                                 QRegExp(QStringLiteral("^[a-zA-Z0-9_]*$"))))
                     {
                         QString funcName =
-                                GtpyContextManager::instance()->findChildFuncName();
+                            GtpyContextManager::instance()->findChildFuncName();
 
                         objName = funcName + "(\"" + objName +
                                        "\")";
@@ -636,7 +642,15 @@ void
 GtpyAbstractScriptingWizardPage::enableSaveButton(bool enable)
 {
     m_saveButton->setEnabled(enable);
-    m_shortCutSave->setVisible(enable);
+
+    if (enable)
+    {
+        m_shortCutSave->setText("<font color='grey'>  Ctrl+S</font>");
+    }
+    else
+    {
+        m_shortCutSave->setText("");
+    }
 }
 
 void
@@ -698,6 +712,15 @@ GtpyAbstractScriptingWizardPage::onEvalButtonClicked()
 
     evalScript(true);
     showEvalButton(false);
+}
+
+void
+GtpyAbstractScriptingWizardPage::onEvalShortCutTriggered()
+{
+    if (!m_isEvaluating)
+    {
+        onEvalButtonClicked();
+    }
 }
 
 void

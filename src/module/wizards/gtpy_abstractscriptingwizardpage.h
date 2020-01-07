@@ -194,8 +194,6 @@ protected slots:
      */
     void evalScript(bool outputToConsole = true);
 
-    void onEvalButtonClicked();
-
 private:
     /**
      * @brief Will be called at initialization of wizard page.
@@ -304,6 +302,18 @@ private slots:
      * @brief Enables and disables forward and backward buttons.
      */
     void onSearchTextEdit();
+
+    /**
+     * @brief If no evaluation is running, this function starts the evaluation.
+     * Otherwise, it stops the current evaluation.
+     */
+    void onEvalButtonClicked();
+
+    /**
+     * @brief If no evaluation is running, it calls the onEvalButtonClicked()
+     * function.
+     */
+    void onEvalShortCutTriggered();
 
     /**
      * @brief In this pure virtual function the routine for saving a script

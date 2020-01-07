@@ -140,7 +140,6 @@ GtpyScriptCalculator::getModuleIds()
 void
 GtpyScriptCalculator::onStateChanged(GtProcessComponent::STATE state)
 {
-    qDebug() << "STATE == " << state;
     if (m_pyThreadId < 0)
     {
         return;
