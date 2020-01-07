@@ -15,39 +15,71 @@
 
 #include "gtpy_contextmanager.h"
 
+/**
+ * @brief The GtpyScriptRunnable class
+ */
 class GtpyScriptRunnable : public QObject,
         public QRunnable
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief The GtpyScriptRunnable constructor.
+     * @param contextType Python context identifier.
+     */
     GtpyScriptRunnable(GtpyContextManager::Context contextType);
 
+    /**
+     * @brief ~GtpyScriptRunnable
+     */
     virtual ~GtpyScriptRunnable();
 
+    /**
+     * @brief Evaluates the m_script interruptible.
+     */
     void run() Q_DECL_OVERRIDE;
 
+    /**
+     * @brief Returns the python script.
+     * @return The python script.
+     */
     QString script() const;
 
+    /**
+     * @brief Sets m_script to given script.
+     * @param script Python script.
+     */
     void setScript(const QString& script);
 
+    /**
+     * @brief Returns whether the script evaluation was successful or not.
+     * @return Whether the script evaluation was successful or not.
+     */
     bool successful();
 
 private:
+    /// Python script
     QString m_script;
 
+    /// Evaluation success
     bool m_successfulRun;
 
+    /// Mutex
     QMutex m_mutex;
 
+    /// Current python thread id
     long m_threadId;
 
+    /// Python context identifier
     GtpyContextManager::Context m_contextType;
 
 public slots:
+    /// Interrupts the python thread with the id m_threadId.
     void interrupt();
 
 signals:
+    /// Emitted when the run() function ends.
     void runnableFinished();
 };
 

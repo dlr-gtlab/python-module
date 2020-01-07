@@ -16,27 +16,50 @@
 
 #define GTPY_GIL_SCOPE GtpyGilScope internal_gilscope;
 
+/**
+ * @brief The GtpyGilScope class
+ */
 class GtpyGilScope : public QObject
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief The GtpyGilScope constructor.
+     */
     GtpyGilScope();
 
+    /**
+     * @brief Destructor releases the GIL.
+     */
     ~GtpyGilScope();
 
+    /**
+     * @brief Sets m_enableGILScope to the specified flag.
+     * @param flage True if the GIL scope should be enabled.
+     */
     static void setGILScopeEnabled(bool flag);
 
+    /**
+     * @brief Returns whether the GIL scope is enabled or not.
+     * @return Whether the GIL scope is enabled or not.
+     */
     static bool isGILScopeEnabled();
 
 private slots:
+    /**
+     * @brief Releases the GIL.
+     */
     void release();
 
 private:
+    /// GIL state
     PyGILState_STATE m_state;
 
+    /// GIL ensured
     bool m_ensured;
 
+    /// GIL scope is enabled
     static bool m_enableGILScope;
 };
 

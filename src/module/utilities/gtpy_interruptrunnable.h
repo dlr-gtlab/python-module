@@ -13,16 +13,29 @@
 #include <QObject>
 #include <QRunnable>
 
+/**
+ * @brief The GtpyInterruptRunnable class
+ */
 class GtpyInterruptRunnable : public QObject,
         public QRunnable
 {
     Q_OBJECT
+
 public:
+    /**
+     * @brief The GtpyInterruptRunnable constructor.
+     * @param pyThreadId Id of the python thread to be interrupted.
+     */
     GtpyInterruptRunnable(long pyThreadId);
 
+    /**
+     * @brief Throws an KeyboardInterrupt to the python thread with the id
+     *  m_pyThreadId.
+     */
     void run() Q_DECL_OVERRIDE;
 
 private:
+    /// Thread id
     long m_pyThreadId;
 };
 
