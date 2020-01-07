@@ -7,10 +7,10 @@
 BUILD_BATCH     =   true
 BUILD_UNITTESTS =   true
 
-PY_VERSION = 373
+PY_VERSION = 273
 
 # path to dev tools
-DEV_TOOLS = PATH/TO/DEVTOOLS
+DEV_TOOLS = /home/schm_j13/devel/GTlab-DevTools
 
 # path to GTlab Core repository
 GTLAB_CORE_PATH    = $${DEV_TOOLS}
@@ -21,4 +21,4 @@ PYTHON_PATH = $${DEV_TOOLS}\ThirdPartyLibraries\Python\Python_$${PY_VERSION}
 PYTHON_QT_PATH = $${DEV_TOOLS}\ThirdPartyLibraries\PythonQt\PythonQt_$${PY_VERSION}
 
 # Deployment
-GTLAB_ENVIRONMENT_PATH = 
+GTLAB_ENVIRONMENT_PATH = /home/schm_j13/devel/GTlab/1_5_1/build

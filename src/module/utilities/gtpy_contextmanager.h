@@ -15,6 +15,7 @@
 #include <QObject>
 
 #include "PythonQtObjectPtr.h"
+#include "PythonQtConversion.h"
 
 class GtTask;
 class GtpyDecorator;
@@ -555,16 +556,19 @@ private:
 
         PyObject* result = PyDict_New();
 
-        QMap<Key, Val>::const_iterator t = map.constBegin();
+        //QMap<Key, Val>::const_iterator    t;
+        //t = map.constBegin();
+        QList<Key> keys = map.keys();
 
         PyObject* key;
         PyObject* val;
 
-        for ( ; t != map.constEnd(); t++)
+        //for ( ; t != map.constEnd(); t++)
+        foreach (Key k, keys)
         {
             // converts key and value to QVariant and then to PyObject*
-            key = PythonQtConv::QVariantToPyObject(QVariant(t.key()));
-            val = PythonQtConv::QVariantToPyObject(QVariant(t.value()));
+            key = PythonQtConv::QVariantToPyObject(QVariant(k));
+            val = PythonQtConv::QVariantToPyObject(QVariant(map.value(k)));
 
             // sets key and val to the result dict
             PyDict_SetItem(result, key, val);

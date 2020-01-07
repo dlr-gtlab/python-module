@@ -80,7 +80,8 @@ GtpyTask::runIteration()
 
     bool success;
 
-    success = GtpyContextManager::instance()->evalScriptInterruptible(type, script(), true);
+    success = GtpyContextManager::instance()->evalScriptInterruptible(
+                  type, script(), true);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
