@@ -53,6 +53,21 @@ public:
     void setScript(const QString& script);
 
     /**
+     * @brief Returns true when the output of the script evaluation will be send
+     * to the console.
+     * @return True when the output of the script evaluation will be send
+     * to the console.
+     */
+    bool outputToConsole() const;
+
+    /**
+     * @brief Sets the value that determines whether the output will be send
+     * to the console.
+     * @param outputToConsole True if the output should be send to the console.
+     */
+    void setOutputToConsole(bool outputToConsole);
+
+    /**
      * @brief Returns whether the script evaluation was successful or not.
      * @return Whether the script evaluation was successful or not.
      */
@@ -61,6 +76,9 @@ public:
 private:
     /// Python script
     QString m_script;
+
+    /// Output behaviore
+    bool m_outputToConsole;
 
     /// Evaluation success
     bool m_successfulRun;

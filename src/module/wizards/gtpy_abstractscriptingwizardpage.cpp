@@ -681,6 +681,7 @@ GtpyAbstractScriptingWizardPage::evalScript(bool outputToConsole)
     m_runnable = new GtpyScriptRunnable(m_contextType);
 
     m_runnable->setScript(m_editor->script());
+    m_runnable->setOutputToConsole(outputToConsole);
 
     // make runnable not delete herself
     m_runnable->setAutoDelete(false);
