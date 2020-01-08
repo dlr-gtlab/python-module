@@ -73,7 +73,10 @@ HEADERS += \
     utilities/gtpy_contextmanager.h \
     utilities/gtpy_calculatorfactory.h \
     gt_pythonmodule_exports.h \
-    utilities/gtpy_codegenerator.h
+    utilities/gtpy_codegenerator.h \
+    utilities/gtpy_scriptrunnable.h \
+    utilities/gtpy_gilscope.h \
+    utilities/gtpy_interruptrunnable.h
 
 SOURCES += \
     gt_python.cpp \
@@ -98,7 +101,10 @@ SOURCES += \
     utilities/gtpy_decorator.cpp \
     utilities/gtpy_contextmanager.cpp \
     utilities/gtpy_calculatorfactory.cpp \
-    utilities/gtpy_codegenerator.cpp
+    utilities/gtpy_codegenerator.cpp \
+    utilities/gtpy_scriptrunnable.cpp \
+    utilities/gtpy_gilscope.cpp \
+    utilities/gtpy_interruptrunnable.cpp
 
 LIBS += -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabCore
 

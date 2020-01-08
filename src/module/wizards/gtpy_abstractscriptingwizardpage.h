@@ -17,6 +17,7 @@
 
 class GtpyScriptEditor;
 class GtpyConsole;
+class GtpyScriptRunnable;
 class GtSearchWidget;
 class QSplitter;
 class QTabWidget;
@@ -150,14 +151,6 @@ protected:
     void setConsoleVisible(bool visible = true);
 
     /**
-     * @brief Enables the evaluation of the script which is written
-     * in the editor.
-     * @param enable If it is true, the evaluation will be enabled. Otherwise
-     * it will be disabled.
-     */
-    void enableEvaluation(bool enable = true);
-
-    /**
      * @brief Inserts text at current cursor position of editor widget.
      * @param text Text that should be set to editor.
      */
@@ -199,7 +192,7 @@ protected slots:
      * @brief Evaluates the current script from the editor
      * in the Python context of the calculator.
      */
-    bool evalScript(bool outputToConsole = true);
+    void evalScript(bool outputToConsole = true);
 
 private:
     /**
@@ -212,6 +205,8 @@ private:
      * @return Whether validation was successful.
      */
     virtual bool validation();
+
+    void showEvalButton(bool show);
 
     /// Search Widget
     GtSearchWidget* m_searchWidget;
@@ -227,6 +222,12 @@ private:
 
     /// Evaluate Script Button
     QPushButton* m_evalButton;
+
+    QLabel* m_shortCutEval;
+
+    //QPushButton* m_interruptButton;
+
+    QLabel* m_shortCutInterrupt;
 
     /// Save Button
     QPushButton* m_saveButton;
@@ -250,6 +251,10 @@ private:
 
     /// Package Names
     QStringList m_packageNames;
+
+    bool m_isEvaluating;
+
+    QPointer<GtpyScriptRunnable> m_runnable;
 
 private slots:
 
@@ -299,10 +304,24 @@ private slots:
     void onSearchTextEdit();
 
     /**
+     * @brief If no evaluation is running, this function starts the evaluation.
+     * Otherwise, it stops the current evaluation.
+     */
+    void onEvalButtonClicked();
+
+    /**
+     * @brief If no evaluation is running, it calls the onEvalButtonClicked()
+     * function.
+     */
+    void onEvalShortCutTriggered();
+
+    /**
      * @brief In this pure virtual function the routine for saving a script
      * must be implemented.
      */
     virtual void onSaveButtonClicked() = 0;
+
+    void evaluationFinished();
 };
 
 #endif // GTPY_ABSTRACTSCRIPTINGWIZARDPAGE_H

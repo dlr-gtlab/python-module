@@ -18,7 +18,8 @@
 #include "gtpy_scriptcalculator.h"
 
 GtpyScriptCalculator::GtpyScriptCalculator() :
-    m_script("script", "Script")
+    m_script("script", "Script"),
+    m_pyThreadId(-1)
 {
     setObjectName("Python Script Editor");
 
@@ -44,6 +45,9 @@ GtpyScriptCalculator::GtpyScriptCalculator() :
 
     registerProperty(m_script);
     m_script.hide();
+
+    connect(this, SIGNAL(stateChanged(GtProcessComponent::STATE)), this,
+            SLOT(onStateChanged(GtProcessComponent::STATE)));
 }
 
 GtpyScriptCalculator::~GtpyScriptCalculator()
@@ -71,10 +75,12 @@ GtpyScriptCalculator::run()
 
     gtInfo() << "running script...";
 
+    m_pyThreadId = GtpyContextManager::instance()->currentPyThreadId();
 
     bool success;
 
-    success = GtpyContextManager::instance()->evalScript(type, script(), true);
+    success = GtpyContextManager::instance()->evalScriptInterruptible(
+                  type, script(), true);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -130,5 +136,60 @@ GtpyScriptCalculator::getModuleIds()
     }
 
     return project->moduleIds();
+}
+
+void GtpyScriptCalculator::connectWithRootTask(bool connection)
+{
+    GtObject* root = findRoot<GtObject*>();
+
+    if (!root)
+    {
+        return;
+    }
+
+    GtProcessComponent* rootTask = qobject_cast<GtProcessComponent*>(root);
+
+    if (!rootTask)
+    {
+        return;
+    }
+
+    if (connection)
+    {
+        connect(rootTask, SIGNAL(stateChanged(GtProcessComponent::STATE)),
+                this, SLOT(onTaskStateChanged(GtProcessComponent::STATE)));
+    }
+    else
+    {
+        disconnect(rootTask, SIGNAL(stateChanged(GtProcessComponent::STATE)),
+                this, SLOT(onTaskStateChanged(GtProcessComponent::STATE)));
+    }
+}
+
+void
+GtpyScriptCalculator::onStateChanged(GtProcessComponent::STATE state)
+{
+    bool connect = false;
+
+    if (state == GtProcessComponent::RUNNING)
+    {
+        connect = true;
+    }
+
+    connectWithRootTask(connect);
+}
+
+void
+GtpyScriptCalculator::onTaskStateChanged(GtProcessComponent::STATE state)
+{
+    if (m_pyThreadId < 0)
+    {
+        return;
+    }
+
+    if (state == GtProcessComponent::TERMINATION_REQUESTED)
+    {
+        GtpyContextManager::instance()->interruptPyThread(m_pyThreadId);
+    }
 }
 

@@ -11,6 +11,7 @@
 #include <QMetaMethod>
 #include <QMetaEnum>
 #include <QSettings>
+#include <QThreadPool>
 
 #include "PythonQt.h"
 #include "PythonQtObjectPtr.h"
@@ -25,13 +26,15 @@
 #include "gt_task.h"
 #include "gt_calculator.h"
 #include "gt_coreapplication.h"
-#include "gtpy_decorator.h"
 #include "gt_calculatordata.h"
 #include "gt_calculatorfactory.h"
 #include "gt_datazone0d.h"
+#include "gt_calculatorhelperfactory.h"
 
 #include "gtpy_calculatorfactory.h"
-#include "gt_calculatorhelperfactory.h"
+#include "gtpy_gilscope.h"
+#include "gtpy_decorator.h"
+#include "gtpy_interruptrunnable.h"
 
 #include "gtpy_contextmanager.h"
 
@@ -62,12 +65,15 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     m_currentContex(GtpyContextManager::GlobalContext),
     m_sendErrorMessages(true),
     m_errorEmitted(false),
-    m_loggingModule(Q_NULLPTR)
+    m_loggingModule(Q_NULLPTR),
+    m_pyThreadState(Q_NULLPTR)
 {
     qRegisterMetaType<GtpyContextManager::Context>
     ("GtpyContextManager::Context");
 
     PythonQt::init(PythonQt::RedirectStdOut);
+
+    GtpyGilScope::setGILScopeEnabled(true);
 
     PythonQt::self()->setSystemExitExceptionHandlerEnabled(true);
 
@@ -103,6 +109,8 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
             SLOT(onPythonMessage(const QString&)));
     connect(PythonQt::self(), SIGNAL(systemExitExceptionRaised(int)), this,
             SLOT(onSystemExitExceptionRaised(int)));
+
+    m_pyThreadState = PyEval_SaveThread();
 }
 
 GtpyContextManager*
@@ -118,12 +126,22 @@ GtpyContextManager::instance()
     return retval;
 }
 
+GtpyContextManager::~GtpyContextManager()
+{
+    if (m_pyThreadState != Q_NULLPTR)
+    {
+        PyEval_RestoreThread(m_pyThreadState);
+    }
+}
+
 bool
 GtpyContextManager::evalScript(const GtpyContextManager::Context& type,
                                const QString& script,
                                const bool output,
                                const EvalOptions& option)
 {
+    GTPY_GIL_SCOPE
+
     m_currentContex = type;
 
     m_sendOutputMessages = output;
@@ -187,11 +205,30 @@ GtpyContextManager::evalScript(const GtpyContextManager::Context& type,
     return !hadError;
 }
 
+bool
+GtpyContextManager::evalScriptInterruptible(
+        const GtpyContextManager::Context& type, const QString& script,
+        const bool output, const GtpyContextManager::EvalOptions& option)
+{
+    QString interruptibleCode = script;
+
+    interruptibleCode.replace("\r", "\n");
+
+    interruptibleCode.prepend("try:\n");
+    interruptibleCode = interruptibleCode.replace("\n","\n\t");
+    interruptibleCode += "\nexcept KeyboardInterrupt:\n"
+                         "    print ('--Interrupted--')\n";
+
+    return evalScript(type, interruptibleCode, output, option);
+}
+
 QMultiMap<QString, GtpyFunction>
 GtpyContextManager::introspection(const GtpyContextManager::Context& type,
                                   const QString& objectname,
                                   const bool appendModules)
 {
+    GTPY_GIL_SCOPE
+
     PythonQtObjectPtr currentContext = context(type);
 
     if (currentContext == Q_NULLPTR)
@@ -272,6 +309,8 @@ GtpyContextManager::addObject(const GtpyContextManager::Context& type,
                               const QString& name, QObject* obj,
                               const bool saveName)
 {
+    GTPY_GIL_SCOPE
+
     if (name.isEmpty())
     {
         return false;
@@ -311,6 +350,8 @@ bool
 GtpyContextManager::removeObject(const GtpyContextManager::Context&
                                      type, const QString& name)
 {
+    GTPY_GIL_SCOPE
+
     QStringList list = m_addedObjectNames.value(type, QStringList());
 
     if (!list.contains(name))
@@ -338,6 +379,8 @@ bool
 GtpyContextManager::removeAllAddedObjects(
     const GtpyContextManager::Context& type)
 {
+    GTPY_GIL_SCOPE
+
     PythonQtObjectPtr currentContext = context(type);
 
     if (currentContext == Q_NULLPTR)
@@ -361,6 +404,8 @@ bool
 GtpyContextManager::addTaskValue(const GtpyContextManager::Context& type,
                                  GtTask* task)
 {
+    GTPY_GIL_SCOPE
+
     if (!m_calcAccessibleContexts.contains(type))
     {
         return false;
@@ -402,6 +447,8 @@ GtpyContextManager::deleteCalcsFromTask(
 QString
 GtpyContextManager::qvariantToPyStr(const QVariant& val) const
 {
+    GTPY_GIL_SCOPE
+
     PyObject* pyObj = PythonQtConv::QVariantToPyObject(val);
 
     return PythonQtConv::PyObjGetString(pyObj);
@@ -446,6 +493,8 @@ GtpyContextManager::initContexts()
 void
 GtpyContextManager::resetContext(const GtpyContextManager::Context& type)
 {
+    GTPY_GIL_SCOPE
+
     if (m_calcAccessibleContexts.contains(type))
     {
         registerCalcModuleInSys(type);
@@ -465,10 +514,31 @@ GtpyContextManager::resetContext(const GtpyContextManager::Context& type)
     }
 }
 
+long
+GtpyContextManager::currentPyThreadId()
+{
+    GTPY_GIL_SCOPE
+
+    return PyThreadState_Get()->thread_id;
+}
+
+void
+GtpyContextManager::interruptPyThread(long id)
+{
+    GtpyInterruptRunnable* runnable = new GtpyInterruptRunnable(id);
+
+    QThreadPool* tp = QThreadPool::globalInstance();
+
+    // start runnable
+    tp->start(runnable);
+}
+
 void
 GtpyContextManager::defaultContextConfig(
         const GtpyContextManager::Context& type, const QString& contextName)
 {
+    GTPY_GIL_SCOPE
+
     PythonQtObjectPtr context = PythonQt::self()->createModuleFromScript(
                                     contextName);
 
@@ -525,6 +595,8 @@ GtpyContextManager::context(const GtpyContextManager::Context& type) const
 void
 GtpyContextManager::initCalculatorModule()
 {
+    GTPY_GIL_SCOPE
+
     PythonQtObjectPtr calcModule =
             PythonQt::self()->createModuleFromScript(CALC_MODULE);
 
@@ -638,6 +710,8 @@ GtpyContextManager::initCalculatorModule()
 void
 GtpyContextManager::initLoggingModule()
 {
+    GTPY_GIL_SCOPE
+
     QString loggingClass = GtPythonLogger::staticMetaObject.className();
 
     m_loggingModule = PythonQt::self()->createModuleFromScript(LOGGING_MODULE);
@@ -710,6 +784,8 @@ GtpyContextManager::initLoggingModule()
 void
 GtpyContextManager::initBatchContext()
 {
+    GTPY_GIL_SCOPE
+
     Context type = BatchContext;
     PythonQtObjectPtr con = context(type);
 
@@ -748,6 +824,8 @@ GtpyContextManager::initBatchContext()
 void
 GtpyContextManager::initGlobalContext()
 {
+    GTPY_GIL_SCOPE
+
     Context type = GlobalContext;
     PythonQtObjectPtr con = context(type);
 
@@ -838,6 +916,8 @@ void
 GtpyContextManager::importDefaultModules(
         const GtpyContextManager::Context& type)
 {
+    GTPY_GIL_SCOPE
+
     PythonQtObjectPtr con = context(type);
 
     if (con == Q_NULLPTR)
@@ -857,6 +937,8 @@ void
 GtpyContextManager::importLoggingFuncs(const GtpyContextManager::Context& type,
                                         bool appConsole)
 {
+    GTPY_GIL_SCOPE
+
     PythonQtObjectPtr con = context(type);
 
     if (con == Q_NULLPTR)
@@ -884,6 +966,8 @@ GtpyContextManager::importLoggingFuncs(const GtpyContextManager::Context& type,
 void
 GtpyContextManager::importCalcModule(const GtpyContextManager::Context& type)
 {
+    GTPY_GIL_SCOPE
+
     if (!m_calcAccessibleContexts.contains(type))
     {
         m_calcAccessibleContexts << type;
@@ -910,8 +994,11 @@ GtpyContextManager::importCalcModule(const GtpyContextManager::Context& type)
 }
 
 void
-GtpyContextManager::registerCalcModuleInSys(const GtpyContextManager::Context& type)
+GtpyContextManager::registerCalcModuleInSys(
+        const GtpyContextManager::Context& type)
 {
+    GTPY_GIL_SCOPE
+
     PythonQtObjectPtr con = context(type);
 
     if (con == Q_NULLPTR)
@@ -931,6 +1018,8 @@ GtpyContextManager::registerCalcModuleInSys(const GtpyContextManager::Context& t
 void
 GtpyContextManager::removeCalcModuleFromSys()
 {
+    GTPY_GIL_SCOPE
+
     PythonQtObjectPtr con = context(GtpyContextManager::GlobalContext);
 
     if (con == Q_NULLPTR)
@@ -1033,6 +1122,8 @@ GtpyContextManager::lineOutOfMessage(const QString& message) const
 QMultiMap<QString, GtpyFunction>
 GtpyContextManager::introspectObject(PyObject* object) const
 {
+    GTPY_GIL_SCOPE
+
     QMultiMap<QString, GtpyFunction> results;
 
     if (m_decorator == Q_NULLPTR)
@@ -1416,6 +1507,8 @@ GtpyContextManager::customCompletions() const
 QMultiMap<QString, GtpyFunction>
 GtpyContextManager::builtInCompletions() const
 {
+    GTPY_GIL_SCOPE
+
     QMultiMap<QString, GtpyFunction> results;
 
     // the script down below does not work in 2.7
@@ -1475,6 +1568,8 @@ GtpyContextManager::builtInCompletions() const
 void
 GtpyContextManager::setImportableModulesCompletions()
 {
+    GTPY_GIL_SCOPE
+
     // the script down below does not work in 2.7
     if (pythonVersion() != QStringLiteral("3.7"))
     {

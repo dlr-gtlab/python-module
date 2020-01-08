@@ -19,7 +19,8 @@
 
 GtpyTask::GtpyTask():
     m_script("script", "Skript"),
-    m_calcDefinitions("calcDefinitions", "Calculator Definitions")
+    m_calcDefinitions("calcDefinitions", "Calculator Definitions"),
+    m_pyThreadId(-1)
 {
     setObjectName("Python Task");
 
@@ -48,6 +49,9 @@ GtpyTask::GtpyTask():
             m_dynamicPathProps << pathProp;
         }
     }
+
+    connect(this, SIGNAL(stateChanged(GtProcessComponent::STATE)), this,
+            SLOT(onStateChanged(GtProcessComponent::STATE)));
 }
 
 bool
@@ -72,9 +76,12 @@ GtpyTask::runIteration()
 
     gtInfo() << "running script...";
 
+    m_pyThreadId = GtpyContextManager::instance()->currentPyThreadId();
+
     bool success;
 
-    success = GtpyContextManager::instance()->evalScript(type, script(), true);
+    success = GtpyContextManager::instance()->evalScriptInterruptible(
+                  type, script(), true);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -141,6 +148,20 @@ GtpyTask::getModuleIds()
     }
 
     return project->moduleIds();
+}
+
+void
+GtpyTask::onStateChanged(STATE state)
+{
+    if (m_pyThreadId < 0)
+    {
+        return;
+    }
+
+    if (state == GtProcessComponent::TERMINATION_REQUESTED)
+    {
+        GtpyContextManager::instance()->interruptPyThread(m_pyThreadId);
+    }
 }
 
 QString
