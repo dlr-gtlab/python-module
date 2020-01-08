@@ -34,7 +34,8 @@ GtpyScriptRunnable::run()
     m_mutex.unlock();
 
     m_successfulRun = python->evalScriptInterruptible(m_contextType,
-                                                      m_script, true);
+                                                      m_script,
+                                                      m_outputToConsole);
 
     emit runnableFinished();
 }
@@ -51,6 +52,16 @@ GtpyScriptRunnable::setScript(const QString& script)
     m_script = script;
 }
 
+bool GtpyScriptRunnable::outputToConsole() const
+{
+    return m_outputToConsole;
+}
+
+void GtpyScriptRunnable::setOutputToConsole(bool outputToConsole)
+{
+    m_outputToConsole = outputToConsole;
+}
+
 bool
 GtpyScriptRunnable::successful()
 {
@@ -62,7 +73,7 @@ GtpyScriptRunnable::interrupt()
 {
     GTPY_GIL_SCOPE
 
-    m_successfulRun = false;
+            m_successfulRun = false;
     m_mutex.lock();
     GtpyContextManager::instance()->interruptPyThread(m_threadId);
     m_mutex.unlock();
