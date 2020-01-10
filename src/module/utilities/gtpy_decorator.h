@@ -328,6 +328,33 @@ public slots:
      */
     QString ident(GtAbstractProperty* prop);
 
+    /**
+     * @brief Decorator function to isActive function of GtAbstractProperty.
+     * @param prop pointer to GtAbstractProperty
+     * @return True, if property is active.
+     */
+    bool isActive(GtAbstractProperty* prop) const;
+
+    /**
+     * @brief Decorator function to setActive function of GtAbstractProperty.
+     * @param prop pointer to GtAbstractProperty
+     * @param val
+     */
+    void setActive(GtAbstractProperty* prop, bool val);
+
+    /**
+     * @brief Decorator function to isOptional function of GtAbstractProperty.
+     * @param prop pointer to GtAbstractProperty
+     * @return True, if property is optional.
+     */
+    bool isOptional(GtAbstractProperty* prop) const;
+
+    /**
+     * @brief Decorator function to setOptional function of GtAbstractProperty.
+     * @param val
+     */
+    void setOptional(GtAbstractProperty* prop, bool val);
+
     ///-------> functions of QObject <-------\\\
 
     /**
