@@ -399,7 +399,8 @@ GtpyTaskWizardPage::insertConstructor(GtCalculator* calc)
 
     insertToCurrentCursorPos(pyCode + "\n");
 
-    evalScript(false);
+    evalScript(pyCode, true);
+    showEvalButton(false);
 }
 
 bool
