@@ -184,6 +184,8 @@ protected:
      */
     void addTabWidget(QWidget* wid, const QString& label);
 
+    void showEvalButton(bool show);
+
     /// Python Context Type
     GtpyContextManager::Context m_contextType;
 
@@ -193,6 +195,12 @@ protected slots:
      * in the Python context of the calculator.
      */
     void evalScript(bool outputToConsole = true);
+
+    /**
+     * @brief Evaluates the specified script
+     * in the Python context of the calculator.
+     */
+    void evalScript(const QString& script, bool outputToConsole = true);
 
 private:
     /**
@@ -205,8 +213,6 @@ private:
      * @return Whether validation was successful.
      */
     virtual bool validation();
-
-    void showEvalButton(bool show);
 
     /// Search Widget
     GtSearchWidget* m_searchWidget;

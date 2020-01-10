@@ -669,6 +669,15 @@ GtpyAbstractScriptingWizardPage::addTabWidget(QWidget* wid,
 void
 GtpyAbstractScriptingWizardPage::evalScript(bool outputToConsole)
 {
+    GtpyContextManager::instance()->deleteCalcsFromTask(m_contextType);
+
+    evalScript(m_editor->script(), outputToConsole);
+}
+
+void
+GtpyAbstractScriptingWizardPage::evalScript(const QString& script,
+                                            bool outputToConsole)
+{
     if (m_isEvaluating)
     {
         return;
@@ -676,14 +685,12 @@ GtpyAbstractScriptingWizardPage::evalScript(bool outputToConsole)
 
     m_isEvaluating = true;
 
-    GtpyContextManager::instance()->deleteCalcsFromTask(m_contextType);
-
     m_runnable = new GtpyScriptRunnable(m_contextType);
 
-    m_runnable->setScript(m_editor->script());
+    m_runnable->setScript(script);
     m_runnable->setOutputToConsole(outputToConsole);
 
-    // make runnable not delete herself
+    // make runnable not delete itself
     m_runnable->setAutoDelete(false);
 
     // connect runnable signals to wizard slots
