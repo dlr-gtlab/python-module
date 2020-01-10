@@ -12,6 +12,7 @@
 
 #include <QObject>
 #include <QRunnable>
+#include <QMutex>
 
 #include "gtpy_contextmanager.h"
 
