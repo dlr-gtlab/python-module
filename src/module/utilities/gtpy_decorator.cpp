@@ -847,6 +847,50 @@ GtpyDecorator::ident(GtAbstractProperty* prop)
     return prop->ident();
 }
 
+bool
+GtpyDecorator::isActive(GtAbstractProperty* prop) const
+{
+    if (prop == Q_NULLPTR)
+    {
+        return false;
+    }
+
+    return prop->isActive();
+}
+
+void
+GtpyDecorator::setActive(GtAbstractProperty* prop, bool val)
+{
+    if (prop == Q_NULLPTR)
+    {
+        return;
+    }
+
+    return prop->setActive(val);
+}
+
+bool
+GtpyDecorator::isOptional(GtAbstractProperty* prop) const
+{
+    if (prop == Q_NULLPTR)
+    {
+        return false;
+    }
+
+    return prop->isOptional();
+}
+
+void
+GtpyDecorator::setOptional(GtAbstractProperty* prop, bool val)
+{
+    if (prop == Q_NULLPTR)
+    {
+        return;
+    }
+
+    return prop->setOptional(val);
+}
+
 QList<QObject*>
 GtpyDecorator::getChildren(QObject* obj)
 {
