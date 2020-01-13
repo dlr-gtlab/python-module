@@ -212,12 +212,12 @@ GtpyContextManager::evalScriptInterruptible(
 {
     QString interruptibleCode = script;
 
-    interruptibleCode.replace("\r", "\n");
+//    interruptibleCode.replace("\r", "\n");
 
-    interruptibleCode.prepend("try:\n");
-    interruptibleCode = interruptibleCode.replace("\n","\n\t");
-    interruptibleCode += "\nexcept KeyboardInterrupt:\n"
-                         "    print ('--Interrupted--')\n";
+//    interruptibleCode.prepend("try:\n");
+//    interruptibleCode = interruptibleCode.replace("\n","\n\t");
+//    interruptibleCode += "\nexcept KeyboardInterrupt:\n"
+//                         "\tprint ('--Interrupted--')\n";
 
     return evalScript(type, interruptibleCode, output, option);
 }
@@ -1048,8 +1048,8 @@ GtpyContextManager::lineOutOfMessage(const QString& message) const
         return lineNumber;
     }
 
-    QString line = QStringLiteral("line ");
-    int index = message.indexOf(QStringLiteral("line "));
+    QString line = QStringLiteral("\"<string>\", line ");
+    int index = message.indexOf(line);
 
     if (index == -1)
     {

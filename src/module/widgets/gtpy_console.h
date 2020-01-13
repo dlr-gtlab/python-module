@@ -68,6 +68,10 @@ protected:
     void keyPressEvent (QKeyEvent* e) Q_DECL_OVERRIDE;
 
 private:
+
+    static const QRegularExpression RE_KEYBOARD_INTERRUPT;
+    static const QRegularExpression RE_ERROR_LINE;
+
     /// History of Commands
     QStringList m_history;
 
@@ -161,6 +165,14 @@ private:
      * @param bold If blod is true, it sets the font's weight to blod.
      */
     void setCurrentFont(const QColor& color = QColor(0,0,0), bool bold = false);
+
+
+    /**
+     * @brief chekcs if the error message of the python exception
+     * 'KeyboardInterrupt' was send to the console. If so it replaces it with a
+     * propper message
+     */
+    void hideKeyboardInterruptException();
 
 private slots:
 
