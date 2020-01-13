@@ -745,7 +745,7 @@ GtpyScriptEditor::lineHighlighting()
 
 void
 GtpyScriptEditor::highlightErrorLine(int codeLine,
-                                  const GtpyContextManager::Context& type)
+                                     const GtpyContextManager::Context& type)
 {
     if (type == m_contextType)
     {

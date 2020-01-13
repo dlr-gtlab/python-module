@@ -24,6 +24,13 @@
 
 #include "gtpy_console.h"
 
+
+const QRegularExpression GtpyConsole::RE_KEYBOARD_INTERRUPT
+    ("Traceback.*\\n(\\s*File.*\\n)+(.*\\n)?KeyboardInterrupt");
+const QRegularExpression GtpyConsole::RE_ERROR_LINE
+    ("\"<string>\", line \\d+");
+
+
 GtpyConsole::GtpyConsole(GtpyContextManager::Context type,
                          QWidget* parent) :
     QTextEdit(parent), m_python(Q_NULLPTR), m_defaultPrompt("> ")
@@ -569,6 +576,35 @@ GtpyConsole::setCurrentFont(const QColor& color, bool bold)
 }
 
 void
+GtpyConsole::hideKeyboardInterruptException()
+{
+    QString error = this->toPlainText();
+
+    if (error.indexOf(RE_KEYBOARD_INTERRUPT) == -1)
+    {
+        return;
+    }
+
+    QRegularExpressionMatch matchError = RE_KEYBOARD_INTERRUPT.match(error);
+    QRegularExpressionMatch matchLine  = RE_ERROR_LINE.match(
+                matchError.captured());
+
+    // extract lineNumber, size of RE_ERROR_LINE until digit is 17
+    int lineNumber = matchLine.captured().mid(17).toInt();
+
+    QString output = error;
+    QString interruptString;
+    interruptString += " --- Interrupted script at line ";
+    interruptString += QString::number(lineNumber);
+    interruptString += + " --- ";
+
+    output.replace(matchError.captured(), interruptString);
+
+    this->clear();
+    this->insertPlainText(output);
+}
+
+void
 GtpyConsole::stdOut(const QString& message,
                                  GtpyContextManager::Context type)
 {
@@ -685,6 +721,8 @@ GtpyConsole::consoleMessage(const QString& message)
     setTextCursor(cursor);
     append(QString());
     insertPlainText(message);
+
+    hideKeyboardInterruptException();
 
     setCurrentCharFormat(m_defaultTextCharacterFormat);
 }
