@@ -208,10 +208,27 @@ GtpyConsole::keyPressEvent(QKeyEvent* e)
             {
                 break;
             }
+            else
+            {
+                /*indents the new line accordingly*/
+                int  tabCount  = 0;
+                bool storeOnly = storeLine(&tabCount);
 
-            executeLine(e->modifiers() & Qt::ShiftModifier);
-            eventHandled = true;
-            break;
+                executeLine(storeOnly || e->modifiers() & Qt::ShiftModifier);
+
+                if (storeOnly)
+                {
+                    textCursor = this->textCursor();
+
+                    for (int i = 0; i < tabCount; i++)
+                    {
+                        textCursor.insertText(QStringLiteral("\t"));
+                    }
+                }
+
+                eventHandled = true;
+                break;
+            }
 
         case Qt::Key_Backspace:
 
@@ -573,6 +590,46 @@ GtpyConsole::setCurrentFont(const QColor& color, bool bold)
     charFormat.setBackground(brush);
 
     setCurrentCharFormat(charFormat);
+}
+
+bool
+GtpyConsole::storeLine(int* insertTab)
+{
+    QTextCursor cursor = this->textCursor();
+
+    cursor.movePosition(QTextCursor::EndOfLine,
+                        QTextCursor::MoveAnchor);
+    cursor.movePosition(QTextCursor::StartOfLine,
+                        QTextCursor::KeepAnchor);
+
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor,
+                        (m_commandPrompt + m_defaultPrompt).length() - 2);
+
+    QString line = cursor.selectedText();
+
+    // to match whether a definiton starts (e.g. def func():)
+    QRegularExpression defExp(QStringLiteral(":\\s*(\\Z|\\n)"));
+
+    // to count the tabs/spaces
+    QRegularExpression tabExp(QStringLiteral("^\\s+"));
+    QRegularExpressionMatch match = tabExp.match(line);
+
+    *insertTab  = match.capturedLength();
+
+    bool storeOnly = false;
+
+    if (line.contains(defExp))
+    {
+        *insertTab += 1;
+        storeOnly = true;
+    }
+    else if (m_currentMultiLineCode.contains(defExp) &&
+             !line.simplified().isEmpty())
+    {
+        storeOnly  = true;
+    }
+
+    return storeOnly;
 }
 
 void

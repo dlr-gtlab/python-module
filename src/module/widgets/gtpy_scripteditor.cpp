@@ -631,37 +631,37 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
         }
     }
 
+
     switch (event->key())
     {
         case Qt::Key_Return:
         {
-            QTextCursor cursor;
-            cursor = textCursor();
+            QTextCursor cursor = textCursor();
+
             cursor.movePosition(QTextCursor::StartOfLine,
                                 QTextCursor::KeepAnchor);
 
-            QString text;
-            text = cursor.selectedText();
+            QString line = cursor.selectedText();
 
-            int asciiTab = 9;
+            // match leading tabs
+            QRegularExpression regExp(QStringLiteral("^\\s+"));
+            QRegularExpressionMatch match = regExp.match(line);
 
-            QChar tab = static_cast<char>(asciiTab);
+            QString newLine = match.captured();
 
-            int i = 0;
+            // match wheter a definiton starts (e.g. def func():)
+            regExp.setPattern(QStringLiteral(":\\s*\\Z"));
+            match  = regExp.match(line);
 
-            int textSize = text.size();
-
-            while (i < textSize)
+            // append tab
+            if (match.hasMatch())
             {
-                if (text.startsWith(tab))
-                {
-                    text = text.mid(1);
-                    i++;
-                }
-                else
-                {
-                    break;
-                }
+                newLine += QStringLiteral("\t");
+            }
+
+            if (newLine.isEmpty())
+            {
+                break;
             }
 
             GtCodeEditor::keyPressEvent(event);
@@ -672,16 +672,10 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
             }
 
             cursor = textCursor();
-
-            for (int j = 0; j < i; j++)
-            {
-                cursor.insertText(tab);
-            }
+            cursor.insertText(newLine);
 
             return;
         }
-        default:
-            break;
     }
 
     GtCodeEditor::keyPressEvent(event);

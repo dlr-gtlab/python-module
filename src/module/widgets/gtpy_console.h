@@ -166,6 +166,13 @@ private:
      */
     void setCurrentFont(const QColor& color = QColor(0,0,0), bool bold = false);
 
+    /**
+     * @brief checks whether the text in the console should be/continued to be
+     * evaluated in multiline-mode or not
+     * @param tabCount indicates how many tabs the new line should be indented
+     * @return true if multiline-mode should be used
+     */
+    bool storeLine(int* tabCount);
 
     /**
      * @brief chekcs if the error message of the python exception
