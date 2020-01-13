@@ -12,6 +12,7 @@
 #include <QMetaEnum>
 #include <QSettings>
 #include <QThreadPool>
+#include <QRegularExpression>
 
 #include "PythonQt.h"
 #include "PythonQtObjectPtr.h"
@@ -1048,37 +1049,25 @@ GtpyContextManager::lineOutOfMessage(const QString& message) const
         return lineNumber;
     }
 
-    QString line = QStringLiteral("\"<string>\", line ");
-    int index = message.indexOf(line);
+    QRegularExpression errorLine(QStringLiteral("\"<string>\", line \\d+"));
 
-    if (index == -1)
+    if (message.indexOf(errorLine) == -1)
     {
         return -1;
     }
 
-    index = index + line.size();
+    QRegularExpressionMatch match = errorLine.match(message);
 
-    int indexAfterLineNumbers = message.indexOf(QStringLiteral(","), index);
-
-    if (indexAfterLineNumbers == -1)
-    {
-        return -1;
-    }
-
-    int numbersCount = indexAfterLineNumbers - index;
-
-    QString numbers = message.mid(index, numbersCount);
-
-    ok = false;
-
-    lineNumber = numbers.toInt(&ok);
+    lineNumber = match.captured().mid(17).toInt(&ok);
 
     if (ok)
     {
-        return lineNumber;
+        return lineNumber ;
     }
-
-    return -1;
+    else
+    {
+        return -1;
+    }
 }
 
 //void
