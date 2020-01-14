@@ -11,7 +11,7 @@
 #include <QTextBlock>
 #include <QToolTip>
 #include <QFontMetrics>
-#include <QDebug>
+#include <QRegularExpression>
 
 #include "gtpy_completer.h"
 
@@ -485,8 +485,6 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
         GtCodeEditor::keyPressEvent(event);
     }
 
-
-
     const bool ctrlModifier = (event->modifiers() & Qt::ControlModifier);
     const bool shiftModifier = (event->modifiers() & Qt::ShiftModifier);
 
@@ -555,31 +553,26 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
 
         switch (event->key())
         {
-            case Qt::Key_E:
-                emit evalShortcutTriggered();
-                m_cpl->getPopup()->hide();
-                return;
+        case Qt::Key_E:
+            emit evalShortcutTriggered();
+            m_cpl->getPopup()->hide();
+            return;
 
-            case Qt::Key_F:
-                cursor = textCursor();
-                text = cursor.selectedText();
-                emit searchShortcutTriggered(text);
-                searchHighlighting(text);
-                setTextCursor(cursor);
-                return;
+        case Qt::Key_F:
+            cursor = textCursor();
+            text = cursor.selectedText();
+            emit searchShortcutTriggered(text);
+            searchHighlighting(text);
+            setTextCursor(cursor);
+            return;
 
-           case Qt::Key_Space:
+        case Qt::Key_Space:
 
-                if (!isCurrentLineCommentedOut())
-                {
-                    handleCompletion();
-                }
-
-                return;
-
-            default:
-                break;
-
+            if (!isCurrentLineCommentedOut())
+            {
+                handleCompletion();
+            }
+            return;
         }
     }
     else if (shiftModifier)
@@ -631,54 +624,38 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
         }
     }
 
-
     switch (event->key())
     {
-        case Qt::Key_Return:
+    /* indent new line */
+    case Qt::Key_Return:
+
+        if (!indentNewLine(event))
         {
-            QTextCursor cursor = textCursor();
-
-            cursor.movePosition(QTextCursor::StartOfLine,
-                                QTextCursor::KeepAnchor);
-
-            QString line = cursor.selectedText();
-
-            // match leading tabs
-            QRegularExpression regExp(QStringLiteral("^\\s+"));
-            QRegularExpressionMatch match = regExp.match(line);
-
-            QString newLine = match.captured();
-
-            // match wheter a definiton starts (e.g. def func():)
-            regExp.setPattern(QStringLiteral(":\\s*\\Z"));
-            match  = regExp.match(line);
-
-            // append tab
-            if (match.hasMatch())
-            {
-                newLine += QStringLiteral("\t");
-            }
-
-            if (newLine.isEmpty())
-            {
-                break;
-            }
-
             GtCodeEditor::keyPressEvent(event);
-
-            if (m_SearchActivated)
-            {
-                searchHighlighting(m_lastSearch, false);
-            }
-
-            cursor = textCursor();
-            cursor.insertText(newLine);
-
-            return;
         }
-    }
+        break;
 
-    GtCodeEditor::keyPressEvent(event);
+    /* indent selection with tab to the rigth */
+    case Qt::Key_Tab:
+
+        if (!indentSelectedLines(true))
+        {
+            GtCodeEditor::keyPressEvent(event);
+        }
+        break;
+
+    /* indent selection with backtab to the left */
+    case Qt::Key_Backtab:
+
+        if (!indentSelectedLines(false))
+        {
+            GtCodeEditor::keyPressEvent(event);
+        }
+        break;
+
+    default:
+        GtCodeEditor::keyPressEvent(event);
+    }
 
     if (m_SearchActivated)
     {
@@ -975,4 +952,138 @@ GtpyScriptEditor::removeCurrentLineHighlighting()
             setExtraSelections(selectionList);
         }
     }
+}
+
+bool
+GtpyScriptEditor::indentNewLine(QKeyEvent* event)
+{
+    QTextCursor cursor = textCursor();
+
+    cursor.movePosition(QTextCursor::StartOfLine,
+                        QTextCursor::KeepAnchor);
+
+    QString line = cursor.selectedText();
+
+    // match leading tabs
+    QRegularExpression regExp(QStringLiteral("^\\s+"));
+    QRegularExpressionMatch match = regExp.match(line);
+
+    QString newLine = match.captured();
+
+    // match wheter a definiton starts (e.g. def func():)
+    regExp.setPattern(QStringLiteral(":\\s*\\Z"));
+    match  = regExp.match(line);
+
+    // append tab
+    if (match.hasMatch())
+    {
+        newLine += QStringLiteral("\t");
+    }
+
+    if (newLine.isEmpty())
+    {
+        return false;
+    }
+
+    GtCodeEditor::keyPressEvent(event);
+
+    cursor = textCursor();
+    cursor.insertText(newLine);
+
+    return true;
+}
+
+bool
+GtpyScriptEditor::isSelectionIndentable()
+{
+    QTextCursor cursor = this->textCursor();
+
+    if (!cursor.hasSelection())
+    {
+        return false;
+    }
+
+    QString selection = cursor.selectedText();
+
+    QStringList lines = selection.split(QChar::ParagraphSeparator,
+                                        QString::SkipEmptyParts);
+
+    int count = lines.count();
+
+    // one line selected -> whole line must be selected to get indented with tab
+    if (count == 1)
+    {
+        cursor.select(QTextCursor::LineUnderCursor);
+
+        QString line = cursor.selectedText();
+
+        int offset = 0;
+
+        for (QChar c : line)
+        {
+            if (c == ' ' || c == '\t')
+            {
+                offset++;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if (selection.length() == line.length() - offset)
+        {
+            return true;
+        }
+    }
+    // multiple lines, that are not empty, are selected -> can be indented
+    else if (count > 1)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool
+GtpyScriptEditor::indentSelectedLines(bool direction)
+{
+    if (!isSelectionIndentable())
+    {
+        return false;
+    }
+
+    QTextCursor cursor = this->textCursor();
+
+    QString selection = cursor.selectedText();
+
+    int count = selection.split(QChar::ParagraphSeparator).count();
+
+    int selectionStart = cursor.selectionStart();
+
+    cursor.setPosition(selectionStart);
+
+    for (int i = 0; i < count; i++)
+    {
+        cursor.movePosition(QTextCursor::StartOfLine);
+
+        if (direction) // indent right
+        {
+            cursor.insertText(QStringLiteral("\t"));
+        }
+        else // indent left
+        {
+            cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+
+            if (cursor.selectedText() == QStringLiteral("\t"))
+            {
+                cursor.removeSelectedText();
+            }
+        }
+
+        cursor.movePosition(QTextCursor::EndOfLine);
+        cursor.movePosition(QTextCursor::Right);
+    }
+
+    return true;
 }
