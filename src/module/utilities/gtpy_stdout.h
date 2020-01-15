@@ -20,8 +20,7 @@ extern PyTypeObject GtpyStdOutRedirectType;
 
 //! declares the callback that is called from the write() function
 typedef void GtpyOutputChangedCB(const QString& contextName,
-                                 const QString& message,
-                                 const long threadId);
+                                 const QString& message);
 
 //! declares the stdout redirection class
 typedef struct {

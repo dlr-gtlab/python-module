@@ -33,28 +33,6 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
     GtpyStdOutRedirect* s = (GtpyStdOutRedirect*)self;
 
-
-
-
-
-
-
-
-
-
-
-
-
-    PyObject* pType;
-    PyObject* pValue;
-    PyObject* pTracheback;
-
-    PyErr_Fetch(&pType, &pValue, &pTracheback);
-
-//    PyErr_Restore(pType, pValue, pTracheback);
-
-    const long threadId = PyThreadState_Get()->thread_id;
-
     PyObject* globals = PyEval_GetGlobals();
 
     QString contextName;
@@ -131,12 +109,11 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
         if (s->softspace > 0)
         {
-            (*s->_cb)(contextName, QString(""), threadId);
+            (*s->_cb)(contextName, QString(""));
             s->softspace = 0;
         }
 
-        qDebug() << output;
-        (*s->_cb)(contextName, output, threadId);
+        (*s->_cb)(contextName, output);
     }
 
     return Py_BuildValue("");
