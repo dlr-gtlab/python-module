@@ -184,7 +184,13 @@ protected:
      */
     void addTabWidget(QWidget* wid, const QString& label);
 
+    /**
+     * @brief showEvalButton
+     * @param show
+     */
     void showEvalButton(bool show);
+
+    GtProcessWizard* findParentWizard();
 
     /// Python Context Type
     GtpyContextManager::Context m_contextType;
@@ -213,6 +219,8 @@ private:
      * @return Whether validation was successful.
      */
     virtual bool validation();
+
+    GtProcessWizard* findParentWizard(QObject* obj);
 
     /// Search Widget
     GtSearchWidget* m_searchWidget;

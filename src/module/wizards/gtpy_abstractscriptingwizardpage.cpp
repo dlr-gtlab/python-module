@@ -37,6 +37,7 @@
 #include "gt_objectlinkproperty.h"
 #include "gt_datamodel.h"
 #include "gt_filedialog.h"
+#include "gt_processwizard.h"
 
 #include "gt_pyhighlighter.h"
 #include "gt_searchwidget.h"
@@ -743,6 +744,24 @@ GtpyAbstractScriptingWizardPage::validation()
     return true;
 }
 
+GtProcessWizard*
+GtpyAbstractScriptingWizardPage::findParentWizard(QObject* obj)
+{
+    if (obj == Q_NULLPTR)
+    {
+        return Q_NULLPTR;
+    }
+
+    GtProcessWizard* temp = qobject_cast<GtProcessWizard*>(obj);
+
+    if (temp)
+    {
+        return temp;
+    }
+
+    return findParentWizard(obj->parent());
+}
+
 void
 GtpyAbstractScriptingWizardPage::showEvalButton(bool show)
 {
@@ -765,6 +784,24 @@ GtpyAbstractScriptingWizardPage::showEvalButton(bool show)
 
         m_shortCutEval->setText("<font color='grey'>  Ctrl+I</font>");
     }
+}
+
+GtProcessWizard*
+GtpyAbstractScriptingWizardPage::findParentWizard()
+{
+    if (parent() == Q_NULLPTR)
+    {
+        return Q_NULLPTR;
+    }
+
+    GtProcessWizard* temp = qobject_cast<GtProcessWizard*>(parent());
+
+    if (temp)
+    {
+        return temp;
+    }
+
+    return findParentWizard(parent());
 }
 
 void
