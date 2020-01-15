@@ -112,6 +112,8 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
 void
 GtpyTaskWizardPage::initialization()
 {
+    findParentWizard()->setWindowModality(Qt::NonModal);
+
     GtObjectMemento memento = provider()->componentData();
 
     if (memento.isNull())
