@@ -11,6 +11,8 @@
 #include <QMetaMethod>
 #include <QStringList>
 
+#include <PythonQtPythonInclude.h>
+
 #include "gt_coreapplication.h"
 #include "gt_coredatamodel.h"
 #include "gt_project.h"
@@ -425,12 +427,22 @@ GtpyDecorator::findProcess(GtProject* pro, const QString& processId)
 bool
 GtpyDecorator::run(GtCalculator* calc)
 {
+    bool success = false;
+
+    Py_BEGIN_ALLOW_THREADS
+
     if (calc == Q_NULLPTR)
     {
-        return false;
+        success = false;
+    }
+    else
+    {
+        success = calc->exec();
     }
 
-    return calc->exec();
+    Py_END_ALLOW_THREADS
+
+    return success;
 }
 
 //bool
@@ -528,6 +540,8 @@ GtpyDecorator::deleteAllCalculators(GtTask* task)
         return;
     }
 
+    Py_BEGIN_ALLOW_THREADS
+
     QList<GtCalculator*> calcs = task->findDirectChildren<GtCalculator*>();
 
     int lastIndex = calcs.size() - 1;
@@ -538,6 +552,8 @@ GtpyDecorator::deleteAllCalculators(GtTask* task)
         calcs.removeAt(lastIndex);
         delete calc;
     }
+
+    Py_END_ALLOW_THREADS
 }
 
 GtObject*
@@ -959,28 +975,38 @@ GtpyDecorator::static_GtPythonLogger_gtPyWarning(const QVariant& mes)
 void
 GtPythonLogger::gtPyDebug(const QVariant& mes)
 {
+    Py_BEGIN_ALLOW_THREADS
     gtDebug() << mes.toString();
+    Py_END_ALLOW_THREADS
 }
 
 void
 GtPythonLogger::gtPyInfo(const QVariant& mes)
 {
+    Py_BEGIN_ALLOW_THREADS
     gtInfo() << mes.toString();
+    Py_END_ALLOW_THREADS
 }
 
 void
 GtPythonLogger::gtPyError(const QVariant& mes)
 {
+    Py_BEGIN_ALLOW_THREADS
     gtError() << mes.toString();
+    Py_END_ALLOW_THREADS
 }
 
 void
 GtPythonLogger::gtPyFatal(const QVariant& mes)
 {
+    Py_BEGIN_ALLOW_THREADS
     gtFatal() << mes.toString();
+    Py_END_ALLOW_THREADS
 }
 
 void GtPythonLogger::gtPyWarning(const QVariant& mes)
 {
+    Py_BEGIN_ALLOW_THREADS
     gtWarning() << mes.toString();
+    Py_END_ALLOW_THREADS
 }

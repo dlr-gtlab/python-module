@@ -51,7 +51,7 @@ public:
      */
     enum Context
     {
-        BatchContext,
+        BatchContext = 0,
         GlobalContext,
         ScriptEditorContext,
         CalculatorRunContext,
@@ -80,15 +80,15 @@ public:
      * @brief Evaluates the given script into the given python context.
      * @param type Python context identifier.
      * @param script The script to be executed.
-     * @param output
-     * @param outputToEveryConsol
-     * @param option
-     * @return
+     * @param output Emit output messages.
+     * @param errorMessage Emit error messages.
+     * @param option Evaluation options.
+     * @return True if evaluation was successful.
      */
     bool evalScript(const GtpyContextManager::Context& type,
                     const QString& script, const bool output = true,
+                    const bool errorMessage = true,
                     const GtpyContextManager::EvalOptions& option = EvalFile);
-
     /**
      * @brief Frames the code with a try/except block to catch the
      * KeyboardInterrupt exception. After this it calls the evalScript()
@@ -199,8 +199,17 @@ public:
      */
     void resetContext(const GtpyContextManager::Context& type);
 
+    /**
+     * @brief Returns the id of the current Python thread.
+     * @return Id of the current Python thread.
+     */
     long currentPyThreadId();
 
+    /**
+     * @brief Starts a runnable instance which interrupt the current Python
+     * thread.
+     * @param id Id of the Python thread to interrupt.
+     */
     void interruptPyThread(long id);
 
 protected:
@@ -246,7 +255,11 @@ private:
      */
     PythonQtObjectPtr context(const GtpyContextManager::Context& type) const;
 
+    /**
+     * @brief Initializes the calculator module.
+     */
     void initCalculatorModule();
+
     /**
      * @brief Initializes the logging module.
      */
@@ -284,6 +297,8 @@ private:
      * @brief Initializes additional functionalities for the task run context.
      */
     void initTaskRunContext();
+
+    void initStdOut();
 
     /**
      * @brief Imports the default modules to the Python context identified by
@@ -326,12 +341,16 @@ private:
      * @param message The error message.
      * @return The line number in which an error was detected.
      */
-    int lineOutOfMessage(const QString& message) const;
+    static int lineOutOfMessage(const QString& message);
 
-//    void recursiveSubHelperRegistration(const GtpyContextManager::Context&
-    //type,
-//                                        const QString& helperClassName,
-//                                        const QString& calcName);
+    /**
+     * @brief Sets some meta data to the thread dict.
+     * @param type Context type.
+     * @param output Send output messages.
+     * @param error Send error messages.
+     */
+    void setMetaDataToThreadDict(const GtpyContextManager::Context& type,
+                                    bool output, bool error);
 
     /**
      * @brief introspectObject
@@ -350,12 +369,14 @@ private:
      * @brief Used to obtain the built-in functions of python
      * @return builtin fucntions of python
      */
-    QMultiMap<QString, GtpyFunction> builtInCompletions() const;
+    QMultiMap<QString, GtpyFunction> builtInCompletions(
+            const GtpyContextManager::Context& type) const;
 
     /**
      * @brief Obtains importable modules and sets it to member variable
      */
-    void setImportableModulesCompletions();
+    void setImportableModulesCompletions(
+            const GtpyContextManager::Context& type);
 
     /**
      * @brief Returns the constractor functions for the calculators.
@@ -369,7 +390,7 @@ private:
      * @brief Sets custom completions and builtin completions to member
      *  variable. Removes duplicates in these
      */
-    void setStandardCompletions();
+    void setStandardCompletions(const GtpyContextManager::Context& type);
 
     /**
      * @brief Registers the type converters in PythonQt that implemented in
@@ -377,12 +398,47 @@ private:
      */
     void registerTypeConverters() const;
 
-
     /**
      * @brief Used to obtain the Python version currently active
      * @return Major and minorversion of current Python instance (e.g '3.7')
      */
     QString pythonVersion() const;
+
+    /**
+     * @brief Callback for stdout redirection.
+     * It emits the pythonMessage() signal to share the message.
+     * @param contextName Name of the context in which the message was
+     * triggered.
+     * @param output Determines whether the output should be displayed or not.
+     * @param error Determines whether the error should be displayed or not.
+     * @param message Message to emit.
+     */
+    static void stdOutRedirectCB(const QString& contextName, const bool output,
+                                 const bool error, const QString& message);
+
+    /**
+     * @brief Callback for stderr redirection.
+     * It emits the errorMessage() and the errorCodeLine() signal to share the
+     * error message.
+     * @param contextName Name of the context in which the error occurred.
+     * @param output Determines whether the output should be displayed or not.
+     * @param error Determines whether the error should be displayed or not.
+     * @param message Error message to emit.
+     */
+    static void stdErrRedirectCB(const QString& contextName, const bool output,
+                                 const bool error, const QString& message);
+
+    /**
+     * @brief Creates a map of the contexts identified by their names.
+     * @return A map of the contexts identified by their names.
+     */
+    static QMap<QString, GtpyContextManager::Context> initContextNamesMap();
+
+    /**
+     * @brief Returns a static map of the contextes identified by ther names.
+     * @return A static map of the contextes identified by ther names.
+     */
+    static QMap<QString, GtpyContextManager::Context> getContextNamesMap();
 
     /// Map of Python context
     QMap<GtpyContextManager::Context, PythonQtObjectPtr> m_contextMap;
@@ -393,6 +449,12 @@ private:
     /// Logging Module
     PythonQtObjectPtr m_loggingModule;
 
+    /// Error message emitter
+    PythonQtObjectPtr m_err;
+
+    /// Output emitter
+    PythonQtObjectPtr m_out;
+
     /// Standard completions for pytho completer
     QMultiMap<QString, GtpyFunction> m_standardCompletions;
 
@@ -401,9 +463,6 @@ private:
 
     /// Decorator instance
     GtpyDecorator* m_decorator;
-
-    /// Currently used context
-    GtpyContextManager::Context m_currentContex;
 
     /// Determines whether output messages are sent to console.
     bool m_sendOutputMessages;
@@ -420,26 +479,15 @@ private:
     /// Calculator accessible contexts
     QList<GtpyContextManager::Context> m_calcAccessibleContexts;
 
+    /// Python main thread state
     PyThreadState* m_pyThreadState;
 
 private slots:
-    /**
-     * @brief Emits errorCodeLine signal.
-     * @param message Error message.
-     */
-    void onErrorLine(const QString& message);
-
     /**
      * @brief Emits errorMessage signal.
      * @param message Error message.
      */
     void onErrorMessage(const QString& message);
-
-    /**
-     * @brief Emits pythonMessage signal.
-     * @param message Message.
-     */
-    void onPythonMessage(const QString& message);
 
     /**
      * @brief Keeps GTlab running when a python script calls sys.exit().

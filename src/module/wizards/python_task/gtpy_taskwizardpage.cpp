@@ -112,7 +112,12 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
 void
 GtpyTaskWizardPage::initialization()
 {
-    findParentWizard()->setWindowModality(Qt::NonModal);
+    GtProcessWizard* wiz = findParentWizard();
+
+    if (wiz)
+    {
+        wiz->setWindowModality(Qt::NonModal);
+    }
 
     GtObjectMemento memento = provider()->componentData();
 

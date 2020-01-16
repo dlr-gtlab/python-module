@@ -59,10 +59,10 @@ GtpyConsole::GtpyConsole(GtpyContextManager::Context type,
                      GtpyContextManager::Context)), this,
             SLOT(stdOut(const QString&, GtpyContextManager::Context)));
     connect(m_python, SIGNAL(errorMessage(QString,
-                                          GtpyContextManager::Context)),
+                     GtpyContextManager::Context)),
             this, SLOT(stdErr(const QString&, GtpyContextManager::Context)));
     connect(m_python, SIGNAL(startedScriptEvaluation(
-                                 GtpyContextManager::Context)), this,
+                      GtpyContextManager::Context)), this,
             SLOT(cursorToEnd(GtpyContextManager::Context)));
     connect(m_python, SIGNAL(scriptEvaluated(GtpyContextManager::Context)),
             this, SLOT(onCodeExecuted(GtpyContextManager::Context)));
@@ -97,7 +97,7 @@ GtpyConsole::showAdditionalContextOutput(
 
 void
 GtpyConsole::stdErr(const QString& message,
-                                 GtpyContextManager::Context type)
+                    GtpyContextManager::Context type)
 {
     if (m_contextType == type || m_additionalContextOutput.contains(type))
     {

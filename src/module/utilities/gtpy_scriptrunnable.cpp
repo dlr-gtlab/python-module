@@ -73,7 +73,7 @@ GtpyScriptRunnable::interrupt()
 {
     GTPY_GIL_SCOPE
 
-            m_successfulRun = false;
+    m_successfulRun = false;
     m_mutex.lock();
     GtpyContextManager::instance()->interruptPyThread(m_threadId);
     m_mutex.unlock();

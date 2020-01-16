@@ -15,19 +15,41 @@
 #include "structmember.h"
 #include <QString>
 
-//! declares the type of the stdout redirection class
+/**
+ * @brief GtpyStdOutRedirectType
+ * Type of the stdout redirection class
+ */
 extern PyTypeObject GtpyStdOutRedirectType;
 
-//! declares the callback that is called from the write() function
+/**
+ * @brief Declares the callback that is called from the write() function in
+ * Python.
+ * @param contextName Name of the context in which the message was triggered.
+ * @param output Determines whether the output should be shared or not.
+ * @param error Determines whether the error message should be displayed or not.
+ * @param message Triggered message.
+ */
 typedef void GtpyOutputChangedCB(const QString& contextName,
+                                 const bool output, const bool error,
                                  const QString& message);
 
-//! declares the stdout redirection class
+/**
+  * @brief The stdout redirection class.
+  */
 typedef struct {
   PyObject_HEAD
   GtpyOutputChangedCB* _cb;
   int softspace;
   bool closed;
 } GtpyStdOutRedirect;
+
+/// Namespace for static values to identify thread dict meta data.
+namespace GtpyStdOut
+{
+    static const char* CONTEXT_KEY = "CONTEXT_NAME";
+    static const char* OUTPUT_KEY = "OUTPUT_TO_CONSOLE";
+    static const char* ERROR_KEY = "ERROR_TO_CONSOLE";
+}
+
 
 #endif // GTPY_STDOUT_H

@@ -7,8 +7,6 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include <QDebug>
-
 #include "gtpy_gilscope.h"
 
 #include "gtpy_stdout.h"
@@ -31,46 +29,44 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 {
     GTPY_GIL_SCOPE
 
-    GtpyStdOutRedirect* s = (GtpyStdOutRedirect*)self;
+    PyObject* threadDict = PyThreadState_GetDict();
 
-    PyObject* globals = PyEval_GetGlobals();
+    PyObject* item = PyDict_GetItem(threadDict, PyString_FromString(
+                                        GtpyStdOut::CONTEXT_KEY));
 
     QString contextName;
 
-    if (globals && PyDict_Check(globals))
+    if (item && PyString_Check(item))
     {
-        PyObject* keys = PyDict_Keys(globals);
-
-        if (keys)
-        {
-            int count = PyList_Size(keys);
-            PyObject* key = Q_NULLPTR;
-            QString keyStr;
-
-            for (int i = 0; i < count; i++)
-            {
-                key = PyList_GetItem(keys, i);
-
-                const char* keyChar = PyString_AsString(key);
-                keyStr = QString::fromUtf8(keyChar);
-
-                if (keyStr == "__name__")
-                {
-                    PyObject* value = PyDict_GetItem(globals, key);
-                    Py_INCREF(value);
-
-                    const char* valueChar = PyString_AsString(value);
-                    contextName = QString::fromUtf8(valueChar);
-
-                    break;
-                }
-            }
-        }
+        const char* val = PyString_AsString(item);
+        contextName = QString(val);
     }
+
+    item = PyDict_GetItem(threadDict, PyString_FromString(
+                                        GtpyStdOut::OUTPUT_KEY));
+
+    bool output = false;
+
+    if (item && PyInt_Check(item))
+    {
+        output = (bool)PyInt_AsLong(item);
+    }
+
+    item = PyDict_GetItem(threadDict, PyString_FromString(
+                                        GtpyStdOut::ERROR_KEY));
+
+    bool error = false;
+
+    if (item && PyInt_Check(item))
+    {
+        error = (bool)PyInt_AsLong(item);
+    }
+
+    GtpyStdOutRedirect* s = (GtpyStdOutRedirect*)self;
 
     if (s->_cb)
     {
-        QString output;
+        QString message;
 
         if (PyTuple_GET_SIZE(args)>=1)
         {
@@ -79,13 +75,13 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
             if (PyUnicode_Check(obj))
             {
 #ifdef PY3K
-                output = QString::fromUtf8(PyUnicode_AsUTF8(obj));
+                message = QString::fromUtf8(PyUnicode_AsUTF8(obj));
 #else
                 PyObject *tmp = PyUnicode_AsUTF8String(obj);
 
                 if(tmp)
                 {
-                    output = QString::fromUtf8(PyString_AS_STRING(tmp));
+                    message = QString::fromUtf8(PyString_AS_STRING(tmp));
                     Py_DECREF(tmp);
                 }
                 else
@@ -103,17 +99,17 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
                     return NULL;
                 }
 
-                output = QString::fromLatin1(string);
+                message = QString::fromLatin1(string);
             }
         }
 
         if (s->softspace > 0)
         {
-            (*s->_cb)(contextName, QString(""));
+            (*s->_cb)(contextName, output, error, QString(""));
             s->softspace = 0;
         }
 
-        (*s->_cb)(contextName, output);
+        (*s->_cb)(contextName, output, error, message);
     }
 
     return Py_BuildValue("");
