@@ -38,7 +38,7 @@ typedef void GtpyOutputChangedCB(const QString& contextName,
   */
 typedef struct {
   PyObject_HEAD
-  GtpyOutputChangedCB* _cb;
+  GtpyOutputChangedCB* callback;
   int softspace;
   bool closed;
 } GtpyStdOutRedirect;

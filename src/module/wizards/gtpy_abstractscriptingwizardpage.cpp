@@ -714,7 +714,6 @@ GtpyAbstractScriptingWizardPage::onEvalButtonClicked()
         if (m_runnable)
         {
             m_runnable->interrupt();
-            showEvalButton(true);
             return;
         }
     }

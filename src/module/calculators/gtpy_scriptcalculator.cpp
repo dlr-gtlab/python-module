@@ -79,7 +79,7 @@ GtpyScriptCalculator::run()
 
     bool success;
 
-    success = GtpyContextManager::instance()->evalScriptInterruptible(
+    success = GtpyContextManager::instance()->evalScript(
                   type, script(), true);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)

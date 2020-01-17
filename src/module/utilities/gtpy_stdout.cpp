@@ -12,16 +12,17 @@
 #include "gtpy_stdout.h"
 
 static PyObject*
-GtpyStdOutRedirect_new(PyTypeObject *type, PyObject * /*args*/, PyObject * /*kwds*/)
+GtpyStdOutRedirect_new(PyTypeObject* type, PyObject* /*args*/,
+                       PyObject* /*kwds*/)
 {
-    GtpyStdOutRedirect *self;
-    self = (GtpyStdOutRedirect *)type->tp_alloc(type, 0);
+    GtpyStdOutRedirect* self;
+    self = (GtpyStdOutRedirect*)type->tp_alloc(type, 0);
 
     self->softspace = 0;
     self->closed = false;
-    self->_cb = NULL;
+    self->callback = NULL;
 
-    return (PyObject *)self;
+    return (PyObject*)self;
 }
 
 static PyObject*
@@ -64,7 +65,7 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
     GtpyStdOutRedirect* s = (GtpyStdOutRedirect*)self;
 
-    if (s->_cb)
+    if (s->callback)
     {
         QString message;
 
@@ -105,30 +106,24 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
         if (s->softspace > 0)
         {
-            (*s->_cb)(contextName, output, error, QString(""));
+            (*s->callback)(contextName, output, error, QString(""));
             s->softspace = 0;
         }
 
-        (*s->_cb)(contextName, output, error, message);
+        (*s->callback)(contextName, output, error, message);
     }
 
     return Py_BuildValue("");
 }
 
 static PyObject*
-GtpyStdOutRedirect_flush(PyObject * /*self*/, PyObject * /*args*/)
+GtpyStdOutRedirect_flush(PyObject* /*self*/, PyObject* /*args*/)
 {
     return Py_BuildValue("");
 }
 
 static PyObject*
-GtpyStdOutRedirect_module(PyObject * /*self*/, PyObject * /*args*/)
-{
-    return Py_None;
-}
-
-static PyObject*
-GtpyStdOutRedirect_isatty(PyObject * /*self*/, PyObject * /*args*/)
+GtpyStdOutRedirect_isatty(PyObject* /*self*/, PyObject* /*args*/)
 {
     Py_INCREF(Py_False);
     return Py_False;
@@ -140,13 +135,12 @@ GtpyStdOutRedirect_methods[] =
     {"write", (PyCFunction)GtpyStdOutRedirect_write, METH_VARARGS,
     "redirect the writing to a callback"},
     {"flush", (PyCFunction)GtpyStdOutRedirect_flush, METH_VARARGS,
-    "flush the output, currently not implemented but needed for logging framework"
-    },
-    {"module", (PyCFunction)GtpyStdOutRedirect_module, METH_VARARGS,
-    "modfunc"
+    "flush the output, currently not implemented but needed for logging "
+     "framework"
     },
     {"isatty", (PyCFunction)GtpyStdOutRedirect_isatty,   METH_NOARGS,
-    "return False since this object is not atty-like device. Needed for logging framework"
+    "return False since this object is not atty-like device. Needed for logging"
+     " framework"
     },
     {NULL,    NULL, 0 , NULL} /* sentinel */
 };

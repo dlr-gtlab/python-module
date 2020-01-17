@@ -195,27 +195,6 @@ GtpyContextManager::evalScript(const GtpyContextManager::Context& type,
     return !hadError;
 }
 
-bool
-GtpyContextManager::evalScriptInterruptible(
-        const GtpyContextManager::Context& type, const QString& script,
-        const bool output, const GtpyContextManager::EvalOptions& option)
-{
-    GTPY_GIL_SCOPE
-
-    bool success = false;
-
-    success = evalScript(type, script, output, option);
-
-//    interruptibleCode.replace("\r", "\n");
-
-//    interruptibleCode.prepend("try:\n");
-//    interruptibleCode = interruptibleCode.replace("\n","\n\t");
-//    interruptibleCode += "\nexcept KeyboardInterrupt:\n"
-//                         "\tprint ('--Interrupted--')\n";
-
-    return success;
-}
-
 QMultiMap<QString, GtpyFunction>
 GtpyContextManager::introspection(const GtpyContextManager::Context& type,
                                   const QString& objectname,
@@ -924,10 +903,10 @@ GtpyContextManager::initStdOut()
 
     // create a redirection object for stdout and stderr
     m_out = GtpyStdOutRedirectType.tp_new(&GtpyStdOutRedirectType,NULL, NULL);
-    ((GtpyStdOutRedirect*)m_out.object())->_cb = stdOutRedirectCB;
+    ((GtpyStdOutRedirect*)m_out.object())->callback = stdOutRedirectCB;
 
     m_err = GtpyStdOutRedirectType.tp_new(&GtpyStdOutRedirectType,NULL, NULL);
-    ((GtpyStdOutRedirect*)m_err.object())->_cb = stdErrRedirectCB;
+    ((GtpyStdOutRedirect*)m_err.object())->callback = stdErrRedirectCB;
 
     // replace the built in file objects with the new objects
     PyModule_AddObject(sys, "stdout", m_out);

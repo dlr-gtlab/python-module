@@ -89,19 +89,6 @@ public:
                     const QString& script, const bool output = true,
                     const bool errorMessage = true,
                     const GtpyContextManager::EvalOptions& option = EvalFile);
-    /**
-     * @brief Frames the code with a try/except block to catch the
-     * KeyboardInterrupt exception. After this it calls the evalScript()
-     * function to evaluate the script.
-     * @param type Python context identifier.
-     * @param script The script to be executed.
-     * @param output
-     * @param option
-     * @return
-     */
-    bool evalScriptInterruptible(const GtpyContextManager::Context& type,
-                      const QString& script, const bool output = true,
-                      const GtpyContextManager::EvalOptions& option = EvalFile);
 
     /**
      * @brief introspection
