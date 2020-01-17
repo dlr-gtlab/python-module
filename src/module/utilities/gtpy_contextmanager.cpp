@@ -480,11 +480,49 @@ GtpyContextManager::createNewContext(const GtpyContextManager::Context& type)
 
     registerCalcModuleInSys(TaskRunContext);
 
+    qDebug() << "MODULE CREATED == " << contextName;
+
     defaultContextConfig(type, contextId, contextName);
 
     removeCalcModuleFromSys();
 
     return contextId;
+}
+
+bool
+GtpyContextManager::deleteContext(int contextId)
+{
+    QMetaObject metaObj = GtpyContextManager::staticMetaObject;
+    QMetaEnum metaEnum = metaObj.enumerator(
+                             metaObj.indexOfEnumerator("Context"));
+
+    if (contextId < metaEnum.keyCount())
+    {
+        gtDebug() << "It is not allowed to remove one of the default contexts!";
+        return false;
+    }
+
+    PythonContext con = m_contextMap.take(contextId);
+
+    if (!con.module)
+    {
+        return false;
+    }
+
+    GTPY_GIL_SCOPE
+
+    PythonQtObjectPtr sys;
+    sys.setNewRef(PyImport_ImportModule("sys"));
+
+    PyObject* dict = PyModule_GetDict(sys);
+
+    PyObject* modules = PyDict_GetItemString(dict, "modules");
+
+    PyDict_DelItemString(modules, con.contextName.toStdString().c_str());
+
+    con.module.setNewRef(Q_NULLPTR);
+
+    return true;
 }
 
 void
@@ -1830,7 +1868,6 @@ GtpyContextManager::onErrorMessage(const QString& message)
     {
         error = (bool)PyInt_AsLong(item);
     }
-
 
     if (error)
     {

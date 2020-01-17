@@ -188,6 +188,10 @@ public:
 
     int createNewContext(const GtpyContextManager::Context& type);
 
+    bool deleteContext(int contextId);
+
+    int m_tempTest = 19;
+
     /**
      * @brief Resets the Python context indicated by type to its initial state.
      * @param type Python context identifier.

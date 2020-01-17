@@ -436,12 +436,12 @@ GtpyConsole::executeCode(const QString& code)
 
     if (code.indexOf("\n") != -1)
     {
-        m_python->evalScript(m_contextType, code, true,
+        m_python->evalScript(m_contextType, code, true, true,
                              GtpyContextManager::EvalFile);
     }
     else
     {
-        m_python->evalScript(m_contextType, code, true,
+        m_python->evalScript(m_contextType, code, true, true,
                              GtpyContextManager::EvalSingleString);
     }
 
