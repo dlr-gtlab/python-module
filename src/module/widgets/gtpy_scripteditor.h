@@ -249,6 +249,27 @@ private:
      */
     void removeCurrentLineHighlighting();
 
+    /**
+     * @brief indents a new line
+     * @param keyPressEvent
+     * @return true if key event was evaluated, false if not
+     */
+    bool indentNewLine(QKeyEvent* event);
+    /**
+     * @brief Checks whether the current selection should get indented when
+     * pressing e.g. 'tab'
+     * @return True if selection should get indented, false if it should get
+     * replaced with 'tab'
+     */
+    bool isSelectionIndentable();
+
+    /**
+     * @brief indents selected lines to the right or the left depending on param
+     * @param direction, true = right, false = left
+     * @return true if lines were indented, false if not
+     */
+    bool indentSelectedLines(bool direction);
+
 signals:
     /**
      * @brief Will emited if eval shortcut (ctrl+E) has been received.
