@@ -461,8 +461,6 @@ GtpyContextManager::initContexts()
     initStdOut();
 
     removeCalcModuleFromSys();
-
-    getContextNamesMap();
 }
 
 int
@@ -543,19 +541,20 @@ GtpyContextManager::defaultContextConfig(
 {
     GTPY_GIL_SCOPE
 
-    PythonQtObjectPtr context = PythonQt::self()->createModuleFromScript(
-                                    contextName);
+    PythonContext context;
+
+    context.module = PythonQt::self()->createModuleFromScript(contextName);
+    context.contextName = contextName;
 
     m_contextMap.insert(contextId, context);
 
-    qDebug() << "contextName == " << contextName;
     QString pyCode =
             "import sys\n"
             "sys.modules['" + contextName +
             "'] = None\n" +
             "del sys\n";
 
-    context.evalScript(pyCode);
+    context.module.evalScript(pyCode);
 
     m_addedObjectNames.insert(contextId, QStringList());
 
@@ -592,9 +591,11 @@ GtpyContextManager::specificContextConfig(
 }
 
 PythonQtObjectPtr
-GtpyContextManager::context(int type) const
+GtpyContextManager::context(int contextId) const
 {
-    return m_contextMap.value(type, Q_NULLPTR);
+    PythonContext con = m_contextMap.value(contextId);
+
+    return con.module;
 }
 
 void
@@ -1099,9 +1100,7 @@ GtpyContextManager::setMetaDataToThreadDict(
 
     PyObject* threadDict = PyThreadState_GetDict();
 
-    QMap<QString, GtpyContextManager::Context> map = getContextNamesMap();
-
-    QString contextName = map.key(type);
+    QString contextName = m_contextMap.value(type).contextName;
 
     PyObject* val = PyString_FromString(contextName.toStdString().c_str());
 
@@ -1740,9 +1739,8 @@ GtpyContextManager::stdOutRedirectCB(const QString& contextName,
 
     if (output && !contextName.isEmpty())
     {
-        QMap<QString, GtpyContextManager::Context> map = getContextNamesMap();
-
-        GtpyContextManager::Context type = map.value(contextName);
+        Context type = (Context)GtpyContextManager::instance()->
+                       contextIdByName(contextName);
 
         if (type == BatchContext)
         {
@@ -1772,9 +1770,8 @@ GtpyContextManager::stdErrRedirectCB(const QString& contextName,
 
     if (error && !contextName.isEmpty())
     {
-        QMap<QString, GtpyContextManager::Context> map = getContextNamesMap();
-
-        GtpyContextManager::Context type = map.value(contextName);
+        Context type = (Context)GtpyContextManager::instance()->
+                       contextIdByName(contextName);
 
         emit GtpyContextManager::instance()->errorMessage(message, type);
 
@@ -1787,36 +1784,22 @@ GtpyContextManager::stdErrRedirectCB(const QString& contextName,
     }
 }
 
-QMap<QString, GtpyContextManager::Context>
-GtpyContextManager::initContextNamesMap()
+int
+GtpyContextManager::contextIdByName(const QString& contextName)
 {
-    QMap<QString, GtpyContextManager::Context> contextNames;
+    QList<int> ids = m_contextMap.keys();
 
-    QMetaObject metaObj = GtpyContextManager::staticMetaObject;
-    QMetaEnum metaEnum = metaObj.enumerator(
-                             metaObj.indexOfEnumerator("Context"));
-
-    int keyCount = metaEnum.keyCount();
-
-    for (int i = 0;  i < keyCount; i++)
+    foreach (int id, ids)
     {
-        QString contextName = QString::fromUtf8(metaEnum.key(i));
+        PythonContext con = m_contextMap.value(id);
 
-        Context type = static_cast<Context>(metaEnum.value(i));
-
-        contextNames.insert(contextName, type);
+        if (con.contextName == contextName)
+        {
+            return id;
+        }
     }
 
-    return contextNames;
-}
-
-QMap<QString, GtpyContextManager::Context>
-GtpyContextManager::getContextNamesMap()
-{
-    static QMap<QString, GtpyContextManager::Context> CONTEXT_NAMES =
-            initContextNamesMap();
-
-    return CONTEXT_NAMES;
+    return -1;
 }
 
 void
@@ -1835,9 +1818,7 @@ GtpyContextManager::onErrorMessage(const QString& message)
     {
         const char* val = PyString_AsString(item);
 
-        QMap<QString, GtpyContextManager::Context> map = getContextNamesMap();
-
-        type = map.value(QString(val));
+        type = (Context)contextIdByName(QString(val));
     }
 
     item = PyDict_GetItem(threadDict, PyString_FromString(

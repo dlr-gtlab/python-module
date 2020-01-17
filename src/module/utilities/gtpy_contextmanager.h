@@ -68,6 +68,12 @@ public:
         EvalSingleString = Py_single_input
     };
 
+    struct PythonContext
+    {
+        PythonQtObjectPtr module = Q_NULLPTR;
+        QString contextName;
+    };
+
     /**
      * @brief Returns instance of context manager based on singleton pattern.
      * @return Instance of calculator helper factory
@@ -245,7 +251,7 @@ private:
      * @param type Python context identifier.
      * @return Pointer to Python Context.
      */
-    PythonQtObjectPtr context(int type) const;
+    PythonQtObjectPtr context(int contextId) const;
 
     /**
      * @brief Initializes the calculator module.
@@ -420,20 +426,11 @@ private:
     static void stdErrRedirectCB(const QString& contextName, const bool output,
                                  const bool error, const QString& message);
 
-    /**
-     * @brief Creates a map of the contexts identified by their names.
-     * @return A map of the contexts identified by their names.
-     */
-    static QMap<QString, GtpyContextManager::Context> initContextNamesMap();
 
-    /**
-     * @brief Returns a static map of the contextes identified by ther names.
-     * @return A static map of the contextes identified by ther names.
-     */
-    static QMap<QString, GtpyContextManager::Context> getContextNamesMap();
+    int contextIdByName(const QString& contextName);
 
     /// Map of Python context
-    QMap<int, PythonQtObjectPtr> m_contextMap;
+    QMap<int, PythonContext> m_contextMap;
 
     /// Whether the contexts send messages to the application console
     QMap<int, bool> m_appLogging;
