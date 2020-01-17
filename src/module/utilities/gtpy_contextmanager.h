@@ -114,7 +114,7 @@ public:
      * removeAllAddedObjectes() function.
      * @return Whether the addition was successful.
      */
-    bool addObject(const GtpyContextManager::Context& type,
+    bool addObject(int contextId,
                    const QString& name, QObject* obj,
                    const bool saveName = true);
 
@@ -180,11 +180,14 @@ public:
      */
     void initContexts();
 
+    int createNewContext(const GtpyContextManager::Context& type);
+
     /**
      * @brief Resets the Python context indicated by type to its initial state.
      * @param type Python context identifier.
      */
-    void resetContext(const GtpyContextManager::Context& type);
+    void resetContext(const GtpyContextManager::Context& type,
+                      int contextId = -1);
 
     /**
      * @brief Returns the id of the current Python thread.
@@ -226,6 +229,7 @@ private:
      * @param contextName The name of the Python context.
      */
     void defaultContextConfig(const GtpyContextManager::Context& type,
+                              int contextId,
                               const QString& contextName);
 
     /**
@@ -233,14 +237,15 @@ private:
      * Python context indicated by the type.
      * @param type Python context identifier.
      */
-    void specificContextConfig(const GtpyContextManager::Context& type);
+    void specificContextConfig(const GtpyContextManager::Context& type,
+                               int contextId);
 
     /**
      * @brief Returns a pointer to the Python context indicated by type.
      * @param type Python context identifier.
      * @return Pointer to Python Context.
      */
-    PythonQtObjectPtr context(const GtpyContextManager::Context& type) const;
+    PythonQtObjectPtr context(int type) const;
 
     /**
      * @brief Initializes the calculator module.
@@ -255,35 +260,35 @@ private:
     /**
      * @brief Initializes additional functionalities for the batch context.
      */
-    void initBatchContext();
+    void initBatchContext(int contextId);
 
     /**
      * @brief Initializes additional functionalities for the global context.
      */
-    void initGlobalContext();
+    void initGlobalContext(int contextId);
 
     /**
      * @brief Initializes additional functionalities for the script editor
      * context.
      */
-    void initScriptEditorContext();
+    void initScriptEditorContext(int contextId);
 
     /**
      * @brief Initializes additional functionalities for the calculator run
      * context.
      */
-    void initCalculatorRunContext();
+    void initCalculatorRunContext(int contextId);
 
     /**
      * @brief Initializes additional functionalities for the task editor
      * context.
      */
-    void initTaskEditorContext();
+    void initTaskEditorContext(int contextId);
 
     /**
      * @brief Initializes additional functionalities for the task run context.
      */
-    void initTaskRunContext();
+    void initTaskRunContext(int contextId);
 
     void initStdOut();
 
@@ -292,7 +297,7 @@ private:
      * type.
      * @param type Python context identifier.
      */
-    void importDefaultModules(const GtpyContextManager::Context& type);
+    void importDefaultModules(int contextId);
 
     /**
      * @brief Imports the logging functions to the context identified by type.
@@ -302,20 +307,20 @@ private:
      * @param appConsole If true, the logging messages are sent to the
      * GTlab application console.
      */
-    void importLoggingFuncs(const GtpyContextManager::Context& type,
-                             bool appConsole);
+    void importLoggingFuncs(int contextId, bool appConsole);
+
     /**
      * @brief Imports the calculator module to the context identified by type.
      * @param type Python context identifier.
      */
-    void importCalcModule(const GtpyContextManager::Context& type);
+    void importCalcModule(int contextId);
 
     /**
      * @brief Registers calculator module in the modules dict of the Python
      *  module sys.
      * @param type Python context identifier.
      */
-    void registerCalcModuleInSys(const GtpyContextManager::Context& type);
+    void registerCalcModuleInSys(int contextId);
 
     /**
      * @brief Removes the calculator module out of the modules dict of the
@@ -428,10 +433,10 @@ private:
     static QMap<QString, GtpyContextManager::Context> getContextNamesMap();
 
     /// Map of Python context
-    QMap<GtpyContextManager::Context, PythonQtObjectPtr> m_contextMap;
+    QMap<int, PythonQtObjectPtr> m_contextMap;
 
     /// Whether the contexts send messages to the application console
-    QMap<GtpyContextManager::Context, bool> m_appLogging;
+    QMap<int, bool> m_appLogging;
 
     /// Logging Module
     PythonQtObjectPtr m_loggingModule;
@@ -461,10 +466,10 @@ private:
     bool m_errorEmitted;
 
     /// Lists of added objects for all contexts
-    QMap<GtpyContextManager::Context, QStringList> m_addedObjectNames;
+    QMap<int, QStringList> m_addedObjectNames;
 
     /// Calculator accessible contexts
-    QList<GtpyContextManager::Context> m_calcAccessibleContexts;
+    QList<int> m_calcAccessibleContexts;
 
     /// Python main thread state
     PyThreadState* m_pyThreadState;

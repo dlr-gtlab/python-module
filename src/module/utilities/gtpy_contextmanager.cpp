@@ -274,12 +274,10 @@ GtpyContextManager::introspection(const GtpyContextManager::Context& type,
 }
 
 bool
-GtpyContextManager::addObject(const GtpyContextManager::Context& type,
+GtpyContextManager::addObject(int contextId,
                               const QString& name, QObject* obj,
                               const bool saveName)
 {
-    GTPY_GIL_SCOPE
-
     if (name.isEmpty())
     {
         return false;
@@ -290,14 +288,14 @@ GtpyContextManager::addObject(const GtpyContextManager::Context& type,
         return false;
     }
 
-    PythonQtObjectPtr currentContext = context(type);
+    PythonQtObjectPtr currentContext = context(contextId);
 
     if (currentContext == Q_NULLPTR)
     {
         return false;
     }
 
-    QStringList list = m_addedObjectNames.value(type, QStringList());
+    QStringList list = m_addedObjectNames.value(contextId, QStringList());
 
     if (list.contains(name))
     {
@@ -307,8 +305,10 @@ GtpyContextManager::addObject(const GtpyContextManager::Context& type,
     if (saveName)
     {
         list.append(name);
-        m_addedObjectNames.insert(type, list);
+        m_addedObjectNames.insert(contextId, list);
     }
+
+    GTPY_GIL_SCOPE
 
     currentContext.addObject(name, obj);
 
@@ -453,7 +453,9 @@ GtpyContextManager::initContexts()
 
         Context type = static_cast<Context>(metaEnum.value(i));
 
-        defaultContextConfig(type, contextName);
+        int contextId = metaEnum.value(i);
+
+        defaultContextConfig(type, contextId, contextName);
     }
 
     initStdOut();
@@ -463,14 +465,42 @@ GtpyContextManager::initContexts()
     getContextNamesMap();
 }
 
-void
-GtpyContextManager::resetContext(const GtpyContextManager::Context& type)
+int
+GtpyContextManager::createNewContext(const GtpyContextManager::Context& type)
 {
-    GTPY_GIL_SCOPE
+    QMetaObject metaObj = GtpyContextManager::staticMetaObject;
+    QMetaEnum metaEnum = metaObj.enumerator(
+                             metaObj.indexOfEnumerator("Context"));
 
-    if (m_calcAccessibleContexts.contains(type))
+    QString contextName = QString::fromUtf8(metaEnum.key((int)type));
+
+    QList<int> keys = m_contextMap.keys();
+
+    int contextId = *std::max_element(keys.begin(), keys.end()) + 1;
+
+    contextName += ("_" + QString::number(contextId));
+
+    registerCalcModuleInSys(TaskRunContext);
+
+    defaultContextConfig(type, contextId, contextName);
+
+    removeCalcModuleFromSys();
+
+    return contextId;
+}
+
+void
+GtpyContextManager::resetContext(const GtpyContextManager::Context& type,
+                                 int contextId)
+{            
+    if (contextId < 0)
     {
-        registerCalcModuleInSys(type);
+        contextId = (int)type;
+    }
+
+    if (m_calcAccessibleContexts.contains(contextId))
+    {
+        registerCalcModuleInSys(contextId);
     }
 
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
@@ -479,9 +509,9 @@ GtpyContextManager::resetContext(const GtpyContextManager::Context& type)
 
     QString contextName = QString::fromUtf8(metaEnum.key(type));
 
-    defaultContextConfig(type, contextName);
+    defaultContextConfig(type, contextId, contextName);
 
-    if (m_calcAccessibleContexts.contains(type))
+    if (m_calcAccessibleContexts.contains(contextId))
     {
         removeCalcModuleFromSys();
     }
@@ -508,15 +538,17 @@ GtpyContextManager::interruptPyThread(long id)
 
 void
 GtpyContextManager::defaultContextConfig(
-        const GtpyContextManager::Context& type, const QString& contextName)
+        const GtpyContextManager::Context& type,
+        int contextId, const QString& contextName)
 {
     GTPY_GIL_SCOPE
 
     PythonQtObjectPtr context = PythonQt::self()->createModuleFromScript(
                                     contextName);
 
-    m_contextMap.insert(type, context);
+    m_contextMap.insert(contextId, context);
 
+    qDebug() << "contextName == " << contextName;
     QString pyCode =
             "import sys\n"
             "sys.modules['" + contextName +
@@ -525,34 +557,34 @@ GtpyContextManager::defaultContextConfig(
 
     context.evalScript(pyCode);
 
-    m_addedObjectNames.insert(type, QStringList());
+    m_addedObjectNames.insert(contextId, QStringList());
 
-    specificContextConfig(type);
+    specificContextConfig(type, contextId);
 }
 
 void
 GtpyContextManager::specificContextConfig(
-        const GtpyContextManager::Context& type)
+        const GtpyContextManager::Context& type, int contextId)
 {
     switch (type)
     {
         case GtpyContextManager::BatchContext:
-            initBatchContext();
+            initBatchContext(contextId);
             break;
         case GtpyContextManager::GlobalContext:
-            initGlobalContext();
+            initGlobalContext(contextId);
             break;
         case GtpyContextManager::ScriptEditorContext:
-            initScriptEditorContext();
+            initScriptEditorContext(contextId);
             break;
         case GtpyContextManager::CalculatorRunContext:
-            initCalculatorRunContext();
+            initCalculatorRunContext(contextId);
             break;
         case GtpyContextManager::TaskEditorContext:
-            initTaskEditorContext();
+            initTaskEditorContext(contextId);
             break;
         case GtpyContextManager::TaskRunContext:
-            initTaskRunContext();
+            initTaskRunContext(contextId);
             break;
         default:
             break;
@@ -560,7 +592,7 @@ GtpyContextManager::specificContextConfig(
 }
 
 PythonQtObjectPtr
-GtpyContextManager::context(const GtpyContextManager::Context& type) const
+GtpyContextManager::context(int type) const
 {
     return m_contextMap.value(type, Q_NULLPTR);
 }
@@ -755,23 +787,20 @@ GtpyContextManager::initLoggingModule()
 }
 
 void
-GtpyContextManager::initBatchContext()
+GtpyContextManager::initBatchContext(int contextId)
 {
-    GTPY_GIL_SCOPE
-
-    Context type = BatchContext;
-    PythonQtObjectPtr con = context(type);
+    PythonQtObjectPtr con = context(contextId);
 
     if (con == Q_NULLPTR)
     {
         return;
     }
 
-    importDefaultModules(type);
+    importDefaultModules(contextId);
 
     if (gtApp != Q_NULLPTR)
     {
-        addObject(type, "GTlab", gtApp);
+        addObject(contextId, "GTlab", gtApp);
 
         QString pyCode =
             "def openProject(projectName):\n"
@@ -783,6 +812,7 @@ GtpyContextManager::initBatchContext()
             "def switchSession(id = ''):\n"
             "    return GTlab.switchSession(id)\n";
 
+        GTPY_GIL_SCOPE
         con.evalScript(pyCode);
     }
     else
@@ -791,27 +821,24 @@ GtpyContextManager::initBatchContext()
                          "Batch context can not register the GTlab object.");
     }
 
-    importLoggingFuncs(type, true);
+    importLoggingFuncs(contextId, true);
 }
 
 void
-GtpyContextManager::initGlobalContext()
+GtpyContextManager::initGlobalContext(int contextId)
 {
-    GTPY_GIL_SCOPE
-
-    Context type = GlobalContext;
-    PythonQtObjectPtr con = context(type);
+    PythonQtObjectPtr con = context(contextId);
 
     if (con == Q_NULLPTR)
     {
         return;
     }
 
-    importDefaultModules(type);
+    importDefaultModules(contextId);
 
     if (gtApp != Q_NULLPTR)
     {
-        addObject(type, QStringLiteral("GTlab"), gtApp);
+        addObject(contextId, QStringLiteral("GTlab"), gtApp);
 
         QString pyCode =
             "def openProject(projectName):\n"
@@ -822,6 +849,8 @@ GtpyContextManager::initGlobalContext()
             "    return GTlab.init(id)\n"
             "def switchSession(id = ''):\n"
             "    return GTlab.switchSession(id)\n";
+
+        GTPY_GIL_SCOPE
 
         con.evalScript(pyCode);
     }
@@ -836,53 +865,47 @@ GtpyContextManager::initGlobalContext()
         QStringLiteral("sys.argv.append('')\n") +
         QStringLiteral("del sys\n");
 
+    GTPY_GIL_SCOPE
+
     con.evalScript(pyCode);
 
-    importLoggingFuncs(type, true);
+    importLoggingFuncs(contextId, true);
 }
 
 void
-GtpyContextManager::initScriptEditorContext()
+GtpyContextManager::initScriptEditorContext(int contextId)
 {
-    Context type = ScriptEditorContext;
+    importDefaultModules(contextId);
 
-    importDefaultModules(type);
-
-    importLoggingFuncs(type, false);
+    importLoggingFuncs(contextId, false);
 }
 
 void
-GtpyContextManager::initCalculatorRunContext()
+GtpyContextManager::initCalculatorRunContext(int contextId)
 {
-    Context type = CalculatorRunContext;
+    importDefaultModules(contextId);
 
-    importDefaultModules(type);
-
-    importLoggingFuncs(type, true);
+    importLoggingFuncs(contextId, true);
 }
 
 void
-GtpyContextManager::initTaskEditorContext()
+GtpyContextManager::initTaskEditorContext(int contextId)
 {
-    Context type = TaskEditorContext;
+    importDefaultModules(contextId);
 
-    importDefaultModules(type);
+    importLoggingFuncs(contextId, false);
 
-    importLoggingFuncs(type, false);
-
-    importCalcModule(type);
+    importCalcModule(contextId);
 }
 
 void
-GtpyContextManager::initTaskRunContext()
+GtpyContextManager::initTaskRunContext(int contextId)
 {
-    Context type = TaskRunContext;
+    importDefaultModules(contextId);
 
-    importDefaultModules(type);
+    importLoggingFuncs(contextId, true);
 
-    importLoggingFuncs(type, true);
-
-    importCalcModule(type);
+    importCalcModule(contextId);
 }
 
 void
@@ -914,12 +937,9 @@ GtpyContextManager::initStdOut()
 }
 
 void
-GtpyContextManager::importDefaultModules(
-        const GtpyContextManager::Context& type)
+GtpyContextManager::importDefaultModules(int contextId)
 {
-    GTPY_GIL_SCOPE
-
-    PythonQtObjectPtr con = context(type);
+    PythonQtObjectPtr con = context(contextId);
 
     if (con == Q_NULLPTR)
     {
@@ -931,16 +951,16 @@ GtpyContextManager::importDefaultModules(
             CLASS_WRAPPER_MODULE + QStringLiteral("\n") +
         QStringLiteral("from PythonQt import QtCore");
 
+    GTPY_GIL_SCOPE
+
     con.evalScript(pyCode);
 }
 
 void
-GtpyContextManager::importLoggingFuncs(const GtpyContextManager::Context& type,
-                                        bool appConsole)
+GtpyContextManager::importLoggingFuncs(int contextId,
+                                       bool appConsole)
 {
-    GTPY_GIL_SCOPE
-
-    PythonQtObjectPtr con = context(type);
+    PythonQtObjectPtr con = context(contextId);
 
     if (con == Q_NULLPTR)
     {
@@ -959,22 +979,22 @@ GtpyContextManager::importLoggingFuncs(const GtpyContextManager::Context& type,
         QStringLiteral("from ") + LOGGING_MODULE +
             QStringLiteral(" import gtWarning\n");
 
+    GTPY_GIL_SCOPE
+
     con.evalScript(pyCode);
 
-    m_appLogging.insert(type, appConsole);
+    m_appLogging.insert(contextId, appConsole);
 }
 
 void
-GtpyContextManager::importCalcModule(const GtpyContextManager::Context& type)
+GtpyContextManager::importCalcModule(int contextId)
 {
-    GTPY_GIL_SCOPE
-
-    if (!m_calcAccessibleContexts.contains(type))
+    if (!m_calcAccessibleContexts.contains(contextId))
     {
-        m_calcAccessibleContexts << type;
+        m_calcAccessibleContexts << contextId;
     }
 
-    PythonQtObjectPtr con = context(type);
+    PythonQtObjectPtr con = context(contextId);
 
     if (con == Q_NULLPTR)
     {
@@ -991,16 +1011,15 @@ GtpyContextManager::importCalcModule(const GtpyContextManager::Context& type)
         "        del " + HELPER_FAC_VAR + "\n"
         "del sys\n";
 
+    GTPY_GIL_SCOPE
+
     con.evalScript(pyCode);
 }
 
 void
-GtpyContextManager::registerCalcModuleInSys(
-        const GtpyContextManager::Context& type)
+GtpyContextManager::registerCalcModuleInSys(int contextId)
 {
-    GTPY_GIL_SCOPE
-
-    PythonQtObjectPtr con = context(type);
+    PythonQtObjectPtr con = context(contextId);
 
     if (con == Q_NULLPTR)
     {
@@ -1013,14 +1032,14 @@ GtpyContextManager::registerCalcModuleInSys(
             "    sys.modules['" + CALC_MODULE + "'] = " + CALC_MODULE + "\n" +
             "    del sys\n";
 
+    GTPY_GIL_SCOPE
+
     con.evalScript(pyCode);
 }
 
 void
 GtpyContextManager::removeCalcModuleFromSys()
 {
-    GTPY_GIL_SCOPE
-
     PythonQtObjectPtr con = context(GtpyContextManager::GlobalContext);
 
     if (con == Q_NULLPTR)
@@ -1033,6 +1052,8 @@ GtpyContextManager::removeCalcModuleFromSys()
         "if '" + CALC_MODULE + "' in sys.modules:\n" +
         "    sys.modules['" + CALC_MODULE + "'] = None\n" +
         "del sys\n";
+
+    GTPY_GIL_SCOPE
 
     con.evalScript(pyCode);
 }
