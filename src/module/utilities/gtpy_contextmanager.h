@@ -475,6 +475,8 @@ private:
     /// Python main thread state
     PyThreadState* m_pyThreadState;
 
+    bool m_contextsInitialized;
+
 private slots:
     /**
      * @brief Emits errorMessage signal.
