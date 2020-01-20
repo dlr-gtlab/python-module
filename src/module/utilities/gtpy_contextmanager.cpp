@@ -67,7 +67,8 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     m_sendErrorMessages(true),
     m_errorEmitted(false),
     m_loggingModule(Q_NULLPTR),
-    m_pyThreadState(Q_NULLPTR)
+    m_pyThreadState(Q_NULLPTR),
+    m_contextsInitialized(false)
 {
     qRegisterMetaType<GtpyContextManager::Context>
     ("GtpyContextManager::Context");
@@ -141,6 +142,11 @@ GtpyContextManager::evalScript(const GtpyContextManager::Context& type,
                                const bool output,
                                const EvalOptions& option)
 {
+    if (!m_contextsInitialized)
+    {
+        initContexts();
+    }
+
     GTPY_GIL_SCOPE
 
     m_currentContex = type;
@@ -489,6 +495,8 @@ GtpyContextManager::initContexts()
     }
 
     removeCalcModuleFromSys();
+
+    m_contextsInitialized = true;
 }
 
 void
