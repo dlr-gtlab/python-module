@@ -25,12 +25,11 @@ class GtpyScriptEditor : public GtCodeEditor
 public:
     /**
      * @brief GtpyScriptEditor
-     * @param type Type of context in which the scripts written in the
+     * @param contextId Id of the context in which the scripts written in the
      * editor are evaluated.
      * @param parent Parent of the editor.
      */
-    GtpyScriptEditor(GtpyContextManager::Context type,
-                     QWidget* parent = Q_NULLPTR);
+    GtpyScriptEditor(int contextId, QWidget* parent = Q_NULLPTR);
 
     /**
      * @brief Handles the tooltips after error messages.
@@ -154,18 +153,17 @@ private slots:
     /**
      * @brief Highlights the given line as error line (red).
      * @param codeLine number of line which should be highligted
-     * @param type of context in which the error has been triggered
+     * @param contextId Id of the context in which the error has been triggered.
      */
     void highlightErrorLine(int codeLine,
-                            const GtpyContextManager::Context& type);
+                            int contextId);
 
     /**
      * @brief Receives the error messages.
      * @param message that has been send
-     * @param type of context in which the error has been triggered
+     * @param contextId Id of the context in which the error has been triggered.
      */
-    void appendErrorMessage(const QString& message,
-                            const GtpyContextManager::Context& type);
+    void appendErrorMessage(const QString& message, int contextId);
 
     /**
      * @brief Sets the number of error line to invalid value (-1).
@@ -194,8 +192,8 @@ private:
     /// Error message
     QString m_errorMessage;
 
-    /// Python Context
-    GtpyContextManager::Context m_contextType;
+    /// Python Context id
+    int m_contextId;
 
     /**
      * @brief Returns the python code of a function call as string value.

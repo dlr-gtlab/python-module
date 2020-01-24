@@ -16,11 +16,11 @@
 
 #include "gtpy_completer.h"
 
-GtpyCompleter::GtpyCompleter(GtpyContextManager::Context type,
-                  QWidget* widget) : QCompleter(widget)
+GtpyCompleter::GtpyCompleter(int contextId, QWidget* widget) :
+    QCompleter(widget)
 {
     setObjectName("Python Completer");
-    m_contextType = type;
+    m_contextId = contextId;
 
     setCompletionMode(QCompleter::PopupCompletion);
     setCaseSensitivity(Qt::CaseInsensitive);
@@ -171,7 +171,7 @@ GtpyCompleter::getCompletions(QString textToCompare, QString objToLookup)
         textToCompare == QStringLiteral("from"))
     {
         GtpyContextManager* python = GtpyContextManager::instance();
-        map = python->introspection(m_contextType, objToLookup, true);
+        map = python->introspection(m_contextId, objToLookup, true);
     }
     else if (completions.isEmpty() || oldTextToCompare.isEmpty() ||
              !textToCompare.startsWith(oldTextToCompare) ||
@@ -181,11 +181,11 @@ GtpyCompleter::getCompletions(QString textToCompare, QString objToLookup)
 
         if (textToCompare.contains(QRegularExpression("from|import")))
         {
-            map = python->introspection(m_contextType, objToLookup, true);
+            map = python->introspection(m_contextId, objToLookup, true);
         }
         else
         {
-            map = python->introspection(m_contextType, objToLookup);
+            map = python->introspection(m_contextId, objToLookup);
         }
     }
     else

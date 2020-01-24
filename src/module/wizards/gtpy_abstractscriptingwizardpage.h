@@ -40,6 +40,8 @@ public:
      */
     GtpyAbstractScriptingWizardPage(GtpyContextManager::Context type);
 
+    ~GtpyAbstractScriptingWizardPage();
+
     /**
      * @brief Will be called just before page is shown. Adds registered
      * packages to the Python context.
@@ -192,7 +194,10 @@ protected:
 
     GtProcessWizard* findParentWizard();
 
-    /// Python Context Type
+    /// Python Context id
+    int m_contextId;
+
+    /// Python Context type
     GtpyContextManager::Context m_contextType;
 
 protected slots:

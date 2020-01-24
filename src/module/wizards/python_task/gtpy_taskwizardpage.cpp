@@ -91,7 +91,7 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
     connect(m_actionMapper, SIGNAL(mapped(QObject*)),
             SLOT(actionTriggered(QObject*)));
 
-    GtpyScriptEditor* calcEditor = new GtpyScriptEditor(m_contextType, this);
+    GtpyScriptEditor* calcEditor = new GtpyScriptEditor(m_contextId, this);
 
     QTextOption defaultOps = calcEditor->document()->defaultTextOption();
     defaultOps.setFlags(defaultOps.flags() | QTextOption::ShowTabsAndSpaces /*|
@@ -406,7 +406,7 @@ GtpyTaskWizardPage::insertConstructor(GtCalculator* calc)
 
     insertToCurrentCursorPos(pyCode + "\n");
 
-    evalScript(pyCode, true);
+    evalScript(pyCode, false);
     showEvalButton(false);
 }
 

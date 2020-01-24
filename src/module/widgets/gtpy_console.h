@@ -27,12 +27,11 @@ class GtpyConsole: public QTextEdit
 public:
     /**
      * @brief GtPythonScriptingConsole
-     * @param type Type of context in which the scripts lines written in the
-     * console are evaluated.
+     * @param contextId It of the context in which the scripts lines written
+     * in the console are evaluated.
      * @param parent Parent of the editor.
      */
-    GtpyConsole(GtpyContextManager::Context type,
-                             QWidget* parent);
+    GtpyConsole(int contextId, QWidget* parent);
 
     /**
      * @brief Sets the text of command prompt of the console.
@@ -43,17 +42,18 @@ public:
     /**
      * @brief Enables the registration of a context whose output is displayed
      *  on this console. No input will be sent to this context.
-     * @param Context which should be added.
+     * @param contextId Id of the context which should be added.
      */
-    void showAdditionalContextOutput(GtpyContextManager::Context context);
+    void showAdditionalContextOutput(int contextId);
 
 public slots:
     /**
      * @brief Receives error messages and appends them to the console.
      * @param message Error message which should be shown.
-     * @param type Type of python context that triggered the error message.
+     * @param contextId Id of the python context that triggered the error
+     * message.
      */
-    void stdErr(const QString& message, GtpyContextManager::Context type);
+    void stdErr(const QString& message, int contextId);
 
     /**
      * @brief Clears the console text.
@@ -96,8 +96,8 @@ private:
     /// Python Context Manager
     GtpyContextManager* m_python;
 
-    /// Python Context Type
-    GtpyContextManager::Context m_contextType;
+    /// Python Context id
+    int m_contextId;
 
     /// Default Text Character Format
     QTextCharFormat m_defaultTextCharacterFormat;
@@ -108,7 +108,7 @@ private:
     /// Python Completer Model
     GtPyCompleterModel* m_model;
 
-    QList<GtpyContextManager::Context> m_additionalContextOutput;
+    QList<int> m_additionalContextOutput;
 
     /// Cursor Position
     int m_cursorPosition;
@@ -186,30 +186,29 @@ private slots:
     /**
      * @brief Receives messages and appends them to the console.
      * @param message Message which should be shown.
-     * @param type Type of python context that triggered the message.
+     * @param contextId Id of the python context that triggered the message.
      */
-    void stdOut(const QString& message, GtpyContextManager::Context type);
+    void stdOut(const QString& message, int contextId);
 
     /**
      * @brief Sets the cursor to the end of the console.
-     * @param type Type of python context that triggered the cursor move.
+     * @param contextId Id of the python context that triggered the cursor move.
      */
-    void cursorToEnd(const GtpyContextManager::Context& type);
+    void cursorToEnd(int contextId);
 
     /**
      * @brief Appends a new command prompt to the end of the console.
-     * @param type Type of python context that triggered the
+     * @param contextId Id of the python context that triggered the
      * appending of the promt.
      * @param storeOnly If storeOnly is true, it appends the multiline prompt.
      */
-    void appendCommandPrompt(GtpyContextManager::Context type,
-                             bool storeOnly = false);
+    void appendCommandPrompt(int contextId, bool storeOnly = false);
 
     /**
      * @brief Append new line and command prompt after execution.
-     * @param type Type of python context in which the code was executed.
+     * @param contextId Id of the python context in which the code was executed.
      */
-    void onCodeExecuted(GtpyContextManager::Context type);
+    void onCodeExecuted(int contextId);
 
     /**
      * @brief Inserts the selected completion.

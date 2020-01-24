@@ -27,9 +27,9 @@ class GtpyScriptRunnable : public QObject,
 public:
     /**
      * @brief The GtpyScriptRunnable constructor.
-     * @param contextType Python context identifier.
+     * @param contextId Python context identifier.
      */
-    GtpyScriptRunnable(GtpyContextManager::Context contextType);
+    GtpyScriptRunnable(int contextId);
 
     /**
      * @brief ~GtpyScriptRunnable
@@ -91,7 +91,7 @@ private:
     long m_threadId;
 
     /// Python context identifier
-    GtpyContextManager::Context m_contextType;
+    int m_contextId;
 
 public slots:
     /// Interrupts the python thread with the id m_threadId.

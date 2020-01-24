@@ -17,16 +17,16 @@
 
 #include "gtpy_scripteditor.h"
 
-GtpyScriptEditor::GtpyScriptEditor(GtpyContextManager::Context type,
-                                   QWidget* parent) : GtCodeEditor(parent)
+GtpyScriptEditor::GtpyScriptEditor(int contextId, QWidget* parent) :
+    GtCodeEditor(parent)
 {
     const QFont sysFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
     setFont(sysFont);
 
-    m_cpl = new GtpyCompleter(type, this);
+    m_cpl = new GtpyCompleter(contextId, this);
 
-    m_contextType = type;
+    m_contextId = contextId;
 
     setMouseTracking(true);
 
@@ -46,12 +46,10 @@ GtpyScriptEditor::GtpyScriptEditor(GtpyContextManager::Context type,
 
     GtpyContextManager* python = GtpyContextManager::instance();
 
-    connect(python, SIGNAL(errorCodeLine(int,
-            GtpyContextManager::Context)), this,
-          SLOT(highlightErrorLine(int,GtpyContextManager::Context)));
-    connect(python, SIGNAL(errorMessage(QString,
-                  GtpyContextManager::Context)), this,
-         SLOT(appendErrorMessage(QString,GtpyContextManager::Context)));
+    connect(python, SIGNAL(errorCodeLine(int, int)), this,
+          SLOT(highlightErrorLine(int, int)));
+    connect(python, SIGNAL(errorMessage(QString, int)), this,
+         SLOT(appendErrorMessage(QString, int)));
     connect(this, SIGNAL(cursorPositionChanged()), this,
          SLOT(resetErrorLine()));
     connect(m_cpl, SIGNAL(activated(QModelIndex)), this,
@@ -715,10 +713,9 @@ GtpyScriptEditor::lineHighlighting()
 }
 
 void
-GtpyScriptEditor::highlightErrorLine(int codeLine,
-                                     const GtpyContextManager::Context& type)
+GtpyScriptEditor::highlightErrorLine(int codeLine, int contextId)
 {
-    if (type == m_contextType)
+    if (contextId == m_contextId)
     {
         QList<QTextEdit::ExtraSelection> extraSelections;
 
@@ -747,21 +744,23 @@ GtpyScriptEditor::highlightErrorLine(int codeLine,
     }
 }
 
-void GtpyScriptEditor::appendErrorMessage(const QString& message,
-                                   const GtpyContextManager::Context& type)
+void
+GtpyScriptEditor::appendErrorMessage(const QString& message, int contextId)
 {
-    if (type == m_contextType)
+    if (contextId == m_contextId)
     {
         m_errorMessage = m_errorMessage + message;
     }
 }
 
-void GtpyScriptEditor::resetErrorLine()
+void
+GtpyScriptEditor::resetErrorLine()
 {
     m_errorLine = -1;
 }
 
-void GtpyScriptEditor::insertCompletion()
+void
+GtpyScriptEditor::insertCompletion()
 {
     if (m_cpl == Q_NULLPTR)
     {
