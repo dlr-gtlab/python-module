@@ -168,17 +168,17 @@ GtpyContextManager::evalScript(int contextId,
                                 "PyLogger._PyLogger__outputToConsole = False"));
     }
 
-    if (m_calcAccessibleContexts.contains(contextId))
-    {
-        QString pyCode =
-                "if '" + CALC_MODULE + "' in locals():\n" +
-                "    import sys\n" +
-                "    sys.modules['" + CALC_MODULE + "'] = " + CALC_MODULE +
-                "\n" +
-                "    del sys\n";
+//    if (m_calcAccessibleContexts.contains(contextId))
+//    {
+//        QString pyCode =
+//                "if '" + CALC_MODULE + "' in locals():\n" +
+//                "    import sys\n" +
+//                "    sys.modules['" + CALC_MODULE + "'] = " + CALC_MODULE +
+//                "\n" +
+//                "    del sys\n";
 
-        currentContext.evalScript(pyCode);
-    }
+//        currentContext.evalScript(pyCode);
+//    }
 
     bool hadError = false;
 
@@ -193,10 +193,10 @@ GtpyContextManager::evalScript(int contextId,
         emit scriptEvaluated(contextId);
     }
 
-    if (m_calcAccessibleContexts.contains(contextId))
-    {
-        removeCalcModuleFromSys();
-    }
+//    if (m_calcAccessibleContexts.contains(contextId))
+//    {
+//        removeCalcModuleFromSys();
+//    }
 
     return !hadError;
 }
@@ -439,7 +439,6 @@ GtpyContextManager::setPropertyValueFuncName() const
 void
 GtpyContextManager::initContexts()
 {
-    initCalculatorModule();
     initLoggingModule();
 
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
@@ -460,8 +459,6 @@ GtpyContextManager::initContexts()
     }
 
     initStdOut();
-
-    removeCalcModuleFromSys();
 
     m_contextsInitialized = true;
 }
@@ -491,11 +488,11 @@ GtpyContextManager::createNewContext(const GtpyContextManager::Context& type)
 
     contextName += ("_" + QString::number(contextId));
 
-    registerCalcModuleInSys(TaskRunContext);
+//    registerCalcModuleInSys(TaskRunContext);
 
     defaultContextConfig(type, contextId, contextName);
 
-    removeCalcModuleFromSys();
+//    removeCalcModuleFromSys();
 
     return contextId;
 }
@@ -545,10 +542,10 @@ GtpyContextManager::resetContext(const GtpyContextManager::Context& type,
         contextId = (int)type;
     }
 
-    if (m_calcAccessibleContexts.contains(contextId))
-    {
-        registerCalcModuleInSys(contextId);
-    }
+//    if (m_calcAccessibleContexts.contains(contextId))
+//    {
+//        registerCalcModuleInSys(contextId);
+//    }
 
     QString contextName = contextNameById(contextId);
 
@@ -559,10 +556,10 @@ GtpyContextManager::resetContext(const GtpyContextManager::Context& type,
 
     defaultContextConfig(type, contextId, contextName);
 
-    if (m_calcAccessibleContexts.contains(contextId))
-    {
-        removeCalcModuleFromSys();
-    }
+//    if (m_calcAccessibleContexts.contains(contextId))
+//    {
+//        removeCalcModuleFromSys();
+//    }
 }
 
 long
@@ -653,12 +650,135 @@ GtpyContextManager::context(int contextId) const
 void
 GtpyContextManager::initCalculatorModule()
 {
+    static QString helperWrapper;
+    static QString calcWrapper;
+    static QString calcConstructors;
+
+    if (helperWrapper.isEmpty())
+    {
+        helperWrapper =
+                "class HelperWrapper: \n"
+                "    def __init__(self, helper): \n"
+                "        self._helper = helper\n"
+
+                "        helpers = " + HELPER_FAC_VAR +
+                    ".connectedHelper(self._helper.__class__.__name__)\n" +
+                "        for i in range(len(helpers)):\n" +
+                "            funcName = 'create' + helpers[i]\n" +
+                "            def dynCreateHelper(name, self = self, "
+                            "helperName = helpers[i]):\n" +
+                "                helper = " + HELPER_FAC_VAR +
+                    ".newCalculatorHelper(helperName, name, self._helper)\n" +
+                "                return HelperWrapper(helper)\n" +
+                "            setattr(self, funcName, dynCreateHelper)\n" +
+
+                "    def __getattr__(self, name): \n" +
+                "        return getattr(self.__dict__['_helper'], name)\n\n" +
+                "    def __setattr__(self, name, value): \n" +
+                "        if name in ('_helper') or name.startswith('createGt'):\n" +
+                "            self.__dict__[name] = value\n" +
+                "        else:\n" +
+                "            setattr(self.__dict__['_helper'], name, value)\n" +
+                "    def __dir__(self): \n" +
+                "        return sorted(set(dir(type(self)) + dir(self._helper)))";
+    }
+
+    if (calcWrapper.isEmpty())
+    {
+        calcWrapper =
+                "class CalcWrapper: \n"
+                "    def __init__(self, calc):\n"
+                "        self._calc = calc\n"
+
+                "        for i in range(len(self._calc.findGtProperties())):\n"
+                "            prop = self._calc.findGtProperties()[i]\n"
+                "            if prop.ident():\n"
+
+                "                funcName = re.sub('[^A-Za-z0-9]+', '', "
+                                "prop.ident())\n"
+                "                tempLetter = funcName[0]\n"
+                "                funcName = funcName.replace(tempLetter, "
+                                "tempLetter.lower(), 1)\n"
+
+                "                def dynGetter(self = self, propName = "
+                                "prop.ident()):\n"
+                "                    return self._calc.propertyValue(propName)\n"
+                "                setattr(self, funcName, dynGetter)\n"
+
+                "                tempLetter = funcName[0]\n"
+                "                funcName = funcName.replace(tempLetter, "
+                                "tempLetter.upper(), 1)\n"
+                "                funcName = 'set' + funcName\n"
+
+                "                def dynSetter(val, self = self, propName = "
+                                "prop.ident()):\n"
+                "                    self._calc.setPropertyValue(propName, val)\n"
+                "                setattr(self, funcName, dynSetter)\n"
+
+                "        helpers = " + HELPER_FAC_VAR + ".connectedHelper("
+                                            "self._calc.__class__.__name__)\n" +
+                "        for i in range(len(helpers)):\n" +
+                "            funcName = 'create' + helpers[i]\n" +
+
+                "            def dynCreateHelper(name, self = self, helperName = "
+                                                                "helpers[i]):\n" +
+                "                helper = " + HELPER_FAC_VAR +
+                            ".newCalculatorHelper(helperName, name, self._calc)\n" +
+                "                return HelperWrapper(helper)\n" +
+                "            setattr(self, funcName, dynCreateHelper)\n" +
+
+                "    def __getattr__(self, name): \n" +
+                "        return getattr(self.__dict__['_calc'], name)\n" +
+                "    def __setattr__(self, name, value): \n" +
+                "        if name is ('_calc') or  hasattr("
+                                    "self.__dict__['_calc'], name) is False:\n" +
+                "            self.__dict__[name] = value\n" +
+                "        else:\n" +
+                "            setattr(self.__dict__['_calc'], name, value)\n" +
+                "    def __dir__(self): \n" +
+                "        return sorted(list(self.__dict__.keys()) + "
+                                                            "dir(self._calc))\n";
+    }
+
+    if (calcConstructors.isEmpty())
+    {
+        foreach (GtCalculatorData calcData,
+                 gtCalculatorFactory->calculatorDataList())
+        {
+            if (!gtApp->devMode() &&
+                    calcData->status != GtCalculatorDataImpl::RELEASE)
+            {
+                continue;
+            }
+
+            QString className = QString::fromUtf8(
+                                    calcData->metaData().className());
+
+            calcConstructors +=
+                "def " + className + "(name = '" + calcData->id + "'):\n" +
+                "    tempCalc = " + CALC_FAC_VAR + ".createCalculator(\"" +
+                className + "\", name, " + TASK_VAR + ")\n" +
+
+                "    return CalcWrapper(tempCalc)\n";
+        }
+
+    }
+
     GTPY_GIL_SCOPE
 
     PythonQtObjectPtr calcModule =
             PythonQt::self()->createModuleFromScript(CALC_MODULE);
 
-    GtpyCalculatorFactory* factory = new GtpyCalculatorFactory(this);
+    static GtpyCalculatorFactory* factory = Q_NULLPTR;
+
+    if (factory == Q_NULLPTR)
+    {
+        factory = new GtpyCalculatorFactory();
+
+        factory->moveToThread(this->thread());
+
+        factory->setParent(this);
+    }
 
     calcModule.evalScript(TASK_VAR + QStringLiteral(" = None"));
 
@@ -666,98 +786,13 @@ GtpyContextManager::initCalculatorModule()
 
     calcModule.addObject(HELPER_FAC_VAR, gtCalculatorHelperFactory);
 
-    calcModule.evalScript(
+    calcModule.evalScript(helperWrapper);
 
-        QStringLiteral("class HelperWrapper: \n") +
-        QStringLiteral("    def __init__(self, helper): \n") +
-        QStringLiteral("        self._helper = helper\n") +
+    calcModule.evalScript("import re");
 
-        QStringLiteral("        helpers = ") + HELPER_FAC_VAR + QStringLiteral(".connectedHelper(self._helper.__class__.__name__)\n") +
-        QStringLiteral("        for i in range(len(helpers)):\n") +
-        QStringLiteral("            funcName = 'create' + helpers[i]\n") +
-        QStringLiteral("            def dynCreateHelper(name, self = self, helperName = helpers[i]):\n") +
-        QStringLiteral("                helper = ") + HELPER_FAC_VAR + QStringLiteral(".newCalculatorHelper(helperName, name, self._helper)\n") +
-        QStringLiteral("                return HelperWrapper(helper)\n") +
-        QStringLiteral("            setattr(self, funcName, dynCreateHelper)\n") +
+    calcModule.evalScript(calcWrapper);
 
-        QStringLiteral("    def __getattr__(self, name): \n") +
-        QStringLiteral("        return getattr(self.__dict__['_helper'], name)\n\n") +
-        QStringLiteral("    def __setattr__(self, name, value): \n") +
-        QStringLiteral("        if name in ('_helper') or name.startswith('createGt'):\n") +
-        QStringLiteral("            self.__dict__[name] = value\n") +
-        QStringLiteral("        else:\n") +
-        QStringLiteral("            setattr(self.__dict__['_helper'], name, value)\n") +
-        QStringLiteral("    def __dir__(self): \n") +
-        QStringLiteral("        return sorted(set(dir(type(self)) + dir(self._helper)))"));
-
-    calcModule.evalScript(QStringLiteral("import re"));
-
-    calcModule.evalScript(
-
-        QStringLiteral("class CalcWrapper: \n") +
-        QStringLiteral("    def __init__(self, calc):\n") +
-        QStringLiteral("        self._calc = calc\n") +
-
-        QStringLiteral("        for i in range(len(self._calc.findGtProperties())):\n") +
-        QStringLiteral("            prop = self._calc.findGtProperties()[i]\n") +
-        QStringLiteral("            if prop.ident():\n") +
-
-        QStringLiteral("                funcName = re.sub('[^A-Za-z0-9]+', '', prop.ident())\n") +
-        QStringLiteral("                tempLetter = funcName[0]\n") +
-        QStringLiteral("                funcName = funcName.replace(tempLetter, tempLetter.lower(), 1)\n") +
-
-        QStringLiteral("                def dynGetter(self = self, propName = prop.ident()):\n") +
-        QStringLiteral("                    return self._calc.propertyValue(propName)\n") +
-        QStringLiteral("                setattr(self, funcName, dynGetter)\n") +
-
-        QStringLiteral("                tempLetter = funcName[0]\n") +
-        QStringLiteral("                funcName = funcName.replace(tempLetter, tempLetter.upper(), 1)\n") +
-        QStringLiteral("                funcName = 'set' + funcName\n") +
-
-        QStringLiteral("                def dynSetter(val, self = self, propName = prop.ident()):\n") +
-        QStringLiteral("                    self._calc.setPropertyValue(propName, val)\n") +
-        QStringLiteral("                setattr(self, funcName, dynSetter)\n") +
-
-        QStringLiteral("        helpers = ") + HELPER_FAC_VAR + QStringLiteral(".connectedHelper(self._calc.__class__.__name__)\n") +
-        QStringLiteral("        for i in range(len(helpers)):\n") +
-        QStringLiteral("            funcName = 'create' + helpers[i]\n") +
-
-        QStringLiteral("            def dynCreateHelper(name, self = self, helperName = helpers[i]):\n") +
-        QStringLiteral("                helper = ") + HELPER_FAC_VAR + QStringLiteral(".newCalculatorHelper(helperName, name, self._calc)\n") +
-        QStringLiteral("                return HelperWrapper(helper)\n") +
-        QStringLiteral("            setattr(self, funcName, dynCreateHelper)\n") +
-
-        QStringLiteral("    def __getattr__(self, name): \n") +
-        QStringLiteral("        return getattr(self.__dict__['_calc'], name)\n") +
-        QStringLiteral("    def __setattr__(self, name, value): \n") +
-        QStringLiteral("        if name is ('_calc') or  hasattr(self.__dict__['_calc'], name) is False:\n") +
-        QStringLiteral("            self.__dict__[name] = value\n") +
-        QStringLiteral("        else:\n") +
-        QStringLiteral("            setattr(self.__dict__['_calc'], name, value)\n") +
-        QStringLiteral("    def __dir__(self): \n") +
-        QStringLiteral("        return sorted(list(self.__dict__.keys()) + dir(self._calc))\n"));
-
-
-    foreach (GtCalculatorData calcData,
-             gtCalculatorFactory->calculatorDataList())
-    {
-        if (!gtApp->devMode() &&
-                calcData->status != GtCalculatorDataImpl::RELEASE)
-        {
-            continue;
-        }
-
-        QString className = QString::fromUtf8(
-                                calcData->metaData().className());
-
-        calcModule.evalScript(
-
-            "def " + className + "(name = '" + calcData->id + "'):\n" +
-            "    tempCalc = " + CALC_FAC_VAR + ".createCalculator(\"" +
-            className + "\", name, " + TASK_VAR + ")\n" +
-
-            "    return CalcWrapper(tempCalc)");
-    }
+    calcModule.evalScript(calcConstructors);
 }
 
 void
@@ -1049,6 +1084,8 @@ GtpyContextManager::importCalcModule(int contextId)
         return;
     }
 
+    initCalculatorModule();
+
     QString pyCode =
         "import sys\n"
         "if '" + CALC_MODULE + "' in sys.modules:\n"
@@ -1057,7 +1094,7 @@ GtpyContextManager::importCalcModule(int contextId)
         "        from " + CALC_MODULE + " import *\n"
         "        del " + CALC_FAC_VAR + "\n"
         "        del " + HELPER_FAC_VAR + "\n"
-        "del sys\n";
+        "        del sys.modules['" + CALC_MODULE + "']\n";
 
     GTPY_GIL_SCOPE
 
