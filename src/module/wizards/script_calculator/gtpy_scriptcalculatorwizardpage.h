@@ -45,7 +45,7 @@ private slots:
     /**
      * @brief Saves the script into the calculator instance.
      */
-    virtual void onSaveButtonClicked() Q_DECL_OVERRIDE;
+    virtual void saveScript() Q_DECL_OVERRIDE;
 };
 
 

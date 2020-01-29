@@ -84,7 +84,7 @@ public:
 
     /**
      * @brief Evaluates the given script into the given python context.
-     * @param type Python context identifier.
+     * @param contextId Python context identifier.
      * @param script The script to be executed.
      * @param output Emit output messages.
      * @param errorMessage Emit error messages.
@@ -97,7 +97,7 @@ public:
 
     /**
      * @brief introspection
-     * @param type
+     * @param contextId
      * @param objectname
      * @param appendModules
      * @return
@@ -108,9 +108,9 @@ public:
 
     /**
      * @brief Adds the object obj to the Python context indicated by
-     *  type. After calling this function, the object can be referenced by
+     *  contextId. After calling this function, the object can be referenced by
      *  the specified name.
-     * @param type Python context identifier.
+     * @param contextId Python context identifier.
      * @param name Reference name in Python context.
      * @param obj Object to add.
      * @param saveName If true, the reference name is stored in the list of
@@ -124,8 +124,8 @@ public:
 
     /**
      * @brief Removes the object with the given name from the Python context
-     * indicated by type.
-     * @param type Python context identifier.
+     * indicated by contextId.
+     * @param contextId Python context identifier.
      * @param name Reference name in Python context.
      * @return Whether the removal was successful.
      */
@@ -133,27 +133,27 @@ public:
 
     /**
      * @brief Removes all objects added by calling the addObject() function from
-     * the Python context indicated by type. Note that it only removes the
+     * the Python context indicated by contextId. Note that it only removes the
      * objctes whose reference name is stored in the list of added objects.
-     * @param type Python context identifier.
+     * @param contextId Python context identifier.
      * @return Whether the removal was successful.
      */
     bool removeAllAddedObjects(int contextId);
 
     /**
      * @brief Adds the task object to the Python context indicated by
-     *  type.
-     * @param type Python context identifier.
+     *  contextId.
+     * @param contextId Python context identifier.
      * @param task Task object to add.
      * @return Whether the addition was successful.
      */
     bool addTaskValue(int contextId, GtTask* task);
 
     /**
-     * @brief Checks whether the Python context indicated by type as access to
-     *  calculators. If the context has access, this function deletes all
+     * @brief Checks whether the Python context indicated by contextId as access
+     *  to calculators. If the context has access, this function deletes all
      * calculator instances that are children of the task instance (TASK_VAR).
-     * @param type Python context identifier.
+     * @param contextId Python context identifier.
      */
     void deleteCalcsFromTask(int contextId);
 
@@ -183,15 +183,31 @@ public:
      */
     void initContexts();
 
+    /**
+     * @brief Creates a new python context and returns its id.
+     * @param type Determines the type of context and thus which
+     * functionalities it has.
+     * @return The id of the new created context.
+     */
     int createNewContext(const GtpyContextManager::Context& type);
 
+    /**
+     * @brief Deletes the python context with the given id.
+     * @param contextId Id of a python context.
+     * @return True, if the deletion was successful.
+     */
     bool deleteContext(int contextId);
-
-    int m_tempTest = 19;
 
     /**
      * @brief Resets the Python context indicated by type to its initial state.
      * @param type Python context identifier.
+     */
+
+    /**
+     * @brief Resets the Python context indicated by contextId to and
+     * initializes it with the functionality of type.
+     * @param type Identifies the functionality of the context after the reset.
+     * @param contextId Id of a python context.
      */
     void resetContext(const GtpyContextManager::Context& type,
                       int contextId = -1);
@@ -232,10 +248,10 @@ private:
     static const QString CUSTOM_IMPORT_MODULE;
 
     /**
-     * @brief Contains the dafault configuration for every context.
-     * Ensures that the Python context indicated by type cannot be imported
-     * into other modules.
-     * @param type Python context identifier.
+     * @brief Configures the python context indicated by contextId with the
+     * functionality indicated by type
+     * @param type Identifies the functionality of the context.
+     * @param contextId Id of a python context.
      * @param contextName The name of the Python context.
      */
     void defaultContextConfig(const GtpyContextManager::Context& type,
@@ -244,15 +260,17 @@ private:
 
     /**
      * @brief Calls the function containing the specific configuration for the
-     * Python context indicated by the type.
+     * Python context indicated by contextId. The type determines the
+     * configuration of the context.
      * @param type Python context identifier.
+     * @param contextId Id of a python context.
      */
     void specificContextConfig(const GtpyContextManager::Context& type,
                                int contextId);
 
     /**
-     * @brief Returns a pointer to the Python context indicated by type.
-     * @param type Python context identifier.
+     * @brief Returns a pointer to the Python context indicated by contextId.
+     * @param contextId Python context identifier.
      * @return Pointer to Python Context.
      */
     PythonQtObjectPtr context(int contextId) const;
@@ -267,78 +285,94 @@ private:
      */
     void initLoggingModule();
 
+    /**
+     * @brief Initializes the import behaviour of python.
+     */
     void initImportBehaviour();
 
     /**
-     * @brief Initializes additional functionalities for the batch context.
+     * @brief Initializes additional functionalities for the context of type
+     * BatchContext.
+     * @param contextId Python context identifier.
      */
     void initBatchContext(int contextId);
 
     /**
-     * @brief Initializes additional functionalities for the global context.
+     * @brief Initializes additional functionalities for the context of type
+     * GlobalContext.
+     * @param contextId Python context identifier.
      */
     void initGlobalContext(int contextId);
 
     /**
-     * @brief Initializes additional functionalities for the script editor
-     * context.
+     * @brief Initializes additional functionalities for context of type
+     * ScriptEditorContext.
+     * @param contextId Python context identifier.
      */
     void initScriptEditorContext(int contextId);
 
     /**
-     * @brief Initializes additional functionalities for the calculator run
-     * context.
+     * @brief Initializes additional functionalities for context of type
+     * CalculatorRunContext.
+     * @param contextId Python context identifier.
      */
     void initCalculatorRunContext(int contextId);
 
     /**
-     * @brief Initializes additional functionalities for the task editor
-     * context.
+     * @brief Initializes additional functionalities for context of type
+     * TaskEditorContext.
+     * @param contextId Python context identifier.
      */
     void initTaskEditorContext(int contextId);
 
     /**
-     * @brief Initializes additional functionalities for the task run context.
+     * @brief Initializes additional functionalities for context of type
+     * TaskRunContex.
+     * @param contextId Python context identifier.
      */
     void initTaskRunContext(int contextId);
 
+    /**
+     * @brief Initializes the output behaviour of python.
+     */
     void initStdOut();
 
     /**
      * @brief Imports the default modules to the Python context identified by
-     * type.
-     * @param type Python context identifier.
+     * contextId.
+     * @param contextId Python context identifier.
      */
     void importDefaultModules(int contextId);
 
     /**
-     * @brief Imports the logging functions to the context identified by type.
-     * Stores the appConsole value that specifies whether the logging functions
-     * send the output to the application console.
-     * @param type Python context identifier.
+     * @brief Imports the logging functions to the context identified by
+     * contextId. Stores the appConsole value that specifies whether the
+     * logging functions send the output to the application console.
+     * @param contextId Python context identifier.
      * @param appConsole If true, the logging messages are sent to the
      * GTlab application console.
      */
     void importLoggingFuncs(int contextId, bool appConsole);
 
     /**
-     * @brief Imports the calculator module to the context identified by type.
-     * @param type Python context identifier.
+     * @brief Imports the calculator module to the context identified by
+     * contextId.
+     * @param contextId Python context identifier.
      */
     void importCalcModule(int contextId);
 
-    /**
-     * @brief Registers calculator module in the modules dict of the Python
-     *  module sys.
-     * @param type Python context identifier.
-     */
-    void registerCalcModuleInSys(int contextId);
+//    /**
+//     * @brief Registers calculator module in the modules dict of the Python
+//     *  module sys.
+//     * @param contextId Python context identifier.
+//     */
+//    void registerCalcModuleInSys(int contextId);
 
-    /**
-     * @brief Removes the calculator module out of the modules dict of the
-     * Python module sys.
-     */
-    void removeCalcModuleFromSys();
+//    /**
+//     * @brief Removes the calculator module out of the modules dict of the
+//     * Python module sys.
+//     */
+//    void removeCalcModuleFromSys();
 
     /**
      * @brief Searches the line number out of an error message.
@@ -349,7 +383,7 @@ private:
 
     /**
      * @brief Sets some meta data to the thread dict.
-     * @param type Context type.
+     * @param contextId Python context identifier.
      * @param output Send output messages.
      * @param error Send error messages.
      */
@@ -381,7 +415,7 @@ private:
 
     /**
      * @brief Returns the constractor functions for the calculators.
-     * @param type Python context identifier.
+     * @param contextId Python context identifier.
      * @return Constructor functions for the calculators.
      */
     QMultiMap<QString, GtpyFunction> calculatorCompletions(int contextId) const;
@@ -389,6 +423,7 @@ private:
     /**
      * @brief Sets custom completions and builtin completions to member
      *  variable. Removes duplicates in these
+     * @param contextId Python context identifier.
      */
     void setStandardCompletions(int contextId);
 
@@ -428,9 +463,18 @@ private:
     static void stdErrRedirectCB(const QString& contextName, const bool output,
                                  const bool error, const QString& message);
 
-
+    /**
+     * @brief Returns the id of the context with the given name.
+     * @param contextName Name of the context.
+     * @return The id of the context with the given name.
+     */
     int contextIdByName(const QString& contextName);
 
+    /**
+     * @brief Returns the name of the context with the given id.
+     * @param contextId Id of the context.
+     * @return The name of the context with the given id.
+     */
     QString contextNameById(int contextId);
 
     /// Map of Python context
@@ -494,33 +538,33 @@ signals:
     /**
      * @brief Sends the line number in which an error was detected.
      * @param line Line number in which an error was detected.
-     * @param type Python context in which the error occurred.
+     * @param contextId Python context in which the error occurred.
      */
     void errorCodeLine(int line, int contextId);
 
     /**
      * @brief Sends an error messages.
      * @param message Error message.
-     * @param type Python context in which the error occurred.
+     * @param contextId Python context in which the error occurred.
      */
     void errorMessage(const QString& message,int contextId);
 
     /**
      * @brief Sends python messages.
      * @param message Python message.
-     * @param type Python context in which the message was occurred.
+     * @param contextId Python context in which the message was occurred.
      */
     void pythonMessage(const QString& message, int contextId);
 
     /**
      * @brief Emitted if script evaluation starts.
-     * @param type Python context in which the evaluation starts.
+     * @param contextId Python context in which the evaluation starts.
      */
     void startedScriptEvaluation(int contextId);
 
     /**
      * @brief Emitted after script evaluation.
-     * @param type Python context in which script was evaluated.
+     * @param contextId Python context in which script was evaluated.
      */
     void scriptEvaluated(int contextId);
 

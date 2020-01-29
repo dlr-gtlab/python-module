@@ -52,7 +52,7 @@ GtpyScriptCalculatorWizardPage::initialization()
 
     if (gtDataModel->objectByUuid(m_calc->uuid()) == Q_NULLPTR)
     {
-        enableSaveButton(false);
+        enableSaving(false);
     }
 
     setPlainTextToEditor(m_calc->script());
@@ -76,7 +76,7 @@ GtpyScriptCalculatorWizardPage::validation()
 }
 
 void
-GtpyScriptCalculatorWizardPage::onSaveButtonClicked()
+GtpyScriptCalculatorWizardPage::saveScript()
 {
     if (m_calc == Q_NULLPTR)
     {
