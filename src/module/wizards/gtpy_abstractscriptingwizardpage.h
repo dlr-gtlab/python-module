@@ -12,8 +12,10 @@
 
 #include <QPointer>
 
-#include "gtpy_contextmanager.h"
 #include "gt_processwizardpage.h"
+#include "gt_calculator.h"
+
+#include "gtpy_contextmanager.h"
 
 class GtpyScriptEditor;
 class GtpyConsole;
@@ -39,6 +41,8 @@ public:
      * @param type python context type
      */
     GtpyAbstractScriptingWizardPage(GtpyContextManager::Context type);
+
+    ~GtpyAbstractScriptingWizardPage();
 
     /**
      * @brief Will be called just before page is shown. Adds registered
@@ -184,9 +188,22 @@ protected:
      */
     void addTabWidget(QWidget* wid, const QString& label);
 
+    /**
+     * @brief showEvalButton
+     * @param show
+     */
     void showEvalButton(bool show);
 
-    /// Python Context Type
+    GtProcessWizard* findParentWizard();
+
+    void acceptCalculatorDrops(bool accept);
+
+    void cursorToNewLine();
+
+    /// Python Context id
+    int m_contextId;
+
+    /// Python Context type
     GtpyContextManager::Context m_contextType;
 
 protected slots:
@@ -213,6 +230,8 @@ private:
      * @return Whether validation was successful.
      */
     virtual bool validation();
+
+    GtProcessWizard* findParentWizard(QObject* obj);
 
     /// Search Widget
     GtSearchWidget* m_searchWidget;
@@ -328,6 +347,11 @@ private slots:
     virtual void onSaveButtonClicked() = 0;
 
     void evaluationFinished();
+
+    void onCalculatorDropped(GtCalculator* calc);
+
+signals:
+    void calculatorDropReceived(GtCalculator* calc);
 };
 
 #endif // GTPY_ABSTRACTSCRIPTINGWIZARDPAGE_H

@@ -23,14 +23,13 @@ class GtpyCompleter: public QCompleter
 {
     Q_OBJECT
 
-public:
+public:   
     /**
-     * @brief GtPythonCompleter
-     * @param type Type of context the completer is used for.
+     * @brief GtpyCompleter
+     * @param contextId Id of the context the completer is used for.
      * @param widget Parent widget.
      */
-    GtpyCompleter(GtpyContextManager::Context type,
-                  QWidget* widget = Q_NULLPTR);
+    GtpyCompleter(int contextId, QWidget* widget = Q_NULLPTR);
 
     /**
      * @brief Handle completion if completion is selected.
@@ -120,8 +119,8 @@ private:
      */
     int compareStrings(QString s1, QString s2);
 
-    /// Type of Context
-    GtpyContextManager::Context m_contextType;
+    /// Id of Context
+    int m_contextId;
 
     /// Completer Model
     GtpyCompleterModel* m_model;

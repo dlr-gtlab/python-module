@@ -91,7 +91,7 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
     connect(m_actionMapper, SIGNAL(mapped(QObject*)),
             SLOT(actionTriggered(QObject*)));
 
-    GtpyScriptEditor* calcEditor = new GtpyScriptEditor(m_contextType, this);
+    GtpyScriptEditor* calcEditor = new GtpyScriptEditor(m_contextId, this);
 
     QTextOption defaultOps = calcEditor->document()->defaultTextOption();
     defaultOps.setFlags(defaultOps.flags() | QTextOption::ShowTabsAndSpaces /*|
@@ -112,6 +112,15 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
 void
 GtpyTaskWizardPage::initialization()
 {
+    acceptCalculatorDrops(true);
+
+    GtProcessWizard* wiz = findParentWizard();
+
+    if (wiz)
+    {
+        wiz->setWindowModality(Qt::NonModal);
+    }
+
     GtObjectMemento memento = provider()->componentData();
 
     if (memento.isNull())
@@ -178,6 +187,8 @@ GtpyTaskWizardPage::initialization()
             SLOT(onProcessComponentRenamed(QString, QString, QString)));
     connect(m_task, SIGNAL(childAppended(GtObject*, GtObject*)), this,
             SLOT(calculatorAppendedToTask(GtObject*, GtObject*)));
+    connect(this, SIGNAL(calculatorDropReceived(GtCalculator*)), this,
+            SLOT(onCalculatorDropReceived(GtCalculator*)));
 }
 
 bool
@@ -200,6 +211,14 @@ GtpyTaskWizardPage::validation()
     }
 
     provider()->setComponentData(m_task->toMemento());
+
+
+    GtProcessWizard* wiz = findParentWizard();
+
+    if (wiz)
+    {
+        wiz->setWindowModality(Qt::ApplicationModal);
+    }
 
     return true;
 }
@@ -399,7 +418,7 @@ GtpyTaskWizardPage::insertConstructor(GtCalculator* calc)
 
     insertToCurrentCursorPos(pyCode + "\n");
 
-    evalScript(pyCode, true);
+    evalScript(pyCode, false);
     showEvalButton(false);
 }
 
@@ -876,6 +895,19 @@ GtpyTaskWizardPage::onSaveButtonClicked()
         task->fromMemento(memento);
         gtApp->endCommand(command);
     }
+}
+
+void
+GtpyTaskWizardPage::onCalculatorDropReceived(GtCalculator* calc)
+{
+    cursorToNewLine();
+
+    if (appendCalcToTask(calc))
+    {
+        insertConstructor(calc);
+    }
+
+    calc = Q_NULLPTR;
 }
 
 void

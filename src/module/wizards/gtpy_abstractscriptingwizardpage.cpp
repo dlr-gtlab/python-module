@@ -37,6 +37,7 @@
 #include "gt_objectlinkproperty.h"
 #include "gt_datamodel.h"
 #include "gt_filedialog.h"
+#include "gt_processwizard.h"
 
 #include "gt_pyhighlighter.h"
 #include "gt_searchwidget.h"
@@ -45,6 +46,7 @@
 
 GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
         GtpyContextManager::Context type) :
+    m_contextId(-1),
     m_contextType(type),
     m_editor(Q_NULLPTR),
     m_editorSplitter(Q_NULLPTR),
@@ -54,6 +56,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 {
     setTitle(tr("Python Script Editor"));
 
+    m_contextId = GtpyContextManager::instance()->createNewContext(type);
+
     QVBoxLayout* layout = new QVBoxLayout;
 
     QSplitter* splitter = new QSplitter(this);
@@ -62,7 +66,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     m_editorSplitter = new QSplitter(this);
     m_editorSplitter->setOrientation(Qt::Horizontal);
 
-    m_editor = new GtpyScriptEditor(m_contextType, this);
+    m_editor = new GtpyScriptEditor(m_contextId, this);
 
     QTextOption defaultOps = m_editor->document()->defaultTextOption();
     defaultOps.setFlags(defaultOps.flags() | QTextOption::ShowTabsAndSpaces /*|
@@ -126,7 +130,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     splitter->addWidget(m_separator);
 
-    m_pythonConsole = new GtpyConsole(m_contextType, this);
+    m_pythonConsole = new GtpyConsole(m_contextId, this);
 
     m_pythonConsole->setFrameStyle(m_editor->frameStyle());
     m_pythonConsole->setReadOnly(true);
@@ -243,6 +247,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
             SLOT(onEvalShortCutTriggered()));
     connect(m_editor, SIGNAL(searchShortcutTriggered(QString)), this,
             SLOT(setSearchedText(QString)));
+    connect(m_editor, SIGNAL(calculatorDropped(GtCalculator*)), this,
+            SLOT(onCalculatorDropped(GtCalculator*)));
     connect(m_searchWidget, SIGNAL(textEdited(QString)), m_editor,
             SLOT(searchHighlighting(QString)));
     connect(m_searchWidget, SIGNAL(textEdited(QString)), this,
@@ -267,10 +273,15 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
             SLOT(onSaveButtonClicked()));
 }
 
+GtpyAbstractScriptingWizardPage::~GtpyAbstractScriptingWizardPage()
+{
+    GtpyContextManager::instance()->deleteContext(m_contextId);
+}
+
 void
 GtpyAbstractScriptingWizardPage::initializePage()
 {
-    GtpyContextManager::instance()->resetContext(m_contextType);
+//    GtpyContextManager::instance()->resetContext(m_contextType, m_contextId);
 
     initialization();
 
@@ -286,7 +297,7 @@ GtpyAbstractScriptingWizardPage::initializePage()
             clone->setParent(this);
 
             GtpyContextManager::instance()->addObject(
-                        m_contextType, clone->objectName(), clone);
+                        m_contextId, clone->objectName(), clone);
         }
     }
 }
@@ -351,7 +362,7 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
 void
 GtpyAbstractScriptingWizardPage::enableCalculators(GtTask* task)
 {
-    GtpyContextManager::instance()->addTaskValue(m_contextType, task);
+    GtpyContextManager::instance()->addTaskValue(m_contextId, task);
 }
 
 void
@@ -669,7 +680,7 @@ GtpyAbstractScriptingWizardPage::addTabWidget(QWidget* wid,
 void
 GtpyAbstractScriptingWizardPage::evalScript(bool outputToConsole)
 {
-    GtpyContextManager::instance()->deleteCalcsFromTask(m_contextType);
+    GtpyContextManager::instance()->deleteCalcsFromTask(m_contextId);
 
     evalScript(m_editor->script(), outputToConsole);
 }
@@ -685,7 +696,7 @@ GtpyAbstractScriptingWizardPage::evalScript(const QString& script,
 
     m_isEvaluating = true;
 
-    m_runnable = new GtpyScriptRunnable(m_contextType);
+    m_runnable = new GtpyScriptRunnable(m_contextId);
 
     m_runnable->setScript(script);
     m_runnable->setOutputToConsole(outputToConsole);
@@ -713,7 +724,6 @@ GtpyAbstractScriptingWizardPage::onEvalButtonClicked()
         if (m_runnable)
         {
             m_runnable->interrupt();
-            showEvalButton(true);
             return;
         }
     }
@@ -743,6 +753,24 @@ GtpyAbstractScriptingWizardPage::validation()
     return true;
 }
 
+GtProcessWizard*
+GtpyAbstractScriptingWizardPage::findParentWizard(QObject* obj)
+{
+    if (obj == Q_NULLPTR)
+    {
+        return Q_NULLPTR;
+    }
+
+    GtProcessWizard* temp = qobject_cast<GtProcessWizard*>(obj);
+
+    if (temp)
+    {
+        return temp;
+    }
+
+    return findParentWizard(obj->parent());
+}
+
 void
 GtpyAbstractScriptingWizardPage::showEvalButton(bool show)
 {
@@ -767,6 +795,46 @@ GtpyAbstractScriptingWizardPage::showEvalButton(bool show)
     }
 }
 
+GtProcessWizard*
+GtpyAbstractScriptingWizardPage::findParentWizard()
+{
+    if (parent() == Q_NULLPTR)
+    {
+        return Q_NULLPTR;
+    }
+
+    GtProcessWizard* temp = qobject_cast<GtProcessWizard*>(parent());
+
+    if (temp)
+    {
+        return temp;
+    }
+
+    return findParentWizard(parent());
+}
+
+void
+GtpyAbstractScriptingWizardPage::acceptCalculatorDrops(bool accept)
+{
+    m_editor->acceptCalculatorDrops(accept);
+}
+
+void
+GtpyAbstractScriptingWizardPage::cursorToNewLine()
+{
+    QTextCursor cur = m_editor->textCursor();
+
+    cur.movePosition(QTextCursor::StartOfLine);
+    cur.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+
+    if (!cur.selectedText().isEmpty())
+    {
+        cur.insertText("\n");
+    }
+
+    m_editor->setTextCursor(cur);
+}
+
 void
 GtpyAbstractScriptingWizardPage::onImportScript()
 {
@@ -784,7 +852,7 @@ GtpyAbstractScriptingWizardPage::onImportScript()
     if(!file.open(QIODevice::ReadOnly))
     {
         m_pythonConsole->stdErr("Script \"" + filename + "\" not found!",
-                                m_contextType);
+                                m_contextId);
     }
 
     QTextStream in(&file);
@@ -910,4 +978,10 @@ GtpyAbstractScriptingWizardPage::evaluationFinished()
 
         endEval(success);
     }
+}
+
+void
+GtpyAbstractScriptingWizardPage::onCalculatorDropped(GtCalculator* calc)
+{
+    emit calculatorDropReceived(calc);
 }

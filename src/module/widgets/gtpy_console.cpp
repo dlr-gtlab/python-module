@@ -31,7 +31,7 @@ const QRegularExpression GtpyConsole::RE_ERROR_LINE
     ("\"<string>\", line \\d+");
 
 
-GtpyConsole::GtpyConsole(GtpyContextManager::Context type,
+GtpyConsole::GtpyConsole(int contextId,
                          QWidget* parent) :
     QTextEdit(parent), m_python(Q_NULLPTR), m_defaultPrompt("> ")
 {
@@ -46,26 +46,23 @@ GtpyConsole::GtpyConsole(GtpyContextManager::Context type,
 
     Q_UNUSED(highlighter)
 
-    m_contextType = type;
+    m_contextId = contextId;
 
     m_defaultTextCharacterFormat = currentCharFormat();
     m_historyPosition = 0;
 
-    m_cpl = new GtpyCompleter(m_contextType, this);
+    m_cpl = new GtpyCompleter(m_contextId, this);
 
     m_python = GtpyContextManager::instance();
 
-    connect(m_python, SIGNAL(pythonMessage(QString,
-                     GtpyContextManager::Context)), this,
-            SLOT(stdOut(const QString&, GtpyContextManager::Context)));
-    connect(m_python, SIGNAL(errorMessage(QString,
-                                          GtpyContextManager::Context)),
-            this, SLOT(stdErr(const QString&, GtpyContextManager::Context)));
-    connect(m_python, SIGNAL(startedScriptEvaluation(
-                                 GtpyContextManager::Context)), this,
-            SLOT(cursorToEnd(GtpyContextManager::Context)));
-    connect(m_python, SIGNAL(scriptEvaluated(GtpyContextManager::Context)),
-            this, SLOT(onCodeExecuted(GtpyContextManager::Context)));
+    connect(m_python, SIGNAL(pythonMessage(const QString&, int)), this,
+            SLOT(stdOut(const QString&, int)));
+    connect(m_python, SIGNAL(errorMessage(const QString&, int)),
+            this, SLOT(stdErr(const QString&, int)));
+    connect(m_python, SIGNAL(startedScriptEvaluation(int)), this,
+            SLOT(cursorToEnd(int)));
+    connect(m_python, SIGNAL(scriptEvaluated(int)),
+            this, SLOT(onCodeExecuted(int)));
 
     connect(m_cpl, SIGNAL(activated(QModelIndex)), this,
             SLOT(insertCompletion()));
@@ -86,20 +83,19 @@ GtpyConsole::setCommandPrompt(const QString& commandPrompt)
 }
 
 void
-GtpyConsole::showAdditionalContextOutput(
-        GtpyContextManager::Context context)
+GtpyConsole::showAdditionalContextOutput(int contextId)
 {
-   if (!m_additionalContextOutput.contains(context))
+   if (!m_additionalContextOutput.contains(contextId))
    {
-       m_additionalContextOutput.append(context);
+       m_additionalContextOutput.append(contextId);
    }
 }
 
 void
-GtpyConsole::stdErr(const QString& message,
-                                 GtpyContextManager::Context type)
+GtpyConsole::stdErr(const QString& message,int contextId)
 {
-    if (m_contextType == type || m_additionalContextOutput.contains(type))
+    if (m_contextId == contextId ||
+            m_additionalContextOutput.contains(contextId))
     {
         setTextColor(QColor(214, 0, 0));
 
@@ -119,7 +115,7 @@ void
 GtpyConsole::clearConsole()
 {
     QTextEdit::clear();
-    appendCommandPrompt(m_contextType);
+    appendCommandPrompt(m_contextId);
 }
 
 void
@@ -415,7 +411,7 @@ GtpyConsole::executeLine(bool storeOnly)
     }
     else
     {
-        appendCommandPrompt(m_contextType, storeOnly);
+        appendCommandPrompt(m_contextId, storeOnly);
     }
 }
 
@@ -436,12 +432,12 @@ GtpyConsole::executeCode(const QString& code)
 
     if (code.indexOf("\n") != -1)
     {
-        m_python->evalScript(m_contextType, code, true,
+        m_python->evalScript(m_contextId, code, true, true,
                              GtpyContextManager::EvalFile);
     }
     else
     {
-        m_python->evalScript(m_contextType, code, true,
+        m_python->evalScript(m_contextId, code, true, true,
                              GtpyContextManager::EvalSingleString);
     }
 
@@ -662,11 +658,10 @@ GtpyConsole::hideKeyboardInterruptException()
 }
 
 void
-GtpyConsole::stdOut(const QString& message,
-                                 GtpyContextManager::Context type)
+GtpyConsole::stdOut(const QString& message, int contextId)
 {
-    if (m_contextType == type ||
-            (m_additionalContextOutput.contains(type)))
+    if (m_contextId == contextId ||
+            (m_additionalContextOutput.contains(contextId)))
     {
         m_stdOut += message;
         int idx;
@@ -681,9 +676,10 @@ GtpyConsole::stdOut(const QString& message,
 }
 
 void
-GtpyConsole::cursorToEnd(const GtpyContextManager::Context& type)
+GtpyConsole::cursorToEnd(int contextId)
 {
-    if (type == m_contextType || m_additionalContextOutput.contains(type))
+    if (contextId == m_contextId ||
+            m_additionalContextOutput.contains(contextId))
     {
         QTextCursor cursor = this->textCursor();
         cursor.movePosition(QTextCursor::End);
@@ -692,10 +688,10 @@ GtpyConsole::cursorToEnd(const GtpyContextManager::Context& type)
 }
 
 void
-GtpyConsole::appendCommandPrompt(
-    GtpyContextManager::Context type, bool storeOnly)
+GtpyConsole::appendCommandPrompt(int contextId, bool storeOnly)
 {
-    if (type == m_contextType || m_additionalContextOutput.contains(type))
+    if (contextId == m_contextId ||
+            m_additionalContextOutput.contains(contextId))
     {
         if (storeOnly)
         {
@@ -728,18 +724,19 @@ GtpyConsole::appendCommandPrompt(
 }
 
 void
-GtpyConsole::onCodeExecuted(GtpyContextManager::Context type)
+GtpyConsole::onCodeExecuted(int contextId)
 {
-    if (type == m_contextType || m_additionalContextOutput.contains(type))
+    if (contextId == m_contextId ||
+            m_additionalContextOutput.contains(contextId))
     {
         if (!m_stdOut.isEmpty())
         {
-            stdOut("\n", m_contextType);
+            stdOut("\n", m_contextId);
         }
 
         if (!m_stdErr.isEmpty())
         {
-            stdErr("\n", m_contextType);
+            stdErr("\n", m_contextId);
         }
 
         bool messageInserted = (textCursor().position() != m_cursorPosition);
@@ -749,7 +746,7 @@ GtpyConsole::onCodeExecuted(GtpyContextManager::Context type)
             append(QString());
         }
 
-        appendCommandPrompt(m_contextType);
+        appendCommandPrompt(m_contextId);
     }
 }
 

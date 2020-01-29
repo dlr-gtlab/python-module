@@ -12,21 +12,25 @@
 #include <QToolTip>
 #include <QFontMetrics>
 #include <QRegularExpression>
+#include <QMimeData>
+
+#include "gt_objectmemento.h"
+#include "gt_objectfactory.h"
 
 #include "gtpy_completer.h"
 
 #include "gtpy_scripteditor.h"
 
-GtpyScriptEditor::GtpyScriptEditor(GtpyContextManager::Context type,
-                                   QWidget* parent) : GtCodeEditor(parent)
+GtpyScriptEditor::GtpyScriptEditor(int contextId, QWidget* parent) :
+    GtCodeEditor(parent)
 {
     const QFont sysFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
     setFont(sysFont);
 
-    m_cpl = new GtpyCompleter(type, this);
+    m_cpl = new GtpyCompleter(contextId, this);
 
-    m_contextType = type;
+    m_contextId = contextId;
 
     setMouseTracking(true);
 
@@ -46,12 +50,10 @@ GtpyScriptEditor::GtpyScriptEditor(GtpyContextManager::Context type,
 
     GtpyContextManager* python = GtpyContextManager::instance();
 
-    connect(python, SIGNAL(errorCodeLine(int,
-            GtpyContextManager::Context)), this,
-          SLOT(highlightErrorLine(int,GtpyContextManager::Context)));
-    connect(python, SIGNAL(errorMessage(QString,
-                  GtpyContextManager::Context)), this,
-         SLOT(appendErrorMessage(QString,GtpyContextManager::Context)));
+    connect(python, SIGNAL(errorCodeLine(int, int)), this,
+          SLOT(highlightErrorLine(int, int)));
+    connect(python, SIGNAL(errorMessage(QString, int)), this,
+         SLOT(appendErrorMessage(QString, int)));
     connect(this, SIGNAL(cursorPositionChanged()), this,
          SLOT(resetErrorLine()));
     connect(m_cpl, SIGNAL(activated(QModelIndex)), this,
@@ -331,6 +333,12 @@ GtpyScriptEditor::searchAndReplace(const QString& searchFor,
             cursor.insertText(replaceBy);
         }
     }
+}
+
+void
+GtpyScriptEditor::acceptCalculatorDrops(bool accept)
+{
+    setAcceptDrops(accept);
 }
 
 void
@@ -692,6 +700,80 @@ GtpyScriptEditor::focusInEvent(QFocusEvent* event)
 }
 
 void
+GtpyScriptEditor::dragEnterEvent(QDragEnterEvent* event)
+{
+    bool valid = validateDrop(event->mimeData());
+
+    if (valid)
+    {
+        event->accept();
+    }
+    else
+    {
+        event->ignore();
+    }
+}
+
+void
+GtpyScriptEditor::dragMoveEvent(QDragMoveEvent* event)
+{
+    bool valid = validateDrop(event->mimeData());
+
+    if (valid)
+    {
+        event->accept();
+    }
+    else
+    {
+        event->ignore();
+    }
+}
+
+void
+GtpyScriptEditor::dropEvent(QDropEvent* event)
+{
+    QString gtObjectClassName = GtObject::staticMetaObject.className();
+
+    if (!event->mimeData()->formats().contains(gtObjectClassName))
+    {
+        event->ignore();
+        return;
+    }
+
+    const QString droppedContent = event->mimeData()->data(gtObjectClassName);
+
+    if (!droppedContent.isEmpty())
+    {
+        GtObjectMemento droppedM(droppedContent.toUtf8());
+
+        if (!droppedM.isNull())
+        {
+            QString gtCalculatorClassName =
+                    GtCalculator::staticMetaObject.className();
+
+            bool castable = droppedM.canCastTo(
+                                gtCalculatorClassName, gtObjectFactory);
+
+            if (castable)
+            {
+                GtCalculator* calc =
+                        droppedM.restore<GtCalculator*>(gtObjectFactory,
+                                                        true);
+
+                if (calc)
+                {
+                    emit calculatorDropped(calc);
+                    event->accept();
+                    return;
+                }
+            }
+        }
+    }
+
+    event->ignore();
+}
+
+void
 GtpyScriptEditor::lineHighlighting()
 {
     if (!isReadOnly())
@@ -715,10 +797,9 @@ GtpyScriptEditor::lineHighlighting()
 }
 
 void
-GtpyScriptEditor::highlightErrorLine(int codeLine,
-                                     const GtpyContextManager::Context& type)
+GtpyScriptEditor::highlightErrorLine(int codeLine, int contextId)
 {
-    if (type == m_contextType)
+    if (contextId == m_contextId)
     {
         QList<QTextEdit::ExtraSelection> extraSelections;
 
@@ -747,21 +828,23 @@ GtpyScriptEditor::highlightErrorLine(int codeLine,
     }
 }
 
-void GtpyScriptEditor::appendErrorMessage(const QString& message,
-                                   const GtpyContextManager::Context& type)
+void
+GtpyScriptEditor::appendErrorMessage(const QString& message, int contextId)
 {
-    if (type == m_contextType)
+    if (contextId == m_contextId)
     {
         m_errorMessage = m_errorMessage + message;
     }
 }
 
-void GtpyScriptEditor::resetErrorLine()
+void
+GtpyScriptEditor::resetErrorLine()
 {
     m_errorLine = -1;
 }
 
-void GtpyScriptEditor::insertCompletion()
+void
+GtpyScriptEditor::insertCompletion()
 {
     if (m_cpl == Q_NULLPTR)
     {
@@ -1086,4 +1169,38 @@ GtpyScriptEditor::indentSelectedLines(bool direction)
     }
 
     return true;
+}
+
+bool
+GtpyScriptEditor::validateDrop(const QMimeData* droppedData)
+{
+    QString gtObjectClassName = GtObject::staticMetaObject.className();
+
+    if (!droppedData->formats().contains(gtObjectClassName))
+    {
+        return false;
+    }
+
+    const QString droppedContent = droppedData->data(gtObjectClassName);
+
+    if (!droppedContent.isEmpty())
+    {
+        GtObjectMemento droppedM(droppedContent.toUtf8());
+
+        if (!droppedM.isNull())
+        {
+            QString gtCalculatorClassName =
+                    GtCalculator::staticMetaObject.className();
+
+            bool castable = droppedM.canCastTo(
+                                gtCalculatorClassName, gtObjectFactory);
+
+            if (castable)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }

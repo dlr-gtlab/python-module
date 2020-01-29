@@ -176,5 +176,7 @@ private slots:
      * @brief Saves the script into the task instance.
      */
     virtual void onSaveButtonClicked();
+
+    void onCalculatorDropReceived(GtCalculator* calc);
 };
 #endif // GTPY_TASKWIZARDPAGE_H

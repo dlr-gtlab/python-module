@@ -10,9 +10,8 @@
 #include "gtpy_scriptrunnable.h"
 #include "gtpy_gilscope.h"
 
-GtpyScriptRunnable::GtpyScriptRunnable(
-    GtpyContextManager::Context contextType) : m_successfulRun(false),
-    m_contextType(contextType)
+GtpyScriptRunnable::GtpyScriptRunnable(int contextId) : m_successfulRun(false),
+    m_contextId(contextId)
 {
 
 }
@@ -33,10 +32,9 @@ GtpyScriptRunnable::run()
     m_threadId = python->currentPyThreadId();
     m_mutex.unlock();
 
-    m_successfulRun = python->evalScriptInterruptible(m_contextType,
-                                                      m_script,
-                                                      m_outputToConsole);
-
+    m_successfulRun = python->evalScript(m_contextId,
+                                         m_script,
+                                         m_outputToConsole);
     emit runnableFinished();
 }
 
@@ -73,9 +71,12 @@ GtpyScriptRunnable::interrupt()
 {
     GTPY_GIL_SCOPE
 
-            m_successfulRun = false;
     m_mutex.lock();
+
+    m_successfulRun = false;
+
     GtpyContextManager::instance()->interruptPyThread(m_threadId);
+
     m_mutex.unlock();
 }
 
