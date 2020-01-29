@@ -12,8 +12,10 @@
 
 #include <QPointer>
 
-#include "gtpy_contextmanager.h"
 #include "gt_processwizardpage.h"
+#include "gt_calculator.h"
+
+#include "gtpy_contextmanager.h"
 
 class GtpyScriptEditor;
 class GtpyConsole;
@@ -194,6 +196,10 @@ protected:
 
     GtProcessWizard* findParentWizard();
 
+    void acceptCalculatorDrops(bool accept);
+
+    void cursorToNewLine();
+
     /// Python Context id
     int m_contextId;
 
@@ -341,6 +347,11 @@ private slots:
     virtual void onSaveButtonClicked() = 0;
 
     void evaluationFinished();
+
+    void onCalculatorDropped(GtCalculator* calc);
+
+signals:
+    void calculatorDropReceived(GtCalculator* calc);
 };
 
 #endif // GTPY_ABSTRACTSCRIPTINGWIZARDPAGE_H

@@ -112,6 +112,8 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
 void
 GtpyTaskWizardPage::initialization()
 {
+    acceptCalculatorDrops(true);
+
     GtProcessWizard* wiz = findParentWizard();
 
     if (wiz)
@@ -185,6 +187,8 @@ GtpyTaskWizardPage::initialization()
             SLOT(onProcessComponentRenamed(QString, QString, QString)));
     connect(m_task, SIGNAL(childAppended(GtObject*, GtObject*)), this,
             SLOT(calculatorAppendedToTask(GtObject*, GtObject*)));
+    connect(this, SIGNAL(calculatorDropReceived(GtCalculator*)), this,
+            SLOT(onCalculatorDropReceived(GtCalculator*)));
 }
 
 bool
@@ -207,6 +211,14 @@ GtpyTaskWizardPage::validation()
     }
 
     provider()->setComponentData(m_task->toMemento());
+
+
+    GtProcessWizard* wiz = findParentWizard();
+
+    if (wiz)
+    {
+        wiz->setWindowModality(Qt::ApplicationModal);
+    }
 
     return true;
 }
@@ -883,6 +895,19 @@ GtpyTaskWizardPage::onSaveButtonClicked()
         task->fromMemento(memento);
         gtApp->endCommand(command);
     }
+}
+
+void
+GtpyTaskWizardPage::onCalculatorDropReceived(GtCalculator* calc)
+{
+    cursorToNewLine();
+
+    if (appendCalcToTask(calc))
+    {
+        insertConstructor(calc);
+    }
+
+    calc = Q_NULLPTR;
 }
 
 void

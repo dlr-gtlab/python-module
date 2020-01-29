@@ -227,6 +227,9 @@ private:
     static const QString CLASS_WRAPPER_MODULE;
     static const QString LOGGING_MODULE;
     static const QString CALC_MODULE;
+    static const QString DEFAULT_IMPORT_MODULE;
+    static const QString DEFAULT_IMPORT;
+    static const QString CUSTOM_IMPORT_MODULE;
 
     /**
      * @brief Contains the dafault configuration for every context.
@@ -263,6 +266,8 @@ private:
      * @brief Initializes the logging module.
      */
     void initLoggingModule();
+
+    void initImportBehaviour();
 
     /**
      * @brief Initializes additional functionalities for the batch context.

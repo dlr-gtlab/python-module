@@ -247,6 +247,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
             SLOT(onEvalShortCutTriggered()));
     connect(m_editor, SIGNAL(searchShortcutTriggered(QString)), this,
             SLOT(setSearchedText(QString)));
+    connect(m_editor, SIGNAL(calculatorDropped(GtCalculator*)), this,
+            SLOT(onCalculatorDropped(GtCalculator*)));
     connect(m_searchWidget, SIGNAL(textEdited(QString)), m_editor,
             SLOT(searchHighlighting(QString)));
     connect(m_searchWidget, SIGNAL(textEdited(QString)), this,
@@ -812,6 +814,28 @@ GtpyAbstractScriptingWizardPage::findParentWizard()
 }
 
 void
+GtpyAbstractScriptingWizardPage::acceptCalculatorDrops(bool accept)
+{
+    m_editor->acceptCalculatorDrops(accept);
+}
+
+void
+GtpyAbstractScriptingWizardPage::cursorToNewLine()
+{
+    QTextCursor cur = m_editor->textCursor();
+
+    cur.movePosition(QTextCursor::StartOfLine);
+    cur.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+
+    if (!cur.selectedText().isEmpty())
+    {
+        cur.insertText("\n");
+    }
+
+    m_editor->setTextCursor(cur);
+}
+
+void
 GtpyAbstractScriptingWizardPage::onImportScript()
 {
     QString filename = GtFileDialog::getOpenFileName(this,
@@ -954,4 +978,10 @@ GtpyAbstractScriptingWizardPage::evaluationFinished()
 
         endEval(success);
     }
+}
+
+void
+GtpyAbstractScriptingWizardPage::onCalculatorDropped(GtCalculator* calc)
+{
+    emit calculatorDropReceived(calc);
 }

@@ -10,7 +10,9 @@
 #ifndef GTPY_SCRIPTEDITOR_H
 #define GTPY_SCRIPTEDITOR_H
 
+#include "gt_calculator.h"
 #include "gt_codeeditor.h"
+
 #include "gtpy_contextmanager.h"
 
 class GtpyCompleter;
@@ -94,6 +96,8 @@ public:
      */
     void searchAndReplace(const QString& searchFor, const QString& replaceBy,
                           bool all = true);
+
+    void acceptCalculatorDrops(bool accept);
 public slots:
     /**
      * @brief Searchs for the given text and highlights this.
@@ -143,6 +147,13 @@ protected:
      * @param event Event sent by getting the focus.
      */
     void focusInEvent(QFocusEvent* event) Q_DECL_OVERRIDE;
+
+
+    virtual void dragEnterEvent(QDragEnterEvent* event);
+
+    virtual void dragMoveEvent(QDragMoveEvent* event);
+
+    virtual void dropEvent(QDropEvent* event);
 
 private slots:
     /**
@@ -268,6 +279,8 @@ private:
      */
     bool indentSelectedLines(bool direction);
 
+    bool validateDrop(const QMimeData* droppedData);
+
 signals:
     /**
      * @brief Will emited if eval shortcut (ctrl+E) has been received.
@@ -279,6 +292,8 @@ signals:
      * @param text Selected text.
      */
     void searchShortcutTriggered(const QString& text);
+
+    void calculatorDropped(GtCalculator* calc);
 };
 
 #endif // GTPY_SCRIPTEDITOR_H

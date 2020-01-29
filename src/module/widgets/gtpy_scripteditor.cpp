@@ -12,6 +12,10 @@
 #include <QToolTip>
 #include <QFontMetrics>
 #include <QRegularExpression>
+#include <QMimeData>
+
+#include "gt_objectmemento.h"
+#include "gt_objectfactory.h"
 
 #include "gtpy_completer.h"
 
@@ -329,6 +333,12 @@ GtpyScriptEditor::searchAndReplace(const QString& searchFor,
             cursor.insertText(replaceBy);
         }
     }
+}
+
+void
+GtpyScriptEditor::acceptCalculatorDrops(bool accept)
+{
+    setAcceptDrops(accept);
 }
 
 void
@@ -687,6 +697,80 @@ GtpyScriptEditor::focusInEvent(QFocusEvent* event)
     lineHighlighting();
 
     GtCodeEditor::focusInEvent(event);
+}
+
+void
+GtpyScriptEditor::dragEnterEvent(QDragEnterEvent* event)
+{
+    bool valid = validateDrop(event->mimeData());
+
+    if (valid)
+    {
+        event->accept();
+    }
+    else
+    {
+        event->ignore();
+    }
+}
+
+void
+GtpyScriptEditor::dragMoveEvent(QDragMoveEvent* event)
+{
+    bool valid = validateDrop(event->mimeData());
+
+    if (valid)
+    {
+        event->accept();
+    }
+    else
+    {
+        event->ignore();
+    }
+}
+
+void
+GtpyScriptEditor::dropEvent(QDropEvent* event)
+{
+    QString gtObjectClassName = GtObject::staticMetaObject.className();
+
+    if (!event->mimeData()->formats().contains(gtObjectClassName))
+    {
+        event->ignore();
+        return;
+    }
+
+    const QString droppedContent = event->mimeData()->data(gtObjectClassName);
+
+    if (!droppedContent.isEmpty())
+    {
+        GtObjectMemento droppedM(droppedContent.toUtf8());
+
+        if (!droppedM.isNull())
+        {
+            QString gtCalculatorClassName =
+                    GtCalculator::staticMetaObject.className();
+
+            bool castable = droppedM.canCastTo(
+                                gtCalculatorClassName, gtObjectFactory);
+
+            if (castable)
+            {
+                GtCalculator* calc =
+                        droppedM.restore<GtCalculator*>(gtObjectFactory,
+                                                        true);
+
+                if (calc)
+                {
+                    emit calculatorDropped(calc);
+                    event->accept();
+                    return;
+                }
+            }
+        }
+    }
+
+    event->ignore();
 }
 
 void
@@ -1085,4 +1169,38 @@ GtpyScriptEditor::indentSelectedLines(bool direction)
     }
 
     return true;
+}
+
+bool
+GtpyScriptEditor::validateDrop(const QMimeData* droppedData)
+{
+    QString gtObjectClassName = GtObject::staticMetaObject.className();
+
+    if (!droppedData->formats().contains(gtObjectClassName))
+    {
+        return false;
+    }
+
+    const QString droppedContent = droppedData->data(gtObjectClassName);
+
+    if (!droppedContent.isEmpty())
+    {
+        GtObjectMemento droppedM(droppedContent.toUtf8());
+
+        if (!droppedM.isNull())
+        {
+            QString gtCalculatorClassName =
+                    GtCalculator::staticMetaObject.className();
+
+            bool castable = droppedM.canCastTo(
+                                gtCalculatorClassName, gtObjectFactory);
+
+            if (castable)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }

@@ -61,6 +61,12 @@ const QString GtpyContextManager::LOGGING_MODULE =
     QStringLiteral("GtLogging");
 const QString GtpyContextManager::CALC_MODULE =
     QStringLiteral("GtCalculators");
+const QString GtpyContextManager::DEFAULT_IMPORT_MODULE =
+    QStringLiteral("__GtDefaultImport");
+const QString GtpyContextManager::DEFAULT_IMPORT =
+    QStringLiteral("__default_imp");
+const QString GtpyContextManager::CUSTOM_IMPORT_MODULE =
+    QStringLiteral("__GtCustomImport");
 
 GtpyContextManager::GtpyContextManager(QObject* parent) :
     QObject(parent), m_decorator(Q_NULLPTR),
@@ -386,17 +392,20 @@ GtpyContextManager::addTaskValue(int contextId, GtTask* task)
     {
         addObject(contextId, TASK_VAR, task, false);
 
-        QString pyCode =
-            CALC_MODULE + QStringLiteral(".") + TASK_VAR +
-                QStringLiteral(" = ") + TASK_VAR +  QStringLiteral("\n") +
-            QStringLiteral("del ") + TASK_VAR + QStringLiteral("\n");
+        QString pyCode = "if '" + CALC_MODULE + "' in globals():\n" +
+                         "    " + CALC_MODULE + "." + TASK_VAR + " = "
+                         + TASK_VAR;
+
 
         evalScript(contextId, pyCode , false);
     }
     else
     {
-        evalScript(contextId, CALC_MODULE + QStringLiteral(".") + TASK_VAR +
-                   QStringLiteral(" = None"), false);
+        QString pyCode = TASK_VAR + " = None"
+                         "if '" + CALC_MODULE + "' in globals():\n" +
+                         "    " + CALC_MODULE + "." + TASK_VAR + " = None";
+
+        evalScript(contextId, pyCode, false);
     }
 
     return true;
@@ -440,6 +449,7 @@ void
 GtpyContextManager::initContexts()
 {
     initLoggingModule();
+    initImportBehaviour();
 
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
@@ -657,87 +667,87 @@ GtpyContextManager::initCalculatorModule()
     if (helperWrapper.isEmpty())
     {
         helperWrapper =
-                "class HelperWrapper: \n"
-                "    def __init__(self, helper): \n"
-                "        self._helper = helper\n"
+            "class HelperWrapper: \n"
+            "    def __init__(self, helper): \n"
+            "        self._helper = helper\n"
 
-                "        helpers = " + HELPER_FAC_VAR +
-                    ".connectedHelper(self._helper.__class__.__name__)\n" +
-                "        for i in range(len(helpers)):\n" +
-                "            funcName = 'create' + helpers[i]\n" +
-                "            def dynCreateHelper(name, self = self, "
-                            "helperName = helpers[i]):\n" +
-                "                helper = " + HELPER_FAC_VAR +
-                    ".newCalculatorHelper(helperName, name, self._helper)\n" +
-                "                return HelperWrapper(helper)\n" +
-                "            setattr(self, funcName, dynCreateHelper)\n" +
+            "        helpers = " + HELPER_FAC_VAR +
+                ".connectedHelper(self._helper.__class__.__name__)\n" +
+            "        for i in range(len(helpers)):\n" +
+            "            funcName = 'create' + helpers[i]\n" +
+            "            def dynCreateHelper(name, self = self, "
+                        "helperName = helpers[i]):\n" +
+            "                helper = " + HELPER_FAC_VAR +
+                ".newCalculatorHelper(helperName, name, self._helper)\n" +
+            "                return HelperWrapper(helper)\n" +
+            "            setattr(self, funcName, dynCreateHelper)\n" +
 
-                "    def __getattr__(self, name): \n" +
-                "        return getattr(self.__dict__['_helper'], name)\n\n" +
-                "    def __setattr__(self, name, value): \n" +
-                "        if name in ('_helper') or name.startswith('createGt'):\n" +
-                "            self.__dict__[name] = value\n" +
-                "        else:\n" +
-                "            setattr(self.__dict__['_helper'], name, value)\n" +
-                "    def __dir__(self): \n" +
-                "        return sorted(set(dir(type(self)) + dir(self._helper)))";
+            "    def __getattr__(self, name): \n" +
+            "        return getattr(self.__dict__['_helper'], name)\n\n" +
+            "    def __setattr__(self, name, value): \n" +
+            "        if name in ('_helper') or name.startswith('createGt'):\n" +
+            "            self.__dict__[name] = value\n" +
+            "        else:\n" +
+            "            setattr(self.__dict__['_helper'], name, value)\n" +
+            "    def __dir__(self): \n" +
+            "        return sorted(set(dir(type(self)) + dir(self._helper)))";
     }
 
     if (calcWrapper.isEmpty())
     {
         calcWrapper =
-                "class CalcWrapper: \n"
-                "    def __init__(self, calc):\n"
-                "        self._calc = calc\n"
+            "class CalcWrapper: \n"
+            "    def __init__(self, calc):\n"
+            "        self._calc = calc\n"
 
-                "        for i in range(len(self._calc.findGtProperties())):\n"
-                "            prop = self._calc.findGtProperties()[i]\n"
-                "            if prop.ident():\n"
+            "        for i in range(len(self._calc.findGtProperties())):\n"
+            "            prop = self._calc.findGtProperties()[i]\n"
+            "            if prop.ident():\n"
 
-                "                funcName = re.sub('[^A-Za-z0-9]+', '', "
-                                "prop.ident())\n"
-                "                tempLetter = funcName[0]\n"
-                "                funcName = funcName.replace(tempLetter, "
-                                "tempLetter.lower(), 1)\n"
+            "                funcName = re.sub('[^A-Za-z0-9]+', '', "
+                            "prop.ident())\n"
+            "                tempLetter = funcName[0]\n"
+            "                funcName = funcName.replace(tempLetter, "
+                            "tempLetter.lower(), 1)\n"
 
-                "                def dynGetter(self = self, propName = "
-                                "prop.ident()):\n"
-                "                    return self._calc.propertyValue(propName)\n"
-                "                setattr(self, funcName, dynGetter)\n"
+            "                def dynGetter(self = self, propName = "
+                            "prop.ident()):\n"
+            "                    return self._calc.propertyValue(propName)\n"
+            "                setattr(self, funcName, dynGetter)\n"
 
-                "                tempLetter = funcName[0]\n"
-                "                funcName = funcName.replace(tempLetter, "
-                                "tempLetter.upper(), 1)\n"
-                "                funcName = 'set' + funcName\n"
+            "                tempLetter = funcName[0]\n"
+            "                funcName = funcName.replace(tempLetter, "
+                            "tempLetter.upper(), 1)\n"
+            "                funcName = 'set' + funcName\n"
 
-                "                def dynSetter(val, self = self, propName = "
-                                "prop.ident()):\n"
-                "                    self._calc.setPropertyValue(propName, val)\n"
-                "                setattr(self, funcName, dynSetter)\n"
+            "                def dynSetter(val, self = self, propName = "
+                            "prop.ident()):\n"
+            "                    self._calc.setPropertyValue(propName, val)\n"
+            "                setattr(self, funcName, dynSetter)\n"
 
-                "        helpers = " + HELPER_FAC_VAR + ".connectedHelper("
-                                            "self._calc.__class__.__name__)\n" +
-                "        for i in range(len(helpers)):\n" +
-                "            funcName = 'create' + helpers[i]\n" +
+            "        helpers = " + HELPER_FAC_VAR + ".connectedHelper("
+                                        "self._calc.__class__.__name__)\n" +
+            "        for i in range(len(helpers)):\n" +
+            "            funcName = 'create' + helpers[i]\n" +
 
-                "            def dynCreateHelper(name, self = self, helperName = "
-                                                                "helpers[i]):\n" +
-                "                helper = " + HELPER_FAC_VAR +
-                            ".newCalculatorHelper(helperName, name, self._calc)\n" +
-                "                return HelperWrapper(helper)\n" +
-                "            setattr(self, funcName, dynCreateHelper)\n" +
+            "            def dynCreateHelper(name, self = self, helperName = "
+                                                            "helpers[i]):\n" +
+            "                helper = " + HELPER_FAC_VAR +
+                        ".newCalculatorHelper(helperName, name, self._calc)\n" +
+            "                return HelperWrapper(helper)\n" +
+            "            setattr(self, funcName, dynCreateHelper)\n" +
 
-                "    def __getattr__(self, name): \n" +
-                "        return getattr(self.__dict__['_calc'], name)\n" +
-                "    def __setattr__(self, name, value): \n" +
-                "        if name is ('_calc') or  hasattr("
-                                    "self.__dict__['_calc'], name) is False:\n" +
-                "            self.__dict__[name] = value\n" +
-                "        else:\n" +
-                "            setattr(self.__dict__['_calc'], name, value)\n" +
-                "    def __dir__(self): \n" +
-                "        return sorted(list(self.__dict__.keys()) + "
-                                                            "dir(self._calc))\n";
+            "    def __getattr__(self, name): \n" +
+            "        return getattr(self.__dict__['_calc'], name)\n" +
+            "    def __setattr__(self, name, value): \n" +
+            "        if name is ('_calc') or  hasattr("
+                                "self.__dict__['_calc'], name) is False:\n" +
+            "            self.__dict__[name] = value\n" +
+            "        else:\n" +
+            "            setattr(self.__dict__['_calc'], name, value)\n" +
+            "    def __dir__(self): \n" +
+            "        return sorted(list(self.__dict__.keys()) + "
+                                                       "dir(self._calc))\n";
     }
 
     if (calcConstructors.isEmpty())
@@ -867,6 +877,117 @@ GtpyContextManager::initLoggingModule()
 
     m_loggingModule.evalScript(QStringLiteral("def gtWarning(): \n") +
                    QStringLiteral("     return PyLogger.getInstance(4)\n"));
+}
+
+void
+GtpyContextManager::initImportBehaviour()
+{
+    QString finderLoader;
+
+    if (pythonVersion().startsWith("3."))
+    {
+        finderLoader =
+           "from importlib.machinery import ModuleSpec\n"
+           "import sys\n"
+           "import inspect\n"
+
+           "class DataPackageFinder:\n"
+
+           "    @classmethod\n"
+           "    def find_spec(cls, fullname, path=None, target=None):\n"
+           "        name_parts = fullname.split('.')\n"
+           "        if name_parts[:1] != ['" + CALC_MODULE + "']:\n"
+           "            return None\n"
+           "        else:\n"
+           "            return ModuleSpec(fullname, DataPackageImporter())\n\n"
+
+
+           "class DataPackageImporter:\n"
+
+           "    @classmethod\n"
+           "    def create_module(cls, spec):\n"
+           "        current_frame = inspect.currentframe()\n"
+           "        while current_frame is not None:\n"
+
+           "            if '"+ CALC_MODULE + "' in current_frame.f_globals:\n"
+           "                calcMod = current_frame.f_globals['" +
+                           CALC_MODULE + "']\n"
+           "                return calcMod\n"
+           "            current_frame = current_frame.f_back\n"
+           "        raise ImportError(\"It is not allowed to import the module "
+                        "'" + CALC_MODULE + "' here!\")\n"
+           "        return None\n"
+
+           "    @classmethod\n"
+           "    def exec_module(cls, module):\n"
+           "        return module\n";
+    }
+    else
+    {
+        finderLoader =
+           "import sys\n"
+           "import inspect\n"
+
+           "class DataPackageFinder:\n"
+
+           "    @classmethod\n"
+           "    def find_module(cls, fullname, path=None):\n"
+           "        name_parts = fullname.split('.')\n"
+           "        if name_parts[:1] != ['" + CALC_MODULE + "']:\n"
+           "            return None\n"
+           "        else:\n"
+           "            return DataPackageImporter()\n\n"
+
+           "class DataPackageImporter:\n"
+
+           "    @classmethod\n"
+           "    def load_module(cls, fullname):\n"
+           "        current_frame = inspect.currentframe()\n"
+
+           "        while current_frame is not None:\n"
+           "            if '"+ CALC_MODULE + "' in current_frame.f_globals:\n"
+           "                calcMod = current_frame.f_globals['" +
+                           CALC_MODULE + "']\n"
+           "                return calcMod\n"
+           "            current_frame = current_frame.f_back\n"
+           "        raise ImportError(\"It is not allowed to import the module "
+                        "'" + CALC_MODULE + "' here!\")\n"
+           "        return None\n";
+    }
+
+    QString impBehaviour =
+            DEFAULT_IMPORT + " =  __builtins__['__import__']\n" +
+            "import sys\n"
+            "def gt_imp(name, globals=None, locals=None, fromlist=(), "
+            "level=0, builtin_imp=__import__):\n"
+            "    if name is '" + CALC_MODULE + "':\n"
+            "        if name in sys.modules:\n"
+            "            del sys.modules[name]\n"
+
+            "    mod = builtin_imp(name, globals, locals, fromlist, level)\n"
+
+            "    if str(name) is '" + CALC_MODULE + "':\n"
+            "        if str(name) in sys.modules:\n"
+            "            del sys.modules[str(name)]\n"
+            "    return mod\n"
+
+            "__builtins__['__import__'] = gt_imp\n"
+            "del gt_imp\n"
+            "from " + CUSTOM_IMPORT_MODULE + " import DataPackageFinder\n"
+            "sys.meta_path.append(DataPackageFinder)\n"
+            "del DataPackageFinder\n";
+
+    GTPY_GIL_SCOPE
+
+    PythonQtObjectPtr customImp = PythonQt::self()->createModuleFromScript(
+                            CUSTOM_IMPORT_MODULE);
+
+    customImp.evalScript(finderLoader);
+
+    PythonQtObjectPtr defaultImp = PythonQt::self()->createModuleFromScript(
+                            DEFAULT_IMPORT_MODULE);
+
+    defaultImp.evalScript(impBehaviour);
 }
 
 void
@@ -1030,9 +1151,9 @@ GtpyContextManager::importDefaultModules(int contextId)
     }
 
     QString pyCode =
-        QStringLiteral("from PythonQt import ") +
-            CLASS_WRAPPER_MODULE + QStringLiteral("\n") +
-        QStringLiteral("from PythonQt import QtCore");
+        "from PythonQt import " + CLASS_WRAPPER_MODULE + "\n" +
+        "from PythonQt import QtCore\n"
+        "import " + DEFAULT_IMPORT_MODULE;
 
     GTPY_GIL_SCOPE
 
@@ -1088,13 +1209,19 @@ GtpyContextManager::importCalcModule(int contextId)
 
     QString pyCode =
         "import sys\n"
-        "if '" + CALC_MODULE + "' in sys.modules:\n"
-        "    if sys.modules['" + CALC_MODULE + "'] is not None:\n"
-        "        import " + CALC_MODULE + "\n"
+        "if '" + CALC_MODULE + "' in sys.modules and '" + DEFAULT_IMPORT_MODULE +
+            "' in sys.modules:\n"
+        "    if sys.modules['" + CALC_MODULE + "'] is not None and " +
+            "sys.modules['" + DEFAULT_IMPORT_MODULE + "'] is not None" + ":\n"
+        "        import " + DEFAULT_IMPORT_MODULE + "\n" +
+        "        " + CALC_MODULE + " = " + DEFAULT_IMPORT_MODULE + "." +
+            DEFAULT_IMPORT + "('" + CALC_MODULE + "')\n"
         "        from " + CALC_MODULE + " import *\n"
         "        del " + CALC_FAC_VAR + "\n"
         "        del " + HELPER_FAC_VAR + "\n"
-        "        del sys.modules['" + CALC_MODULE + "']\n";
+        "        if '" + CALC_MODULE + "' in sys.modules:\n"
+        "            del sys.modules['" + CALC_MODULE + "']\n"
+        "        del sys\n";
 
     GTPY_GIL_SCOPE
 
@@ -1796,7 +1923,8 @@ GtpyContextManager::registerTypeConverters() const
                          GtpyTypeConversion::convertToQMapStringInt);
 }
 
-QString GtpyContextManager::pythonVersion() const
+QString
+GtpyContextManager::pythonVersion() const
 {
     QString version;
 
@@ -1835,10 +1963,10 @@ GtpyContextManager::stdOutRedirectCB(const QString& contextName,
 
         emit GtpyContextManager::instance()->pythonMessage(message, contextId);
     }
-    else
-    {
-        std::cout << message.toLatin1().data() << std::endl;
-    }
+//    else
+//    {
+//        std::cout << message.toLatin1().data() << std::endl;
+//    }
 }
 
 void
@@ -1866,10 +1994,10 @@ GtpyContextManager::stdErrRedirectCB(const QString& contextName,
             emit GtpyContextManager::instance()->errorCodeLine(line, contextId);
         }
     }
-    else
-    {
-        std::cout << message.toLatin1().data() << std::endl;
-    }
+//    else
+//    {
+//        std::cout << message.toLatin1().data() << std::endl;
+//    }
 }
 
 int
