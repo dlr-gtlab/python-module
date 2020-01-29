@@ -54,8 +54,16 @@ public:
      */
     QStringList packageNames();
 
+    /**
+     * @brief Returns the value of the calculator definitions property.
+     * @return The value of the calculator definitions property.
+     */
     QString calcDefinitions() const;
 
+    /**
+     * @brief Sets the calculator definitions property to the given value.
+     * @param calcDefinitions Calculator definitions.
+     */
     void setCalcDefinitions(QString& calcDefinitions);
 
 protected:
@@ -76,11 +84,13 @@ private:
     /// Script.
     GtStringProperty m_script;
 
+    /// Calculator definitions
     GtStringProperty m_calcDefinitions;
 
     /// Dynamic properties regarding project modules
     QList<GtObjectPathProperty*> m_dynamicPathProps;
 
+    /// Python thread id
     long m_pyThreadId;
 
 private slots:

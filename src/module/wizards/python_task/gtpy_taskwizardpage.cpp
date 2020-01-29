@@ -144,7 +144,7 @@ GtpyTaskWizardPage::initialization()
 
     if (gtDataModel->objectByUuid(m_task->uuid()) == Q_NULLPTR)
     {
-        enableSaveButton(false);
+        enableSaving(false);
     }
 
     enableCalculators(m_task);
@@ -868,7 +868,7 @@ GtpyTaskWizardPage::calculatorDestroyed(QObject* obj)
 }
 
 void
-GtpyTaskWizardPage::onSaveButtonClicked()
+GtpyTaskWizardPage::saveScript()
 {
     if (m_task == Q_NULLPTR)
     {

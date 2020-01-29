@@ -175,8 +175,12 @@ private slots:
     /**
      * @brief Saves the script into the task instance.
      */
-    virtual void onSaveButtonClicked();
+    virtual void saveScript();
 
+    /**
+     * @brief Inserts the python code of the dropped calculator in the editor.
+     * @param calc Dropped calculator.
+     */
     void onCalculatorDropReceived(GtCalculator* calc);
 };
 #endif // GTPY_TASKWIZARDPAGE_H

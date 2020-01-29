@@ -498,11 +498,7 @@ GtpyContextManager::createNewContext(const GtpyContextManager::Context& type)
 
     contextName += ("_" + QString::number(contextId));
 
-//    registerCalcModuleInSys(TaskRunContext);
-
     defaultContextConfig(type, contextId, contextName);
-
-//    removeCalcModuleFromSys();
 
     return contextId;
 }
@@ -552,11 +548,6 @@ GtpyContextManager::resetContext(const GtpyContextManager::Context& type,
         contextId = (int)type;
     }
 
-//    if (m_calcAccessibleContexts.contains(contextId))
-//    {
-//        registerCalcModuleInSys(contextId);
-//    }
-
     QString contextName = contextNameById(contextId);
 
     if (contextName.isEmpty())
@@ -565,11 +556,6 @@ GtpyContextManager::resetContext(const GtpyContextManager::Context& type,
     }
 
     defaultContextConfig(type, contextId, contextName);
-
-//    if (m_calcAccessibleContexts.contains(contextId))
-//    {
-//        removeCalcModuleFromSys();
-//    }
 }
 
 long
@@ -1228,47 +1214,47 @@ GtpyContextManager::importCalcModule(int contextId)
     con.evalScript(pyCode);
 }
 
-void
-GtpyContextManager::registerCalcModuleInSys(int contextId)
-{
-    PythonQtObjectPtr con = context(contextId);
+//void
+//GtpyContextManager::registerCalcModuleInSys(int contextId)
+//{
+//    PythonQtObjectPtr con = context(contextId);
 
-    if (con == Q_NULLPTR)
-    {
-        return;
-    }
+//    if (con == Q_NULLPTR)
+//    {
+//        return;
+//    }
 
-    QString pyCode =
-            "if '" + CALC_MODULE + "' in locals():\n" +
-            "    import sys\n" +
-            "    sys.modules['" + CALC_MODULE + "'] = " + CALC_MODULE + "\n" +
-            "    del sys\n";
+//    QString pyCode =
+//            "if '" + CALC_MODULE + "' in locals():\n" +
+//            "    import sys\n" +
+//            "    sys.modules['" + CALC_MODULE + "'] = " + CALC_MODULE + "\n" +
+//            "    del sys\n";
 
-    GTPY_GIL_SCOPE
+//    GTPY_GIL_SCOPE
 
-    con.evalScript(pyCode);
-}
+//    con.evalScript(pyCode);
+//}
 
-void
-GtpyContextManager::removeCalcModuleFromSys()
-{
-    PythonQtObjectPtr con = context(GtpyContextManager::GlobalContext);
+//void
+//GtpyContextManager::removeCalcModuleFromSys()
+//{
+//    PythonQtObjectPtr con = context(GtpyContextManager::GlobalContext);
 
-    if (con == Q_NULLPTR)
-    {
-        return;
-    }
+//    if (con == Q_NULLPTR)
+//    {
+//        return;
+//    }
 
-    QString pyCode =
-        "import sys\n"
-        "if '" + CALC_MODULE + "' in sys.modules:\n" +
-        "    sys.modules['" + CALC_MODULE + "'] = None\n" +
-        "del sys\n";
+//    QString pyCode =
+//        "import sys\n"
+//        "if '" + CALC_MODULE + "' in sys.modules:\n" +
+//        "    sys.modules['" + CALC_MODULE + "'] = None\n" +
+//        "del sys\n";
 
-    GTPY_GIL_SCOPE
+//    GTPY_GIL_SCOPE
 
-    con.evalScript(pyCode);
-}
+//    con.evalScript(pyCode);
+//}
 
 int
 GtpyContextManager::lineOutOfMessage(const QString& message)

@@ -97,7 +97,12 @@ public:
     void searchAndReplace(const QString& searchFor, const QString& replaceBy,
                           bool all = true);
 
+    /**
+     * @brief Set drops accepted or not.
+     * @param accept Determines whether drops are accepted or not.
+     */
     void acceptCalculatorDrops(bool accept);
+
 public slots:
     /**
      * @brief Searchs for the given text and highlights this.
@@ -148,12 +153,24 @@ protected:
      */
     void focusInEvent(QFocusEvent* event) Q_DECL_OVERRIDE;
 
+    /**
+     * @brief Accept the drag enter if the mimedata contains a calculator
+     * object.
+     * @param event Raised event.
+     */
+    virtual void dragEnterEvent(QDragEnterEvent* event) Q_DECL_OVERRIDE;
 
-    virtual void dragEnterEvent(QDragEnterEvent* event);
+    /**
+     * @brief Accept the drag move if the mimedata contains a calculator object.
+     * @param event Raised event.
+     */
+    virtual void dragMoveEvent(QDragMoveEvent* event) Q_DECL_OVERRIDE;
 
-    virtual void dragMoveEvent(QDragMoveEvent* event);
-
-    virtual void dropEvent(QDropEvent* event);
+    /**
+     * @brief Accept the drop if the mimedata contains a calculator object.
+     * @param event Raised event.
+     */
+    virtual void dropEvent(QDropEvent* event) Q_DECL_OVERRIDE;
 
 private slots:
     /**
@@ -279,6 +296,11 @@ private:
      */
     bool indentSelectedLines(bool direction);
 
+    /**
+     * @brief Validates if the given mimedata contains a calculator object.
+     * @param droppedData Dropped mimedata.
+     * @return True, if the given mimedata contains a calculator object.
+     */
     bool validateDrop(const QMimeData* droppedData);
 
 signals:

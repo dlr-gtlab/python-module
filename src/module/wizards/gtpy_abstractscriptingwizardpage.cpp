@@ -38,6 +38,7 @@
 #include "gt_datamodel.h"
 #include "gt_filedialog.h"
 #include "gt_processwizard.h"
+#include "gt_saveprojectmessagebox.h"
 
 #include "gt_pyhighlighter.h"
 #include "gt_searchwidget.h"
@@ -52,7 +53,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     m_editorSplitter(Q_NULLPTR),
     m_tabWidget(Q_NULLPTR),
     m_isEvaluating(false),
-    m_runnable(Q_NULLPTR)
+    m_runnable(Q_NULLPTR),
+    m_savingEnabled(true)
 {
     setTitle(tr("Python Script Editor"));
 
@@ -196,6 +198,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     toolBarLayout->addLayout(saveButtonLay);
 
+    enableSaveButton(false);
+
     //Import Button
     QLabel* shortCutImport = new QLabel("<font color='grey'></font>");
     QFont fontImport = shortCutImport->font();
@@ -281,8 +285,6 @@ GtpyAbstractScriptingWizardPage::~GtpyAbstractScriptingWizardPage()
 void
 GtpyAbstractScriptingWizardPage::initializePage()
 {
-//    GtpyContextManager::instance()->resetContext(m_contextType, m_contextId);
-
     initialization();
 
     foreach (QString packageName, m_packageNames)
@@ -300,6 +302,8 @@ GtpyAbstractScriptingWizardPage::initializePage()
                         m_contextId, clone->objectName(), clone);
         }
     }
+
+    connect(m_editor, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
 }
 
 bool
@@ -322,6 +326,15 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
         case Qt::Key_Return:
             // Ignore return
          return;
+        case Qt::Key_Escape:
+
+            if (m_saveButton->isEnabled())
+            {
+                saveMesssageBox();
+                return;
+            }
+
+            break;
 
         default:
             break;
@@ -650,21 +663,6 @@ GtpyAbstractScriptingWizardPage::setPackageNames(QStringList packageNames)
 }
 
 void
-GtpyAbstractScriptingWizardPage::enableSaveButton(bool enable)
-{
-    m_saveButton->setEnabled(enable);
-
-    if (enable)
-    {
-        m_shortCutSave->setText("<font color='grey'>  Ctrl+S</font>");
-    }
-    else
-    {
-        m_shortCutSave->setText("");
-    }
-}
-
-void
 GtpyAbstractScriptingWizardPage::addTabWidget(QWidget* wid,
                                               const QString& label)
 {
@@ -742,6 +740,21 @@ GtpyAbstractScriptingWizardPage::onEvalShortCutTriggered()
 }
 
 void
+GtpyAbstractScriptingWizardPage::onSaveButtonClicked()
+{
+    connect(m_editor, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
+    saveScript();
+    enableSaveButton(false);
+}
+
+void
+GtpyAbstractScriptingWizardPage::onTextChanged()
+{
+    enableSaveButton(true);
+    disconnect(m_editor, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
+}
+
+void
 GtpyAbstractScriptingWizardPage::initialization()
 {
     return;
@@ -751,6 +764,65 @@ bool
 GtpyAbstractScriptingWizardPage::validation()
 {
     return true;
+}
+
+void
+GtpyAbstractScriptingWizardPage::enableSaveButton(bool enable)
+{
+    if (!m_savingEnabled)
+    {
+        enable = false;
+    }
+
+    m_saveButton->setEnabled(enable);
+
+    if (enable)
+    {
+        m_shortCutSave->setText("<font color='grey'>  Ctrl+S</font>");
+    }
+    else
+    {
+        m_shortCutSave->setText("");
+    }
+}
+
+void
+GtpyAbstractScriptingWizardPage::saveMesssageBox()
+{
+    GtProcessWizard* wiz = findParentWizard();
+
+    if (wiz == Q_NULLPTR)
+    {
+        return;
+    }
+
+    QString text =
+    tr("Do you want to ") +
+    tr("save your changes before closing the wizard?");
+
+    GtSaveProjectMessageBox mb(text);
+
+    int ret;
+
+    ret = mb.exec();
+
+    switch (ret)
+    {
+        case QMessageBox::Yes:
+            onSaveButtonClicked();
+            wiz->close();
+            break;
+
+        case QMessageBox::No:
+            wiz->close();
+            break;
+
+        case QMessageBox::Cancel:
+            return;
+
+        default:
+            break;
+    }
 }
 
 GtProcessWizard*
@@ -833,6 +905,12 @@ GtpyAbstractScriptingWizardPage::cursorToNewLine()
     }
 
     m_editor->setTextCursor(cur);
+}
+
+void
+GtpyAbstractScriptingWizardPage::enableSaving(bool enable)
+{
+    m_savingEnabled = enable;
 }
 
 void

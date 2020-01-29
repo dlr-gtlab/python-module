@@ -175,13 +175,6 @@ protected:
     void setPackageNames(QStringList packageNames);
 
     /**
-     * @brief Enables of disables the save button.
-     * @param enable If true, the Save button is enabled, otherwise it is
-     *  disabled.
-     */
-    void enableSaveButton(bool enable = true);
-
-    /**
      * @brief Adds a tab containing the given widget to the editor tab widget.
      * @param wid Widget to add to the editor tab widget.
      * @param label Label of the new tab.
@@ -194,11 +187,30 @@ protected:
      */
     void showEvalButton(bool show);
 
+    /**
+     * @brief Searchs the parent GtProcessWizard and returns it.
+     * @return The parent GtProcessWizard.
+     */
     GtProcessWizard* findParentWizard();
 
+    /**
+     * @brief Sets drops of calculator instances to accept.
+     * @param accept Decides whether drops of calculator instances are
+     * accepted or not.
+     */
     void acceptCalculatorDrops(bool accept);
 
+    /**
+     * @brief Sets the cursor of the calculator to a new line.
+     */
     void cursorToNewLine();
+
+    /**
+     * @brief Enable or disable the saving functionality.
+     * @param enable Whether the saving functionality should be enabled or
+     *  disabled.
+     */
+    void enableSaving(bool enable = true);
 
     /// Python Context id
     int m_contextId;
@@ -231,6 +243,30 @@ private:
      */
     virtual bool validation();
 
+    /**
+     * @brief In this pure virtual function the routine for saving a script
+     * must be implemented.
+     */
+    virtual void saveScript() = 0;
+
+    /**
+     * @brief Enables of disables the save button.
+     * @param enable If true, the Save button is enabled, otherwise it is
+     *  disabled.
+     */
+    void enableSaveButton(bool enable = true);
+
+    /**
+     * @brief saveMesssageBox
+     */
+    void saveMesssageBox();
+
+    /**
+     * @brief Searchs the parent GtProcessWizard of the given object
+     * and returns it.
+     * @param obj Object which parent GtProcessWizard is searched.
+     * @return The parent GtProcessWizard.
+     */
     GtProcessWizard* findParentWizard(QObject* obj);
 
     /// Search Widget
@@ -248,10 +284,10 @@ private:
     /// Evaluate Script Button
     QPushButton* m_evalButton;
 
+    /// Evaluate shortcut lable
     QLabel* m_shortCutEval;
 
-    //QPushButton* m_interruptButton;
-
+    /// Interrupt shortcut lable
     QLabel* m_shortCutInterrupt;
 
     /// Save Button
@@ -277,9 +313,14 @@ private:
     /// Package Names
     QStringList m_packageNames;
 
+    /// Is Evaluating
     bool m_isEvaluating;
 
+    /// Script runnable for evaluation
     QPointer<GtpyScriptRunnable> m_runnable;
+
+    /// Saving the script
+    bool m_savingEnabled;
 
 private slots:
 
@@ -341,16 +382,28 @@ private slots:
     void onEvalShortCutTriggered();
 
     /**
-     * @brief In this pure virtual function the routine for saving a script
-     * must be implemented.
+     * @brief It saves the current script.
      */
-    virtual void onSaveButtonClicked() = 0;
+    void onSaveButtonClicked();
 
+    /**
+     * @brief Enables the save button.
+     */
+    void onTextChanged();
+
+    /**
+     * @brief Checks if the evaluation was successful.
+     */
     void evaluationFinished();
 
+    /**
+     * @brief Emits the signal calculatorDropReceived().
+     * @param calc Calculator which was dropped.
+     */
     void onCalculatorDropped(GtCalculator* calc);
 
 signals:
+    /// Calculator was dropped to the editor.
     void calculatorDropReceived(GtCalculator* calc);
 };
 
