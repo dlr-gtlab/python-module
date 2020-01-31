@@ -95,6 +95,11 @@ GtpyTaskStyleModel::data(const QModelIndex& index, int role) const
                     {
                         return eData->icon;
                     }
+                    else
+                    {
+                        return gtApp->icon(
+                                   QStringLiteral("processIcon_16.png"));
+                    }
                 }
             }
         }
@@ -120,33 +125,19 @@ GtpyTaskStyleModel::data(const QModelIndex& index, int role) const
             {
                 case Qt::ForegroundRole:
                 {
-                    if (qobject_cast<GtTask*>(item))
+                    if (item != m_rootTask && (qobject_cast<GtTask*>(item) ||
+                            item->parent() != m_rootTask))
                     {
-                        if (item->newlyCreated())
-                        {
-                            return QColor(Qt::darkGreen);
-                        }
-                        else if (item->hasChanges() || item->hasChildChanged())
-                        {
-                            return QColor(Qt::blue);
-                        }
-                    }
-                    else if (qobject_cast<GtCalculator*>(item))
-                    {
-                        if (item->newlyCreated())
-                        {
-                            return QColor(Qt::darkGreen);
-                        }
-                        else if (item->hasChanges())
-                        {
-                            return QColor(Qt::blue);
-                        }
+                            return QColor(Qt::gray);
                     }
 
                     break;
                 }
+                default:
+                    break;
             }
         }
+
     }
 
     return QIdentityProxyModel::data(index, role);
@@ -166,11 +157,15 @@ GtpyTaskStyleModel::flags(const QModelIndex& index) const
     // get object
     GtObject* object = static_cast<GtObject*>(index.internalPointer());
 
-    GtProcessComponent* pc = qobject_cast<GtProcessComponent*>(object);
+    GtCalculator* pc = qobject_cast<GtCalculator*>(object);
 
-    if (pc)
+    if (pc && (!m_rootTask || pc->parent() == m_rootTask))
     {
         defaultFlags = defaultFlags | Qt::ItemIsEditable;
+    }
+    else
+    {
+        defaultFlags = defaultFlags & ~Qt::ItemIsEditable;
     }
 
     // add drop enabled flag
@@ -436,4 +431,10 @@ GtpyTaskStyleModel::dropMimeData(const QMimeData* data,
     endMoveRows();
 
     return true;
+}
+
+void
+GtpyTaskStyleModel::setRootTask(GtpyTask* rootTask)
+{
+    m_rootTask = rootTask;
 }

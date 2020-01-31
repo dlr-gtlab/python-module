@@ -11,8 +11,9 @@
 #define GTPY_TASKSTYLEMODEL_H
 
 #include <QModelIndex>
-
 #include <QIdentityProxyModel>
+
+#include "gtpy_task.h"
 
 class GtpyTaskStyleModel: public QIdentityProxyModel
 {
@@ -29,6 +30,12 @@ public:
      */
     virtual QVariant data(const QModelIndex& index,
                           int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Sets the rootTask.
+     * @param rootTask
+     */
+    void setRootTask(GtpyTask* rootTask);
 
 protected:
     /**
@@ -67,6 +74,10 @@ protected:
     bool dropMimeData(const QMimeData* data, Qt::DropAction action,
                       int row, int column,
                       const QModelIndex& parent) Q_DECL_OVERRIDE;
+
+private:
+    /// Root task
+    QPointer<GtpyTask> m_rootTask;
 };
 
 #endif // GTPY_TASKSTYLEMODEL_H
