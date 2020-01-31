@@ -105,6 +105,9 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
 
     PythonQt::self()->addDecorators(m_decorator);
 
+    PythonQt::self()->registerCPPClass("GtpyProcessDataDistributor", 0,
+                                     CLASS_WRAPPER_MODULE.toLocal8Bit().data());
+
     connect(m_decorator, SIGNAL(sendErrorMessage(QString)), this,
             SLOT(onErrorMessage(QString)));
 
@@ -535,6 +538,8 @@ GtpyContextManager::deleteContext(int contextId)
     PyDict_DelItemString(modules, con.contextName.toStdString().c_str());
 
     con.module.setNewRef(Q_NULLPTR);
+
+    m_calcAccessibleContexts.removeOne(contextId);
 
     return true;
 }

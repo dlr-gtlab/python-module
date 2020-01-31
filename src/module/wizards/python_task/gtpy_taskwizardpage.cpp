@@ -119,6 +119,7 @@ GtpyTaskWizardPage::initialization()
     if (wiz)
     {
         wiz->setWindowModality(Qt::NonModal);
+
     }
 
     GtObjectMemento memento = provider()->componentData();
@@ -907,6 +908,7 @@ GtpyTaskWizardPage::onCalculatorDropReceived(GtCalculator* calc)
         insertConstructor(calc);
     }
 
+    delete calc;
     calc = Q_NULLPTR;
 }
 

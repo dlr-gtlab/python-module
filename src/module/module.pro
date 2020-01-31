@@ -77,7 +77,8 @@ HEADERS += \
     utilities/gtpy_scriptrunnable.h \
     utilities/gtpy_gilscope.h \
     utilities/gtpy_interruptrunnable.h \
-    utilities/gtpy_stdout.h
+    utilities/gtpy_stdout.h \
+    utilities/gtpy_processdatadistributor.h
 
 SOURCES += \
     gt_python.cpp \
@@ -106,7 +107,8 @@ SOURCES += \
     utilities/gtpy_scriptrunnable.cpp \
     utilities/gtpy_gilscope.cpp \
     utilities/gtpy_interruptrunnable.cpp \
-    utilities/gtpy_stdout.cpp
+    utilities/gtpy_stdout.cpp \
+    utilities/gtpy_processdatadistributor.cpp
 
 LIBS += -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabCore
 
