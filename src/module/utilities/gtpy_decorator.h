@@ -10,6 +10,8 @@
 #ifndef GTPY_DECORATOR_H
 #define GTPY_DECORATOR_H
 
+#include <PythonQt.h>
+
 #include <QObject>
 #include <QVariant>
 
@@ -21,6 +23,8 @@ class GtAbstractProperty;
 class GtPythonLogger;
 class GtCalculator;
 class GtDataZone0D;
+class GtpyTask;
+class GtpyProcessDataDistributor;
 
 #ifndef Q_MOC_RUN
 
@@ -184,6 +188,8 @@ public slots:
      */
     bool run(GtCalculator* calc);
 
+    bool run(GtTask* task);
+
     /**
      * @brief close close the project
      * @param pro pointer to GtProject
@@ -199,6 +205,15 @@ public slots:
      * @param task pointer to GtTask
      */
     void deleteAllCalculators(GtTask* task);
+
+    ///-------> functions of GtpyProcessDataDistributor <-------\\\
+
+    PythonQtPassOwnershipToPython<GtpyProcessDataDistributor*>
+    new_GtpyProcessDataDistributor(GtpyTask* pythonTask);
+
+    void delete_GtpyProcessDataDistributor(GtpyProcessDataDistributor* obj);
+
+    GtTask* taskElement(GtpyProcessDataDistributor* obj, const QString& name);
 
     ///-------> functions of GtObject <-------\\\
 

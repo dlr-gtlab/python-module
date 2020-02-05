@@ -170,6 +170,7 @@ GtpyTaskWizardPage::initialization()
     /// Own styled model created to enable editing calculator names
     m_styledModel = new GtpyTaskStyleModel(m_treeView);
     m_styledModel->setSourceModel(m_calcModel);
+    m_styledModel->setRootTask(m_task);
 
     m_filterModel = new GtProcessFilterModel(m_treeView);
     m_filterModel->setSourceModel(m_styledModel);
@@ -477,13 +478,21 @@ GtpyTaskWizardPage::onDoubleClicked(const QModelIndex& index)
         return;
     }
 
+    if (m_task == Q_NULLPTR)
+    {
+        return;
+    }
+
     QModelIndex srcIndex = mapToSource(index);
 
     GtObject* obj = m_calcModel->objectFromIndex(srcIndex);
 
     if (GtCalculator* calc = qobject_cast<GtCalculator*>(obj))
     {
-        configCalculator(calc);
+        if (m_task == calc->parent())
+        {
+            configCalculator(calc);
+        }
     }
 }
 
@@ -907,6 +916,7 @@ GtpyTaskWizardPage::onCalculatorDropReceived(GtCalculator* calc)
         insertConstructor(calc);
     }
 
+    delete calc;
     calc = Q_NULLPTR;
 }
 

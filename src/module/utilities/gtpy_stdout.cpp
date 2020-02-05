@@ -148,11 +148,11 @@ GtpyStdOutRedirect_methods[] =
 static PyMemberDef
 GtpyStdOutRedirect_members[] =
 {
-    {const_cast<char*>("softspace"), T_INT, offsetof(GtpyStdOutRedirect, softspace), 0,
-      const_cast<char*>("soft space flag")
+    {const_cast<char*>("softspace"), T_INT, offsetof(GtpyStdOutRedirect,
+     softspace), 0, const_cast<char*>("soft space flag")
     },
-    { const_cast<char*>("closed"), T_BOOL, offsetof(GtpyStdOutRedirect, closed), 0,
-    const_cast<char*>("soft space flag")
+    { const_cast<char*>("closed"), T_BOOL, offsetof(GtpyStdOutRedirect, closed),
+      0, const_cast<char*>("soft space flag")
     },
     {NULL}  /* Sentinel */
 };
