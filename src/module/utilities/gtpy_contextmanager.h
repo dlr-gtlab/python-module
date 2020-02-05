@@ -18,6 +18,7 @@
 #include "PythonQtConversion.h"
 
 class GtTask;
+class GtObject;
 class GtpyDecorator;
 class GtpyCalculatorFactory;
 class GtProject;
@@ -149,6 +150,9 @@ public:
      */
     bool addTaskValue(int contextId, GtTask* task);
 
+//    bool addDataModelObject(int contextId, const QString& name,
+//                            GtObject* package);
+
     /**
      * @brief Checks whether the Python context indicated by contextId as access
      *  to calculators. If the context has access, this function deletes all
@@ -240,12 +244,16 @@ private:
     static const QString TASK_VAR;
     static const QString CALC_FAC_VAR;
     static const QString HELPER_FAC_VAR;
+    static const QString GTOBJECT_WRAPPER;
+    static const QString HELPER_WRAPPER;
+    static const QString DEFAULT_IMPORT;
     static const QString CLASS_WRAPPER_MODULE;
     static const QString LOGGING_MODULE;
     static const QString CALC_MODULE;
     static const QString DEFAULT_IMPORT_MODULE;
-    static const QString DEFAULT_IMPORT;
     static const QString CUSTOM_IMPORT_MODULE;
+    static const QString OBJECT_WRAPPER_MODULE;
+
 
     /**
      * @brief Configures the python context indicated by contextId with the
@@ -274,6 +282,8 @@ private:
      * @return Pointer to Python Context.
      */
     PythonQtObjectPtr context(int contextId) const;
+
+    void initGtObjectWrapper();
 
     /**
      * @brief Initializes the calculator module.
@@ -520,6 +530,8 @@ private:
     PyThreadState* m_pyThreadState;
 
     bool m_contextsInitialized;
+
+    QMutex m_evalMutex;
 
 private slots:
     /**

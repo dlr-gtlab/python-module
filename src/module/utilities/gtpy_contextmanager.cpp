@@ -54,6 +54,13 @@ const QString GtpyContextManager::CALC_FAC_VAR =
     QStringLiteral("CalculatorFactory");
 const QString GtpyContextManager::HELPER_FAC_VAR =
     QStringLiteral("HelperFactory");
+const QString GtpyContextManager::GTOBJECT_WRAPPER =
+    QStringLiteral("GtObjectWrapper");
+const QString GtpyContextManager::HELPER_WRAPPER =
+    QStringLiteral("HelperWrapper");
+
+const QString GtpyContextManager::DEFAULT_IMPORT =
+    QStringLiteral("__default_imp");
 
 const QString GtpyContextManager::CLASS_WRAPPER_MODULE =
     QStringLiteral("GtClasses");
@@ -63,10 +70,12 @@ const QString GtpyContextManager::CALC_MODULE =
     QStringLiteral("GtCalculators");
 const QString GtpyContextManager::DEFAULT_IMPORT_MODULE =
     QStringLiteral("__GtDefaultImport");
-const QString GtpyContextManager::DEFAULT_IMPORT =
-    QStringLiteral("__default_imp");
 const QString GtpyContextManager::CUSTOM_IMPORT_MODULE =
     QStringLiteral("__GtCustomImport");
+const QString GtpyContextManager::OBJECT_WRAPPER_MODULE =
+    QStringLiteral("GtObjectWrapperModule");
+
+
 
 GtpyContextManager::GtpyContextManager(QObject* parent) :
     QObject(parent), m_decorator(Q_NULLPTR),
@@ -194,7 +203,11 @@ GtpyContextManager::evalScript(int contextId,
     if (!script.isEmpty())
     {
         currentContext.evalScript(script, option);
+
+        m_evalMutex.lock();
         hadError = PythonQt::self()->hadError();
+        PythonQt::self()->clearError();
+        m_evalMutex.unlock();
     }
 
     if (output || (hadError && errorMessage))
@@ -413,6 +426,28 @@ GtpyContextManager::addTaskValue(int contextId, GtTask* task)
 
     return true;
 }
+
+//bool
+//GtpyContextManager::addDataModelObject(int contextId, const QString& name,
+//                                       GtObject* package)
+//{
+//    GTPY_GIL_SCOPE
+
+//    if (package != Q_NULLPTR && !name.isEmpty())
+//    {
+//        addObject(contextId, name, package);
+
+//        QString pyCode = "if '" + GTOBJECT_WRAPPER + "' in globals():\n" +
+//                         "    globals()['"+ name + "'] = " + GTOBJECT_WRAPPER +
+//                         "(" + name + ")\n";
+
+//        evalScript(contextId, pyCode , false);
+
+//        return true;
+//    }
+
+//    return false;
+//}
 
 void
 GtpyContextManager::deleteCalcsFromTask(int contextId)
@@ -649,50 +684,20 @@ GtpyContextManager::context(int contextId) const
 }
 
 void
-GtpyContextManager::initCalculatorModule()
+GtpyContextManager::initGtObjectWrapper()
 {
-    static QString helperWrapper;
-    static QString calcWrapper;
-    static QString calcConstructors;
+    static QString objWrapper;
 
-    if (helperWrapper.isEmpty())
+    if (objWrapper.isEmpty())
     {
-        helperWrapper =
-            "class HelperWrapper: \n"
-            "    def __init__(self, helper): \n"
-            "        self._helper = helper\n"
+        objWrapper =
+            "import re\n"
+            "class " + GTOBJECT_WRAPPER + ": \n"
+            "    def __init__(self, obj):\n"
+            "        self._obj = obj\n"
 
-            "        helpers = " + HELPER_FAC_VAR +
-                ".connectedHelper(self._helper.__class__.__name__)\n" +
-            "        for i in range(len(helpers)):\n" +
-            "            funcName = 'create' + helpers[i]\n" +
-            "            def dynCreateHelper(name, self = self, "
-                        "helperName = helpers[i]):\n" +
-            "                helper = " + HELPER_FAC_VAR +
-                ".newCalculatorHelper(helperName, name, self._helper)\n" +
-            "                return HelperWrapper(helper)\n" +
-            "            setattr(self, funcName, dynCreateHelper)\n" +
-
-            "    def __getattr__(self, name): \n" +
-            "        return getattr(self.__dict__['_helper'], name)\n\n" +
-            "    def __setattr__(self, name, value): \n" +
-            "        if name in ('_helper') or name.startswith('createGt'):\n" +
-            "            self.__dict__[name] = value\n" +
-            "        else:\n" +
-            "            setattr(self.__dict__['_helper'], name, value)\n" +
-            "    def __dir__(self): \n" +
-            "        return sorted(set(dir(type(self)) + dir(self._helper)))";
-    }
-
-    if (calcWrapper.isEmpty())
-    {
-        calcWrapper =
-            "class CalcWrapper: \n"
-            "    def __init__(self, calc):\n"
-            "        self._calc = calc\n"
-
-            "        for i in range(len(self._calc.findGtProperties())):\n"
-            "            prop = self._calc.findGtProperties()[i]\n"
+            "        for i in range(len(self._obj.findGtProperties())):\n"
+            "            prop = self._obj.findGtProperties()[i]\n"
             "            if prop.ident():\n"
 
             "                funcName = re.sub('[^A-Za-z0-9]+', '', "
@@ -703,7 +708,7 @@ GtpyContextManager::initCalculatorModule()
 
             "                def dynGetter(self = self, propName = "
                             "prop.ident()):\n"
-            "                    return self._calc.propertyValue(propName)\n"
+            "                    return self._obj.propertyValue(propName)\n"
             "                setattr(self, funcName, dynGetter)\n"
 
             "                tempLetter = funcName[0]\n"
@@ -713,36 +718,76 @@ GtpyContextManager::initCalculatorModule()
 
             "                def dynSetter(val, self = self, propName = "
                             "prop.ident()):\n"
-            "                    self._calc.setPropertyValue(propName, val)\n"
+            "                    self._obj.setPropertyValue(propName, val)\n"
             "                setattr(self, funcName, dynSetter)\n"
 
             "        helpers = " + HELPER_FAC_VAR + ".connectedHelper("
-                                        "self._calc.__class__.__name__)\n" +
+                                        "self._obj.__class__.__name__)\n" +
             "        for i in range(len(helpers)):\n" +
             "            funcName = 'create' + helpers[i]\n" +
 
             "            def dynCreateHelper(name, self = self, helperName = "
                                                             "helpers[i]):\n" +
             "                helper = " + HELPER_FAC_VAR +
-                        ".newCalculatorHelper(helperName, name, self._calc)\n" +
-            "                return HelperWrapper(helper)\n" +
+                        ".newCalculatorHelper(helperName, name, self._obj)\n" +
+            "                return " + GTOBJECT_WRAPPER + "(helper)\n" +
             "            setattr(self, funcName, dynCreateHelper)\n" +
 
+            "        def dynFindGtChild(name, self = self):\n"
+            "            if hasattr(self._obj, 'findGtChild'):\n"
+            "                child = self._obj.findGtChild(name)\n"
+            "                return " + GTOBJECT_WRAPPER + "(child)\n"
+            "        setattr(self, 'findGtChild', dynFindGtChild)\n" +
+
+            "        def dynFindGtChildren(name = '', self = self):\n"
+            "            if hasattr(self._obj, 'findGtChildren'):\n"
+            "                children = self._obj.findGtChildren(name)\n"
+            "            retList = []\n"
+            "            for i in range(len(children)):\n" +
+            "                retList.append(" + GTOBJECT_WRAPPER +
+                             "(children[i]))\n"
+            "            return retList\n"
+            "        setattr(self, 'findGtChildren', dynFindGtChildren)\n" +
+
             "    def __getattr__(self, name): \n" +
-            "        return getattr(self.__dict__['_calc'], name)\n" +
+            "        return getattr(self.__dict__['_obj'], name)\n" +
+
             "    def __setattr__(self, name, value): \n" +
-            "        if name is ('_calc') or  hasattr("
-                                "self.__dict__['_calc'], name) is False:\n" +
+            "        if name is ('_obj') or  hasattr("
+                                "self.__dict__['_obj'], name) is False or "
+                                "name.startswith('findGtChild'):\n" +
             "            self.__dict__[name] = value\n" +
             "        else:\n" +
-            "            setattr(self.__dict__['_calc'], name, value)\n" +
+            "            setattr(self.__dict__['_obj'], name, value)\n" +
             "    def __dir__(self): \n" +
             "        return sorted(list(self.__dict__.keys()) + "
-                                                       "dir(self._calc))\n";
+                                                       "dir(self._obj))\n";
     }
+
+    GTPY_GIL_SCOPE
+
+    PythonQtObjectPtr con =
+            PythonQt::self()->importModule(OBJECT_WRAPPER_MODULE);
+
+    if (!con)
+    {
+        con = PythonQt::self()->createModuleFromScript(OBJECT_WRAPPER_MODULE);
+        con.addObject(HELPER_FAC_VAR, gtCalculatorHelperFactory);
+        con.evalScript(objWrapper);
+    }
+}
+
+void
+GtpyContextManager::initCalculatorModule()
+{
+    static QString calcConstructors;
+    static QString processElementFunction;
 
     if (calcConstructors.isEmpty())
     {
+        calcConstructors +=
+                "from " + OBJECT_WRAPPER_MODULE + " import " +
+                GTOBJECT_WRAPPER + "\n";
         foreach (GtCalculatorData calcData,
                  gtCalculatorFactory->calculatorDataList())
         {
@@ -760,9 +805,20 @@ GtpyContextManager::initCalculatorModule()
                 "    tempCalc = " + CALC_FAC_VAR + ".createCalculator(\"" +
                 className + "\", name, " + TASK_VAR + ")\n" +
 
-                "    return CalcWrapper(tempCalc)\n";
+                "    return " + GTOBJECT_WRAPPER + "(tempCalc)\n";
         }
 
+    }
+
+    if (processElementFunction.isEmpty())
+    {
+        processElementFunction =
+                "from PythonQt." + CLASS_WRAPPER_MODULE +
+                " import GtpyProcessDataDistributor\n" +
+                "def findGtTask(name):\n"
+                "    task = GtpyProcessDataDistributor(__task).taskElement(name)\n" +
+                "    if task is not None:"
+                "       return " + GTOBJECT_WRAPPER + "(task)\n";
     }
 
     GTPY_GIL_SCOPE
@@ -785,15 +841,9 @@ GtpyContextManager::initCalculatorModule()
 
     calcModule.addObject(CALC_FAC_VAR, factory);
 
-    calcModule.addObject(HELPER_FAC_VAR, gtCalculatorHelperFactory);
-
-    calcModule.evalScript(helperWrapper);
-
-    calcModule.evalScript("import re");
-
-    calcModule.evalScript(calcWrapper);
-
     calcModule.evalScript(calcConstructors);
+
+    calcModule.evalScript(processElementFunction);
 }
 
 void
@@ -1141,10 +1191,13 @@ GtpyContextManager::importDefaultModules(int contextId)
         return;
     }
 
+    initGtObjectWrapper();
+
     QString pyCode =
         "from PythonQt import " + CLASS_WRAPPER_MODULE + "\n" +
         "from PythonQt import QtCore\n"
-        "import " + DEFAULT_IMPORT_MODULE;
+        "import " + DEFAULT_IMPORT_MODULE + "\n"
+        "from " + OBJECT_WRAPPER_MODULE + " import " + GTOBJECT_WRAPPER;
 
     GTPY_GIL_SCOPE
 
@@ -1209,7 +1262,6 @@ GtpyContextManager::importCalcModule(int contextId)
             DEFAULT_IMPORT + "('" + CALC_MODULE + "')\n"
         "        from " + CALC_MODULE + " import *\n"
         "        del " + CALC_FAC_VAR + "\n"
-        "        del " + HELPER_FAC_VAR + "\n"
         "        if '" + CALC_MODULE + "' in sys.modules:\n"
         "            del sys.modules['" + CALC_MODULE + "']\n"
         "        del sys\n";

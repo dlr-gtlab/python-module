@@ -119,7 +119,6 @@ GtpyTaskWizardPage::initialization()
     if (wiz)
     {
         wiz->setWindowModality(Qt::NonModal);
-
     }
 
     GtObjectMemento memento = provider()->componentData();

@@ -24,6 +24,8 @@
 #include "gt_command.h"
 #include "gt_datazone0d.h"
 
+#include "gtpy_processdatadistributor.h"
+
 #include "gtpy_decorator.h"
 
 GtpyDecorator::GtpyDecorator(QObject* parent) : QObject(parent)
@@ -445,6 +447,27 @@ GtpyDecorator::run(GtCalculator* calc)
     return success;
 }
 
+bool
+GtpyDecorator::run(GtTask* task)
+{
+    bool success = false;
+
+    Py_BEGIN_ALLOW_THREADS
+
+    if (task == Q_NULLPTR)
+    {
+        success = false;
+    }
+    else
+    {
+        success = task->exec();
+    }
+
+    Py_END_ALLOW_THREADS
+
+    return success;
+}
+
 //bool
 //GtpyDecorator::runProcess(GtTask* process)
 //{
@@ -542,19 +565,44 @@ GtpyDecorator::deleteAllCalculators(GtTask* task)
 
     Py_BEGIN_ALLOW_THREADS
 
-    QList<GtCalculator*> calcs = task->findDirectChildren<GtCalculator*>();
+    QList<GtProcessComponent*> calcs = task->findDirectChildren<
+                                 GtProcessComponent*>();
 
     int lastIndex = calcs.size() - 1;
 
     for (lastIndex; lastIndex >= 0; lastIndex--)
     {
-        GtCalculator* calc = calcs.at(lastIndex);
+        GtProcessComponent* calc = calcs.at(lastIndex);
         calcs.removeAt(lastIndex);
         delete calc;
     }
 
     Py_END_ALLOW_THREADS
 }
+
+PythonQtPassOwnershipToPython<GtpyProcessDataDistributor*>
+GtpyDecorator::new_GtpyProcessDataDistributor(GtpyTask* pythonTask)
+{
+    return new GtpyProcessDataDistributor(pythonTask);
+}
+
+void
+GtpyDecorator::delete_GtpyProcessDataDistributor(
+        GtpyProcessDataDistributor* obj)
+{
+    delete obj;
+    obj = Q_NULLPTR;
+}
+
+GtTask*
+GtpyDecorator::taskElement(
+        GtpyProcessDataDistributor* obj, const QString& name)
+{
+    GtTask* task = obj->taskElement(name);
+
+    return task;
+}
+
 
 GtObject*
 GtpyDecorator::findGtChild(GtObject* obj, const QString& childName)
@@ -575,7 +623,18 @@ GtpyDecorator::findGtChildren(GtObject* obj, const QString& childrenName)
         return QList<GtObject*>();
     }
 
-    return obj->findDirectChildren<GtObject*>(childrenName);
+    QList<GtObject*> retval;
+
+    if (childrenName.isEmpty())
+    {
+        retval = obj->findDirectChildren<GtObject*>();
+    }
+    else
+    {
+        retval = obj->findDirectChildren<GtObject*>(childrenName);
+    }
+
+    return retval;
 }
 
 QList<GtAbstractProperty*>
