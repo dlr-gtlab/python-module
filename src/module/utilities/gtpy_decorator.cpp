@@ -23,6 +23,7 @@
 #include "gt_objectlinkproperty.h"
 #include "gt_command.h"
 #include "gt_datazone0d.h"
+#include "gt_abstractrunnable.h"
 
 #include "gtpy_processdatadistributor.h"
 
@@ -433,7 +434,7 @@ GtpyDecorator::run(GtCalculator* calc)
 
     Py_BEGIN_ALLOW_THREADS
 
-    if (calc == Q_NULLPTR)
+    if (calc == Q_NULLPTR || !calc->findParent<GtAbstractRunnable*>())
     {
         success = false;
     }
@@ -454,7 +455,7 @@ GtpyDecorator::run(GtTask* task)
 
     Py_BEGIN_ALLOW_THREADS
 
-    if (task == Q_NULLPTR)
+    if (task == Q_NULLPTR || !task->findParent<GtAbstractRunnable*>())
     {
         success = false;
     }
