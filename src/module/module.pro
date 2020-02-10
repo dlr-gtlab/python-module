@@ -10,7 +10,8 @@
 
 include( $${PWD}/../../settings.pri )
 
-BUILD_DEST = $${MODULE_BUILD_DEST}
+BUILD_DEST     = ../../$${LIB_BUILD_DEST}
+MOC_BUILD_DEST = ../../build
 
 TARGET = GTlabPython$${PY_VERSION}
 
@@ -23,17 +24,17 @@ CONFIG += c++11
 DEFINES += GT_PYTHON_DLL
 
 CONFIG(debug, debug|release){
-    DESTDIR = $${MOC_BUILD_DEST}/debug-python
-    OBJECTS_DIR = $${MOC_BUILD_DEST}/debug-python/obj
-    MOC_DIR = $${MOC_BUILD_DEST}/debug-python/moc
-    RCC_DIR = $${MOC_BUILD_DEST}/debug-python/rcc
-    UI_DIR = $${MOC_BUILD_DEST}/debug-python/ui
+    DESTDIR = $${MOC_BUILD_DEST}/debug-$${TARGET_DIR_NAME}
+    OBJECTS_DIR = $${MOC_BUILD_DEST}/debug-$${TARGET_DIR_NAME}/obj
+    MOC_DIR = $${MOC_BUILD_DEST}/debug-$${TARGET_DIR_NAME}/moc
+    RCC_DIR = $${MOC_BUILD_DEST}/debug-$${TARGET_DIR_NAME}/rcc
+    UI_DIR = $${MOC_BUILD_DEST}/debug-$${TARGET_DIR_NAME}/ui
 } else {
-    DESTDIR = $${MOC_BUILD_DEST}/release-python
-    OBJECTS_DIR = $${MOC_BUILD_DEST}/release-python/obj
-    MOC_DIR = $${MOC_BUILD_DEST}/release-python/moc
-    RCC_DIR = $${MOC_BUILD_DEST}/release-python/rcc
-    UI_DIR = $${MOC_BUILD_DEST}/release-python/ui
+    DESTDIR = $${MOC_BUILD_DEST}/release-$${TARGET_DIR_NAME}
+    OBJECTS_DIR = $${MOC_BUILD_DEST}/release-$${TARGET_DIR_NAME}/obj
+    MOC_DIR = $${MOC_BUILD_DEST}/release-$${TARGET_DIR_NAME}/moc
+    RCC_DIR = $${MOC_BUILD_DEST}/release-$${TARGET_DIR_NAME}/rcc
+    UI_DIR = $${MOC_BUILD_DEST}/release-$${TARGET_DIR_NAME}/ui
 }
 
 INCLUDEPATH += .\
@@ -118,6 +119,5 @@ unix: LIBS += -lPythonQt-Qt5-Python3.7
 ######################################################################
 
 copyHeaders($$HEADERS)
-unix:   copyToEnvironmentPathModules($${MODULE_BUILD_DEST}/$${TARGET}.so*)
-win32:  copyToEnvironmentPathModules($${MODULE_BUILD_DEST}/$${TARGET}.dll)
+copyToEnvironmentPathModules()
 ######################################################################

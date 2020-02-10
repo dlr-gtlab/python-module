@@ -10,13 +10,14 @@
 
 include( $${PWD}/../../settings.pri )
 
+BUILD_DEST     = ../../build
+MOC_BUILD_DEST = $${BUILD_DEST}
+
 TEMPLATE = app
 
 QT += xml core sql widgets
 
 TARGET = GTlabUnitTest
-
-BUILD_DEST = ../../build
 
 CONFIG += silent
 CONFIG += c++11
@@ -68,6 +69,7 @@ DESTDIR = $${BUILD_DEST}
 ####################################################
 
 LIBS +=  -lgtest
+LIBS += -L../../$${LIB_BUILD_DEST}
 
 ####################################################
 
