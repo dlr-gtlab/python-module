@@ -10,7 +10,8 @@
 
 include( ../../settings.pri )
 
-BUILD_DEST = ../../build
+BUILD_DEST     = ../../build
+MOC_BUILD_DEST = $${BUILD_DEST}
 
 TARGET = GTlabPythonConsole$${PY_VERSION}
 
@@ -49,7 +50,7 @@ HEADERS +=
 SOURCES += \
     batch-script.cpp
 
-LIBS += -L$${MODULE_BUILD_DEST}
+LIBS += -L../../$${LIB_BUILD_DEST}
 LIBS += -lGTlabPython$${PY_VERSION} -lGTlabCore -lGTlabMdi
 LIBS += -lGTlabDatamodel -lGTlabCalculators
 
