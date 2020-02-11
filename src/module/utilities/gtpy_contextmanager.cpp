@@ -1501,7 +1501,7 @@ GtpyContextManager::introspectObject(PyObject* object) const
         {
             foreach (QVariant var, childrenListVar)
             {
-                GtObject* obj = qvariant_cast<GtObject*>(var);
+                QObject* obj = qvariant_cast<QObject*>(var);
 
                 if (obj != Q_NULLPTR && !obj->objectName().isEmpty())
                 {
@@ -1534,7 +1534,7 @@ GtpyContextManager::introspectObject(PyObject* object) const
 
                             desc = LIST_DATATYPE + QStringLiteral("<") +
                                    QString::fromUtf8(
-                                   GtObject::staticMetaObject.className()) +
+                                   QObject::staticMetaObject.className()) +
                                    QStringLiteral("*> ") + completion;
                         }
                     }
