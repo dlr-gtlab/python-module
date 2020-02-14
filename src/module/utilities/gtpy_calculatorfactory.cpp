@@ -27,20 +27,20 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
                                         const QString& objName,
                                         GtTask* parent)
 {
-    if (parent != Q_NULLPTR)
-    {
-        QList<GtCalculator*> calculators =
-                parent->findChildren<GtCalculator*>(objName);
+//    if (parent != Q_NULLPTR)
+//    {
+//        QList<GtCalculator*> calculators =
+//                parent->findChildren<GtCalculator*>(objName);
 
-        foreach (GtCalculator* calculator, calculators)
-        {
-            if (className == QString::fromUtf8(calculator->
-                                     metaObject()->className()))
-            {
-                return calculator;
-            }
-        }
-    }
+//        foreach (GtCalculator* calculator, calculators)
+//        {
+//            if (className == QString::fromUtf8(calculator->
+//                                     metaObject()->className()))
+//            {
+//                return calculator;
+//            }
+//        }
+//    }
 
     GtCalculatorData calcData =
         gtCalculatorFactory->calculatorData(className);
