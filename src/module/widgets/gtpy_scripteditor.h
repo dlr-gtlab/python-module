@@ -212,7 +212,7 @@ private:
     int m_errorLine;
 
     /// Whether the text search is activated
-    bool m_SearchActivated;
+    bool m_searchActivated;
 
     /// Text that was last searched for
     QString m_lastSearch;
