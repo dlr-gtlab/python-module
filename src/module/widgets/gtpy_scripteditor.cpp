@@ -22,7 +22,7 @@
 #include "gtpy_scripteditor.h"
 
 GtpyScriptEditor::GtpyScriptEditor(int contextId, QWidget* parent) :
-    GtCodeEditor(parent)
+    GtCodeEditor(parent), m_searchActivated(false)
 {
     const QFont sysFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
@@ -409,7 +409,7 @@ GtpyScriptEditor::searchHighlighting(const QString& searchText,
 void
 GtpyScriptEditor::removeSearchHighlighting()
 {
-    m_SearchActivated = false;
+    m_searchActivated = false;
 
     QList<QTextEdit::ExtraSelection> selectionList = extraSelections();
 
@@ -436,7 +436,7 @@ GtpyScriptEditor::removeSearchHighlighting()
 void
 GtpyScriptEditor::textSearchingActivated()
 {
-    m_SearchActivated = true;
+    m_searchActivated = true;
 }
 
 void
@@ -561,26 +561,29 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
 
         switch (event->key())
         {
-        case Qt::Key_E:
-            emit evalShortcutTriggered();
-            m_cpl->getPopup()->hide();
-            return;
+            case Qt::Key_E:
+                emit evalShortcutTriggered();
+                m_cpl->getPopup()->hide();
+                return;
 
-        case Qt::Key_F:
-            cursor = textCursor();
-            text = cursor.selectedText();
-            emit searchShortcutTriggered(text);
-            searchHighlighting(text);
-            setTextCursor(cursor);
-            return;
+            case Qt::Key_F:
+                cursor = textCursor();
+                text = cursor.selectedText();
+                emit searchShortcutTriggered(text);
+                searchHighlighting(text);
+                setTextCursor(cursor);
+                return;
 
-        case Qt::Key_Space:
+            case Qt::Key_Space:
 
-            if (!isCurrentLineCommentedOut())
-            {
-                handleCompletion();
-            }
-            return;
+                if (!isCurrentLineCommentedOut())
+                {
+                    handleCompletion();
+                }
+                return;
+
+            default:
+                break;
         }
     }
     else if (shiftModifier)
@@ -634,38 +637,38 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
 
     switch (event->key())
     {
-    /* indent new line */
-    case Qt::Key_Return:
+        /* indent new line */
+        case Qt::Key_Return:
 
-        if (!indentNewLine(event))
-        {
+            if (!indentNewLine(event))
+            {
+                GtCodeEditor::keyPressEvent(event);
+            }
+            break;
+
+        /* indent selection with tab to the rigth */
+        case Qt::Key_Tab:
+
+            if (!indentSelectedLines(true))
+            {
+                GtCodeEditor::keyPressEvent(event);
+            }
+            break;
+
+        /* indent selection with backtab to the left */
+        case Qt::Key_Backtab:
+
+            if (!indentSelectedLines(false))
+            {
+                GtCodeEditor::keyPressEvent(event);
+            }
+            break;
+
+        default:
             GtCodeEditor::keyPressEvent(event);
-        }
-        break;
-
-    /* indent selection with tab to the rigth */
-    case Qt::Key_Tab:
-
-        if (!indentSelectedLines(true))
-        {
-            GtCodeEditor::keyPressEvent(event);
-        }
-        break;
-
-    /* indent selection with backtab to the left */
-    case Qt::Key_Backtab:
-
-        if (!indentSelectedLines(false))
-        {
-            GtCodeEditor::keyPressEvent(event);
-        }
-        break;
-
-    default:
-        GtCodeEditor::keyPressEvent(event);
     }
 
-    if (m_SearchActivated)
+    if (m_searchActivated)
     {
         searchHighlighting(m_lastSearch, false);
     }
