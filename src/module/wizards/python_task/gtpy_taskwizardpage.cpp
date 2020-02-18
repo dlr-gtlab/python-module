@@ -349,15 +349,10 @@ GtpyTaskWizardPage::addCalculator()
 
     updateLastUsedElementList(calc->metaObject()->className());
 
-    if (appendCalcToTask(calc))
-    {
-        insertConstructor(calc);
-    }
-    else
-    {
-        delete calc;
-        calc = Q_NULLPTR;
-    }
+    insertConstructor(calc);
+
+    delete calc;
+    calc = Q_NULLPTR;
 }
 
 void
@@ -810,14 +805,10 @@ GtpyTaskWizardPage::actionTriggered(QObject* obj)
 
         updateLastUsedElementList(lastUsedClassName);
 
-        if (appendCalcToTask(calc))
-        {
-            insertConstructor(calc);
-        }
-        else
-        {
-            delete calc;
-        }
+        insertConstructor(calc);
+
+        delete calc;
+        calc = Q_NULLPTR;
     }
 }
 
@@ -911,10 +902,7 @@ GtpyTaskWizardPage::onCalculatorDropReceived(GtCalculator* calc)
 {
     cursorToNewLine();
 
-    if (appendCalcToTask(calc))
-    {
-        insertConstructor(calc);
-    }
+    insertConstructor(calc);
 
     delete calc;
     calc = Q_NULLPTR;
