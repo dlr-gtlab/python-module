@@ -1445,11 +1445,16 @@ GtpyContextManager::introspectObject(PyObject* object) const
 
                     if (info)
                     {
-                        QString type = QString::fromUtf8(info->
-                                                     metaMethod()->typeName());
-                        QString sig = info->fullSignature(true);
+                        QString type;
 
-                        func.toolTip = type + QStringLiteral(" ") + sig;
+                        if (info->parameterCount() > 0)
+                        {
+                            type = info->parameters()[0].name;
+                        }
+
+                        QString fullSig = info->fullSignature(true);
+
+                        func.toolTip = type + " " + fullSig;
                     }
                     else
                     {
