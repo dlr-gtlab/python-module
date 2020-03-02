@@ -581,6 +581,18 @@ GtpyDecorator::deleteAllCalculators(GtTask* task)
     Py_END_ALLOW_THREADS
 }
 
+bool
+GtpyDecorator::hasWarnings(GtProcessComponent* comp)
+{
+    if (!comp)
+    {
+        return false;
+    }
+
+    return comp->hasWarnings();
+}
+
+
 PythonQtPassOwnershipToPython<GtpyProcessDataDistributor*>
 GtpyDecorator::new_GtpyProcessDataDistributor(GtpyTask* pythonTask)
 {

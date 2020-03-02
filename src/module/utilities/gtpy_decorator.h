@@ -25,6 +25,7 @@ class GtCalculator;
 class GtDataZone0D;
 class GtpyTask;
 class GtpyProcessDataDistributor;
+class GtProcessComponent;
 
 #ifndef Q_MOC_RUN
 
@@ -178,6 +179,13 @@ public slots:
      */
     GtTask* findProcess(GtProject* pro, const QString& processId);
 
+    /**
+     * @brief close close the project
+     * @param pro pointer to GtProject
+     * @param save indicats whether results should be saved or not
+     * @return true if closing was successful
+     */
+    bool close(GtProject* pro, bool save = false);
 
     ///-------> functions of GtCalculator <-------\\\
 
@@ -188,23 +196,29 @@ public slots:
      */
     bool run(GtCalculator* calc);
 
-    bool run(GtTask* task);
+    ///-------> functions of GtTask <-------\\\
 
     /**
-     * @brief close close the project
-     * @param pro pointer to GtProject
-     * @param save indicats whether results should be saved or not
-     * @return true if closing was successful
+     * @brief run calls the exec() function of the given task
+     * @param task pointer to GtTask
+     * @return true if the task was executed successfully
      */
-    bool close(GtProject* pro, bool save = false);
-
-    ///-------> functions of GtTask <-------\\\
+    bool run(GtTask* task);
 
     /**
      * @brief Deletes all calculator appended to the given task.
      * @param task pointer to GtTask
      */
     void deleteAllCalculators(GtTask* task);
+
+    ///-------> functions of GtProcessComponent <-------\\\
+
+    /**
+     * @brief Returns state of warning flag.
+     * @param comp pointer to GtProcessComponent
+     * @return Warning flag.
+     */
+    bool hasWarnings(GtProcessComponent* comp);
 
     ///-------> functions of GtpyProcessDataDistributor <-------\\\
 
