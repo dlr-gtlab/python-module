@@ -17,6 +17,8 @@
 #include "PythonQtObjectPtr.h"
 #include "PythonQtConversion.h"
 
+#include "gtpy_gilscope.h"
+
 class GtTask;
 class GtObject;
 class GtpyDecorator;
@@ -649,6 +651,8 @@ private:
     template<typename Key, typename Val>
     static PyObject* mapToPython (const void* inMap)
     {
+        GTPY_GIL_SCOPE
+
         QMap<Key, Val>& map = *((QMap<Key, Val>*) inMap);
 
         PyObject* result = PyDict_New();
@@ -657,8 +661,8 @@ private:
         //t = map.constBegin();
         QList<Key> keys = map.keys();
 
-        PyObject* key;
-        PyObject* val;
+        PyObject* key = Q_NULLPTR;
+        PyObject* val = Q_NULLPTR;
 
         //for ( ; t != map.constEnd(); t++)
         foreach (Key k, keys)
@@ -688,6 +692,8 @@ private:
     template <typename Key, typename Val>
     static bool pythonToMap(PyObject* obj, void* outMap)
     {
+        GTPY_GIL_SCOPE
+
         bool success = false;
 
         if (PyMapping_Check(obj))
@@ -704,9 +710,9 @@ private:
             {
                 int count = PyList_Size(items);
 
-                PyObject* pyValue;
-                PyObject* pyKey;
-                PyObject* pyTuple;
+                PyObject* pyValue = Q_NULLPTR;
+                PyObject* pyKey = Q_NULLPTR;
+                PyObject* pyTuple = Q_NULLPTR;
 
                 for (int i = 0;i<count;i++)
                 {
@@ -714,10 +720,18 @@ private:
                     pyKey = PyTuple_GetItem(pyTuple, 0);
                     pyValue = PyTuple_GetItem(pyTuple, 1);
 
+                    Py_XINCREF(pyTuple);
+                    Py_XINCREF(pyKey);
+                    Py_XINCREF(pyKey);
+
                     QVariant key = PythonQtConv::PyObjToQVariant(pyKey);
                     QVariant val = PythonQtConv::PyObjToQVariant(pyValue);
 
                     map.insert(key.value<Key>(), val.value<Val>());
+
+                    Py_XDECREF(pyTuple);
+                    Py_XDECREF(pyKey);
+                    Py_XDECREF(pyKey);
                 }
 
                 Py_DECREF(items);
