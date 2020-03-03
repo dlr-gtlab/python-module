@@ -32,6 +32,13 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
     PyObject* threadDict = PyThreadState_GetDict();
 
+    if (!threadDict)
+    {
+        return Py_BuildValue("");
+    }
+
+    Py_INCREF(threadDict);
+
     PyObject* item = PyDict_GetItem(threadDict, PyString_FromString(
                                         GtpyStdOut::CONTEXT_KEY));
 
@@ -39,8 +46,10 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
     if (item && PyString_Check(item))
     {
+        Py_INCREF(item);
         const char* val = PyString_AsString(item);
         contextName = QString(val);
+        Py_DECREF(item);
     }
 
     item = PyDict_GetItem(threadDict, PyString_FromString(
@@ -50,7 +59,9 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
     if (item && PyInt_Check(item))
     {
+        Py_INCREF(item);
         output = (bool)PyInt_AsLong(item);
+        Py_DECREF(item);
     }
 
     item = PyDict_GetItem(threadDict, PyString_FromString(
@@ -60,7 +71,9 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
     if (item && PyInt_Check(item))
     {
+        Py_INCREF(item);
         error = (bool)PyInt_AsLong(item);
+        Py_DECREF(item);
     }
 
     GtpyStdOutRedirect* s = (GtpyStdOutRedirect*)self;
@@ -73,12 +86,14 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
         {
             PyObject* obj = PyTuple_GET_ITEM(args,0);
 
+            Py_XINCREF(obj);
+
             if (PyUnicode_Check(obj))
             {
 #ifdef PY3K
                 message = QString::fromUtf8(PyUnicode_AsUTF8(obj));
 #else
-                PyObject *tmp = PyUnicode_AsUTF8String(obj);
+                PyObject* tmp = PyUnicode_AsUTF8String(obj);
 
                 if(tmp)
                 {
@@ -87,21 +102,27 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
                 }
                 else
                 {
+                    Py_XDECREF(obj);
+                    Py_DECREF(threadDict);
                     return NULL;
                 }
 #endif
             }
             else
             {
-                char *string;
+                char* string;
 
                 if (!PyArg_ParseTuple(args, "s", &string))
                 {
+                    Py_XDECREF(obj);
+                    Py_DECREF(threadDict);
                     return NULL;
                 }
 
                 message = QString::fromLatin1(string);
             }
+
+            Py_XDECREF(obj);
         }
 
         if (s->softspace > 0)
@@ -112,6 +133,8 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
         (*s->callback)(contextName, output, error, message);
     }
+
+    Py_DECREF(threadDict);
 
     return Py_BuildValue("");
 }

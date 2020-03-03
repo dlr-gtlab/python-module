@@ -33,7 +33,6 @@
 #include "gt_calculatorhelperfactory.h"
 
 #include "gtpy_calculatorfactory.h"
-#include "gtpy_gilscope.h"
 #include "gtpy_decorator.h"
 #include "gtpy_interruptrunnable.h"
 #include "gtpy_stdout.h"
@@ -468,7 +467,11 @@ GtpyContextManager::qvariantToPyStr(const QVariant& val) const
 
     PyObject* pyObj = PythonQtConv::QVariantToPyObject(val);
 
-    return PythonQtConv::PyObjGetString(pyObj);
+    QString retVal = PythonQtConv::PyObjGetString(pyObj);
+
+    Py_XDECREF(pyObj);
+
+    return retVal;
 }
 
 QString
@@ -568,13 +571,31 @@ GtpyContextManager::deleteContext(int contextId)
 
     PyObject* dict = PyModule_GetDict(sys);
 
+    if (!dict)
+    {
+        return false;
+    }
+
+    Py_INCREF(dict);
+
     PyObject* modules = PyDict_GetItemString(dict, "modules");
+
+    if (!modules)
+    {
+        Py_DECREF(dict);
+        return false;
+    }
+
+    Py_INCREF(modules);
 
     PyDict_DelItemString(modules, con.contextName.toStdString().c_str());
 
     con.module.setNewRef(Q_NULLPTR);
 
     m_calcAccessibleContexts.removeOne(contextId);
+
+    Py_DECREF(modules);
+    Py_DECREF(dict);
 
     return true;
 }
@@ -1354,6 +1375,13 @@ GtpyContextManager::setMetaDataToThreadDict(int contextId, bool output,
 
     PyObject* threadDict = PyThreadState_GetDict();
 
+    if (!threadDict)
+    {
+        return;
+    }
+
+    Py_INCREF(threadDict);
+
     QString contextName = contextNameById(contextId);
 
     PyObject* val = PyString_FromString(contextName.toStdString().c_str());
@@ -1369,6 +1397,7 @@ GtpyContextManager::setMetaDataToThreadDict(int contextId, bool output,
     PyDict_SetItemString(threadDict, GtpyStdOut::ERROR_KEY, val);
 
     Py_DECREF(val);
+    Py_DECREF(threadDict);
 }
 
 QMultiMap<QString, GtpyFunction>
@@ -1387,6 +1416,8 @@ GtpyContextManager::introspectObject(PyObject* object) const
     {
         return results;
     }
+
+    Py_INCREF(object);
 
     PyObject* keys = NULL;
     bool isDict = false;
@@ -1412,10 +1443,17 @@ GtpyContextManager::introspectObject(PyObject* object) const
         {
             key = PyList_GetItem(keys, i);
 
+            if (!key)
+            {
+                continue;
+            }
+
+            Py_INCREF(key);
+
             if (isDict)
             {
                 value = PyDict_GetItem(object, key);
-                Py_INCREF(value);
+                Py_XINCREF(value);
             }
             else
             {
@@ -1483,6 +1521,7 @@ GtpyContextManager::introspectObject(PyObject* object) const
             }
 
             Py_DECREF(value);
+            Py_DECREF(key);
         }
 
         Py_DECREF(keys);
@@ -1704,6 +1743,8 @@ GtpyContextManager::introspectObject(PyObject* object) const
         }
     }
 //    }
+
+    Py_DECREF(object);
 
     return results;
 }
@@ -2083,6 +2124,13 @@ GtpyContextManager::onErrorMessage(const QString& message)
 
     PyObject* threadDict = PyThreadState_GetDict();
 
+    if (!threadDict)
+    {
+        return;
+    }
+
+    Py_INCREF(threadDict);
+
     PyObject* item = PyDict_GetItem(threadDict, PyString_FromString(
                                         GtpyStdOut::CONTEXT_KEY));
 
@@ -2090,13 +2138,19 @@ GtpyContextManager::onErrorMessage(const QString& message)
 
     if (item)
     {
+        Py_INCREF(item);
+
         const char* val = PyString_AsString(item);
 
         contextId = contextIdByName(QString(val));
+
+        Py_DECREF(item);
     }
 
     item = PyDict_GetItem(threadDict, PyString_FromString(
                               GtpyStdOut::ERROR_KEY));
+
+    Py_XINCREF(item);
 
     bool error = false;
 
@@ -2109,6 +2163,9 @@ GtpyContextManager::onErrorMessage(const QString& message)
     {
         emit errorMessage(message, contextId);
     }
+
+    Py_XDECREF(item);
+    Py_DECREF(threadDict);
 }
 
 void
