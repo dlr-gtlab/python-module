@@ -60,6 +60,7 @@ codingstyle:
   stage: codingstyle
   script:
     - .\tests\codingstyle\runCodingstyle.bat 1>codingStyleLog.txt
+    - .\tests\badges\badges.bat --bw .\codingStyleLog.txt .
   tags:
     - Windows7
   dependencies:
@@ -73,7 +74,6 @@ codingstyle:
 badges:
   stage: badges
   script:
-    - .\tests\badges\badges.bat --bw .\codingStyleLog.txt .
     - $CommitNumber = git rev-list --count HEAD
     - .\tests\badges\badges.bat --run commits $CommitNumber
     - $statistics = git diff --shortstat 4b825dc642cb6eb9a060e54bf8d69288fbee4904
