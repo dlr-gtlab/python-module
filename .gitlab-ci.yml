@@ -1,6 +1,7 @@
 stages:
   - build
   - codingstyle
+  - badges
   
 buildWindows:
   stage: build
@@ -19,7 +20,8 @@ buildWindows:
       - buildLog.txt
       - "New_BuildWarn-W.svg"
     expire_in: 1 week
-
+    when: always
+    
 nightlyBuildPy273:
   stage: build
   script:
@@ -54,3 +56,14 @@ codingstyle:
       - codingStyleLog.txt
       - "New_CodingStyle.svg"
     expire_in: 1 week
+
+badges:
+  stage: badges
+  script:
+  artifacts:
+    paths:
+      - "New_BuildWarn-W.svg"
+      - "New_CodingStyle.svg"
+    expire_in: 1 week
+
+
