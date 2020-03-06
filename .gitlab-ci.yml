@@ -1,7 +1,6 @@
 stages:
   - build
   - codingstyle
-  - badges
   
 buildWindows:
   stage: build
@@ -20,22 +19,7 @@ buildWindows:
       - buildLog.txt
       - "New_BuildWarn-W.svg"
     expire_in: 1 week
-    when: always
 
-#buildWindowsQt512:
-#  stage: build
-#  script:
-#    - .\tests\build\buildQt512.bat 1>buildLog.txt
-#  tags:
-#    - Win7Qt512
-#  artifacts:
-#    paths:
-#      - lib\python373\GTlabPython373.dll
-#      - lib\python373\GTlabPython373.lib
-#      - buildLog.txt
-#    expire_in: 1 week
-#    when: always
-    
 nightlyBuildPy273:
   stage: build
   script:
@@ -60,7 +44,7 @@ codingstyle:
   stage: codingstyle
   script:
     - .\tests\codingstyle\runCodingstyle.bat 1>codingStyleLog.txt
-    - .\tests\badges\badges.bat --bw .\codingStyleLog.txt .
+    - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
   tags:
     - Windows7
   dependencies:
@@ -70,26 +54,3 @@ codingstyle:
       - codingStyleLog.txt
       - "New_CodingStyle.svg"
     expire_in: 1 week
-    
-#badges:
-#  stage: badges
-#  script:
-#    - $CommitNumber = git rev-list --count HEAD
-#    - .\tests\badges\badges.bat --run commits $CommitNumber
-#    - $statistics = git diff --shortstat 4b825dc642cb6eb9a060e54bf8d69288fbee4904
-#    - $filesRaw,$linesRaw = $statistics.split(',')
-#    - $fileNumber = $filesRaw.split(' ')[1]
-#    - $linenumber = $linesRaw.split(' ')[1]
-#    - .\tests\badges\badges.bat --run lines $linenumber
-#    - .\tests\badges\badges.bat --run files $fileNumber
-#  tags:
-#    - Windows7
-#  artifacts:
-#    paths:
-#      - "New_commits.svg"
-#      - "New_lines.svg"
-#      - "New_files.svg"
-#    expire_in: 1 week
-
-
-
