@@ -13,6 +13,7 @@
 #include "gt_pythonmodule_exports.h"
 
 #include <QObject>
+#include <QMutex>
 
 #include "PythonQtObjectPtr.h"
 #include "PythonQtConversion.h"
