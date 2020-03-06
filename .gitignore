@@ -9,3 +9,4 @@ local_settings.pri
 !tests/build/
 *.pro.user
 *.autosave
+.qmake.stash
