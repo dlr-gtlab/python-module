@@ -56,14 +56,14 @@ codingstyle:
 badges:
   stage: badges
   script:
-    - $CommitNumber = git rev-list --count HEAD
-    - .\tests\badges\badges.bat --run commits $CommitNumber
-    - $statistics = git diff --shortstat 4b825dc642cb6eb9a060e54bf8d69288fbee4904
-    - $filesRaw,$linesRaw = $statistics.split(',')
-    - $fileNumber = $filesRaw.split(' ')[1]
-    - $linenumber = $linesRaw.split(' ')[1]
-    - .\tests\badges\badges.bat --run lines $linenumber
-    - .\tests\badges\badges.bat --run files $fileNumber
+ ##   - $CommitNumber = git rev-list --count HEAD
+ ##   - .\tests\badges\badges.bat --run commits $CommitNumber
+ ##   - $statistics = git diff --shortstat 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+ ##   - $filesRaw,$linesRaw = $statistics.split(',')
+ ##   - $fileNumber = $filesRaw.split(' ')[1]
+ ##   - $linenumber = $linesRaw.split(' ')[1]
+ ##   - .\tests\badges\badges.bat --run lines $linenumber
+ ##   - .\tests\badges\badges.bat --run files $fileNumber
     - .\tests\badges\badges.bat --bw .\buildLog.txt .
     - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
   tags:
