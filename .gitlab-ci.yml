@@ -2,7 +2,7 @@ stages:
   - build
   - codingstyle
   - badges
-  
+
 buildWindows:
   stage: build
   script:
@@ -40,7 +40,38 @@ nightlyBuildPy373:
     - Windows7
   only:
     - master
+    
+buildWindowsQt512:
+  stage: build
+  script:
+    - .\tests\build\buildQt512.bat 1>buildLog.txt
+  tags:
+    - Win7Qt512
+  artifacts:
+    paths:
+      - lib\python373\GTlabPython373.dll
+      - lib\python373\GTlabPython373.lib
+      - buildLog.txt
+    expire_in: 1 week
+    when: always
 
+nightlyBuildQt512Py373:
+  stage: build
+  script:
+    - .\tests\build\build-nightlyQt512Py373.bat
+    - .\tests\build\copyHeadersQt512Py373.bat
+  tags:
+    - Win7Qt512
+  only:
+    - master
+  artifacts:
+    paths:
+      - lib\python373\GTlabPython373.dll
+      - lib\python373\GTlabPython373.lib
+      - include/python373/*.h  
+    expire_in: 1 week
+    when: always
+    
 codingstyle:
   stage: codingstyle
   script:
@@ -67,8 +98,8 @@ badges:
     - $linenumber = $linesRaw.split(' ')[1]
     - .\tests\badges\badges.bat --run lines $linenumber
     - .\tests\badges\badges.bat --run files $fileNumber
-    - .\tests\badges\badges.bat --bw .\buildLog.txt .
-    - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
+#    - .\tests\badges\badges.bat --bw .\buildLog.txt .
+#    - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
   tags:
     - Windows7
   artifacts:
