@@ -1,5 +1,6 @@
 stages:
   - build
+  - test
   - codingstyle
   - badges
 
@@ -7,7 +8,6 @@ buildWindows:
   stage: build
   script:
     - .\tests\build\build.bat 1>buildLog.txt
-    - .\tests\badges\badges.bat --bw .\buildLog.txt .
   tags:
     - Windows7
   artifacts:
@@ -17,8 +17,10 @@ buildWindows:
       - lib\python373\GTlabPython373.lib
       - build\GTlabPython373.pdb
       - build\GTlabPython373.ilk
+      - build\GTlabUnitTest.exe
+      - build\GTlabUnitTest.pdb
+
       - buildLog.txt
-      - "New_BuildWarn-W.svg"
     expire_in: 1 week
 
 nightlyBuildPy273:
@@ -44,14 +46,17 @@ nightlyBuildPy373:
 buildWindowsQt512:
   stage: build
   script:
-    - .\tests\build\buildQt512.bat 1>buildLog.txt
+    - .\tests\build\buildQt512.bat 1>buildLogQt512.txt
   tags:
     - Win7Qt512
   artifacts:
     paths:
-      - lib\python373\GTlabPython373.dll
-      - lib\python373\GTlabPython373.lib
-      - buildLog.txt
+      - lib\python373\GTlabPython373-d.dll
+      - lib\python373\GTlabPython373-d.lib
+      - lib\python373\GTlabPython373-d.pdb
+      - lib\python373\GTlabPython373-d.ilk
+      - lib\python373\GTlabPython373-d.exp
+      - buildLogQt512.txt
     expire_in: 1 week
     when: always
 
@@ -71,12 +76,28 @@ nightlyBuildQt512Py373:
       - include/python373/*.h  
     expire_in: 1 week
     when: always
-    
+
+# run tests using the binary built before
+testWin:
+  stage: test
+  script:
+    - .\tests\unittests\runUnittests.bat
+  dependencies:
+    - buildWindows
+  tags:
+    - Windows7
+  artifacts:
+    paths:
+      - "GTlabUnitTestCoverage.xml"
+      - "CoverageReport*"
+      - "unittests.xml"
+    reports:
+      junit: unittests.xml
+
 codingstyle:
   stage: codingstyle
   script:
     - .\tests\codingstyle\runCodingstyle.bat 1>codingStyleLog.txt
-    - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
   tags:
     - Windows7
   dependencies:
@@ -84,7 +105,6 @@ codingstyle:
     paths:
       - "nsiqcppstyle_report.xml"
       - codingStyleLog.txt
-      - "New_CodingStyle.svg"
     expire_in: 1 week
 
 badges:
@@ -98,10 +118,12 @@ badges:
     - $linenumber = $linesRaw.split(' ')[1]
     - .\tests\badges\badges.bat --run lines $linenumber
     - .\tests\badges\badges.bat --run files $fileNumber
-#    - .\tests\badges\badges.bat --bw .\buildLog.txt .
-#    - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
+    - .\tests\badges\badges.bat --bw .\buildLog.txt .
+    - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
   tags:
     - Windows7
+  only:
+    - master
   artifacts:
     paths:
       - "New_commits.svg"
@@ -109,3 +131,4 @@ badges:
       - "New_files.svg"
       - "New_BuildWarn-W.svg"
       - "New_CodingStyle.svg"
+      - "New_Coverage.svg"

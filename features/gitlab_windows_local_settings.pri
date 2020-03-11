@@ -19,6 +19,7 @@ GTLAB_LOGGING_PATH = $${DEV_TOOLS}
 # Third Party
 PYTHON_PATH = $${DEV_TOOLS}\ThirdPartyLibraries\Python\Python_$${PY_VERSION}
 PYTHON_QT_PATH = $${DEV_TOOLS}\ThirdPartyLibraries\PythonQt\PythonQt_$${PY_VERSION}
+GOOGLE_TEST_PATH = $${DEV_TOOLS}\ThirdPartyLibraries\GoogleTest
 
 # Deployment
 GTLAB_ENVIRONMENT_PATH = 

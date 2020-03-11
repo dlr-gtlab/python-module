@@ -23,22 +23,6 @@ CONFIG += silent
 CONFIG += c++11
 CONFIG += console
 
-# Google Test
-INCLUDEPATH += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/include
-win32 {
-    CONFIG(debug, debug|release){
-        LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/libDebug
-        DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/libDebug
-    } else {
-        LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
-        DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
-    }
-}
-unix {
-    LIBS        += -L$${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
-    DEPENDPATH  += $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest/lib
-}
-
 CONFIG(debug, debug|release){
     DESTDIR = $${MOC_BUILD_DEST}/debug-unittests
     OBJECTS_DIR = $${MOC_BUILD_DEST}/debug-unittests/obj
@@ -68,7 +52,21 @@ DESTDIR = $${BUILD_DEST}
 
 ####################################################
 
-LIBS +=  -lgtest
+equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 12) {
+    message(Qt Version 5.12 or newer)
+
+        CONFIG(debug, debug|release){
+                LIBS += -lgtestd
+        } else {
+                LIBS += -lgtest
+        }
+
+} else {
+    message(Qt Version older than 5.12)
+
+        LIBS += -lgtest
+}
+
 LIBS += -L../../$${LIB_BUILD_DEST}
 
 ####################################################

@@ -13,7 +13,11 @@ include( $${PWD}/../../settings.pri )
 BUILD_DEST     = ../../$${LIB_BUILD_DEST}
 MOC_BUILD_DEST = ../../build
 
-TARGET = GTlabPython$${PY_VERSION}
+CONFIG(debug, debug|release){
+    TARGET = GTlabPython$${PY_VERSION}-d
+} else {
+    TARGET = GTlabPython$${PY_VERSION}
+}
 
 QT += core widgets xml svg
 TEMPLATE = lib
@@ -111,11 +115,35 @@ SOURCES += \
     utilities/gtpy_stdout.cpp \
     utilities/gtpy_processdatadistributor.cpp
 
-LIBS += -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators -lGTlabMdi -lGTlabCore
 
-# THIRD PARTY
-win32: LIBS += -lPythonQt-Qt5-Python$${PY_VERSION}
-unix: LIBS += -lPythonQt-Qt5-Python3.7
+
+CONFIG(debug, debug|release){
+    # GTLAB CORE
+    LIBS += -lGTlabLogging-d -lGTlabDatamodel-d -lGTlabCalculators-d
+    LIBS += -lGTlabCore-d -lGTlabMdi-d
+
+    # GTLAB MODULES
+
+    # THIRD PARTY
+    equals(PY_VERSION, 373) {
+        win32: LIBS += -lPythonQt-Qt5-Python37_d3
+        unix: LIBS += -lPythonQt-Qt5-Python3.7
+    } else {
+        win32: LIBS += -lPythonQt-Qt5-Python27_d3
+    }
+
+} else {
+    # GTLAB CORE
+    LIBS += -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators
+    LIBS += -lGTlabCore -lGTlabMdi
+
+    # GTLAB MODULES
+
+    # THIRD PARTY
+    win32: LIBS += -lPythonQt-Qt5-Python$${PY_VERSION}
+    unix: LIBS += -lPythonQt-Qt5-Python3.7
+}
+
 ######################################################################
 
 copyHeaders($$HEADERS)
