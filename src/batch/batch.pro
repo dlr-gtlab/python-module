@@ -13,7 +13,11 @@ include( ../../settings.pri )
 BUILD_DEST     = ../../build
 MOC_BUILD_DEST = $${BUILD_DEST}
 
-TARGET = GTlabPythonConsole$${PY_VERSION}
+CONFIG(debug, debug|release){
+    TARGET = GTlabPythonConsole$${PY_VERSION}-d
+} else {
+    TARGET = GTlabPythonConsole$${PY_VERSION}
+}
 
 QT += core xml gui widgets
 TEMPLATE = app
@@ -51,8 +55,26 @@ SOURCES += \
     batch-script.cpp
 
 LIBS += -L../../$${LIB_BUILD_DEST}
-LIBS += -lGTlabPython$${PY_VERSION} -lGTlabCore -lGTlabMdi
-LIBS += -lGTlabDatamodel -lGTlabCalculators
+
+CONFIG(debug, debug|release){
+    # GTLAB CORE
+    LIBS += -lGTlabDatamodel-d -lGTlabCalculators-d
+    LIBS += -lGTlabCore-d -lGTlabMdi-d
+
+    # GTLAB MODULES
+    LIBS += -lGTlabPython$${PY_VERSION}-d
+
+    # THIRD PARTY
+} else {
+    # GTLAB CORE
+    LIBS += -lGTlabDatamodel -lGTlabCalculators
+    LIBS += -lGTlabCore -lGTlabMdi
+
+    # GTLAB MODULES
+    LIBS += -lGTlabPython$${PY_VERSION}
+
+    # THIRD PARTY
+}
 
 # add search paths to shared libraries
 unix: QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN:\$$ORIGIN/modules\''
