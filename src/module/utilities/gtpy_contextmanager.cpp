@@ -1021,7 +1021,7 @@ GtpyContextManager::initImportBehaviour()
             DEFAULT_IMPORT + " =  __builtins__['__import__']\n" +
             "import sys\n"
             "def gt_imp(name, globals=None, locals=None, fromlist=(), "
-            "level=0, builtin_imp=__import__):\n"
+            "level=0, builtin_imp=" + DEFAULT_IMPORT + "):\n"
             "    if name is '" + CALC_MODULE + "':\n"
             "        if name in sys.modules:\n"
             "            del sys.modules[name]\n"
