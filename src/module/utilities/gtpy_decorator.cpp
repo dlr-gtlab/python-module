@@ -589,7 +589,23 @@ GtpyDecorator::hasWarnings(GtProcessComponent* comp)
         return false;
     }
 
-    return comp->hasWarnings();
+    if (comp->currentState() == GtProcessComponent::WARN_FINISHED ||
+            comp->currentState() == GtProcessComponent::FAILED)
+    {
+        return true;
+    }
+
+    foreach (GtProcessComponent* child,
+             comp->findChildren<GtProcessComponent*>())
+    {
+        if (child->currentState() == GtProcessComponent::WARN_FINISHED ||
+                child->currentState() == GtProcessComponent::FAILED)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
