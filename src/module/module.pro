@@ -62,6 +62,7 @@ HEADERS += \
     post/gtpy_pythonplotitem.h \
     post/gtpy_pythonplotwidget.h \
     post/gtpy_pythonsvgwidget.h \
+    utilities/gtpy_importfunction.h \
     wizards/gtpy_abstractscriptingwizardpage.h \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_completer.h \
@@ -93,6 +94,7 @@ SOURCES += \
     post/gtpy_pythonplotitem.cpp \
     post/gtpy_pythonplotwidget.cpp \
     post/gtpy_pythonsvgwidget.cpp \
+    utilities/gtpy_importfunction.cpp \
     wizards/gtpy_abstractscriptingwizardpage.cpp \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_completer.cpp \
