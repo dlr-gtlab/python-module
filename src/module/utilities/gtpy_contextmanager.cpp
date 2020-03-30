@@ -36,6 +36,7 @@
 #include "gtpy_decorator.h"
 #include "gtpy_interruptrunnable.h"
 #include "gtpy_stdout.h"
+#include "gtpy_importfunction.h"
 
 #include "gtpy_contextmanager.h"
 
@@ -121,6 +122,12 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
 
     connect(PythonQt::self(), SIGNAL(systemExitExceptionRaised(int)), this,
             SLOT(onSystemExitExceptionRaised(int)));
+
+    if (PyType_Ready(&GtpyMyImport_Type) < 0)
+    {
+        gtError() << "could not initialize GtpyMyImport_Type";
+    }
+    Py_INCREF(&GtpyMyImport_Type);
 
     m_pyThreadState = PyEval_SaveThread();
 }
@@ -998,7 +1005,7 @@ GtpyContextManager::initImportBehaviour()
            "        if name_parts[:1] != ['" + CALC_MODULE + "']:\n"
            "            return None\n"
            "        else:\n"
-           "            return DataPackageImporter()\n\n"
+           "            return DataPackageImporter()\n"
 
            "class DataPackageImporter:\n"
 
@@ -1020,21 +1027,6 @@ GtpyContextManager::initImportBehaviour()
     QString impBehaviour =
             DEFAULT_IMPORT + " =  __builtins__['__import__']\n" +
             "import sys\n"
-            "def gt_imp(name, globals=None, locals=None, fromlist=(), "
-            "level=0, builtin_imp=" + DEFAULT_IMPORT + "):\n"
-            "    if name is '" + CALC_MODULE + "':\n"
-            "        if name in sys.modules:\n"
-            "            del sys.modules[name]\n"
-
-            "    mod = builtin_imp(name, globals, locals, fromlist, level)\n"
-
-            "    if str(name) is '" + CALC_MODULE + "':\n"
-            "        if str(name) in sys.modules:\n"
-            "            del sys.modules[str(name)]\n"
-            "    return mod\n"
-
-            "__builtins__['__import__'] = gt_imp\n"
-            "del gt_imp\n"
             "from " + CUSTOM_IMPORT_MODULE + " import DataPackageFinder\n"
             "sys.meta_path.append(DataPackageFinder)\n"
             "del DataPackageFinder\n";
@@ -1050,6 +1042,16 @@ GtpyContextManager::initImportBehaviour()
                             DEFAULT_IMPORT_MODULE);
 
     defaultImp.evalScript(impBehaviour);
+
+    PyObject* builtins = PyDict_GetItemString(PyModule_GetDict(defaultImp),
+                                              "__builtins__");
+
+    PyObject* defImp = PyDict_GetItemString(builtins, "__import__");
+
+    PythonQtObjectPtr imp = GtpyMyImport_Type.tp_new(&GtpyMyImport_Type,NULL, NULL);
+
+    ((GtpyMyImport*)imp.object())->defaultImp = defImp;
+    PyDict_SetItemString(builtins, "__import__", imp);
 }
 
 void
