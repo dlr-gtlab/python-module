@@ -101,6 +101,11 @@ GtPythonModule::init()
     pythonConsole->showAdditionalContextOutput(
                 GtpyContextManager::TaskRunContext);
 
+    connect(GtpyContextManager::instance(), SIGNAL(newContextCreated(int)),
+            pythonConsole, SLOT(showAdditionalContextOutput(int)));
+    connect(GtpyContextManager::instance(), SIGNAL(contextDeleted(int)),
+            pythonConsole, SLOT(removeAdditionalContextOutput(int)));
+
     pythonConsoleLayout->addWidget(pythonConsole);
 
     // python console tools layout

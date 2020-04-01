@@ -58,7 +58,7 @@ bool
 GtpyTask::runIteration()
 {
     int contextId = GtpyContextManager::instance()->createNewContext(
-                GtpyContextManager::TaskRunContext);
+                GtpyContextManager::TaskRunContext, true);
 
     GtpyContextManager::instance()->addTaskValue(contextId, this);
 
@@ -93,7 +93,7 @@ GtpyTask::runIteration()
         }
     }
 
-    GtpyContextManager::instance()->deleteContext(contextId);
+    GtpyContextManager::instance()->deleteContext(contextId, true);
 
     gtInfo() << "...done!";
 

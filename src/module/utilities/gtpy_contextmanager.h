@@ -194,16 +194,19 @@ public:
      * @brief Creates a new python context and returns its id.
      * @param type Determines the type of context and thus which
      * functionalities it has.
+     * @param emitSignal If true, newContextCreated(contextId) will be emitted.
      * @return The id of the new created context.
      */
-    int createNewContext(const GtpyContextManager::Context& type);
+    int createNewContext(const GtpyContextManager::Context& type,
+                         bool emitSignal = false);
 
     /**
      * @brief Deletes the python context with the given id.
      * @param contextId Id of a python context.
+     * @param emitSignal If true, contextDeleted(contextId) will be emitted.
      * @return True, if the deletion was successful.
      */
-    bool deleteContext(int contextId);
+    bool deleteContext(int contextId, bool emitSignal = false);
 
     /**
      * @brief Resets the Python context indicated by type to its initial state.
@@ -582,6 +585,18 @@ signals:
      * @param contextId Python context in which script was evaluated.
      */
     void scriptEvaluated(int contextId);
+
+    /**
+     * @brief Emitted after creating a new context.
+     * @param contextId Context id.
+     */
+    void newContextCreated(int contextId);
+
+    /**
+     * @brief Emitted after a deleted.
+     * @param contextId Cotnext Id.
+     */
+    void contextDeleted(int contextId);
 
 };
 

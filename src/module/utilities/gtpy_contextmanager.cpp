@@ -75,8 +75,6 @@ const QString GtpyContextManager::CUSTOM_IMPORT_MODULE =
 const QString GtpyContextManager::OBJECT_WRAPPER_MODULE =
     QStringLiteral("GtObjectWrapperModule");
 
-
-
 GtpyContextManager::GtpyContextManager(QObject* parent) :
     QObject(parent), m_decorator(Q_NULLPTR),
     m_errorEmitted(false),
@@ -522,7 +520,8 @@ GtpyContextManager::initContexts()
 }
 
 int
-GtpyContextManager::createNewContext(const GtpyContextManager::Context& type)
+GtpyContextManager::createNewContext(const GtpyContextManager::Context& type,
+                                     bool emitSignal)
 {
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
@@ -548,11 +547,16 @@ GtpyContextManager::createNewContext(const GtpyContextManager::Context& type)
 
     defaultContextConfig(type, contextId, contextName);
 
+    if (emitSignal)
+    {
+        emit newContextCreated(contextId);
+    }
+
     return contextId;
 }
 
 bool
-GtpyContextManager::deleteContext(int contextId)
+GtpyContextManager::deleteContext(int contextId, bool emitSignal)
 {
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
@@ -598,6 +602,11 @@ GtpyContextManager::deleteContext(int contextId)
     PyDict_DelItemString(modules, con.contextName.toStdString().c_str());
 
     con.module.setNewRef(Q_NULLPTR);
+
+    if (emitSignal)
+    {
+        emit contextDeleted(contextId);
+    }
 
     m_calcAccessibleContexts.removeOne(contextId);
 

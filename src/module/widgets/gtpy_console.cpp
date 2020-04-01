@@ -92,6 +92,17 @@ GtpyConsole::showAdditionalContextOutput(int contextId)
 }
 
 void
+GtpyConsole::removeAdditionalContextOutput(int contextId)
+{
+    int index = m_additionalContextOutput.indexOf(contextId, -1);
+
+    if (index > -1)
+    {
+        m_additionalContextOutput.removeAt(index);
+    }
+}
+
+void
 GtpyConsole::stdErr(const QString& message,int contextId)
 {
     if (m_contextId == contextId ||

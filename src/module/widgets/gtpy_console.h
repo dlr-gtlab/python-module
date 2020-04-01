@@ -39,6 +39,7 @@ public:
      */
     void setCommandPrompt(const QString& commandPrompt);
 
+public slots:
     /**
      * @brief Enables the registration of a context whose output is displayed
      *  on this console. No input will be sent to this context.
@@ -46,7 +47,13 @@ public:
      */
     void showAdditionalContextOutput(int contextId);
 
-public slots:
+    /**
+     * @brief Removes the context with the specified ID from the list of
+     * contexts for displaying output on this console.
+     * @param contextId Id of the context which should be removed.
+     */
+    void removeAdditionalContextOutput(int contextId);
+
     /**
      * @brief Receives error messages and appends them to the console.
      * @param message Error message which should be shown.

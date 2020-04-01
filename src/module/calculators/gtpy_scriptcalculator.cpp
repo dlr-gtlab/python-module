@@ -59,7 +59,7 @@ bool
 GtpyScriptCalculator::run()
 {
     int contextId = GtpyContextManager::instance()->createNewContext(
-                GtpyContextManager::CalculatorRunContext);
+                GtpyContextManager::CalculatorRunContext, true);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -92,7 +92,7 @@ GtpyScriptCalculator::run()
         }
     }
 
-    GtpyContextManager::instance()->deleteContext(contextId);
+    GtpyContextManager::instance()->deleteContext(contextId, true);
 
     gtInfo() << "...done!";
 
