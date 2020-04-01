@@ -57,11 +57,10 @@ GtpyTask::GtpyTask():
 bool
 GtpyTask::runIteration()
 {
-    GtpyContextManager::Context type = GtpyContextManager::TaskRunContext;
+    int contextId = GtpyContextManager::instance()->createNewContext(
+                GtpyContextManager::TaskRunContext);
 
-    GtpyContextManager::instance()->resetContext(type);
-
-    GtpyContextManager::instance()->addTaskValue(type, this);
+    GtpyContextManager::instance()->addTaskValue(contextId, this);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -69,7 +68,7 @@ GtpyTask::runIteration()
 
         if (package != Q_NULLPTR)
         {
-            GtpyContextManager::instance()->addObject(type,
+            GtpyContextManager::instance()->addObject(contextId,
                                          package->objectName(), package);
         }
     }
@@ -81,7 +80,7 @@ GtpyTask::runIteration()
     bool success;
 
     success = GtpyContextManager::instance()->evalScript(
-                  type, script(), true);
+                  contextId, script(), true);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -89,10 +88,12 @@ GtpyTask::runIteration()
 
         if (package != Q_NULLPTR)
         {
-            GtpyContextManager::instance()->removeObject(type,
+            GtpyContextManager::instance()->removeObject(contextId,
                         package->objectName());
         }
     }
+
+    GtpyContextManager::instance()->deleteContext(contextId);
 
     gtInfo() << "...done!";
 
