@@ -58,9 +58,8 @@ GtpyScriptCalculator::~GtpyScriptCalculator()
 bool
 GtpyScriptCalculator::run()
 {
-    GtpyContextManager::Context type = GtpyContextManager::CalculatorRunContext;
-
-    GtpyContextManager::instance()->resetContext(type);
+    int contextId = GtpyContextManager::instance()->createNewContext(
+                GtpyContextManager::CalculatorRunContext);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -68,7 +67,7 @@ GtpyScriptCalculator::run()
 
         if (package != Q_NULLPTR)
         {
-            GtpyContextManager::instance()->addObject(type,
+            GtpyContextManager::instance()->addObject(contextId,
                         package->objectName(), package);
         }
     }
@@ -80,7 +79,7 @@ GtpyScriptCalculator::run()
     bool success;
 
     success = GtpyContextManager::instance()->evalScript(
-                  type, script(), true);
+                  contextId, script(), true);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -88,10 +87,12 @@ GtpyScriptCalculator::run()
 
         if (package != Q_NULLPTR)
         {
-            GtpyContextManager::instance()->removeObject(type,
+            GtpyContextManager::instance()->removeObject(contextId,
                                              package->objectName());
         }
     }
+
+    GtpyContextManager::instance()->deleteContext(contextId);
 
     gtInfo() << "...done!";
 
