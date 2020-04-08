@@ -65,7 +65,6 @@ HEADERS += \
     post/gtpy_pythonsvgwidget.h \
     utilities/gtpy_importfunction.h \
     utilities/pythonextensions/gtpy_calculatorsmodule.h \
-    utilities/pythonextensions/gtpy_taskdistributor.h \
     wizards/gtpy_abstractscriptingwizardpage.h \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_completer.h \
@@ -102,7 +101,6 @@ SOURCES += \
     post/gtpy_pythonsvgwidget.cpp \
     utilities/gtpy_importfunction.cpp \
     utilities/pythonextensions/gtpy_calculatorsmodule.cpp \
-    utilities/pythonextensions/gtpy_taskdistributor.cpp \
     wizards/gtpy_abstractscriptingwizardpage.cpp \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_completer.cpp \

@@ -127,6 +127,23 @@ public:
                    const bool saveName = true);
 
     /**
+     * @brief Adds the object obj to the Python context indicated by
+     *  contextId. After calling this function, the object can be referenced by
+     *  the specified name. This function wraps the object with the
+     *  GtpyExtendedWrapper class.
+     * @param contextId Python context identifier.
+     * @param name Reference name in Python context.
+     * @param obj Object to add.
+     * @param saveName If true, the reference name is stored in the list of
+     * added objects. All stored objects will be removed by calling the
+     * removeAllAddedObjectes() function.
+     * @return Whether the addition was successful.
+     */
+    bool addGtObject(int contextId,
+                     const QString& name, QObject* obj,
+                     const bool saveName = true);
+
+    /**
      * @brief Removes the object with the given name from the Python context
      * indicated by contextId.
      * @param contextId Python context identifier.
@@ -209,11 +226,6 @@ public:
     bool deleteContext(int contextId, bool emitSignal = false);
 
     /**
-     * @brief Resets the Python context indicated by type to its initial state.
-     * @param type Python context identifier.
-     */
-
-    /**
      * @brief Resets the Python context indicated by contextId to and
      * initializes it with the functionality of type.
      * @param type Identifies the functionality of the context after the reset.
@@ -289,7 +301,7 @@ private:
      */
     PythonQtObjectPtr context(int contextId) const;
 
-    void initGtObjectWrapper();
+//    void initGtObjectWrapper();
 
     /**
      * @brief Initializes the calculator module.
@@ -352,6 +364,8 @@ private:
      * @brief Initializes the output behaviour of python.
      */
     void initStdOut();
+
+    void initWrapperModule();
 
     /**
      * @brief Imports the default modules to the Python context identified by
