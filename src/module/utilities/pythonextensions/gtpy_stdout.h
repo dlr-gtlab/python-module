@@ -16,10 +16,10 @@
 #include <QString>
 
 /**
- * @brief GtpyStdOutRedirectType
+ * @brief GtpyStdOutRedirect_Type
  * Type of the stdout redirection class
  */
-extern PyTypeObject GtpyStdOutRedirectType;
+extern PyTypeObject GtpyStdOutRedirect_Type;
 
 /**
  * @brief Declares the callback that is called from the write() function in

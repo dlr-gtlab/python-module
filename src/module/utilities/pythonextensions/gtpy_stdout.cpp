@@ -8,7 +8,6 @@
  */
 
 #include "gtpy_gilscope.h"
-
 #include "gtpy_stdout.h"
 
 static PyObject*
@@ -39,41 +38,41 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
     Py_INCREF(threadDict);
 
-    PyObject* item = PyDict_GetItem(threadDict, PyString_FromString(
+    PyObject* valItem = PyDict_GetItem(threadDict, PyString_FromString(
                                         GtpyStdOut::CONTEXT_KEY));
-
     QString contextName;
 
-    if (item && PyString_Check(item))
+    if (valItem && PyString_Check(valItem))
     {
-        Py_INCREF(item);
-        const char* val = PyString_AsString(item);
+        Py_INCREF(valItem);
+        const char* val = PyString_AsString(valItem);
         contextName = QString(val);
-        Py_DECREF(item);
+        Py_DECREF(valItem);
     }
 
-    item = PyDict_GetItem(threadDict, PyString_FromString(
+    PyObject* outputItem = PyDict_GetItem(threadDict, PyString_FromString(
                                         GtpyStdOut::OUTPUT_KEY));
 
     bool output = false;
 
-    if (item && PyInt_Check(item))
+    if (outputItem && PyLong_Check(outputItem))
     {
-        Py_INCREF(item);
-        output = (bool)PyInt_AsLong(item);
-        Py_DECREF(item);
+        Py_INCREF(outputItem);
+        output = (bool)PyLong_AsLong(outputItem);
+        Py_DECREF(outputItem);
     }
 
-    item = PyDict_GetItem(threadDict, PyString_FromString(
+    PyObject* errorItem = PyDict_GetItem(threadDict, PyString_FromString(
                                         GtpyStdOut::ERROR_KEY));
 
     bool error = false;
 
-    if (item && PyInt_Check(item))
+    if (errorItem && PyLong_Check(errorItem))
     {
-        Py_INCREF(item);
-        error = (bool)PyInt_AsLong(item);
-        Py_DECREF(item);
+        Py_INCREF(errorItem);
+        error = (bool)PyLong_AsLong(errorItem);
+
+        Py_DECREF(errorItem);
     }
 
     GtpyStdOutRedirect* s = (GtpyStdOutRedirect*)self;
@@ -181,7 +180,7 @@ GtpyStdOutRedirect_members[] =
 };
 
 PyTypeObject
-GtpyStdOutRedirectType =
+GtpyStdOutRedirect_Type =
 {
     PyVarObject_HEAD_INIT(NULL, 0)
     "GtpyStdOutRedirect",             /*tp_name*/

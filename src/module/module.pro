@@ -46,6 +46,7 @@ INCLUDEPATH += .\
     tasks \
     post \
     utilities \
+    utilities\pythonextensions \
     wizards \
     wizards/script_calculator \
     wizrads/python_task \
@@ -63,6 +64,8 @@ HEADERS += \
     post/gtpy_pythonplotwidget.h \
     post/gtpy_pythonsvgwidget.h \
     utilities/gtpy_importfunction.h \
+    utilities/pythonextensions/gtpy_calculatorsmodule.h \
+    utilities/pythonextensions/gtpy_taskdistributor.h \
     wizards/gtpy_abstractscriptingwizardpage.h \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_completer.h \
@@ -83,8 +86,11 @@ HEADERS += \
     utilities/gtpy_scriptrunnable.h \
     utilities/gtpy_gilscope.h \
     utilities/gtpy_interruptrunnable.h \
-    utilities/gtpy_stdout.h \
-    utilities/gtpy_processdatadistributor.h
+    utilities/gtpy_processdatadistributor.h \
+    utilities/pythonextensions/gtpy_stdout.h \
+    utilities/pythonextensions/gtpy_extendedwrapper.h \
+    utilities/pythonextensions/gtpy_createhelperfunction.h \
+    utilities/pythonextensions/gtpy_propertysetter.h
 
 SOURCES += \
     gt_python.cpp \
@@ -95,6 +101,8 @@ SOURCES += \
     post/gtpy_pythonplotwidget.cpp \
     post/gtpy_pythonsvgwidget.cpp \
     utilities/gtpy_importfunction.cpp \
+    utilities/pythonextensions/gtpy_calculatorsmodule.cpp \
+    utilities/pythonextensions/gtpy_taskdistributor.cpp \
     wizards/gtpy_abstractscriptingwizardpage.cpp \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_completer.cpp \
@@ -114,8 +122,11 @@ SOURCES += \
     utilities/gtpy_scriptrunnable.cpp \
     utilities/gtpy_gilscope.cpp \
     utilities/gtpy_interruptrunnable.cpp \
-    utilities/gtpy_stdout.cpp \
-    utilities/gtpy_processdatadistributor.cpp
+    utilities/gtpy_processdatadistributor.cpp \
+    utilities/pythonextensions/gtpy_stdout.cpp \
+    utilities/pythonextensions/gtpy_extendedwrapper.cpp \
+    utilities/pythonextensions/gtpy_createhelperfunction.cpp \
+    utilities/pythonextensions/gtpy_propertysetter.cpp
 
 
 
