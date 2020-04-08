@@ -54,7 +54,6 @@ static PyObject*
 GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* args,
                        PyObject* /*kwds*/)
 {
-    qDebug() << "new extended wrapper!!!";
     GtpyExtendedWrapper* self;
 
     self = (GtpyExtendedWrapper*)type->tp_alloc(type, 0);

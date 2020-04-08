@@ -298,7 +298,7 @@ GtpyAbstractScriptingWizardPage::initializePage()
             GtObject* clone = obj->clone();
             clone->setParent(this);
 
-            GtpyContextManager::instance()->addObject(
+            GtpyContextManager::instance()->addGtObject(
                         m_contextId, clone->objectName(), clone);
         }
     }
@@ -540,120 +540,6 @@ GtpyAbstractScriptingWizardPage::insertToCurrentCursorPos(const QString& text)
     }
 
     m_editor->insertToCurrentCursorPos(text);
-}
-
-QString
-GtpyAbstractScriptingWizardPage::propValToString(GtAbstractProperty* prop)
-{
-    QString val;
-
-    if (qobject_cast<GtModeProperty*>(prop))
-    {
-        QString valTemp = GtpyContextManager::instance()->qvariantToPyStr(
-                              prop->valueToVariant());
-
-        if (valTemp.isEmpty())
-        {
-            valTemp = "\"\"";
-        }
-
-        val = "\""
-              + valTemp
-              + "\"";
-    }
-    else if (qobject_cast<GtObjectLinkProperty*>(prop))
-    {
-        GtObject* obj = gtDataModel->objectByUuid(
-                            prop->valueToVariant().toString());
-
-        if (obj)
-        {
-            GtPackage* pack = Q_NULLPTR;
-
-            while (pack == Q_NULLPTR)
-            {
-                QString objName = obj->objectName();
-
-                if (!objName.contains(
-                            QRegExp(QStringLiteral("^[a-zA-Z0-9_]*$"))))
-                {
-                    QString funcName =
-                            GtpyContextManager::instance()->findChildFuncName();
-
-                    objName = funcName + "(\"" + objName +
-                                   "\")";
-                }
-
-                obj = qobject_cast<GtObject*>(obj->parent());
-
-                if (obj == Q_NULLPTR)
-                {
-                    break;
-                }
-
-                pack = qobject_cast<GtPackage*>(obj);
-
-                val.insert(0, objName);
-
-                val.insert(0, ".");
-
-                if (pack != Q_NULLPTR)
-                {
-                    objName = pack->objectName();
-
-                    if (!objName.contains(
-                                QRegExp(QStringLiteral("^[a-zA-Z0-9_]*$"))))
-                    {
-                        QString funcName =
-                            GtpyContextManager::instance()->findChildFuncName();
-
-                        objName = funcName + "(\"" + objName +
-                                       "\")";
-                    }
-
-                    val.insert(0, objName);
-                }
-            }
-
-            obj = Q_NULLPTR;
-            pack = Q_NULLPTR;
-        }
-        else
-        {
-            QString valTemp = prop->valueToVariant().toString();
-
-            if (valTemp.isEmpty())
-            {
-                val = "\"\"";
-            }
-            else
-            {
-                val =  GtpyContextManager::instance()->qvariantToPyStr(
-                           prop->valueToVariant());
-            }
-        }
-    }
-    else if (qobject_cast<GtStringProperty*>(prop))
-    {
-        val = "\"";
-        val +=  GtpyContextManager::instance()->qvariantToPyStr(
-                    prop->valueToVariant());
-        val += "\"";
-    }
-    else if (dynamic_cast<GtProperty<QString>*>(prop))
-    {
-        val = "\"";
-        val +=  GtpyContextManager::instance()->qvariantToPyStr(
-                    prop->valueToVariant());
-        val += "\"";
-    }
-    else
-    {
-        val = GtpyContextManager::instance()->qvariantToPyStr(
-                  prop->valueToVariant());
-    }
-
-    return val;
 }
 
 void

@@ -161,14 +161,6 @@ protected:
     void insertToCurrentCursorPos(const QString& text);
 
     /**
-     * @brief Converts the property value of the given property to python value
-     * and returns it as string.
-     * @param prop Property whose value should be converted.
-     * @return Value of property as python string
-     */
-    QString propValToString(GtAbstractProperty* prop);
-
-    /**
      * @brief Set the list of package names.
      * @param packageNames List of package names.
      */
