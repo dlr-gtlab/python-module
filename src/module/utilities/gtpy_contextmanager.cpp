@@ -1341,7 +1341,7 @@ GtpyContextManager::initWrapperModule()
 
 #ifdef PY3K
     PyDict_SetItem(PyObject_GetAttrString(sys.object(), "modules"),
-                   PyUnicode_FromString(name.constData()), myMod.object());
+                   PyUnicode_FromString(name.constData()), myMod);
 #endif
 
     if (PyModule_AddObject(myMod, "GtpyExtendedWrapper",
