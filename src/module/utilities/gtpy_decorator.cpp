@@ -11,7 +11,7 @@
 #include <QMetaMethod>
 #include <QStringList>
 
-#include <PythonQtPythonInclude.h>
+#include "PythonQtPythonInclude.h"
 
 #include "gt_coreapplication.h"
 #include "gt_coredatamodel.h"
@@ -26,6 +26,7 @@
 #include "gt_abstractrunnable.h"
 
 #include "gtpy_processdatadistributor.h"
+#include "gtpy_extendedwrapper.h"
 
 #include "gtpy_decorator.h"
 
@@ -53,6 +54,58 @@ GtpyDecorator::getFunctionName(const QString& funcTag)
     }
 
     return QString();
+}
+
+GtObject*
+GtpyDecorator::pyObjectToGtObject(PythonQtObjectPtr obj)
+{
+    if (obj.isNull())
+    {
+        return Q_NULLPTR;
+    }
+
+    GtObject* gtObj = Q_NULLPTR;
+
+    if (obj->ob_type == &GtpyExtendedWrapper_Type)
+    {
+        GtpyExtendedWrapper* self = (GtpyExtendedWrapper*)obj.object();
+
+        if (self && self->_obj)
+        {
+            gtObj = qobject_cast<GtObject*>(self->_obj->_obj);
+        }
+    }
+
+    return gtObj;
+}
+
+PyObject*
+GtpyDecorator::wrapGtObject(GtObject* obj)
+{
+    if (!obj)
+    {
+        return Q_NULLPTR;
+    }
+
+    PyObject* pyQtWrapper = PythonQt::priv()->wrapQObject(obj);
+
+    if (pyQtWrapper && pyQtWrapper->ob_type->tp_base !=
+            &PythonQtInstanceWrapper_Type)
+    {
+        Py_XDECREF(pyQtWrapper);
+        return Q_NULLPTR;
+    }
+
+    PyObject* childArg = PyTuple_New(1);
+
+    PyTuple_SetItem(childArg, 0, pyQtWrapper);
+
+    PyObject* wrapped = GtpyExtendedWrapper_Type.tp_new(
+                          &GtpyExtendedWrapper_Type, childArg, Q_NULLPTR);
+
+    Py_DECREF(childArg);
+
+    return wrapped;
 }
 
 void
@@ -194,8 +247,7 @@ GtpyDecorator::switchSession(GtCoreApplication* app, const QString& id)
     app->switchSession(id);
 }
 
-GtProject*
-GtpyDecorator::openProject(GtCoreApplication* app,
+PyObject* GtpyDecorator::openProject(GtCoreApplication* app,
                                 const QString& projectId)
 {
     if (app == Q_NULLPTR)
@@ -255,10 +307,10 @@ GtpyDecorator::openProject(GtCoreApplication* app,
 
     qDebug() << "project opened!";
 
-    return project;
+    return wrapGtObject(project);
 }
 
-GtProject*
+PyObject*
 GtpyDecorator::currentProject(GtCoreApplication* app)
 {
     if (app == Q_NULLPTR)
@@ -273,7 +325,7 @@ GtpyDecorator::currentProject(GtCoreApplication* app)
         return Q_NULLPTR;
     }
 
-    return app->currentProject();
+    return wrapGtObject(app->currentProject());
 }
 
 const QString
@@ -416,7 +468,7 @@ GtpyDecorator::runProcess(GtProject* pro, const QString& processId,
     return true;
 }
 
-GtTask*
+PyObject*
 GtpyDecorator::findProcess(GtProject* pro, const QString& processId)
 {
     if (pro == Q_NULLPTR || processId.isEmpty())
@@ -424,7 +476,7 @@ GtpyDecorator::findProcess(GtProject* pro, const QString& processId)
         return Q_NULLPTR;
     }
 
-    return pro->findProcess(processId);
+    return wrapGtObject(pro->findProcess(processId));
 }
 
 bool
@@ -623,17 +675,16 @@ GtpyDecorator::delete_GtpyProcessDataDistributor(
     obj = Q_NULLPTR;
 }
 
-GtTask*
+PyObject*
 GtpyDecorator::taskElement(
         GtpyProcessDataDistributor* obj, const QString& name)
 {
     GtTask* task = obj->taskElement(name);
 
-    return task;
+    return wrapGtObject(task);
 }
 
-
-GtObject*
+PyObject*
 GtpyDecorator::findGtChild(GtObject* obj, const QString& childName)
 {
     if (obj == Q_NULLPTR || childName.isEmpty())
@@ -641,26 +692,34 @@ GtpyDecorator::findGtChild(GtObject* obj, const QString& childName)
         return Q_NULLPTR;
     }
 
-    return obj->findDirectChild<GtObject*>(childName);
+    GtObject* child = obj->findDirectChild<GtObject*>(childName);
+    return wrapGtObject(child);
 }
 
-QList<GtObject*>
+QList<PyObject*>
 GtpyDecorator::findGtChildren(GtObject* obj, const QString& childrenName)
 {
     if (obj == Q_NULLPTR)
     {
-        return QList<GtObject*>();
+        return QList<PyObject*>();
     }
 
-    QList<GtObject*> retval;
+    QList<GtObject*> children;
 
     if (childrenName.isEmpty())
     {
-        retval = obj->findDirectChildren<GtObject*>();
+        children = obj->findDirectChildren<GtObject*>();
     }
     else
     {
-        retval = obj->findDirectChildren<GtObject*>(childrenName);
+        children = obj->findDirectChildren<GtObject*>(childrenName);
+    }
+
+    QList<PyObject*> retval;
+
+    foreach (GtObject* child, children)
+    {
+        retval.append(wrapGtObject(child));
     }
 
     return retval;
@@ -726,6 +785,17 @@ GtpyDecorator::setPropertyValue(GtObject* obj, const QString& id,
             qobject_cast<GtObjectLinkProperty*>(prop))
     {
         GtObject* dataObj = qvariant_cast<GtObject*>(val);
+
+        if (!dataObj)
+        {
+
+            PythonQtObjectPtr pyPtr = qvariant_cast<PythonQtObjectPtr>(val);
+
+            if(pyPtr)
+            {
+                dataObj = pyObjectToGtObject(val);
+            }
+        }
 
         if (dataObj)
         {
@@ -875,6 +945,16 @@ GtpyDecorator::setPropertyValue(GtAbstractProperty* prop,
             qobject_cast<GtObjectLinkProperty*>(subProp))
     {
         GtObject* dataObj = qvariant_cast<GtObject*>(val);
+
+        if (!dataObj)
+        {
+            PythonQtObjectPtr pyPtr = qvariant_cast<PythonQtObjectPtr>(val);
+
+            if(pyPtr)
+            {
+                dataObj = pyObjectToGtObject(val);
+            }
+        }
 
         if (dataObj)
         {

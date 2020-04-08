@@ -71,6 +71,15 @@ public:
      */
     QString getFunctionName(const QString& funcTag);
 
+    /**
+     * @brief Converts a Python object to a GtObject.
+     * @param obj Object to convert.
+     * @return The converted GtObject.
+     */
+    GtObject* pyObjectToGtObject(PythonQtObjectPtr obj);
+
+    PyObject* wrapGtObject(GtObject* obj);
+
 public slots:
 
     ///-------> functions of GtCoreApplication <-------\\\
@@ -129,14 +138,14 @@ public slots:
      * @param projectId id of the project that should be opened
      * @return the opened project
      */
-    GtProject* openProject(GtCoreApplication* app, const QString& projectId);
+    PyObject* openProject(GtCoreApplication* app, const QString& projectId);
 
     /**
      * @brief currentProject returns the current project
      * @param app pointer to GtCoreApplication
      * @return the current project
      */
-    GtProject* currentProject(GtCoreApplication* app);
+    PyObject* currentProject(GtCoreApplication* app);
 
     ///-------> functions of GtProject <-------\\\
 
@@ -177,7 +186,7 @@ public slots:
      * @param processId id of process that should be returned
      * @return the process with the given id
      */
-    GtTask* findProcess(GtProject* pro, const QString& processId);
+    PyObject* findProcess(GtProject* pro, const QString& processId);
 
     /**
      * @brief close close the project
@@ -227,7 +236,7 @@ public slots:
 
     void delete_GtpyProcessDataDistributor(GtpyProcessDataDistributor* obj);
 
-    GtTask* taskElement(GtpyProcessDataDistributor* obj, const QString& name);
+    PyObject* taskElement(GtpyProcessDataDistributor* obj, const QString& name);
 
     ///-------> functions of GtObject <-------\\\
 
@@ -238,7 +247,7 @@ public slots:
      * @param childName name of child that should be found
      * @return See GtObject class documentation.
      */
-    FIND_GT_CHILD GtObject* findGtChild(GtObject* obj, const QString& childName);
+    FIND_GT_CHILD PyObject* findGtChild(GtObject* obj, const QString& childName);
 
     /**
      * @brief findGtChildren returns the children of type GtObject with the
@@ -247,7 +256,7 @@ public slots:
      * @param childrenName name of children that should be found
      * @return See GtObject class documentation.
      */
-    FIND_GT_CHILDREN QList<GtObject*> findGtChildren(GtObject* obj,
+    FIND_GT_CHILDREN QList<PyObject*> findGtChildren(GtObject* obj,
             const QString& childrenName = QString());
 
     /**
@@ -255,7 +264,8 @@ public slots:
      * @param obj pointer to GtObject
      * @return See GtObject class documentation.
      */
-    FIND_GT_PROPERTIES QList<GtAbstractProperty*> findGtProperties(GtObject* obj);
+    FIND_GT_PROPERTIES QList<GtAbstractProperty*> findGtProperties(
+            GtObject* obj);
 
     /**
      * @brief findGtProperty returns the property with the given id
