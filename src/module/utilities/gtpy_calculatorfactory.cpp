@@ -7,6 +7,7 @@
  *  Tel.: +49 2203 601 2692
  */
 
+#include <PythonQtPythonInclude.h>
 
 #include "gt_calculatordata.h"
 #include "gt_calculator.h"
@@ -27,6 +28,9 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
                                         const QString& objName,
                                         GtTask* parent)
 {
+    GtCalculator* calc = Q_NULLPTR;
+
+    Py_BEGIN_ALLOW_THREADS
 //    if (parent != Q_NULLPTR)
 //    {
 //        QList<GtCalculator*> calculators =
@@ -62,7 +66,7 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
         return Q_NULLPTR;
     }
 
-    GtCalculator* calc = qobject_cast<GtCalculator*>(newObj);
+    calc = qobject_cast<GtCalculator*>(newObj);
 
     if (calc == Q_NULLPTR)
     {
@@ -83,6 +87,8 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
 
         parent->appendChild(calc);
     }
+
+    Py_END_ALLOW_THREADS
 
     return calc;
 }

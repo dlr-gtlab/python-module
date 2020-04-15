@@ -37,17 +37,17 @@ GtpyProcessDataDistributor::taskElement(const QString& name)
         return task;
     }
 
-    QList<GtTask*> children = m_pythonTask->findDirectChildren<GtTask*>();
+//    QList<GtTask*> children = m_pythonTask->findDirectChildren<GtTask*>();
 
-    foreach (GtTask* child, children)
-    {
-        if(child->uuid() == task->uuid())
-        {
-            delete child;
-            child = Q_NULLPTR;
-            break;
-        }
-    }
+//    foreach (GtTask* child, children)
+//    {
+//        if(child->uuid() == task->uuid())
+//        {
+//            delete child;
+//            child = Q_NULLPTR;
+//            break;
+//        }
+//    }
 
     task = qobject_cast<GtTask*>(task->clone());
 

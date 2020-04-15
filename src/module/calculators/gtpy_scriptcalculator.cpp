@@ -67,7 +67,7 @@ GtpyScriptCalculator::run()
 
         if (package != Q_NULLPTR)
         {
-            GtpyContextManager::instance()->addObject(contextId,
+            GtpyContextManager::instance()->addGtObject(contextId,
                         package->objectName(), package);
         }
     }

@@ -21,6 +21,7 @@
 #include "PythonQtProperty.h"
 #include "PythonQtConversion.h"
 
+#include "gt_logging.h"
 #include "gt_abstractproperty.h"
 #include "gt_project.h"
 #include "gt_processdata.h"
@@ -36,6 +37,10 @@
 #include "gtpy_decorator.h"
 #include "gtpy_interruptrunnable.h"
 #include "gtpy_stdout.h"
+
+#include "gtpy_extendedwrapper.h"
+#include "gtpy_createhelperfunction.h"
+#include "gtpy_propertysetter.h"
 #include "gtpy_importfunction.h"
 
 #include "gtpy_contextmanager.h"
@@ -55,12 +60,12 @@ const QString GtpyContextManager::CALC_FAC_VAR =
 const QString GtpyContextManager::HELPER_FAC_VAR =
     QStringLiteral("HelperFactory");
 const QString GtpyContextManager::GTOBJECT_WRAPPER =
-    QStringLiteral("GtObjectWrapper");
+    QStringLiteral("CurrentGtObjectWrapper");
 const QString GtpyContextManager::HELPER_WRAPPER =
     QStringLiteral("HelperWrapper");
 
 const QString GtpyContextManager::DEFAULT_IMPORT =
-    QStringLiteral("__default_imp");
+    QStringLiteral("default_imp");
 
 const QString GtpyContextManager::CLASS_WRAPPER_MODULE =
     QStringLiteral("GtClasses");
@@ -120,6 +125,30 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
 
     connect(PythonQt::self(), SIGNAL(systemExitExceptionRaised(int)), this,
             SLOT(onSystemExitExceptionRaised(int)));
+
+    if (PyType_Ready(&GtpyStdOutRedirect_Type) < 0)
+    {
+        gtError() << "could not initialize GtpyStdOutRedirect_Type";
+    }
+    Py_INCREF(&GtpyStdOutRedirect_Type);
+
+    if (PyType_Ready(&GtpyExtendedWrapper_Type) < 0)
+    {
+        gtError() << "could not initialize GtpyExtendedWrapper_Type";
+    }
+    Py_INCREF(&GtpyExtendedWrapper_Type);
+
+    if (PyType_Ready(&GtpyCreateHelperFunction_Type) < 0)
+    {
+        gtError() << "could not initialize GtpyCreateHelperFunction_Type";
+    }
+    Py_INCREF(&GtpyCreateHelperFunction_Type);
+
+    if (PyType_Ready(&GtpyPropertySetter_Type) < 0)
+    {
+        gtError() << "could not initialize GtpyPropertySetter_Type";
+    }
+    Py_INCREF(&GtpyPropertySetter_Type);
 
     if (PyType_Ready(&GtpyMyImport_Type) < 0)
     {
@@ -347,6 +376,68 @@ GtpyContextManager::addObject(int contextId,
 }
 
 bool
+GtpyContextManager::addGtObject(int contextId, const QString& name,
+                                QObject* obj, const bool saveName)
+{
+    if (name.isEmpty())
+    {
+        return false;
+    }
+
+    if (obj == Q_NULLPTR)
+    {
+        return false;
+    }
+
+    PythonQtObjectPtr currentContext = context(contextId);
+
+    if (currentContext == Q_NULLPTR)
+    {
+        return false;
+    }
+
+    QStringList list = m_addedObjectNames.value(contextId, QStringList());
+
+    if (list.contains(name))
+    {
+        return false;
+    }
+
+    if (saveName)
+    {
+        list.append(name);
+        m_addedObjectNames.insert(contextId, list);
+    }
+
+    GTPY_GIL_SCOPE
+
+    PyObject* argsTuple = PyTuple_New(1);
+
+    PyObject* pyQtWrapper = PythonQt::priv()->wrapQObject(obj);
+
+    if (pyQtWrapper && (pyQtWrapper->ob_type->tp_base ==
+                            &PythonQtInstanceWrapper_Type))
+    {
+        PyTuple_SetItem(argsTuple, 0, pyQtWrapper);
+    }
+    else
+    {
+        Py_XDECREF(pyQtWrapper);
+        Py_DECREF(argsTuple);
+        return false;
+    }
+
+    PyObject* wrapped = GtpyExtendedWrapper_Type.tp_new(
+                            &GtpyExtendedWrapper_Type, argsTuple, NULL);
+
+    Py_DECREF(argsTuple);
+
+    PyModule_AddObject(currentContext, name.toLatin1().data(), wrapped);
+
+    return true;
+}
+
+bool
 GtpyContextManager::removeObject(int contextId, const QString& name)
 {
     GTPY_GIL_SCOPE
@@ -415,7 +506,6 @@ GtpyContextManager::addTaskValue(int contextId, GtTask* task)
         QString pyCode = "if '" + CALC_MODULE + "' in globals():\n" +
                          "    " + CALC_MODULE + "." + TASK_VAR + " = "
                          + TASK_VAR;
-
 
         evalScript(contextId, pyCode , false);
     }
@@ -495,6 +585,7 @@ void
 GtpyContextManager::initContexts()
 {
     initLoggingModule();
+    initWrapperModule();
     initImportBehaviour();
 
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
@@ -720,99 +811,99 @@ GtpyContextManager::context(int contextId) const
     return con.module;
 }
 
-void
-GtpyContextManager::initGtObjectWrapper()
-{
-    static QString objWrapper;
+//void
+//GtpyContextManager::initGtObjectWrapper()
+//{
+//    static QString objWrapper;
 
-    if (objWrapper.isEmpty())
-    {
-        objWrapper =
-            "import re\n"
-            "class " + GTOBJECT_WRAPPER + ": \n"
-            "    def __init__(self, obj):\n"
-            "        self._obj = obj\n"
+//    if (objWrapper.isEmpty())
+//    {
+//        objWrapper =
+//            "import re\n"
+//            "class " + GTOBJECT_WRAPPER + ": \n"
+//            "    def __init__(self, obj):\n"
+//            "        self._obj = obj\n"
 
-            "        for i in range(len(self._obj.findGtProperties())):\n"
-            "            prop = self._obj.findGtProperties()[i]\n"
-            "            if prop.ident():\n"
+//            "        for i in range(len(self._obj.findGtProperties())):\n"
+//            "            prop = self._obj.findGtProperties()[i]\n"
+//            "            if prop.ident():\n"
 
-            "                funcName = re.sub('[^A-Za-z0-9]+', '', "
-                            "prop.ident())\n"
-            "                tempLetter = funcName[0]\n"
-            "                funcName = funcName.replace(tempLetter, "
-                            "tempLetter.lower(), 1)\n"
+//            "                funcName = re.sub('[^A-Za-z0-9]+', '', "
+//                            "prop.ident())\n"
+//            "                tempLetter = funcName[0]\n"
+//            "                funcName = funcName.replace(tempLetter, "
+//                            "tempLetter.lower(), 1)\n"
 
-            "                def dynGetter(self = self, propName = "
-                            "prop.ident()):\n"
-            "                    return self._obj.propertyValue(propName)\n"
-            "                setattr(self, funcName, dynGetter)\n"
+//            "                def dynGetter(self = self, propName = "
+//                            "prop.ident()):\n"
+//            "                    return self._obj.propertyValue(propName)\n"
+//            "                setattr(self, funcName, dynGetter)\n"
 
-            "                tempLetter = funcName[0]\n"
-            "                funcName = funcName.replace(tempLetter, "
-                            "tempLetter.upper(), 1)\n"
-            "                funcName = 'set' + funcName\n"
+//            "                tempLetter = funcName[0]\n"
+//            "                funcName = funcName.replace(tempLetter, "
+//                            "tempLetter.upper(), 1)\n"
+//            "                funcName = 'set' + funcName\n"
 
-            "                def dynSetter(val, self = self, propName = "
-                            "prop.ident()):\n"
-            "                    self._obj.setPropertyValue(propName, val)\n"
-            "                setattr(self, funcName, dynSetter)\n"
+//            "                def dynSetter(val, self = self, propName = "
+//                            "prop.ident()):\n"
+//            "                    self._obj.setPropertyValue(propName, val)\n"
+//            "                setattr(self, funcName, dynSetter)\n"
 
-            "        helpers = " + HELPER_FAC_VAR + ".connectedHelper("
-                                        "self._obj.__class__.__name__)\n" +
-            "        for i in range(len(helpers)):\n" +
-            "            funcName = 'create' + helpers[i]\n" +
+//            "        helpers = " + HELPER_FAC_VAR + ".connectedHelper("
+//                                        "self._obj.__class__.__name__)\n" +
+//            "        for i in range(len(helpers)):\n" +
+//            "            funcName = 'create' + helpers[i]\n" +
 
-            "            def dynCreateHelper(name, self = self, helperName = "
-                                                            "helpers[i]):\n" +
-            "                helper = " + HELPER_FAC_VAR +
-                        ".newCalculatorHelper(helperName, name, self._obj)\n" +
-            "                return " + GTOBJECT_WRAPPER + "(helper)\n" +
-            "            setattr(self, funcName, dynCreateHelper)\n" +
+//            "            def dynCreateHelper(name, self = self, helperName = "
+//                                                            "helpers[i]):\n" +
+//            "                helper = " + HELPER_FAC_VAR +
+//                        ".newCalculatorHelper(helperName, name, self._obj)\n" +
+//            "                return " + GTOBJECT_WRAPPER + "(helper)\n" +
+//            "            setattr(self, funcName, dynCreateHelper)\n" +
 
-            "        def dynFindGtChild(name, self = self):\n"
-            "            if hasattr(self._obj, 'findGtChild'):\n"
-            "                child = self._obj.findGtChild(name)\n"
-            "                return " + GTOBJECT_WRAPPER + "(child)\n"
-            "        setattr(self, 'findGtChild', dynFindGtChild)\n" +
+//            "        def dynFindGtChild(name, self = self):\n"
+//            "            if hasattr(self._obj, 'findGtChild'):\n"
+//            "                child = self._obj.findGtChild(name)\n"
+//            "                return " + GTOBJECT_WRAPPER + "(child)\n"
+//            "        setattr(self, 'findGtChild', dynFindGtChild)\n" +
 
-            "        def dynFindGtChildren(name = '', self = self):\n"
-            "            if hasattr(self._obj, 'findGtChildren'):\n"
-            "                children = self._obj.findGtChildren(name)\n"
-            "            retList = []\n"
-            "            for i in range(len(children)):\n" +
-            "                retList.append(" + GTOBJECT_WRAPPER +
-                             "(children[i]))\n"
-            "            return retList\n"
-            "        setattr(self, 'findGtChildren', dynFindGtChildren)\n" +
+//            "        def dynFindGtChildren(name = '', self = self):\n"
+//            "            if hasattr(self._obj, 'findGtChildren'):\n"
+//            "                children = self._obj.findGtChildren(name)\n"
+//            "            retList = []\n"
+//            "            for i in range(len(children)):\n" +
+//            "                retList.append(" + GTOBJECT_WRAPPER +
+//                             "(children[i]))\n"
+//            "            return retList\n"
+//            "        setattr(self, 'findGtChildren', dynFindGtChildren)\n" +
 
-            "    def __getattr__(self, name): \n" +
-            "        return getattr(self.__dict__['_obj'], name)\n" +
+//            "    def __getattr__(self, name): \n" +
+//            "        return getattr(self.__dict__['_obj'], name)\n" +
 
-            "    def __setattr__(self, name, value): \n" +
-            "        if name is ('_obj') or  hasattr("
-                                "self.__dict__['_obj'], name) is False or "
-                                "name.startswith('findGtChild'):\n" +
-            "            self.__dict__[name] = value\n" +
-            "        else:\n" +
-            "            setattr(self.__dict__['_obj'], name, value)\n" +
-            "    def __dir__(self): \n" +
-            "        return sorted(list(self.__dict__.keys()) + "
-                                                       "dir(self._obj))\n";
-    }
+//            "    def __setattr__(self, name, value): \n" +
+//            "        if name is ('_obj') or  hasattr("
+//                                "self.__dict__['_obj'], name) is False or "
+//                                "name.startswith('findGtChild'):\n" +
+//            "            self.__dict__[name] = value\n" +
+//            "        else:\n" +
+//            "            setattr(self.__dict__['_obj'], name, value)\n" +
+//            "    def __dir__(self): \n" +
+//            "        return sorted(list(self.__dict__.keys()) + "
+//                                                       "dir(self._obj))\n";
+//    }
 
-    GTPY_GIL_SCOPE
+//    GTPY_GIL_SCOPE
 
-    PythonQtObjectPtr con =
-            PythonQt::self()->importModule(OBJECT_WRAPPER_MODULE);
+//    PythonQtObjectPtr con =
+//            PythonQt::self()->importModule(OBJECT_WRAPPER_MODULE);
 
-    if (!con)
-    {
-        con = PythonQt::self()->createModuleFromScript(OBJECT_WRAPPER_MODULE);
-        con.addObject(HELPER_FAC_VAR, gtCalculatorHelperFactory);
-        con.evalScript(objWrapper);
-    }
-}
+//    if (!con)
+//    {
+//        con = PythonQt::self()->createModuleFromScript(OBJECT_WRAPPER_MODULE);
+//        con.addObject(HELPER_FAC_VAR, gtCalculatorHelperFactory);
+//        con.evalScript(objWrapper);
+//    }
+//}
 
 void
 GtpyContextManager::initCalculatorModule()
@@ -822,9 +913,12 @@ GtpyContextManager::initCalculatorModule()
 
     if (calcConstructors.isEmpty())
     {
+//        calcConstructors +=
+//                "from " + OBJECT_WRAPPER_MODULE + " import " +
+//                GTOBJECT_WRAPPER + "\n";
         calcConstructors +=
-                "from " + OBJECT_WRAPPER_MODULE + " import " +
-                GTOBJECT_WRAPPER + "\n";
+                "from GtObjectWrapperModuleC import GtpyExtendedWrapper\n";
+
         foreach (GtCalculatorData calcData,
                  gtCalculatorFactory->calculatorDataList())
         {
@@ -841,8 +935,8 @@ GtpyContextManager::initCalculatorModule()
                 "def " + className + "(name = '" + calcData->id + "'):\n" +
                 "    tempCalc = " + CALC_FAC_VAR + ".createCalculator(\"" +
                 className + "\", name, " + TASK_VAR + ")\n" +
+                "    return GtpyExtendedWrapper(tempCalc)\n";
 
-                "    return " + GTOBJECT_WRAPPER + "(tempCalc)\n";
         }
 
     }
@@ -852,10 +946,11 @@ GtpyContextManager::initCalculatorModule()
         processElementFunction =
                 "from PythonQt." + CLASS_WRAPPER_MODULE +
                 " import GtpyProcessDataDistributor\n" +
-                "def findGtTask(name):\n"
+                "from GtObjectWrapperModuleC import GtpyExtendedWrapper\n" +
+                "def findGtTask(name):\n" +
                 "    task = GtpyProcessDataDistributor(__task).taskElement(name)\n" +
-                "    if task is not None:"
-                "       return " + GTOBJECT_WRAPPER + "(task)\n";
+                "    if task is not None:\n" +
+                "        return task\n";
     }
 
     GTPY_GIL_SCOPE
@@ -1057,7 +1152,8 @@ GtpyContextManager::initImportBehaviour()
 
     PyObject* defImp = PyDict_GetItemString(builtins, "__import__");
 
-    PythonQtObjectPtr imp = GtpyMyImport_Type.tp_new(&GtpyMyImport_Type,NULL, NULL);
+    PythonQtObjectPtr imp = GtpyMyImport_Type.tp_new(&GtpyMyImport_Type, NULL,
+                                                     NULL);
 
     ((GtpyMyImport*)imp.object())->defaultImp = defImp;
     PyDict_SetItemString(builtins, "__import__", imp);
@@ -1190,27 +1286,70 @@ GtpyContextManager::initStdOut()
 {
     GTPY_GIL_SCOPE
 
-    if (PyType_Ready(&GtpyStdOutRedirectType) < 0)
-    {
-        std::cerr << "could not initialize GtpyStdOutRedirectType" << ", in "
-                  << __FILE__ << ":" << __LINE__ << std::endl;
-    }
-
-    Py_INCREF(&GtpyStdOutRedirectType);
-
     PythonQtObjectPtr sys;
     sys.setNewRef(PyImport_ImportModule("sys"));
 
     // create a redirection object for stdout and stderr
-    m_out = GtpyStdOutRedirectType.tp_new(&GtpyStdOutRedirectType,NULL, NULL);
+    m_out = GtpyStdOutRedirect_Type.tp_new(&GtpyStdOutRedirect_Type,NULL, NULL);
     ((GtpyStdOutRedirect*)m_out.object())->callback = stdOutRedirectCB;
 
-    m_err = GtpyStdOutRedirectType.tp_new(&GtpyStdOutRedirectType,NULL, NULL);
+    m_err = GtpyStdOutRedirect_Type.tp_new(&GtpyStdOutRedirect_Type,NULL, NULL);
     ((GtpyStdOutRedirect*)m_err.object())->callback = stdErrRedirectCB;
 
     // replace the built in file objects with the new objects
     PyModule_AddObject(sys, "stdout", m_out);
     PyModule_AddObject(sys, "stderr", m_err);
+}
+
+void
+GtpyContextManager::initWrapperModule()
+{
+    GTPY_GIL_SCOPE
+
+    PythonQtObjectPtr sys;
+    sys.setNewRef(PyImport_ImportModule("sys"));
+
+    QByteArray name = "GtObjectWrapperModuleC";
+    PyObject* myMod;
+#ifdef PY3K
+    customPyModule.m_name = name.constData();
+    myMod = PyModule_Create(&customPyModule);
+#else
+    myMod = Py_InitModule(name.constData(), NULL);
+#endif
+    // add GtObjectWrapperModuleC to the list of builtin module names
+    PyObject* old_module_names =
+            PyObject_GetAttrString(sys.object(),"builtin_module_names");
+
+    if (old_module_names && PyTuple_Check(old_module_names))
+    {
+        Py_ssize_t old_size = PyTuple_Size(old_module_names);
+        PyObject* module_names = PyTuple_New(old_size + 1);
+
+        for (Py_ssize_t i = 0; i < old_size; i++)
+        {
+            PyTuple_SetItem(module_names, i,
+                            PyTuple_GetItem(old_module_names, i));
+        }
+
+        PyTuple_SetItem(module_names, old_size,
+                        PyString_FromString(name.constData()));
+        PyModule_AddObject(sys.object(), "builtin_module_names", module_names);
+    }
+
+//    Py_XDECREF(old_module_names);
+
+#ifdef PY3K
+    PyDict_SetItem(PyObject_GetAttrString(sys.object(), "modules"),
+                   PyUnicode_FromString(name.constData()), myMod);
+#endif
+
+    if (PyModule_AddObject(myMod, "GtpyExtendedWrapper",
+                           (PyObject*) &GtpyExtendedWrapper_Type) < 0)
+    {
+        Py_DECREF(&GtpyExtendedWrapper_Type);
+        Py_DECREF(myMod);
+    }
 }
 
 void
@@ -1223,13 +1362,12 @@ GtpyContextManager::importDefaultModules(int contextId)
         return;
     }
 
-    initGtObjectWrapper();
-
     QString pyCode =
         "from PythonQt import " + CLASS_WRAPPER_MODULE + "\n" +
         "from PythonQt import QtCore\n"
         "import " + DEFAULT_IMPORT_MODULE + "\n"
-        "from " + OBJECT_WRAPPER_MODULE + " import " + GTOBJECT_WRAPPER;
+        "from " + GtpyExtended::GTOBJECT_WRAPPER_MODULE + " import " +
+            GtpyExtended::GTOBJECT_WRAPPER + "\n";
 
     GTPY_GIL_SCOPE
 
@@ -1288,7 +1426,7 @@ GtpyContextManager::importCalcModule(int contextId)
         "if '" + CALC_MODULE + "' in sys.modules and '" + DEFAULT_IMPORT_MODULE +
             "' in sys.modules:\n"
         "    if sys.modules['" + CALC_MODULE + "'] is not None and " +
-            "sys.modules['" + DEFAULT_IMPORT_MODULE + "'] is not None" + ":\n"
+            "sys.modules['" + DEFAULT_IMPORT_MODULE + "'] is not None:\n"
         "        import " + DEFAULT_IMPORT_MODULE + "\n" +
         "        " + CALC_MODULE + " = " + DEFAULT_IMPORT_MODULE + "." +
             DEFAULT_IMPORT + "('" + CALC_MODULE + "')\n"
@@ -1395,19 +1533,24 @@ GtpyContextManager::setMetaDataToThreadDict(int contextId, bool output,
 
     QString contextName = contextNameById(contextId);
 
-    PyObject* val = PyString_FromString(contextName.toStdString().c_str());
+    PyObject* key = PyString_FromString(contextName.toStdString().c_str());
 
-    PyDict_SetItemString(threadDict, GtpyStdOut::CONTEXT_KEY, val);
+    PyDict_SetItemString(threadDict, GtpyStdOut::CONTEXT_KEY, key);
 
-    val = PyBool_FromLong(output ? 1 : 0);
+    Py_DECREF(key);
 
-    PyDict_SetItemString(threadDict, GtpyStdOut::OUTPUT_KEY, val);
+    PyObject* outputVal = PyLong_FromLong(output ? 1 : 0);
 
-    val = PyBool_FromLong(error ? 1 : 0);
+    PyDict_SetItemString(threadDict, GtpyStdOut::OUTPUT_KEY, outputVal);
 
-    PyDict_SetItemString(threadDict, GtpyStdOut::ERROR_KEY, val);
+    Py_DECREF(outputVal);
 
-    Py_DECREF(val);
+    PyObject* errorVal = PyLong_FromLong(error ? 1 : 0);
+
+    PyDict_SetItemString(threadDict, GtpyStdOut::ERROR_KEY, errorVal);
+
+    Py_DECREF(errorVal);
+
     Py_DECREF(threadDict);
 }
 
@@ -1653,8 +1796,8 @@ GtpyContextManager::introspectObject(PyObject* object) const
         {
             foreach (QVariant var, propertyListVar)
             {
-                GtAbstractProperty* prop = qvariant_cast <
-                                           GtAbstractProperty*> (var);
+                GtAbstractProperty* prop = qvariant_cast<GtAbstractProperty*>(
+                                               var);
 
                 if (prop != Q_NULLPTR && !prop->objectName().isEmpty())
                 {
@@ -1857,7 +2000,7 @@ GtpyContextManager::builtInCompletions(int contextId) const
 
         QChar c = name.at(0).toUpper();
 
-        if(name.startsWith(c, Qt::CaseSensitive))
+        if (name.startsWith(c, Qt::CaseSensitive))
         {
             continue;
         }
