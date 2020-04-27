@@ -38,6 +38,48 @@ pointerAdress(QObject* obj)
     return retVal;
 }
 
+static ternaryfunc pythonqt_slot_call = Q_NULLPTR;
+
+PyObject*
+PythonQtSlotFunction_MyCall(PyObject* func, PyObject* args, PyObject* kw)
+{
+    if (PyTuple_Check(args))
+    {
+        int size = PyTuple_Size(args);
+
+        for (int i = 0; i < size; i++)
+        {
+            PyObject* arg = PyTuple_GetItem(args, i);
+
+            if (arg)
+            {
+                Py_INCREF(arg);
+
+                if (PyObject_TypeCheck(arg, &GtpyExtendedWrapper_Type))
+                {
+                    GtpyExtendedWrapper* wrapper = (GtpyExtendedWrapper*)arg;
+
+                    PyObject* wrappedObj = (PyObject*)wrapper->_obj;
+
+                    Py_INCREF(wrappedObj);
+
+                    PyTuple_SetItem(args, i, wrappedObj);
+                }
+
+                Py_DECREF(arg);
+            }
+        }
+    }
+    return pythonqt_slot_call(func, args, kw);
+}
+
+void GtpyCustomization::customizeSlotCalling()
+{
+    pythonqt_slot_call = PythonQtSlotFunction_Type.tp_call;
+    PythonQtSlotFunction_Type.tp_call = PythonQtSlotFunction_MyCall;
+}
+
+
 static void
 GtpyExtendedWrapper_dealloc(GtpyExtendedWrapper* self)
 {

@@ -157,6 +157,8 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     Py_INCREF(&GtpyMyImport_Type);
 
     m_pyThreadState = PyEval_SaveThread();
+
+    GtpyCustomization::customizeSlotCalling();
 }
 
 GtpyContextManager*

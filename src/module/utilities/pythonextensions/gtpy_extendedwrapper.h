@@ -29,6 +29,12 @@ typedef struct {
 
 } GtpyExtendedWrapper;
 
+namespace GtpyCustomization
+{
+    void customizeSlotCalling();
+}
+
+
 #ifdef PY3K
 static PyModuleDef customPyModule = {
   PyModuleDef_HEAD_INIT,
