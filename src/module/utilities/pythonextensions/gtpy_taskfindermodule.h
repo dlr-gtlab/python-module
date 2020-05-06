@@ -25,6 +25,7 @@
 #include "gtpy_processdatadistributor.h"
 #include "gtpy_decorator.h"
 #include "gtpy_gilscope.h"
+#include "gtpy_extendedwrapper.h"
 
 
 static PyObject*
@@ -190,7 +191,7 @@ GtpyTaskFinder_StaticMethods[] = {
 static PyModuleDef
 GtpyTaskFinder_Module = {
   PyModuleDef_HEAD_INIT,
-  GtpyConsts::GTPYTASKFINDER_MODULE.toStdString().data(),
+  GtpyExtended::GTPYTASKFINDER_MODULE.toStdString().data(),
   NULL,
   -1,
   GtpyTaskFinder_StaticMethods,
