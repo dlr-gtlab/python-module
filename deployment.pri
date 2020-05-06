@@ -14,6 +14,9 @@
 HEADERS_DIR_PATH = $${PWD}/include
 mkpath($${HEADERS_DIR_PATH})
 
+## if true, *.lib is copied to the environment path
+COPY_LIB_FILE = false
+
 ## FUNCTION DEFINITION FOR COPY FUNCTION
 defineTest(copyHeaders) {
 
@@ -113,10 +116,13 @@ defineTest(copyToEnvironmentPath) {
 
             QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$dllPath) $$shell_quote($$environmentPath) $$escape_expand(\\n\\t)
 
-            libPath = $${DESTDIR}/$${TARGET}.lib
-            libPath ~= s,/,\\,g
+            equals(COPY_LIB_FILE, true) {
 
-            QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$libPath) $$shell_quote($$environmentPath) $$escape_expand(\\n\\t)
+                libPath = $${DESTDIR}/$${TARGET}.lib
+                libPath ~= s,/,\\,g
+
+                QMAKE_POST_LINK += $$QMAKE_COPY $$shell_quote($$libPath) $$shell_quote($$environmentPath) $$escape_expand(\\n\\t)
+            }
         }
 
         unix:  QMAKE_POST_LINK += find $${DESTDIR} -name $$shell_quote(*$${TARGET}.so*) -exec cp $$shell_quote({}) $$shell_quote($$environmentPath) \; $$escape_expand(\\n\\t)
