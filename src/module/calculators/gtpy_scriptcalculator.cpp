@@ -7,6 +7,9 @@
  *  Tel.: +49 2203 601 2692
  */
 
+#include <QThread>
+
+#include "gt_abstractrunnable.h"
 #include "gt_logging.h"
 #include "gt_application.h"
 #include "gt_package.h"
@@ -58,6 +61,9 @@ GtpyScriptCalculator::~GtpyScriptCalculator()
 bool
 GtpyScriptCalculator::run()
 {
+    GtAbstractRunnable* runnable = this->findParent<GtAbstractRunnable*>();
+    runnable->setParent(QThread::currentThread());
+
     int contextId = GtpyContextManager::instance()->createNewContext(
                 GtpyContextManager::CalculatorRunContext, true);
 
@@ -93,6 +99,8 @@ GtpyScriptCalculator::run()
     }
 
     GtpyContextManager::instance()->deleteContext(contextId, true);
+
+    runnable->setParent(Q_NULLPTR);
 
     gtInfo() << "...done!";
 

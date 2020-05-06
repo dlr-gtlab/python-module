@@ -367,6 +367,8 @@ private:
 
     void initWrapperModule();
 
+    void initTaskFinderModule();
+
     /**
      * @brief Imports the default modules to the Python context identified by
      * contextId.

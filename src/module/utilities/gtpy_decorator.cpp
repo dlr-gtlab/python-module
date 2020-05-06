@@ -664,7 +664,7 @@ GtpyDecorator::hasWarnings(GtProcessComponent* comp)
 PythonQtPassOwnershipToPython<GtpyProcessDataDistributor*>
 GtpyDecorator::new_GtpyProcessDataDistributor(GtpyTask* pythonTask)
 {
-    return new GtpyProcessDataDistributor(pythonTask);
+    return new GtpyProcessDataDistributor((GtTask*) pythonTask);
 }
 
 void

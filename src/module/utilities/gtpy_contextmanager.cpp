@@ -42,6 +42,7 @@
 #include "gtpy_createhelperfunction.h"
 #include "gtpy_propertysetter.h"
 #include "gtpy_importfunction.h"
+#include "gtpy_taskfindermodule.h"
 
 #include "gtpy_contextmanager.h"
 
@@ -587,6 +588,7 @@ GtpyContextManager::initContexts()
     initLoggingModule();
     initWrapperModule();
     initImportBehaviour();
+    initTaskFinderModule();
 
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
@@ -1350,6 +1352,49 @@ GtpyContextManager::initWrapperModule()
         Py_DECREF(&GtpyExtendedWrapper_Type);
         Py_DECREF(myMod);
     }
+}
+
+void
+GtpyContextManager::initTaskFinderModule()
+{
+    GTPY_GIL_SCOPE
+
+    PythonQtObjectPtr sys;
+    sys.setNewRef(PyImport_ImportModule("sys"));
+
+    QByteArray name = GtpyExtended::GTPYTASKFINDER_MODULE.toUtf8();
+
+    PyObject* myMod;
+#ifdef PY3K
+    customPyModule.m_name = name.constData();
+    myMod = PyModule_Create(&GtpyTaskFinder_Module);
+#else
+    myMod = Py_InitModule(name.constData(), GtpyTaskFinder_StaticMethods);
+#endif
+    // add GtTaskFinder to the list of builtin module names
+    PyObject* old_module_names =
+            PyObject_GetAttrString(sys.object(),"builtin_module_names");
+
+    if (old_module_names && PyTuple_Check(old_module_names))
+    {
+        Py_ssize_t old_size = PyTuple_Size(old_module_names);
+        PyObject* module_names = PyTuple_New(old_size + 1);
+
+        for (Py_ssize_t i = 0; i < old_size; i++)
+        {
+            PyTuple_SetItem(module_names, i,
+                            PyTuple_GetItem(old_module_names, i));
+        }
+
+        PyTuple_SetItem(module_names, old_size,
+                        PyString_FromString(name.constData()));
+        PyModule_AddObject(sys.object(), "builtin_module_names", module_names);
+    }
+
+#ifdef PY3K
+    PyDict_SetItem(PyObject_GetAttrString(sys.object(), "modules"),
+                   PyUnicode_FromString(name.constData()), myMod);
+#endif
 }
 
 void

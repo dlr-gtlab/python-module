@@ -12,18 +12,17 @@
 
 #include <QString>
 
-class GtpyTask;
 class GtTask;
 
 class GtpyProcessDataDistributor
 {
 public:
-    GtpyProcessDataDistributor(GtpyTask* pythonTask);
+    GtpyProcessDataDistributor(GtTask* pythonTask);
 
     GtTask* taskElement(const QString& name);
 
 private:
-    GtpyTask* m_pythonTask;
+    GtTask* m_pythonTask;
 };
 
 #endif // GTPY_PROCESSDATADISTRIBUTOR_H
