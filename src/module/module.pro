@@ -63,6 +63,7 @@ HEADERS += \
     post/gtpy_pythonplotitem.h \
     post/gtpy_pythonplotwidget.h \
     post/gtpy_pythonsvgwidget.h \
+    utilities/gtpy_globals.h \
     utilities/gtpy_importfunction.h \
     utilities/pythonextensions/gtpy_calculatorsmodule.h \
     utilities/pythonextensions/gtpy_taskfindermodule.h \
@@ -100,6 +101,7 @@ SOURCES += \
     post/gtpy_pythonplotitem.cpp \
     post/gtpy_pythonplotwidget.cpp \
     post/gtpy_pythonsvgwidget.cpp \
+    utilities/gtpy_globals.cpp \
     utilities/gtpy_importfunction.cpp \
     utilities/pythonextensions/gtpy_calculatorsmodule.cpp \
     utilities/pythonextensions/gtpy_taskfindermodule.cpp \

@@ -27,7 +27,7 @@ GtpyTaskFinder_StaticMethods[] = {
 static PyModuleDef
 GtpyTaskFinder_Module = {
   PyModuleDef_HEAD_INIT,
-  GtpyExtended::GTPYTASKFINDER_MODULE.toStdString().data(),
+  GtpyGlobals::GTPYTASKFINDER_MODULE.toStdString().data(),
   NULL,
   -1,
   GtpyTaskFinder_StaticMethods,
