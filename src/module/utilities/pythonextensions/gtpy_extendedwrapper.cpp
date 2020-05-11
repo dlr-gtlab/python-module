@@ -234,7 +234,8 @@ object___dir__(PyObject* self/*, PyObject* Py_UNUSED(ignored)*/)
     return result;
 }
 
-static PyMethodDef GtpyExtendedWrapper_methods[] = {
+static PyMethodDef
+GtpyExtendedWrapper_methods[] = {
     {"__dir__", (PyCFunction)object___dir__, METH_NOARGS,
      "GtpyExtendedWrapper dir() implementation"},
 {Q_NULLPTR, Q_NULLPTR, 0, Q_NULLPTR}  /* Sentinel */
