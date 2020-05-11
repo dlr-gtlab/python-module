@@ -21,6 +21,7 @@ namespace GtpyExtended
 {
     const QString GTOBJECT_WRAPPER_MODULE = "GtObjectWrapperModuleC";
     const QString GTOBJECT_WRAPPER = "GtpyExtendedWrapper";
+    const QString GTPYTASKFINDER_MODULE = "GtpyTaskFinder";
 }
 
 typedef struct {

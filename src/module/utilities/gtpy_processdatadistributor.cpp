@@ -10,12 +10,12 @@
 #include "gt_application.h"
 #include "gt_processdata.h"
 #include "gt_project.h"
-#include "gtpy_task.h"
+#include "gt_task.h"
 #include "gtpy_scriptcalculator.h"
 
 #include "gtpy_processdatadistributor.h"
 
-GtpyProcessDataDistributor::GtpyProcessDataDistributor(GtpyTask* pythonTask)
+GtpyProcessDataDistributor::GtpyProcessDataDistributor(GtTask *pythonTask)
 {
     m_pythonTask = pythonTask;
 }
