@@ -15,14 +15,9 @@
 #include "PythonQtPythonInclude.h"
 #include "PythonQtInstanceWrapper.h"
 
-extern PyTypeObject GtpyExtendedWrapper_Type;
+#include "gtpy_globals.h"
 
-namespace GtpyExtended
-{
-    const QString GTOBJECT_WRAPPER_MODULE = "GtObjectWrapperModuleC";
-    const QString GTOBJECT_WRAPPER = "GtpyExtendedWrapper";
-    const QString GTPYTASKFINDER_MODULE = "GtpyTaskFinder";
-}
+extern PyTypeObject GtpyExtendedWrapper_Type;
 
 typedef struct {
   PyObject_HEAD
@@ -39,7 +34,7 @@ namespace GtpyCustomization
 #ifdef PY3K
 static PyModuleDef customPyModule = {
   PyModuleDef_HEAD_INIT,
-  GtpyExtended::GTOBJECT_WRAPPER_MODULE.toStdString().data(),
+  GtpyGlobals::GTOBJECT_WRAPPER_MODULE.toStdString().data(),
   NULL,
   -1,
   NULL,

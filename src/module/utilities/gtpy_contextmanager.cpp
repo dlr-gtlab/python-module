@@ -33,6 +33,7 @@
 #include "gt_datazone0d.h"
 #include "gt_calculatorhelperfactory.h"
 
+#include "gtpy_globals.h"
 #include "gtpy_calculatorfactory.h"
 #include "gtpy_decorator.h"
 #include "gtpy_interruptrunnable.h"
@@ -1364,7 +1365,7 @@ GtpyContextManager::initTaskFinderModule()
     PythonQtObjectPtr sys;
     sys.setNewRef(PyImport_ImportModule("sys"));
 
-    QByteArray name = GtpyExtended::GTPYTASKFINDER_MODULE.toUtf8();
+    QByteArray name = GtpyGlobals::GTPYTASKFINDER_MODULE.toUtf8();
 
     PyObject* myMod;
 #ifdef PY3K
@@ -1413,8 +1414,8 @@ GtpyContextManager::importDefaultModules(int contextId)
         "from PythonQt import " + CLASS_WRAPPER_MODULE + "\n" +
         "from PythonQt import QtCore\n"
         "import " + DEFAULT_IMPORT_MODULE + "\n"
-        "from " + GtpyExtended::GTOBJECT_WRAPPER_MODULE + " import " +
-            GtpyExtended::GTOBJECT_WRAPPER + "\n";
+        "from " + GtpyGlobals::GTOBJECT_WRAPPER_MODULE + " import " +
+            GtpyGlobals::GTOBJECT_WRAPPER + "\n";
 
     GTPY_GIL_SCOPE
 
