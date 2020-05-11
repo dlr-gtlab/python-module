@@ -46,7 +46,7 @@ INCLUDEPATH += .\
     tasks \
     post \
     utilities \
-    utilities\pythonextensions \
+    utilities/pythonextensions \
     wizards \
     wizards/script_calculator \
     wizrads/python_task \
