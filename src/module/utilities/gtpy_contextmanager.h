@@ -86,6 +86,8 @@ public:
 
     ~GtpyContextManager();
 
+    void initExtensions();
+
     /**
      * @brief Evaluates the given script into the given python context.
      * @param contextId Python context identifier.
@@ -260,18 +262,8 @@ private:
     static const QString VARIANT_DATATYPE;
     static const QString FUNCTION_WARNING;
     static const QString TASK_VAR;
-    static const QString CALC_FAC_VAR;
-    static const QString HELPER_FAC_VAR;
-    static const QString GTOBJECT_WRAPPER;
-    static const QString HELPER_WRAPPER;
-    static const QString DEFAULT_IMPORT;
     static const QString CLASS_WRAPPER_MODULE;
-    static const QString LOGGING_MODULE;
     static const QString CALC_MODULE;
-    static const QString DEFAULT_IMPORT_MODULE;
-    static const QString CUSTOM_IMPORT_MODULE;
-    static const QString OBJECT_WRAPPER_MODULE;
-
 
     /**
      * @brief Configures the python context indicated by contextId with the
@@ -301,12 +293,10 @@ private:
      */
     PythonQtObjectPtr context(int contextId) const;
 
-//    void initGtObjectWrapper();
-
     /**
      * @brief Initializes the calculator module.
      */
-    void initCalculatorModule();
+    void initCalculatorsModule();
 
     /**
      * @brief Initializes the logging module.
@@ -367,8 +357,6 @@ private:
 
     void initWrapperModule();
 
-    void initTaskFinderModule();
-
     /**
      * @brief Imports the default modules to the Python context identified by
      * contextId.
@@ -392,19 +380,6 @@ private:
      * @param contextId Python context identifier.
      */
     void importCalcModule(int contextId);
-
-//    /**
-//     * @brief Registers calculator module in the modules dict of the Python
-//     *  module sys.
-//     * @param contextId Python context identifier.
-//     */
-//    void registerCalcModuleInSys(int contextId);
-
-//    /**
-//     * @brief Removes the calculator module out of the modules dict of the
-//     * Python module sys.
-//     */
-//    void removeCalcModuleFromSys();
 
     /**
      * @brief Searches the line number out of an error message.

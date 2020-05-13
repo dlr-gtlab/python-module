@@ -144,8 +144,7 @@ GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args,
                                                        objectName, gtObj);
                 Py_DECREF(self);
 
-                GtpyDecorator decorator;
-                PyObject* test = decorator.wrapGtObject(helper);
+                PyObject* test = GtpyDecorator::wrapGtObject(helper);
 
                 return test;
             }

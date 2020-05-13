@@ -20,7 +20,7 @@
 extern PyTypeObject GtpyMyImport_Type;
 
 /**
-  * @brief The stdout redirection class.
+  * @brief The import class.
   */
 typedef struct {
     PyObject_HEAD

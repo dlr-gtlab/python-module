@@ -16,7 +16,10 @@ namespace GtpyGlobals
 {
     ///Python Modules
     extern const QString GTOBJECT_WRAPPER_MODULE;
+    extern const QString MODULE_GtCalculators;
+    extern const QString MODULE_GtLogging;
+
+    ///Python Classes
     extern const QString GTOBJECT_WRAPPER;
-    extern const QString GTPYTASKFINDER_MODULE;
 }
 #endif // GTPYGLOBALS_H

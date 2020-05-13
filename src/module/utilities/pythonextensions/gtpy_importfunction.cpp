@@ -89,16 +89,12 @@ GtpyMyImport_Call(PyObject* func, PyObject* args,
     }
     else
     {
-        deleteGtCalculatorsModule(args);
-
         PyObject* mod = PyObject_Call(f->defaultImp, args, kwds);
 
         if (mod == Q_NULLPTR)
         {
             return Q_NULLPTR;
         }
-
-        deleteGtCalculatorsModule(args);
 
         return mod;
     }

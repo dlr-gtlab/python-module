@@ -43,7 +43,7 @@
 #include "gtpy_createhelperfunction.h"
 #include "gtpy_propertysetter.h"
 #include "gtpy_importfunction.h"
-#include "gtpy_taskfindermodule.h"
+#include "gtpy_calculatorsmodule.h"
 
 #include "gtpy_contextmanager.h"
 
@@ -57,30 +57,9 @@ const QString GtpyContextManager::FUNCTION_WARNING =
 
 const QString GtpyContextManager::TASK_VAR =
     QStringLiteral("__task");
-const QString GtpyContextManager::CALC_FAC_VAR =
-    QStringLiteral("CalculatorFactory");
-const QString GtpyContextManager::HELPER_FAC_VAR =
-    QStringLiteral("HelperFactory");
-const QString GtpyContextManager::GTOBJECT_WRAPPER =
-    QStringLiteral("CurrentGtObjectWrapper");
-const QString GtpyContextManager::HELPER_WRAPPER =
-    QStringLiteral("HelperWrapper");
-
-const QString GtpyContextManager::DEFAULT_IMPORT =
-    QStringLiteral("default_imp");
 
 const QString GtpyContextManager::CLASS_WRAPPER_MODULE =
     QStringLiteral("GtClasses");
-const QString GtpyContextManager::LOGGING_MODULE =
-    QStringLiteral("GtLogging");
-const QString GtpyContextManager::CALC_MODULE =
-    QStringLiteral("GtCalculators");
-const QString GtpyContextManager::DEFAULT_IMPORT_MODULE =
-    QStringLiteral("__GtDefaultImport");
-const QString GtpyContextManager::CUSTOM_IMPORT_MODULE =
-    QStringLiteral("__GtCustomImport");
-const QString GtpyContextManager::OBJECT_WRAPPER_MODULE =
-    QStringLiteral("GtObjectWrapperModule");
 
 GtpyContextManager::GtpyContextManager(QObject* parent) :
     QObject(parent), m_decorator(Q_NULLPTR),
@@ -128,6 +107,37 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     connect(PythonQt::self(), SIGNAL(systemExitExceptionRaised(int)), this,
             SLOT(onSystemExitExceptionRaised(int)));
 
+    initExtensions();
+
+    m_pyThreadState = PyEval_SaveThread();
+
+    GtpyCustomization::customizeSlotCalling();
+}
+
+GtpyContextManager*
+GtpyContextManager::instance()
+{
+    static GtpyContextManager* retval = Q_NULLPTR;
+
+    if (retval == Q_NULLPTR)
+    {
+        retval = new GtpyContextManager(gtApp);
+    }
+
+    return retval;
+}
+
+GtpyContextManager::~GtpyContextManager()
+{
+    if (m_pyThreadState != Q_NULLPTR)
+    {
+        PyEval_RestoreThread(m_pyThreadState);
+    }
+}
+
+void
+GtpyContextManager::initExtensions()
+{
     if (PyType_Ready(&GtpyStdOutRedirect_Type) < 0)
     {
         gtError() << "could not initialize GtpyStdOutRedirect_Type";
@@ -158,30 +168,11 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     }
     Py_INCREF(&GtpyMyImport_Type);
 
-    m_pyThreadState = PyEval_SaveThread();
-
-    GtpyCustomization::customizeSlotCalling();
-}
-
-GtpyContextManager*
-GtpyContextManager::instance()
-{
-    static GtpyContextManager* retval = Q_NULLPTR;
-
-    if (retval == Q_NULLPTR)
+    if (PyType_Ready(&GtpyCalcculatorsModule::GtpyCreateCalculator_Type) < 0)
     {
-        retval = new GtpyContextManager(gtApp);
+        gtError() << "could not initialize GtpyCreateCalculator_Type";
     }
-
-    return retval;
-}
-
-GtpyContextManager::~GtpyContextManager()
-{
-    if (m_pyThreadState != Q_NULLPTR)
-    {
-        PyEval_RestoreThread(m_pyThreadState);
-    }
+    Py_INCREF(&GtpyCalcculatorsModule::GtpyCreateCalculator_Type);
 }
 
 bool
@@ -222,18 +213,6 @@ GtpyContextManager::evalScript(int contextId,
         m_loggingModule.evalScript(QStringLiteral(
                                 "PyLogger._PyLogger__outputToConsole = False"));
     }
-
-//    if (m_calcAccessibleContexts.contains(contextId))
-//    {
-//        QString pyCode =
-//                "if '" + CALC_MODULE + "' in locals():\n" +
-//                "    import sys\n" +
-//                "    sys.modules['" + CALC_MODULE + "'] = " + CALC_MODULE +
-//                "\n" +
-//                "    del sys\n";
-
-//        currentContext.evalScript(pyCode);
-//    }
 
     bool hadError = false;
 
@@ -507,45 +486,16 @@ GtpyContextManager::addTaskValue(int contextId, GtTask* task)
     {
         addObject(contextId, TASK_VAR, task, false);
 
-        QString pyCode = "if '" + CALC_MODULE + "' in globals():\n" +
-                         "    " + CALC_MODULE + "." + TASK_VAR + " = "
-                         + TASK_VAR;
-
-        evalScript(contextId, pyCode , false);
     }
     else
     {
-        QString pyCode = TASK_VAR + " = None"
-                         "if '" + CALC_MODULE + "' in globals():\n" +
-                         "    " + CALC_MODULE + "." + TASK_VAR + " = None";
+        QString pyCode = TASK_VAR + " = None";
 
         evalScript(contextId, pyCode, false);
     }
 
     return true;
 }
-
-//bool
-//GtpyContextManager::addDataModelObject(int contextId, const QString& name,
-//                                       GtObject* package)
-//{
-//    GTPY_GIL_SCOPE
-
-//    if (package != Q_NULLPTR && !name.isEmpty())
-//    {
-//        addObject(contextId, name, package);
-
-//        QString pyCode = "if '" + GTOBJECT_WRAPPER + "' in globals():\n" +
-//                         "    globals()['"+ name + "'] = " + GTOBJECT_WRAPPER +
-//                         "(" + name + ")\n";
-
-//        evalScript(contextId, pyCode , false);
-
-//        return true;
-//    }
-
-//    return false;
-//}
 
 void
 GtpyContextManager::deleteCalcsFromTask(int contextId)
@@ -555,8 +505,8 @@ GtpyContextManager::deleteCalcsFromTask(int contextId)
         return;
     }
 
-    evalScript(contextId, CALC_MODULE + QStringLiteral(".") + TASK_VAR
-               + QStringLiteral(".deleteAllCalculators()"), false);
+    evalScript(contextId, TASK_VAR + QStringLiteral(".deleteAllCalculators()"),
+               false);
 }
 
 QString
@@ -590,8 +540,7 @@ GtpyContextManager::initContexts()
 {
     initLoggingModule();
     initWrapperModule();
-    initImportBehaviour();
-    initTaskFinderModule();
+    initCalculatorsModule();
 
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
@@ -611,6 +560,7 @@ GtpyContextManager::initContexts()
     }
 
     initStdOut();
+    initImportBehaviour();
 
     m_contextsInitialized = true;
 }
@@ -816,173 +766,51 @@ GtpyContextManager::context(int contextId) const
     return con.module;
 }
 
-//void
-//GtpyContextManager::initGtObjectWrapper()
-//{
-//    static QString objWrapper;
-
-//    if (objWrapper.isEmpty())
-//    {
-//        objWrapper =
-//            "import re\n"
-//            "class " + GTOBJECT_WRAPPER + ": \n"
-//            "    def __init__(self, obj):\n"
-//            "        self._obj = obj\n"
-
-//            "        for i in range(len(self._obj.findGtProperties())):\n"
-//            "            prop = self._obj.findGtProperties()[i]\n"
-//            "            if prop.ident():\n"
-
-//            "                funcName = re.sub('[^A-Za-z0-9]+', '', "
-//                            "prop.ident())\n"
-//            "                tempLetter = funcName[0]\n"
-//            "                funcName = funcName.replace(tempLetter, "
-//                            "tempLetter.lower(), 1)\n"
-
-//            "                def dynGetter(self = self, propName = "
-//                            "prop.ident()):\n"
-//            "                    return self._obj.propertyValue(propName)\n"
-//            "                setattr(self, funcName, dynGetter)\n"
-
-//            "                tempLetter = funcName[0]\n"
-//            "                funcName = funcName.replace(tempLetter, "
-//                            "tempLetter.upper(), 1)\n"
-//            "                funcName = 'set' + funcName\n"
-
-//            "                def dynSetter(val, self = self, propName = "
-//                            "prop.ident()):\n"
-//            "                    self._obj.setPropertyValue(propName, val)\n"
-//            "                setattr(self, funcName, dynSetter)\n"
-
-//            "        helpers = " + HELPER_FAC_VAR + ".connectedHelper("
-//                                        "self._obj.__class__.__name__)\n" +
-//            "        for i in range(len(helpers)):\n" +
-//            "            funcName = 'create' + helpers[i]\n" +
-
-//            "            def dynCreateHelper(name, self = self, helperName = "
-//                                                            "helpers[i]):\n" +
-//            "                helper = " + HELPER_FAC_VAR +
-//                        ".newCalculatorHelper(helperName, name, self._obj)\n" +
-//            "                return " + GTOBJECT_WRAPPER + "(helper)\n" +
-//            "            setattr(self, funcName, dynCreateHelper)\n" +
-
-//            "        def dynFindGtChild(name, self = self):\n"
-//            "            if hasattr(self._obj, 'findGtChild'):\n"
-//            "                child = self._obj.findGtChild(name)\n"
-//            "                return " + GTOBJECT_WRAPPER + "(child)\n"
-//            "        setattr(self, 'findGtChild', dynFindGtChild)\n" +
-
-//            "        def dynFindGtChildren(name = '', self = self):\n"
-//            "            if hasattr(self._obj, 'findGtChildren'):\n"
-//            "                children = self._obj.findGtChildren(name)\n"
-//            "            retList = []\n"
-//            "            for i in range(len(children)):\n" +
-//            "                retList.append(" + GTOBJECT_WRAPPER +
-//                             "(children[i]))\n"
-//            "            return retList\n"
-//            "        setattr(self, 'findGtChildren', dynFindGtChildren)\n" +
-
-//            "    def __getattr__(self, name): \n" +
-//            "        return getattr(self.__dict__['_obj'], name)\n" +
-
-//            "    def __setattr__(self, name, value): \n" +
-//            "        if name is ('_obj') or  hasattr("
-//                                "self.__dict__['_obj'], name) is False or "
-//                                "name.startswith('findGtChild'):\n" +
-//            "            self.__dict__[name] = value\n" +
-//            "        else:\n" +
-//            "            setattr(self.__dict__['_obj'], name, value)\n" +
-//            "    def __dir__(self): \n" +
-//            "        return sorted(list(self.__dict__.keys()) + "
-//                                                       "dir(self._obj))\n";
-//    }
-
-//    GTPY_GIL_SCOPE
-
-//    PythonQtObjectPtr con =
-//            PythonQt::self()->importModule(OBJECT_WRAPPER_MODULE);
-
-//    if (!con)
-//    {
-//        con = PythonQt::self()->createModuleFromScript(OBJECT_WRAPPER_MODULE);
-//        con.addObject(HELPER_FAC_VAR, gtCalculatorHelperFactory);
-//        con.evalScript(objWrapper);
-//    }
-//}
-
 void
-GtpyContextManager::initCalculatorModule()
+GtpyContextManager::initCalculatorsModule()
 {
-    static QString calcConstructors;
-    static QString processElementFunction;
-
-    if (calcConstructors.isEmpty())
-    {
-//        calcConstructors +=
-//                "from " + OBJECT_WRAPPER_MODULE + " import " +
-//                GTOBJECT_WRAPPER + "\n";
-        calcConstructors +=
-                "from GtObjectWrapperModuleC import GtpyExtendedWrapper\n";
-
-        foreach (GtCalculatorData calcData,
-                 gtCalculatorFactory->calculatorDataList())
-        {
-            if (!gtApp->devMode() &&
-                    calcData->status != GtCalculatorDataImpl::RELEASE)
-            {
-                continue;
-            }
-
-            QString className = QString::fromUtf8(
-                                    calcData->metaData().className());
-
-            calcConstructors +=
-                "def " + className + "(name = '" + calcData->id + "'):\n" +
-                "    tempCalc = " + CALC_FAC_VAR + ".createCalculator(\"" +
-                className + "\", name, " + TASK_VAR + ")\n" +
-                "    return GtpyExtendedWrapper(tempCalc)\n";
-
-        }
-
-    }
-
-    if (processElementFunction.isEmpty())
-    {
-        processElementFunction =
-                "from PythonQt." + CLASS_WRAPPER_MODULE +
-                " import GtpyProcessDataDistributor\n" +
-                "from GtObjectWrapperModuleC import GtpyExtendedWrapper\n" +
-                "def findGtTask(name):\n" +
-                "    task = GtpyProcessDataDistributor(__task).taskElement(name)\n" +
-                "    if task is not None:\n" +
-                "        return task\n";
-    }
-
     GTPY_GIL_SCOPE
 
-    PythonQtObjectPtr calcModule =
-            PythonQt::self()->createModuleFromScript(CALC_MODULE);
+    PythonQtObjectPtr sys;
+    sys.setNewRef(PyImport_ImportModule("sys"));
 
-    static GtpyCalculatorFactory* factory = Q_NULLPTR;
+    QByteArray name = GtpyGlobals::MODULE_GtCalculators.toUtf8();
 
-    if (factory == Q_NULLPTR)
+    PyObject* myMod;
+#ifdef PY3K
+    customPyModule.m_name = name.constData();
+    myMod = PyModule_Create(&GtpyCalcculatorsModule::GtpyCalculators_Module);
+#else
+    myMod = Py_InitModule(name.constData(),
+                  GtpyCalcculatorsModule::GtpyCalculatorsModule_StaticMethods);
+#endif
+    // add GtTaskFinder to the list of builtin module names
+    PyObject* old_module_names =
+            PyObject_GetAttrString(sys.object(),"builtin_module_names");
+
+    if (old_module_names && PyTuple_Check(old_module_names))
     {
-        factory = new GtpyCalculatorFactory();
+        Py_ssize_t old_size = PyTuple_Size(old_module_names);
+        PyObject* module_names = PyTuple_New(old_size + 1);
 
-        factory->moveToThread(this->thread());
+        for (Py_ssize_t i = 0; i < old_size; i++)
+        {
+            PyTuple_SetItem(module_names, i,
+                            PyTuple_GetItem(old_module_names, i));
+        }
 
-        factory->setParent(this);
+        PyTuple_SetItem(module_names, old_size,
+                        PyString_FromString(name.constData()));
+        PyModule_AddObject(sys.object(), "builtin_module_names", module_names);
     }
 
-    calcModule.evalScript(TASK_VAR + QStringLiteral(" = None"));
+#ifdef PY3K
+    PyDict_SetItem(PyObject_GetAttrString(sys.object(), "modules"),
+                   PyUnicode_FromString(name.constData()), myMod);
+#endif
 
-    calcModule.addObject(CALC_FAC_VAR, factory);
-
-    calcModule.evalScript(calcConstructors);
-
-    calcModule.evalScript(processElementFunction);
+    GtpyCalcculatorsModule::createCalcConstructors();
 }
-
 void
 GtpyContextManager::initLoggingModule()
 {
@@ -990,7 +818,8 @@ GtpyContextManager::initLoggingModule()
 
     QString loggingClass = GtPythonLogger::staticMetaObject.className();
 
-    m_loggingModule = PythonQt::self()->createModuleFromScript(LOGGING_MODULE);
+    m_loggingModule = PythonQt::self()->createModuleFromScript(
+                GtpyGlobals::MODULE_GtLogging);
 
     m_loggingModule.evalScript(QStringLiteral("from PythonQt.") +
                              CLASS_WRAPPER_MODULE + QStringLiteral(" import ") +
@@ -1060,108 +889,44 @@ GtpyContextManager::initLoggingModule()
 void
 GtpyContextManager::initImportBehaviour()
 {
-    QString finderLoader;
+    QList<PythonContext> conList = m_contextMap.values();
 
-    if (pythonVersion().startsWith("3."))
+    if (conList.isEmpty())
     {
-        finderLoader =
-           "from importlib.machinery import ModuleSpec\n"
-           "import sys\n"
-           "import inspect\n"
-
-           "class DataPackageFinder:\n"
-
-           "    @classmethod\n"
-           "    def find_spec(cls, fullname, path=None, target=None):\n"
-           "        name_parts = fullname.split('.')\n"
-           "        if name_parts[:1] != ['" + CALC_MODULE + "']:\n"
-           "            return None\n"
-           "        else:\n"
-           "            return ModuleSpec(fullname, DataPackageImporter())\n\n"
-
-
-           "class DataPackageImporter:\n"
-
-           "    @classmethod\n"
-           "    def create_module(cls, spec):\n"
-           "        current_frame = inspect.currentframe()\n"
-           "        while current_frame is not None:\n"
-
-           "            if '"+ CALC_MODULE + "' in current_frame.f_globals:\n"
-           "                calcMod = current_frame.f_globals['" +
-                           CALC_MODULE + "']\n"
-           "                return calcMod\n"
-           "            current_frame = current_frame.f_back\n"
-           "        raise ImportError(\"It is not allowed to import the module "
-                        "'" + CALC_MODULE + "' here!\")\n"
-           "        return None\n"
-
-           "    @classmethod\n"
-           "    def exec_module(cls, module):\n"
-           "        return module\n";
-    }
-    else
-    {
-        finderLoader =
-           "import sys\n"
-           "import inspect\n"
-
-           "class DataPackageFinder:\n"
-
-           "    @classmethod\n"
-           "    def find_module(cls, fullname, path=None):\n"
-           "        name_parts = fullname.split('.')\n"
-           "        if name_parts[:1] != ['" + CALC_MODULE + "']:\n"
-           "            return None\n"
-           "        else:\n"
-           "            return DataPackageImporter()\n"
-
-           "class DataPackageImporter:\n"
-
-           "    @classmethod\n"
-           "    def load_module(cls, fullname):\n"
-           "        current_frame = inspect.currentframe()\n"
-
-           "        while current_frame is not None:\n"
-           "            if '"+ CALC_MODULE + "' in current_frame.f_globals:\n"
-           "                calcMod = current_frame.f_globals['" +
-                           CALC_MODULE + "']\n"
-           "                return calcMod\n"
-           "            current_frame = current_frame.f_back\n"
-           "        raise ImportError(\"It is not allowed to import the module "
-                        "'" + CALC_MODULE + "' here!\")\n"
-           "        return None\n";
+        return;
     }
 
-    QString impBehaviour =
-            DEFAULT_IMPORT + " =  __builtins__['__import__']\n" +
-            "import sys\n"
-            "from " + CUSTOM_IMPORT_MODULE + " import DataPackageFinder\n"
-            "sys.meta_path.append(DataPackageFinder)\n"
-            "del DataPackageFinder\n";
+    PythonContext con = conList.first();
 
     GTPY_GIL_SCOPE
 
-    PythonQtObjectPtr customImp = PythonQt::self()->createModuleFromScript(
-                            CUSTOM_IMPORT_MODULE);
-
-    customImp.evalScript(finderLoader);
-
-    PythonQtObjectPtr defaultImp = PythonQt::self()->createModuleFromScript(
-                            DEFAULT_IMPORT_MODULE);
-
-    defaultImp.evalScript(impBehaviour);
-
-    PyObject* builtins = PyDict_GetItemString(PyModule_GetDict(defaultImp),
+    PyObject* builtins = PyDict_GetItemString(PyModule_GetDict(con.module),
                                               "__builtins__");
 
-    PyObject* defImp = PyDict_GetItemString(builtins, "__import__");
+    if (builtins)
+    {
+        Py_INCREF(builtins);
 
-    PythonQtObjectPtr imp = GtpyMyImport_Type.tp_new(&GtpyMyImport_Type, NULL,
-                                                     NULL);
+        if (PyDict_Check(builtins))
+        {
+            PyObject* defImp = PyDict_GetItemString(builtins, "__import__");
 
-    ((GtpyMyImport*)imp.object())->defaultImp = defImp;
-    PyDict_SetItemString(builtins, "__import__", imp);
+            if (defImp)
+            {
+                Py_INCREF(defImp);
+
+                PythonQtObjectPtr imp = GtpyMyImport_Type.tp_new(
+                            &GtpyMyImport_Type, NULL, NULL);
+
+                ((GtpyMyImport*)imp.object())->defaultImp = defImp;
+                PyDict_SetItemString(builtins, "__import__", imp);
+
+                Py_DECREF(defImp);
+            }
+        }
+
+        Py_DECREF(builtins);
+    }
 }
 
 void
@@ -1341,7 +1106,6 @@ GtpyContextManager::initWrapperModule()
                         PyString_FromString(name.constData()));
         PyModule_AddObject(sys.object(), "builtin_module_names", module_names);
     }
-
 //    Py_XDECREF(old_module_names);
 
 #ifdef PY3K
@@ -1358,49 +1122,6 @@ GtpyContextManager::initWrapperModule()
 }
 
 void
-GtpyContextManager::initTaskFinderModule()
-{
-    GTPY_GIL_SCOPE
-
-    PythonQtObjectPtr sys;
-    sys.setNewRef(PyImport_ImportModule("sys"));
-
-    QByteArray name = GtpyGlobals::GTPYTASKFINDER_MODULE.toUtf8();
-
-    PyObject* myMod;
-#ifdef PY3K
-    customPyModule.m_name = name.constData();
-    myMod = PyModule_Create(&GtpyTaskFinder_Module);
-#else
-    myMod = Py_InitModule(name.constData(), GtpyTaskFinder_StaticMethods);
-#endif
-    // add GtTaskFinder to the list of builtin module names
-    PyObject* old_module_names =
-            PyObject_GetAttrString(sys.object(),"builtin_module_names");
-
-    if (old_module_names && PyTuple_Check(old_module_names))
-    {
-        Py_ssize_t old_size = PyTuple_Size(old_module_names);
-        PyObject* module_names = PyTuple_New(old_size + 1);
-
-        for (Py_ssize_t i = 0; i < old_size; i++)
-        {
-            PyTuple_SetItem(module_names, i,
-                            PyTuple_GetItem(old_module_names, i));
-        }
-
-        PyTuple_SetItem(module_names, old_size,
-                        PyString_FromString(name.constData()));
-        PyModule_AddObject(sys.object(), "builtin_module_names", module_names);
-    }
-
-#ifdef PY3K
-    PyDict_SetItem(PyObject_GetAttrString(sys.object(), "modules"),
-                   PyUnicode_FromString(name.constData()), myMod);
-#endif
-}
-
-void
 GtpyContextManager::importDefaultModules(int contextId)
 {
     PythonQtObjectPtr con = context(contextId);
@@ -1413,7 +1134,6 @@ GtpyContextManager::importDefaultModules(int contextId)
     QString pyCode =
         "from PythonQt import " + CLASS_WRAPPER_MODULE + "\n" +
         "from PythonQt import QtCore\n"
-        "import " + DEFAULT_IMPORT_MODULE + "\n"
         "from " + GtpyGlobals::GTOBJECT_WRAPPER_MODULE + " import " +
             GtpyGlobals::GTOBJECT_WRAPPER + "\n";
 
@@ -1434,15 +1154,15 @@ GtpyContextManager::importLoggingFuncs(int contextId,
     }
 
     QString pyCode =
-        QStringLiteral("from ") + LOGGING_MODULE +
+        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
             QStringLiteral(" import gtDebug\n") +
-        QStringLiteral("from ") + LOGGING_MODULE +
+        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
             QStringLiteral(" import gtInfo\n") +
-        QStringLiteral("from ") + LOGGING_MODULE +
+        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
             QStringLiteral(" import gtError\n") +
-        QStringLiteral("from ") + LOGGING_MODULE +
+        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
             QStringLiteral(" import gtFatal\n") +
-        QStringLiteral("from ") + LOGGING_MODULE +
+        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
             QStringLiteral(" import gtWarning\n");
 
     GTPY_GIL_SCOPE
@@ -1467,69 +1187,12 @@ GtpyContextManager::importCalcModule(int contextId)
         return;
     }
 
-    initCalculatorModule();
-
-    QString pyCode =
-        "import sys\n"
-        "if '" + CALC_MODULE + "' in sys.modules and '" + DEFAULT_IMPORT_MODULE +
-            "' in sys.modules:\n"
-        "    if sys.modules['" + CALC_MODULE + "'] is not None and " +
-            "sys.modules['" + DEFAULT_IMPORT_MODULE + "'] is not None:\n"
-        "        import " + DEFAULT_IMPORT_MODULE + "\n" +
-        "        " + CALC_MODULE + " = " + DEFAULT_IMPORT_MODULE + "." +
-            DEFAULT_IMPORT + "('" + CALC_MODULE + "')\n"
-        "        from " + CALC_MODULE + " import *\n"
-        "        del " + CALC_FAC_VAR + "\n"
-        "        if '" + CALC_MODULE + "' in sys.modules:\n"
-        "            del sys.modules['" + CALC_MODULE + "']\n"
-        "        del sys\n";
+    QString pyCode = "from " + GtpyGlobals::MODULE_GtCalculators + " import *";
 
     GTPY_GIL_SCOPE
 
     con.evalScript(pyCode);
 }
-
-//void
-//GtpyContextManager::registerCalcModuleInSys(int contextId)
-//{
-//    PythonQtObjectPtr con = context(contextId);
-
-//    if (con == Q_NULLPTR)
-//    {
-//        return;
-//    }
-
-//    QString pyCode =
-//            "if '" + CALC_MODULE + "' in locals():\n" +
-//            "    import sys\n" +
-//            "    sys.modules['" + CALC_MODULE + "'] = " + CALC_MODULE + "\n" +
-//            "    del sys\n";
-
-//    GTPY_GIL_SCOPE
-
-//    con.evalScript(pyCode);
-//}
-
-//void
-//GtpyContextManager::removeCalcModuleFromSys()
-//{
-//    PythonQtObjectPtr con = context(GtpyContextManager::GlobalContext);
-
-//    if (con == Q_NULLPTR)
-//    {
-//        return;
-//    }
-
-//    QString pyCode =
-//        "import sys\n"
-//        "if '" + CALC_MODULE + "' in sys.modules:\n" +
-//        "    sys.modules['" + CALC_MODULE + "'] = None\n" +
-//        "del sys\n";
-
-//    GTPY_GIL_SCOPE
-
-//    con.evalScript(pyCode);
-//}
 
 int
 GtpyContextManager::lineOutOfMessage(const QString& message)

@@ -13,6 +13,9 @@ namespace GtpyGlobals
 {
     ///Python Modules
     const QString GTOBJECT_WRAPPER_MODULE = "GtObjectWrapperModuleC";
+    const QString MODULE_GtCalculators = "GtCalculators";
+    const QString MODULE_GtLogging = "GtLogging";
+
+    ///Python Classes
     const QString GTOBJECT_WRAPPER = "GtpyExtendedWrapper";
-    const QString GTPYTASKFINDER_MODULE = "GtpyTaskFinder";
 }

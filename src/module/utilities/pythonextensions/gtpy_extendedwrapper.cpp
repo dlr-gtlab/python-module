@@ -79,7 +79,6 @@ void GtpyCustomization::customizeSlotCalling()
     PythonQtSlotFunction_Type.tp_call = PythonQtSlotFunction_MyCall;
 }
 
-
 static void
 GtpyExtendedWrapper_dealloc(GtpyExtendedWrapper* self)
 {

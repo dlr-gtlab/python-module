@@ -76,7 +76,14 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
 
     calc->setFactory(gtProcessFactory);
 
-    calc->setObjectName(objName);
+    if (objName.isEmpty())
+    {
+        calc->setObjectName(calcData->id);
+    }
+    else
+    {
+        calc->setObjectName(objName);
+    }
 
     if (parent != Q_NULLPTR)
     {
