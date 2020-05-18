@@ -58,9 +58,9 @@ const QString GtpyContextManager::FUNCTION_WARNING =
 const QString GtpyContextManager::TASK_VAR =
     QStringLiteral("__task");
 const QString GtpyContextManager::CALC_FAC_VAR =
-    QStringLiteral("CalculatorFactory");
+    QStringLiteral("__calculatorFactory");
 const QString GtpyContextManager::HELPER_FAC_VAR =
-    QStringLiteral("HelperFactory");
+    QStringLiteral("__helperFactory");
 const QString GtpyContextManager::GTOBJECT_WRAPPER =
     QStringLiteral("CurrentGtObjectWrapper");
 const QString GtpyContextManager::HELPER_WRAPPER =
