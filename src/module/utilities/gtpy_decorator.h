@@ -265,7 +265,7 @@ public slots:
      * @return See GtObject class documentation.
      */
     FIND_GT_PROPERTIES QList<GtAbstractProperty*> findGtProperties(
-            GtObject* obj);
+        GtObject* obj);
 
     /**
      * @brief findGtProperty returns the property with the given id
@@ -331,7 +331,7 @@ public slots:
      * @return See GtAbstractProperty class documentation.
      */
     FIND_GT_PROPERTIES QList<GtAbstractProperty*> findGtProperties(
-            GtAbstractProperty* prop);
+        GtAbstractProperty* prop);
 
     /**
      * @brief findGtProperty returns the subproperty with the given id
@@ -340,7 +340,7 @@ public slots:
      * @return The subproperty with the given id.
      */
     FIND_GT_PROPERTY GtAbstractProperty* findGtProperty(
-            GtAbstractProperty* prop, const QString& id);
+        GtAbstractProperty* prop, const QString& id);
 
     /**
      * @brief Returns the value of the subproperty with given id
@@ -358,7 +358,7 @@ public slots:
      * @param val value that should be set to the property with given id
      */
     SET_PROPERTY_VALUE void setPropertyValue(GtAbstractProperty* prop,
-                                             const QString& id, QVariant val);
+            const QString& id, QVariant val);
 
     /**
      * @brief Returns identification string of property.
@@ -414,7 +414,16 @@ public slots:
     ///-------> functions of GtDataZone0D <-------\\\
 
     double value(GtDataZone0D* dataZone, const QString& paramName, bool* ok =
-            Q_NULLPTR);
+                     Q_NULLPTR);
+
+    bool setValue(GtDataZone0D* dataZone, const QString& paramName,
+                  const double& value);
+
+    bool appendData(GtDataZone0D* dataZone, const QString& paramName,
+                    double value);
+
+    bool appendData(GtDataZone0D* dataZone, const QString& paramName,
+                    const QString& unit, double value);
 
     ///-------> functions of GtPythonLogger <-------\\\
 

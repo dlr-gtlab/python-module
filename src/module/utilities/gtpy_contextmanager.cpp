@@ -99,7 +99,7 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     PythonQt::self()->addDecorators(m_decorator);
 
     PythonQt::self()->registerCPPClass("GtpyProcessDataDistributor", 0,
-                                     CLASS_WRAPPER_MODULE.toLocal8Bit().data());
+                                       CLASS_WRAPPER_MODULE.toLocal8Bit().data());
 
     connect(m_decorator, SIGNAL(sendErrorMessage(QString)), this,
             SLOT(onErrorMessage(QString)));
@@ -142,36 +142,42 @@ GtpyContextManager::initExtensions()
     {
         gtError() << "could not initialize GtpyStdOutRedirect_Type";
     }
+
     Py_INCREF(&GtpyStdOutRedirect_Type);
 
     if (PyType_Ready(&GtpyExtendedWrapper_Type) < 0)
     {
         gtError() << "could not initialize GtpyExtendedWrapper_Type";
     }
+
     Py_INCREF(&GtpyExtendedWrapper_Type);
 
     if (PyType_Ready(&GtpyCreateHelperFunction_Type) < 0)
     {
         gtError() << "could not initialize GtpyCreateHelperFunction_Type";
     }
+
     Py_INCREF(&GtpyCreateHelperFunction_Type);
 
     if (PyType_Ready(&GtpyPropertySetter_Type) < 0)
     {
         gtError() << "could not initialize GtpyPropertySetter_Type";
     }
+
     Py_INCREF(&GtpyPropertySetter_Type);
 
     if (PyType_Ready(&GtpyMyImport_Type) < 0)
     {
         gtError() << "could not initialize GtpyMyImport_Type";
     }
+
     Py_INCREF(&GtpyMyImport_Type);
 
     if (PyType_Ready(&GtpyCalcculatorsModule::GtpyCreateCalculator_Type) < 0)
     {
         gtError() << "could not initialize GtpyCreateCalculator_Type";
     }
+
     Py_INCREF(&GtpyCalcculatorsModule::GtpyCreateCalculator_Type);
 }
 
@@ -206,12 +212,12 @@ GtpyContextManager::evalScript(int contextId,
     if (m_appLogging.value(contextId, false))
     {
         m_loggingModule.evalScript(QStringLiteral(
-                                 "PyLogger._PyLogger__outputToConsole = True"));
+                                       "PyLogger._PyLogger__outputToConsole = True"));
     }
     else
     {
         m_loggingModule.evalScript(QStringLiteral(
-                                "PyLogger._PyLogger__outputToConsole = False"));
+                                       "PyLogger._PyLogger__outputToConsole = False"));
     }
 
     bool hadError = false;
@@ -231,10 +237,10 @@ GtpyContextManager::evalScript(int contextId,
         emit scriptEvaluated(contextId);
     }
 
-//    if (m_calcAccessibleContexts.contains(contextId))
-//    {
-//        removeCalcModuleFromSys();
-//    }
+    //    if (m_calcAccessibleContexts.contains(contextId))
+    //    {
+    //        removeCalcModuleFromSys();
+    //    }
 
     return !hadError;
 }
@@ -399,7 +405,7 @@ GtpyContextManager::addGtObject(int contextId, const QString& name,
     PyObject* pyQtWrapper = PythonQt::priv()->wrapQObject(obj);
 
     if (pyQtWrapper && (pyQtWrapper->ob_type->tp_base ==
-                            &PythonQtInstanceWrapper_Type))
+                        &PythonQtInstanceWrapper_Type))
     {
         PyTuple_SetItem(argsTuple, 0, pyQtWrapper);
     }
@@ -702,8 +708,8 @@ GtpyContextManager::interruptPyThread(long id)
 
 void
 GtpyContextManager::defaultContextConfig(
-        const GtpyContextManager::Context& type,
-        int contextId, const QString& contextName)
+    const GtpyContextManager::Context& type,
+    int contextId, const QString& contextName)
 {
     GTPY_GIL_SCOPE
 
@@ -715,10 +721,10 @@ GtpyContextManager::defaultContextConfig(
     m_contextMap.insert(contextId, context);
 
     QString pyCode =
-            "import sys\n"
-            "sys.modules['" + contextName +
-            "'] = None\n" +
-            "del sys\n";
+        "import sys\n"
+        "sys.modules['" + contextName +
+        "'] = None\n" +
+        "del sys\n";
 
     context.module.evalScript(pyCode);
 
@@ -729,28 +735,34 @@ GtpyContextManager::defaultContextConfig(
 
 void
 GtpyContextManager::specificContextConfig(
-        const GtpyContextManager::Context& type, int contextId)
+    const GtpyContextManager::Context& type, int contextId)
 {
     switch (type)
     {
         case GtpyContextManager::BatchContext:
             initBatchContext(contextId);
             break;
+
         case GtpyContextManager::GlobalContext:
             initGlobalContext(contextId);
             break;
+
         case GtpyContextManager::ScriptEditorContext:
             initScriptEditorContext(contextId);
             break;
+
         case GtpyContextManager::CalculatorRunContext:
             initCalculatorRunContext(contextId);
             break;
+
         case GtpyContextManager::TaskEditorContext:
             initTaskEditorContext(contextId);
             break;
+
         case GtpyContextManager::TaskRunContext:
             initTaskRunContext(contextId);
             break;
+
         default:
             break;
     }
@@ -782,11 +794,11 @@ GtpyContextManager::initCalculatorsModule()
     myMod = PyModule_Create(&GtpyCalcculatorsModule::GtpyCalculators_Module);
 #else
     myMod = Py_InitModule(name.constData(),
-                  GtpyCalcculatorsModule::GtpyCalculatorsModule_StaticMethods);
+                          GtpyCalcculatorsModule::GtpyCalculatorsModule_StaticMethods);
 #endif
     // add GtTaskFinder to the list of builtin module names
     PyObject* old_module_names =
-            PyObject_GetAttrString(sys.object(),"builtin_module_names");
+        PyObject_GetAttrString(sys.object(), "builtin_module_names");
 
     if (old_module_names && PyTuple_Check(old_module_names))
     {
@@ -819,11 +831,11 @@ GtpyContextManager::initLoggingModule()
     QString loggingClass = GtPythonLogger::staticMetaObject.className();
 
     m_loggingModule = PythonQt::self()->createModuleFromScript(
-                GtpyGlobals::MODULE_GtLogging);
+                          GtpyGlobals::MODULE_GtLogging);
 
     m_loggingModule.evalScript(QStringLiteral("from PythonQt.") +
-                             CLASS_WRAPPER_MODULE + QStringLiteral(" import ") +
-                             loggingClass);
+                               CLASS_WRAPPER_MODULE + QStringLiteral(" import ") +
+                               loggingClass);
 
     m_loggingModule.evalScript(
         QStringLiteral("class PyLogger:\n") +
@@ -871,19 +883,19 @@ GtpyContextManager::initLoggingModule()
 
 
     m_loggingModule.evalScript(QStringLiteral("def gtDebug(): \n") +
-                   QStringLiteral("     return PyLogger.getInstance(0)\n"));
+                               QStringLiteral("     return PyLogger.getInstance(0)\n"));
 
     m_loggingModule.evalScript(QStringLiteral("def gtInfo(): \n") +
-                   QStringLiteral("     return PyLogger.getInstance(1)\n"));
+                               QStringLiteral("     return PyLogger.getInstance(1)\n"));
 
     m_loggingModule.evalScript(QStringLiteral("def gtError(): \n") +
-                   QStringLiteral("     return PyLogger.getInstance(2)\n"));
+                               QStringLiteral("     return PyLogger.getInstance(2)\n"));
 
     m_loggingModule.evalScript(QStringLiteral("def gtFatal(): \n") +
-                   QStringLiteral("     return PyLogger.getInstance(3)\n"));
+                               QStringLiteral("     return PyLogger.getInstance(3)\n"));
 
     m_loggingModule.evalScript(QStringLiteral("def gtWarning(): \n") +
-                   QStringLiteral("     return PyLogger.getInstance(4)\n"));
+                               QStringLiteral("     return PyLogger.getInstance(4)\n"));
 }
 
 void
@@ -901,7 +913,7 @@ GtpyContextManager::initImportBehaviour()
     GTPY_GIL_SCOPE
 
     PyObject* builtins = PyDict_GetItemString(PyModule_GetDict(con.module),
-                                              "__builtins__");
+                         "__builtins__");
 
     if (builtins)
     {
@@ -916,7 +928,7 @@ GtpyContextManager::initImportBehaviour()
                 Py_INCREF(defImp);
 
                 PythonQtObjectPtr imp = GtpyMyImport_Type.tp_new(
-                            &GtpyMyImport_Type, NULL, NULL);
+                                            &GtpyMyImport_Type, NULL, NULL);
 
                 ((GtpyMyImport*)imp.object())->defaultImp = defImp;
                 PyDict_SetItemString(builtins, "__import__", imp);
@@ -1060,10 +1072,10 @@ GtpyContextManager::initStdOut()
     sys.setNewRef(PyImport_ImportModule("sys"));
 
     // create a redirection object for stdout and stderr
-    m_out = GtpyStdOutRedirect_Type.tp_new(&GtpyStdOutRedirect_Type,NULL, NULL);
+    m_out = GtpyStdOutRedirect_Type.tp_new(&GtpyStdOutRedirect_Type, NULL, NULL);
     ((GtpyStdOutRedirect*)m_out.object())->callback = stdOutRedirectCB;
 
-    m_err = GtpyStdOutRedirect_Type.tp_new(&GtpyStdOutRedirect_Type,NULL, NULL);
+    m_err = GtpyStdOutRedirect_Type.tp_new(&GtpyStdOutRedirect_Type, NULL, NULL);
     ((GtpyStdOutRedirect*)m_err.object())->callback = stdErrRedirectCB;
 
     // replace the built in file objects with the new objects
@@ -1089,7 +1101,7 @@ GtpyContextManager::initWrapperModule()
 #endif
     // add GtObjectWrapperModuleC to the list of builtin module names
     PyObject* old_module_names =
-            PyObject_GetAttrString(sys.object(),"builtin_module_names");
+        PyObject_GetAttrString(sys.object(), "builtin_module_names");
 
     if (old_module_names && PyTuple_Check(old_module_names))
     {
@@ -1106,7 +1118,8 @@ GtpyContextManager::initWrapperModule()
                         PyString_FromString(name.constData()));
         PyModule_AddObject(sys.object(), "builtin_module_names", module_names);
     }
-//    Py_XDECREF(old_module_names);
+
+    //    Py_XDECREF(old_module_names);
 
 #ifdef PY3K
     PyDict_SetItem(PyObject_GetAttrString(sys.object(), "modules"),
@@ -1135,7 +1148,7 @@ GtpyContextManager::importDefaultModules(int contextId)
         "from PythonQt import " + CLASS_WRAPPER_MODULE + "\n" +
         "from PythonQt import QtCore\n"
         "from " + GtpyGlobals::GTOBJECT_WRAPPER_MODULE + " import " +
-            GtpyGlobals::GTOBJECT_WRAPPER + "\n";
+        GtpyGlobals::GTOBJECT_WRAPPER + "\n";
 
     GTPY_GIL_SCOPE
 
@@ -1155,15 +1168,15 @@ GtpyContextManager::importLoggingFuncs(int contextId,
 
     QString pyCode =
         QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
-            QStringLiteral(" import gtDebug\n") +
+        QStringLiteral(" import gtDebug\n") +
         QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
-            QStringLiteral(" import gtInfo\n") +
+        QStringLiteral(" import gtInfo\n") +
         QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
-            QStringLiteral(" import gtError\n") +
+        QStringLiteral(" import gtError\n") +
         QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
-            QStringLiteral(" import gtFatal\n") +
+        QStringLiteral(" import gtFatal\n") +
         QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
-            QStringLiteral(" import gtWarning\n");
+        QStringLiteral(" import gtWarning\n");
 
     GTPY_GIL_SCOPE
 
@@ -1229,7 +1242,7 @@ GtpyContextManager::lineOutOfMessage(const QString& message)
 
 void
 GtpyContextManager::setMetaDataToThreadDict(int contextId, bool output,
-                                            bool error)
+        bool error)
 {
     GTPY_GIL_SCOPE
 
@@ -1392,8 +1405,8 @@ GtpyContextManager::introspectObject(PyObject* object) const
         Py_DECREF(keys);
     }
 
-//    if (PyObject_TypeCheck(object, &PythonQtInstanceWrapper_Type))
-//    {
+    //    if (PyObject_TypeCheck(object, &PythonQtInstanceWrapper_Type))
+    //    {
     PythonQtObjectPtr p = object;
 
     QString childrenFunc = m_decorator->getFunctionName(
@@ -1443,14 +1456,14 @@ GtpyContextManager::introspectObject(PyObject* object) const
 
                             desc = LIST_DATATYPE + QStringLiteral("<") +
                                    QString::fromUtf8(
-                                   QObject::staticMetaObject.className()) +
+                                       QObject::staticMetaObject.className()) +
                                    QStringLiteral("*> ") + completion;
                         }
                     }
                     else
                     {
                         if (!objName.contains(
-                                QRegExp(QStringLiteral("^[a-zA-Z0-9_]*$"))))
+                                    QRegExp(QStringLiteral("^[a-zA-Z0-9_]*$"))))
                         {
                             QString funcName = m_decorator->getFunctionName(
                                                    FIND_GT_CHILD_TAG);
@@ -1465,7 +1478,7 @@ GtpyContextManager::introspectObject(PyObject* object) const
                             {
                                 completion = funcName +
                                              QStringLiteral("(\"") +
-                                            objName + QStringLiteral("\")");
+                                             objName + QStringLiteral("\")");
 
                                 desc = QString::fromUtf8(
                                            obj->metaObject()->className()) +
@@ -1607,7 +1620,8 @@ GtpyContextManager::introspectObject(PyObject* object) const
             }
         }
     }
-//    }
+
+    //    }
 
     Py_DECREF(object);
 
@@ -1689,7 +1703,7 @@ GtpyContextManager::builtInCompletions(int contextId) const
 
     con.evalScript(QStringLiteral("import inspect"));
     con.evalScript(QStringLiteral("def __builtins():") +
-                       QStringLiteral("return dir(inspect.builtins)"));
+                   QStringLiteral("return dir(inspect.builtins)"));
 
     QVariant v = con.call(QStringLiteral("__builtins"));
 
@@ -1750,9 +1764,9 @@ GtpyContextManager::setImportableModulesCompletions(int contextId)
 
     con.evalScript(QStringLiteral("import pkgutil"));
     con.evalScript(QStringLiteral("def __importableModules():\n") +
-                       QStringLiteral("\tmodules = pkgutil.iter_modules()\n") +
-                       QStringLiteral("\tx = (i.name for i in modules)\n") +
-                       QStringLiteral("\treturn list(x)"));
+                   QStringLiteral("\tmodules = pkgutil.iter_modules()\n") +
+                   QStringLiteral("\tx = (i.name for i in modules)\n") +
+                   QStringLiteral("\treturn list(x)"));
 
     QVariant v = con.call(QStringLiteral("__importableModules"));
 
@@ -1768,7 +1782,7 @@ GtpyContextManager::setImportableModulesCompletions(int contextId)
     modules.append(QStringLiteral("sys"));  // sys is somehow not listed
     modules.append(QStringLiteral("time")); // time is somehow not listed
 
-    foreach (QString name, modules )
+    foreach (QString name, modules)
     {
         if (name.startsWith(name.startsWith(QStringLiteral("_"))))
         {
@@ -1853,28 +1867,28 @@ void
 GtpyContextManager::registerTypeConverters() const
 {
     int objectPtrMapId = qRegisterMetaType<QMap<int, double>>(
-                "QMap<int, double>");
+                             "QMap<int, double>");
 
     PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
-                         GtpyTypeConversion::convertFromQMapIntDouble);
+            GtpyTypeConversion::convertFromQMapIntDouble);
     PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
-                         GtpyTypeConversion::convertToQMapIntDouble);
+            GtpyTypeConversion::convertToQMapIntDouble);
 
     objectPtrMapId = qRegisterMetaType<QMap<QString, double>>(
-                "QMap<QString, double>");
+                         "QMap<QString, double>");
 
     PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
-                         GtpyTypeConversion::convertFromQMapStringDouble);
+            GtpyTypeConversion::convertFromQMapStringDouble);
     PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
-                         GtpyTypeConversion::convertToQMapStringDouble);
+            GtpyTypeConversion::convertToQMapStringDouble);
 
     objectPtrMapId = qRegisterMetaType<QMap<QString, int>>(
-                "QMap<QString, int>");
+                         "QMap<QString, int>");
 
     PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
-                         GtpyTypeConversion::convertFromQMapStringInt);
+            GtpyTypeConversion::convertFromQMapStringInt);
     PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
-                         GtpyTypeConversion::convertToQMapStringInt);
+            GtpyTypeConversion::convertToQMapStringInt);
 }
 
 QString
@@ -1917,10 +1931,11 @@ GtpyContextManager::stdOutRedirectCB(const QString& contextName,
 
         emit GtpyContextManager::instance()->pythonMessage(message, contextId);
     }
-//    else
-//    {
-//        std::cout << message.toLatin1().data() << std::endl;
-//    }
+
+    //    else
+    //    {
+    //        std::cout << message.toLatin1().data() << std::endl;
+    //    }
 }
 
 void
@@ -1948,10 +1963,11 @@ GtpyContextManager::stdErrRedirectCB(const QString& contextName,
             emit GtpyContextManager::instance()->errorCodeLine(line, contextId);
         }
     }
-//    else
-//    {
-//        std::cout << message.toLatin1().data() << std::endl;
-//    }
+
+    //    else
+    //    {
+    //        std::cout << message.toLatin1().data() << std::endl;
+    //    }
 }
 
 int
@@ -2047,7 +2063,7 @@ GtpyTypeConversion::convertFromQMapIntDouble(const void* inObject, const int)
 
 bool
 GtpyTypeConversion::convertToQMapIntDouble(PyObject* obj, void* outMap,
-                                           int, bool)
+        int, bool)
 {
     return pythonToMap<int, double> (obj, outMap);
 }
@@ -2060,7 +2076,7 @@ GtpyTypeConversion::convertFromQMapStringDouble(const void* inObject, int)
 
 bool
 GtpyTypeConversion::convertToQMapStringDouble(PyObject* obj, void* outMap,
-                                              int, bool)
+        int, bool)
 {
     return pythonToMap<QString, double>(obj, outMap);
 }
@@ -2073,7 +2089,7 @@ GtpyTypeConversion::convertFromQMapStringInt(const void* inObject, int)
 
 bool
 GtpyTypeConversion::convertToQMapStringInt(PyObject* obj, void* outMap,
-                                           int, bool)
+        int, bool)
 {
     return pythonToMap<QString, int>(obj, outMap);
 }

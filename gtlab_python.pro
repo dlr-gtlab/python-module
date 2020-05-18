@@ -10,6 +10,9 @@
 
 include( local_settings.pri )
 
+#### ARTISTIC STYLE FILE
+DISTFILES  += style.astylerc
+
 TEMPLATE = subdirs
 CONFIG += console
 CONFIG += c++11
