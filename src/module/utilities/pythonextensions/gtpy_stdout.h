@@ -36,12 +36,20 @@ typedef void GtpyOutputChangedCB(const QString& contextName,
 /**
   * @brief The stdout redirection class.
   */
-typedef struct
-{
-    PyObject_HEAD
-    GtpyOutputChangedCB* callback;
-    int softspace;
-    bool closed;
+typedef struct {
+  PyObject_HEAD
+  GtpyOutputChangedCB* callback;
+  int softspace;
+  bool closed;
 } GtpyStdOutRedirect;
+
+/// Namespace for static values to identify thread dict meta data.
+namespace GtpyStdOut
+{
+    static const char* CONTEXT_KEY = "CONTEXT_NAME";
+    static const char* OUTPUT_KEY = "OUTPUT_TO_CONSOLE";
+    static const char* ERROR_KEY = "ERROR_TO_CONSOLE";
+}
+
 
 #endif // GTPY_STDOUT_H

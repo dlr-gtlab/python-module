@@ -26,9 +26,9 @@
 
 
 const QRegularExpression GtpyConsole::RE_KEYBOARD_INTERRUPT
-("Traceback.*\\n(\\s*File.*\\n)+(.*\\n)?KeyboardInterrupt");
+    ("Traceback.*\\n(\\s*File.*\\n)+(.*\\n)?KeyboardInterrupt");
 const QRegularExpression GtpyConsole::RE_ERROR_LINE
-("\"<string>\", line \\d+");
+    ("\"<string>\", line \\d+");
 
 
 GtpyConsole::GtpyConsole(int contextId,
@@ -85,10 +85,10 @@ GtpyConsole::setCommandPrompt(const QString& commandPrompt)
 void
 GtpyConsole::showAdditionalContextOutput(int contextId)
 {
-    if (!m_additionalContextOutput.contains(contextId))
-    {
-        m_additionalContextOutput.append(contextId);
-    }
+   if (!m_additionalContextOutput.contains(contextId))
+   {
+       m_additionalContextOutput.append(contextId);
+   }
 }
 
 void
@@ -103,7 +103,7 @@ GtpyConsole::removeAdditionalContextOutput(int contextId)
 }
 
 void
-GtpyConsole::stdErr(const QString& message, int contextId)
+GtpyConsole::stdErr(const QString& message,int contextId)
 {
     if (m_contextId == contextId ||
             m_additionalContextOutput.contains(contextId))
@@ -185,7 +185,6 @@ GtpyConsole::keyPressEvent(QKeyEvent* e)
             {
                 eventHandled = true;
             }
-
             break;
 
         case Qt::Key_Up:
@@ -262,7 +261,6 @@ GtpyConsole::keyPressEvent(QKeyEvent* e)
                     eventHandled = true;
                 }
             }
-
             break;
 
         case Qt::Key_Delete:
@@ -288,13 +286,12 @@ GtpyConsole::keyPressEvent(QKeyEvent* e)
                     eventHandled = true;
                 }
             }
-
             break;
 
         /*copies selected text from console to clipboard*/
         case Qt::Key_C:
 
-            if (e->modifiers() & Qt::ControlModifier)
+            if(e->modifiers() & Qt::ControlModifier)
             {
                 if (textCursor.hasSelection())
                 {
@@ -314,13 +311,12 @@ GtpyConsole::keyPressEvent(QKeyEvent* e)
                     eventHandled = true;
                 }
             }
-
             break;
 
         /*pastes code from clipboard to console*/
         case Qt::Key_V:
 
-            if (e->modifiers() & Qt::ControlModifier)
+            if(e->modifiers() & Qt::ControlModifier)
             {
                 if (this->isReadOnly())
                 {
@@ -337,7 +333,7 @@ GtpyConsole::keyPressEvent(QKeyEvent* e)
                 QClipboard* clipboard = QApplication::clipboard();
 
                 QStringListIterator clipboardIterator =
-                    clipboard->text().split("\n");
+                        clipboard->text().split("\n");
 
                 while (clipboardIterator.hasNext())
                 {
@@ -351,7 +347,6 @@ GtpyConsole::keyPressEvent(QKeyEvent* e)
 
                 eventHandled = true;
             }
-
             break;
 
         default:
@@ -656,7 +651,7 @@ GtpyConsole::hideKeyboardInterruptException()
 
     QRegularExpressionMatch matchError = RE_KEYBOARD_INTERRUPT.match(error);
     QRegularExpressionMatch matchLine  = RE_ERROR_LINE.match(
-            matchError.captured());
+                matchError.captured());
 
     // extract lineNumber, size of RE_ERROR_LINE until digit is 17
     int lineNumber = matchLine.captured().mid(17).toInt();
