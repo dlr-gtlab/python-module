@@ -12,46 +12,57 @@
 
 #include <QString>
 
-#include "gtpy_globals.h"
-
 #include "PythonQtPythonInclude.h"
 
-namespace GtpyCalcculatorsModule
+#include "gtpy_globals.h"
+#include "gt_task.h"
+
+namespace GtpyCalculatorsModule
 {
-    extern PyTypeObject GtpyCreateCalculator_Type;
 
-    typedef struct {
-        PyObject_HEAD
-        PyObject* m_calcClassName;
-    } GtpyCreateCalculator;
+extern PyTypeObject GtpyCreateCalculator_Type;
 
-    extern PyObject*
-    findGtTask_C_function(PyObject* self, PyObject* args);
+typedef struct
+{
+    PyObject_HEAD
+    PyObject* m_calcClassName;
+} GtpyCreateCalculator;
 
-    static PyMethodDef
-    GtpyCalculatorsModule_StaticMethods[] = {
-        { "findGtTask", (PyCFunction)findGtTask_C_function, METH_VARARGS, "GtTask* "
-          "findGtTask(name) --> finds an existing GtTask by objectname and"
-          " returns it" },
-        { NULL, NULL, 0, NULL }
-    };
+extern PyObject*
+findGtTask_C_function(PyObject* self, PyObject* args);
 
-    void createCalcConstructors();
+extern GtTask*
+findRunningParentTask();
+
+static PyMethodDef
+GtpyCalculatorsModule_StaticMethods[] =
+{
+    {
+        "findGtTask", (PyCFunction)findGtTask_C_function, METH_VARARGS,
+        "GtTask* findGtTask(name) --> finds an existing GtTask by objectname "
+        "and returns it"
+    },
+    { NULL, NULL, 0, NULL }
+};
+
+void createCalcConstructors();
 
 #ifdef PY3K
-    static PyModuleDef
-    GtpyCalculators_Module = {
-        PyModuleDef_HEAD_INIT,
-        GtpyGlobals::MODULE_GtCalculators.toStdString().data(),
-        NULL,
-        -1,
-        GtpyCalculatorsModule_StaticMethods,
-        NULL,
-        NULL,
-        NULL,
-        NULL
-    };
+static PyModuleDef
+GtpyCalculators_Module =
+{
+    PyModuleDef_HEAD_INIT,
+    GtpyGlobals::MODULE_GtCalculators.toStdString().data(),
+    NULL,
+    -1,
+    GtpyCalculatorsModule_StaticMethods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
 #endif
+
 }
 
 #endif // GTPYCALCULATORSMODULE_H
