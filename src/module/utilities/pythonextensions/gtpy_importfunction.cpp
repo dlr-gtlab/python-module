@@ -7,14 +7,11 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include "gtpy_globals.h"
-#include "gtpy_calculatorsmodule.h"
-
 #include "gtpy_importfunction.h"
 
 static PyObject*
 GtpyMyImport_new(PyTypeObject* type, PyObject* /*args*/,
-                 PyObject* /*kwds*/)
+                       PyObject* /*kwds*/)
 {
     GtpyMyImport* self;
     self = (GtpyMyImport*)type->tp_alloc(type, 0);
@@ -23,11 +20,9 @@ GtpyMyImport_new(PyTypeObject* type, PyObject* /*args*/,
     return (PyObject*)self;
 }
 
-static bool
-checkModuleName(PyObject* args, const QString& moduleName)
+static void
+deleteGtCalculatorsModule(PyObject* args)
 {
-    bool retval = false;
-
     if (args && PyTuple_Check(args))
     {
         Py_INCREF(args);
@@ -39,9 +34,34 @@ checkModuleName(PyObject* args, const QString& moduleName)
             Py_INCREF(name);
             QString nameStr = PyString_AsString(name);
 
-            if (nameStr == moduleName)
+            if (nameStr == "GtCalculators")
             {
-                retval = true;
+                PythonQtObjectPtr sys;
+                sys.setNewRef(PyImport_ImportModule("sys"));
+
+                PyObject* dict = PyModule_GetDict(sys);
+
+                if (dict)
+                {
+                    Py_INCREF(dict);
+
+                    PyObject* modules = PyDict_GetItemString(dict,
+                                                             "modules");
+
+                    if (modules)
+                    {
+                        Py_INCREF(modules);
+
+                        if (PyDict_Contains(modules, name))
+                        {
+                            PyDict_DelItemString(modules, "GtCalculators");
+                        }
+
+                        Py_DECREF(modules);
+                    }
+
+                    Py_DECREF(dict);
+                }
             }
 
             Py_DECREF(name);
@@ -49,34 +69,11 @@ checkModuleName(PyObject* args, const QString& moduleName)
 
         Py_DECREF(args);
     }
-
-    return retval;
-}
-
-static bool
-isImportAllowed(PyObject* args)
-{
-    if (checkModuleName(args, GtpyGlobals::MODULE_GtCalculators))
-    {
-        if (!GtpyCalculatorsModule::findRunningParentTask())
-        {
-            QString error =  "The import of " +
-                             GtpyGlobals::MODULE_GtCalculators +
-                             " is not allowed in this context! Maybe you have "
-                             "to use a Python Task.";
-
-            PyErr_SetString(PyExc_ImportError, error.toLatin1().data());
-
-            return false;
-        }
-    }
-
-    return true;
 }
 
 static PyObject*
 GtpyMyImport_Call(PyObject* func, PyObject* args,
-                  PyObject* kwds)
+                                    PyObject* kwds)
 {
     GtpyMyImport* f = (GtpyMyImport*)func;
 
@@ -92,11 +89,6 @@ GtpyMyImport_Call(PyObject* func, PyObject* args,
     }
     else
     {
-        if (!isImportAllowed(args))
-        {
-            return Q_NULLPTR;
-        }
-
         PyObject* mod = PyObject_Call(f->defaultImp, args, kwds);
 
         if (mod == Q_NULLPTR)
@@ -107,67 +99,6 @@ GtpyMyImport_Call(PyObject* func, PyObject* args,
         return mod;
     }
 }
-
-static PyObject*
-meth_importGtCalculators(PyObject* self)
-{
-    GtpyMyImport* f = (GtpyMyImport*)self;
-
-    if (f->defaultImp == Q_NULLPTR)
-    {
-        QString error =  "Something is wrong with the import system defined "
-                         "for the Python Module! (raised by "
-                         "GtpyMyImport_Call)";
-
-        PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
-
-        return Q_NULLPTR;
-    }
-    else
-    {
-        PyObject* argsTuple = PyTuple_New(1);
-
-        PyTuple_SetItem(argsTuple, 0, QSTRING_AS_PYSTRING(
-                            GtpyGlobals::MODULE_GtCalculators));
-
-        PyObject* mod = PyObject_Call(f->defaultImp, argsTuple, Q_NULLPTR);
-
-        if (mod == Q_NULLPTR)
-        {
-            return Q_NULLPTR;
-        }
-
-        PyObject* globals = PyEval_GetGlobals();
-
-        if (globals)
-        {
-            Py_INCREF(globals);
-
-            if (PyDict_Check(globals))
-            {
-                PyDict_Merge(globals, PyModule_GetDict(mod), 0);
-
-                PyDict_SetItem(globals, QSTRING_AS_PYSTRING(
-                                   GtpyGlobals::MODULE_GtCalculators), mod);
-            }
-
-            Py_DECREF(globals);
-        }
-
-        return mod;
-    }
-}
-
-static PyMethodDef
-GtpyExtendedWrapper_methods[] =
-{
-    {
-        "importGtCalculators", (PyCFunction)meth_importGtCalculators,
-        METH_NOARGS, "Imports GtCalculators without checking if it is "
-        "allowed."
-    },
-    {Q_NULLPTR, Q_NULLPTR, 0, Q_NULLPTR}  /* Sentinel */
-};
 
 PyTypeObject
 GtpyMyImport_Type =
@@ -199,7 +130,7 @@ GtpyMyImport_Type =
     0,                   /* tp_weaklistoffset */
     0,                   /* tp_iter */
     0,                   /* tp_iternext */
-    GtpyExtendedWrapper_methods,                   /* tp_methods */
+    0,                   /* tp_methods */
     0,                   /* tp_members */
     0,                   /* tp_getset */
     0,                         /* tp_base */

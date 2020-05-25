@@ -14,6 +14,7 @@
 #include "gt_application.h"
 #include "gt_processdata.h"
 #include "gt_project.h"
+#include "gt_task.h"
 #include "gt_calculator.h"
 #include "gt_calculatordata.h"
 #include "gt_calculatorfactory.h"
@@ -28,10 +29,10 @@
 
 #include "gtpy_calculatorsmodule.h"
 
-using namespace GtpyCalculatorsModule;
+using namespace GtpyCalcculatorsModule;
 
 static GtTask*
-findValue__task()
+findRunningParentTask()
 {
     GtTask* parentTask = Q_NULLPTR;
 
@@ -43,9 +44,7 @@ findValue__task()
 
         if (PyDict_Check(globals))
         {
-            PyObject* taskVar = PyDict_GetItemString(globals,
-                                GtpyGlobals::ATTR_task.
-                                toStdString().data());
+            PyObject* taskVar = PyDict_GetItemString(globals, "__task");
 
             if (taskVar)
             {
@@ -54,7 +53,7 @@ findValue__task()
                 if (taskVar->ob_type->tp_base == &PythonQtInstanceWrapper_Type)
                 {
                     PythonQtInstanceWrapper* wrapper =
-                        (PythonQtInstanceWrapper*)taskVar;
+                            (PythonQtInstanceWrapper*)taskVar;
 
                     if (wrapper && wrapper->_obj)
                     {
@@ -64,7 +63,7 @@ findValue__task()
                 else
                 {
                     GtObject* taskObj = GtpyDecorator::pyObjectToGtObject(
-                                            taskVar);
+                                taskVar);
                     parentTask = qobject_cast<GtTask*>(taskObj);
                 }
 
@@ -75,134 +74,18 @@ findValue__task()
         Py_DECREF(globals);
     }
 
-    return parentTask;
-}
-
-static GtTask*
-findTaskFromHigherFrame()
-{
-    GtTask* parentTask = Q_NULLPTR;
-
-    PythonQtObjectPtr inspect;
-    inspect.setNewRef(PyImport_ImportModule("inspect"));
-
-    PyObject* dict = PyModule_GetDict(inspect);
-
-    if (dict)
-    {
-        Py_INCREF(dict);
-
-        PyObject* func = PyDict_GetItemString(dict, "currentframe");
-
-        if (func)
-        {
-            Py_INCREF(func);
-
-            if (PyCallable_Check(func))
-            {
-                PyObject* fram = PyObject_Call(func, PyTuple_New(0), NULL);
-                PyObject* backFram = Q_NULLPTR;
-
-                while (fram != Py_None)
-                {
-                    PyObject* frameGlobals = PyObject_GetAttrString(
-                                                 fram, "f_globals");
-
-                    if (frameGlobals)
-                    {
-                        if (PyDict_Check(frameGlobals))
-                        {
-                            PyObject* taskVar =
-                                PyDict_GetItemString(frameGlobals,
-                                                     GtpyGlobals::ATTR_task.
-                                                     toStdString().data());
-
-                            if (taskVar)
-                            {
-                                Py_INCREF(taskVar);
-
-                                if (taskVar->ob_type->tp_base ==
-                                        &PythonQtInstanceWrapper_Type)
-                                {
-                                    PythonQtInstanceWrapper* wrapper =
-                                        (PythonQtInstanceWrapper*)taskVar;
-
-                                    if (wrapper && wrapper->_obj)
-                                    {
-                                        parentTask = qobject_cast<GtTask*>(
-                                                         wrapper->_obj);
-                                    }
-                                }
-                                else
-                                {
-                                    GtObject* taskObj =
-                                        GtpyDecorator::pyObjectToGtObject(
-                                            taskVar);
-                                    parentTask = qobject_cast<GtTask*>(taskObj);
-                                }
-
-                                Py_DECREF(taskVar);
-                            }
-                        }
-
-                        Py_DECREF(frameGlobals);
-                    }
-
-                    backFram = PyObject_GetAttrString(fram,
-                                                      "f_back");
-
-                    Py_DECREF(fram);
-
-                    fram = backFram;
-                }
-            }
-
-            Py_DECREF(func);
-        }
-
-        Py_DECREF(dict);
-    }
-
-    return parentTask;
-}
-
-static GtTask*
-findTaskByRunnable()
-{
-    GtTask* parentTask = Q_NULLPTR;
-
     if (!parentTask)
     {
         QThread* thread = QThread::currentThread();
 
         GtAbstractRunnable* runnable = thread->findChild<GtAbstractRunnable*>(
-                                           QString(), Qt::FindDirectChildrenOnly);
+                    QString(), Qt::FindDirectChildrenOnly);
 
         if (runnable)
         {
             parentTask = runnable->findChild<GtTask*>(
-                             QString(), Qt::FindDirectChildrenOnly);
+                        QString(), Qt::FindDirectChildrenOnly);
         }
-    }
-
-    return parentTask;
-}
-
-GtTask*
-GtpyCalculatorsModule::findRunningParentTask()
-{
-    GtTask* parentTask = Q_NULLPTR;
-
-    parentTask = findValue__task();
-
-    if (!parentTask)
-    {
-        parentTask = findTaskFromHigherFrame();
-    }
-
-    if (!parentTask)
-    {
-        parentTask = findTaskByRunnable();
     }
 
     return parentTask;
@@ -226,7 +109,7 @@ calcClassName(GtpyCreateCalculator* func)
 
 static PyObject*
 GtpyCreateCalculator_new(PyTypeObject* type, PyObject* args,
-                         PyObject* /*kwds*/)
+                       PyObject* /*kwds*/)
 {
     GtpyCreateCalculator* self;
     self = (GtpyCreateCalculator*)type->tp_alloc(type, 0);
@@ -306,7 +189,7 @@ GtpyCreateCalculator_dealloc(GtpyCreateCalculator* self)
 
 static PyObject*
 GtpyCreateCalculator_Call(PyObject* func, PyObject* args,
-                          PyObject* /*kwds*/)
+                                    PyObject* /*kwds*/)
 {
     GtpyCreateCalculator* f = (GtpyCreateCalculator*)func;
 
@@ -315,7 +198,7 @@ GtpyCreateCalculator_Call(PyObject* func, PyObject* args,
     if (!parentTask)
     {
         QString error = calcClassName(f) + "(name) --> can not find a " +
-                        "running parent task!";
+                         "running parent task!";
 
         PyErr_SetString(PyExc_RuntimeError, error.toLatin1().data());
 
@@ -330,14 +213,14 @@ GtpyCreateCalculator_Call(PyObject* func, PyObject* args,
 
         if (argsCount > 1)
         {
-            QString error = calcClassName(f) + "(name) --> takes 1" +
-                            " positional argument but ";
-            error += QString::number(argsCount);
-            error += " were given";
+                QString error = calcClassName(f) + "(name) --> takes 1" +
+                               " positional argument but ";
+                error += QString::number(argsCount);
+                error += " were given";
 
-            PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
+                PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
 
-            return Q_NULLPTR;
+                return Q_NULLPTR;
         }
 
         if (argsCount == 1)
@@ -351,7 +234,7 @@ GtpyCreateCalculator_Call(PyObject* func, PyObject* args,
                 if (!PyString_Check(arg))
                 {
                     QString error = calcClassName(f) + "(name) --> "
-                                    "object name has to be a string";
+                                     "object name has to be a string";
 
                     PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
@@ -369,15 +252,13 @@ GtpyCreateCalculator_Call(PyObject* func, PyObject* args,
     GtpyCalculatorFactory fac;
 
     GtCalculator* calc =
-        fac.createCalculator(calcClassName(f), objName, parentTask);
+            fac.createCalculator(calcClassName(f), objName, parentTask);
 
-    PyObject* obj = GtpyDecorator::wrapGtObject(calc);
-
-    return obj;
+    return GtpyDecorator::wrapGtObject(calc);
 }
 
 PyTypeObject
-GtpyCalculatorsModule::GtpyCreateCalculator_Type =
+GtpyCalcculatorsModule::GtpyCreateCalculator_Type =
 {
     PyVarObject_HEAD_INIT(NULL, 0)
     "GtpyCreateCalculator",             /*tp_name*/
@@ -420,8 +301,8 @@ GtpyCalculatorsModule::GtpyCreateCalculator_Type =
 };
 
 PyObject*
-GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
-        PyObject* args)
+GtpyCalcculatorsModule::findGtTask_C_function(PyObject* /*self*/,
+                                              PyObject* args)
 {
     GTPY_GIL_SCOPE
 
@@ -517,11 +398,11 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
 }
 
 void
-GtpyCalculatorsModule::createCalcConstructors()
+GtpyCalcculatorsModule::createCalcConstructors()
 {
     PythonQtObjectPtr mod =
-        PyImport_ImportModule(
-            GtpyGlobals::MODULE_GtCalculators.toStdString().data());
+            PyImport_ImportModule(
+                GtpyGlobals::MODULE_GtCalculators.toStdString().data());
 
     if (!mod)
     {
@@ -546,7 +427,7 @@ GtpyCalculatorsModule::createCalcConstructors()
                             className.toStdString().data()));
 
         PythonQtObjectPtr calcConstructor = GtpyCreateCalculator_Type.tp_new(
-                                                &GtpyCreateCalculator_Type, argsTuple, NULL);
+                    &GtpyCreateCalculator_Type, argsTuple, NULL);
 
         Py_DECREF(argsTuple);
 
