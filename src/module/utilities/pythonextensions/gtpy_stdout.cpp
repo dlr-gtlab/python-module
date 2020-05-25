@@ -8,8 +8,6 @@
  */
 
 #include "gtpy_gilscope.h"
-#include "gtpy_globals.h"
-
 #include "gtpy_stdout.h"
 
 static PyObject*
@@ -41,7 +39,7 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
     Py_INCREF(threadDict);
 
     PyObject* valItem = PyDict_GetItem(threadDict, PyString_FromString(
-                                           GtpyGlobals::CONTEXT_KEY));
+                                        GtpyStdOut::CONTEXT_KEY));
     QString contextName;
 
     if (valItem && PyString_Check(valItem))
@@ -53,7 +51,7 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
     }
 
     PyObject* outputItem = PyDict_GetItem(threadDict, PyString_FromString(
-            GtpyGlobals::OUTPUT_KEY));
+                                        GtpyStdOut::OUTPUT_KEY));
 
     bool output = false;
 
@@ -65,7 +63,7 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
     }
 
     PyObject* errorItem = PyDict_GetItem(threadDict, PyString_FromString(
-            GtpyGlobals::ERROR_KEY));
+                                        GtpyStdOut::ERROR_KEY));
 
     bool error = false;
 
@@ -83,9 +81,9 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
     {
         QString message;
 
-        if (PyTuple_GET_SIZE(args) >= 1)
+        if (PyTuple_GET_SIZE(args)>=1)
         {
-            PyObject* obj = PyTuple_GET_ITEM(args, 0);
+            PyObject* obj = PyTuple_GET_ITEM(args,0);
 
             Py_XINCREF(obj);
 
@@ -96,7 +94,7 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 #else
                 PyObject* tmp = PyUnicode_AsUTF8String(obj);
 
-                if (tmp)
+                if(tmp)
                 {
                     message = QString::fromUtf8(PyString_AS_STRING(tmp));
                     Py_DECREF(tmp);
@@ -107,7 +105,6 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
                     Py_DECREF(threadDict);
                     return NULL;
                 }
-
 #endif
             }
             else
@@ -157,19 +154,15 @@ GtpyStdOutRedirect_isatty(PyObject* /*self*/, PyObject* /*args*/)
 static PyMethodDef
 GtpyStdOutRedirect_methods[] =
 {
-    {
-        "write", (PyCFunction)GtpyStdOutRedirect_write, METH_VARARGS,
-        "redirect the writing to a callback"
+    {"write", (PyCFunction)GtpyStdOutRedirect_write, METH_VARARGS,
+    "redirect the writing to a callback"},
+    {"flush", (PyCFunction)GtpyStdOutRedirect_flush, METH_VARARGS,
+    "flush the output, currently not implemented but needed for logging "
+     "framework"
     },
-    {
-        "flush", (PyCFunction)GtpyStdOutRedirect_flush, METH_VARARGS,
-        "flush the output, currently not implemented but needed for logging "
-        "framework"
-    },
-    {
-        "isatty", (PyCFunction)GtpyStdOutRedirect_isatty,   METH_NOARGS,
-        "return False since this object is not atty-like device. Needed for logging"
-        " framework"
+    {"isatty", (PyCFunction)GtpyStdOutRedirect_isatty,   METH_NOARGS,
+    "return False since this object is not atty-like device. Needed for logging"
+     " framework"
     },
     {NULL,    NULL, 0 , NULL} /* sentinel */
 };
@@ -177,13 +170,11 @@ GtpyStdOutRedirect_methods[] =
 static PyMemberDef
 GtpyStdOutRedirect_members[] =
 {
-    {
-        const_cast<char*>("softspace"), T_INT, offsetof(GtpyStdOutRedirect,
-        softspace), 0, const_cast<char*>("soft space flag")
+    {const_cast<char*>("softspace"), T_INT, offsetof(GtpyStdOutRedirect,
+     softspace), 0, const_cast<char*>("soft space flag")
     },
-    {
-        const_cast<char*>("closed"), T_BOOL, offsetof(GtpyStdOutRedirect, closed),
-        0, const_cast<char*>("soft space flag")
+    { const_cast<char*>("closed"), T_BOOL, offsetof(GtpyStdOutRedirect, closed),
+      0, const_cast<char*>("soft space flag")
     },
     {NULL}  /* Sentinel */
 };

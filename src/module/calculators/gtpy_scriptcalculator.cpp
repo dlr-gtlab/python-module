@@ -14,7 +14,6 @@
 #include "gt_objectpathproperty.h"
 
 #include "gtpy_contextmanager.h"
-//#include "gtpy_globals.h"
 
 #include "gtpy_scriptcalculator.h"
 
@@ -31,12 +30,12 @@ GtpyScriptCalculator::GtpyScriptCalculator() :
         if (!modClass.isEmpty())
         {
             GtObjectPathProperty* pathProp =
-                new GtObjectPathProperty(QStringLiteral(""),
-                                         QStringLiteral(""),
-                                         QStringLiteral(""),
-                                         modId,
-                                         this,
-                                         QStringList() << modClass);
+                    new GtObjectPathProperty(QStringLiteral(""),
+                                             QStringLiteral(""),
+                                             QStringLiteral(""),
+                                             modId,
+                                             this,
+                                             QStringList() << modClass);
             pathProp->hide(true);
             registerProperty(*pathProp);
 
@@ -60,7 +59,7 @@ bool
 GtpyScriptCalculator::run()
 {
     int contextId = GtpyContextManager::instance()->createNewContext(
-                        GtpyContextManager::CalculatorRunContext, true);
+                GtpyContextManager::CalculatorRunContext, true);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
@@ -69,16 +68,13 @@ GtpyScriptCalculator::run()
         if (package != Q_NULLPTR)
         {
             GtpyContextManager::instance()->addGtObject(contextId,
-                    package->objectName(), package);
+                        package->objectName(), package);
         }
     }
 
     gtInfo() << "running script...";
 
     m_pyThreadId = GtpyContextManager::instance()->currentPyThreadId();
-
-    GtpyGlobals::StdOutMetaData metaData =
-        GtpyContextManager::instance()->threadDictMetaData();
 
     bool success;
 
@@ -92,13 +88,11 @@ GtpyScriptCalculator::run()
         if (package != Q_NULLPTR)
         {
             GtpyContextManager::instance()->removeObject(contextId,
-                    package->objectName());
+                                             package->objectName());
         }
     }
 
     GtpyContextManager::instance()->deleteContext(contextId, true);
-
-    GtpyContextManager::instance()->setMetaDataToThreadDict(metaData);
 
     gtInfo() << "...done!";
 
@@ -169,7 +163,7 @@ void GtpyScriptCalculator::connectWithRootTask(bool connection)
     else
     {
         disconnect(rootTask, SIGNAL(stateChanged(GtProcessComponent::STATE)),
-                   this, SLOT(onTaskStateChanged(GtProcessComponent::STATE)));
+                this, SLOT(onTaskStateChanged(GtProcessComponent::STATE)));
     }
 }
 
