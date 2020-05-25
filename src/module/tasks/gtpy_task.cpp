@@ -37,12 +37,12 @@ GtpyTask::GtpyTask():
         if (!modClass.isEmpty())
         {
             GtObjectPathProperty* pathProp =
-                new GtObjectPathProperty(QStringLiteral(""),
-                                         QStringLiteral(""),
-                                         QStringLiteral(""),
-                                         modId,
-                                         this,
-                                         QStringList() << modClass);
+                    new GtObjectPathProperty(QStringLiteral(""),
+                                             QStringLiteral(""),
+                                             QStringLiteral(""),
+                                             modId,
+                                             this,
+                                             QStringList() << modClass);
             pathProp->hide(true);
             registerProperty(*pathProp);
 
@@ -58,7 +58,7 @@ bool
 GtpyTask::runIteration()
 {
     int contextId = GtpyContextManager::instance()->createNewContext(
-                        GtpyContextManager::TaskRunContext, true);
+                GtpyContextManager::TaskRunContext, true);
 
     GtpyContextManager::instance()->addTaskValue(contextId, this);
 
@@ -70,16 +70,13 @@ GtpyTask::runIteration()
         {
             GtpyContextManager::instance()->addGtObject(contextId,
 
-                    package->objectName(), package);
+                                         package->objectName(), package);
         }
     }
 
     gtInfo() << "running script...";
 
     m_pyThreadId = GtpyContextManager::instance()->currentPyThreadId();
-
-    GtpyGlobals::StdOutMetaData metaData =
-        GtpyContextManager::instance()->threadDictMetaData();
 
     bool success;
 
@@ -93,13 +90,11 @@ GtpyTask::runIteration()
         if (package != Q_NULLPTR)
         {
             GtpyContextManager::instance()->removeObject(contextId,
-                    package->objectName());
+                        package->objectName());
         }
     }
 
     GtpyContextManager::instance()->deleteContext(contextId, true);
-
-    GtpyContextManager::instance()->setMetaDataToThreadDict(metaData);
 
     gtInfo() << "...done!";
 
