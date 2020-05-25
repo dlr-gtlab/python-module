@@ -33,11 +33,10 @@
 #include "gt_datazone0d.h"
 #include "gt_calculatorhelperfactory.h"
 
-#include "gtpy_globals.h"
+#include "gtpy_stdout.h"
 #include "gtpy_calculatorfactory.h"
 #include "gtpy_decorator.h"
 #include "gtpy_interruptrunnable.h"
-#include "gtpy_stdout.h"
 
 #include "gtpy_extendedwrapper.h"
 #include "gtpy_createhelperfunction.h"
@@ -173,12 +172,12 @@ GtpyContextManager::initExtensions()
 
     Py_INCREF(&GtpyMyImport_Type);
 
-    if (PyType_Ready(&GtpyCalcculatorsModule::GtpyCreateCalculator_Type) < 0)
+    if (PyType_Ready(&GtpyCalculatorsModule::GtpyCreateCalculator_Type) < 0)
     {
         gtError() << "could not initialize GtpyCreateCalculator_Type";
     }
 
-    Py_INCREF(&GtpyCalcculatorsModule::GtpyCreateCalculator_Type);
+    Py_INCREF(&GtpyCalculatorsModule::GtpyCreateCalculator_Type);
 }
 
 bool
@@ -195,7 +194,7 @@ GtpyContextManager::evalScript(int contextId,
 
     GTPY_GIL_SCOPE
 
-    setMetaDataToThreadDict(contextId, output, errorMessage);
+    prvSetMetaDataToThreadDict(contextId, output, errorMessage);
 
     if (output)
     {
@@ -212,12 +211,14 @@ GtpyContextManager::evalScript(int contextId,
     if (m_appLogging.value(contextId, false))
     {
         m_loggingModule.evalScript(QStringLiteral(
-                                       "PyLogger._PyLogger__outputToConsole = True"));
+                                       "PyLogger._PyLogger__outputToConsole "
+                                       "= True"));
     }
     else
     {
         m_loggingModule.evalScript(QStringLiteral(
-                                       "PyLogger._PyLogger__outputToConsole = False"));
+                                       "PyLogger._PyLogger__outputToConsole "
+                                       "= False"));
     }
 
     bool hadError = false;
@@ -236,11 +237,6 @@ GtpyContextManager::evalScript(int contextId,
     {
         emit scriptEvaluated(contextId);
     }
-
-    //    if (m_calcAccessibleContexts.contains(contextId))
-    //    {
-    //        removeCalcModuleFromSys();
-    //    }
 
     return !hadError;
 }
@@ -548,6 +544,8 @@ GtpyContextManager::initContexts()
     initWrapperModule();
     initCalculatorsModule();
 
+    initImportBehaviour();
+
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
                              metaObj.indexOfEnumerator("Context"));
@@ -566,7 +564,7 @@ GtpyContextManager::initContexts()
     }
 
     initStdOut();
-    initImportBehaviour();
+
 
     m_contextsInitialized = true;
 }
@@ -706,6 +704,59 @@ GtpyContextManager::interruptPyThread(long id)
     tp->start(runnable);
 }
 
+GtpyGlobals::StdOutMetaData
+GtpyContextManager::threadDictMetaData()
+{
+    GTPY_GIL_SCOPE
+
+    GtpyGlobals::StdOutMetaData retval;
+
+    PyObject* threadDict = PyThreadState_GetDict();
+
+    if (!threadDict)
+    {
+        return retval;
+    }
+
+    Py_INCREF(threadDict);
+
+    PyObject* valItem = PyDict_GetItem(threadDict, PyString_FromString(
+                                           GtpyGlobals::CONTEXT_KEY));
+
+    if (valItem && PyString_Check(valItem))
+    {
+        Py_INCREF(valItem);
+        const char* val = PyString_AsString(valItem);
+        retval.contextName = QString(val);
+        Py_DECREF(valItem);
+    }
+
+    PyObject* outputItem = PyDict_GetItem(threadDict, PyString_FromString(
+            GtpyGlobals::OUTPUT_KEY));
+
+    if (outputItem && PyLong_Check(outputItem))
+    {
+        Py_INCREF(outputItem);
+        retval.output = (bool)PyLong_AsLong(outputItem);
+        Py_DECREF(outputItem);
+    }
+
+    PyObject* errorItem = PyDict_GetItem(threadDict, PyString_FromString(
+            GtpyGlobals::ERROR_KEY));
+
+    if (errorItem && PyLong_Check(errorItem))
+    {
+        Py_INCREF(errorItem);
+        retval.error = (bool)PyLong_AsLong(errorItem);
+
+        Py_DECREF(errorItem);
+    }
+
+    Py_DECREF(threadDict);
+
+    return retval;
+}
+
 void
 GtpyContextManager::defaultContextConfig(
     const GtpyContextManager::Context& type,
@@ -791,10 +842,10 @@ GtpyContextManager::initCalculatorsModule()
     PyObject* myMod;
 #ifdef PY3K
     customPyModule.m_name = name.constData();
-    myMod = PyModule_Create(&GtpyCalcculatorsModule::GtpyCalculators_Module);
+    myMod = PyModule_Create(&GtpyCalculatorsModule::GtpyCalculators_Module);
 #else
     myMod = Py_InitModule(name.constData(),
-                          GtpyCalcculatorsModule::GtpyCalculatorsModule_StaticMethods);
+                          GtpyCalculatorsModule::GtpyCalculatorsModule_StaticMethods);
 #endif
     // add GtTaskFinder to the list of builtin module names
     PyObject* old_module_names =
@@ -821,7 +872,7 @@ GtpyContextManager::initCalculatorsModule()
                    PyUnicode_FromString(name.constData()), myMod);
 #endif
 
-    GtpyCalcculatorsModule::createCalcConstructors();
+    GtpyCalculatorsModule::createCalcConstructors();
 }
 void
 GtpyContextManager::initLoggingModule()
@@ -901,39 +952,39 @@ GtpyContextManager::initLoggingModule()
 void
 GtpyContextManager::initImportBehaviour()
 {
-    QList<PythonContext> conList = m_contextMap.values();
-
-    if (conList.isEmpty())
-    {
-        return;
-    }
-
-    PythonContext con = conList.first();
-
     GTPY_GIL_SCOPE
 
-    PyObject* builtins = PyDict_GetItemString(PyModule_GetDict(con.module),
-                         "__builtins__");
+    PythonQtObjectPtr builtins;
+    builtins.setNewRef(PyImport_ImportModule("builtins"));
 
     if (builtins)
     {
         Py_INCREF(builtins);
 
-        if (PyDict_Check(builtins))
+        if (PyModule_Check(builtins))
         {
-            PyObject* defImp = PyDict_GetItemString(builtins, "__import__");
+            PyObject* dict = PyModule_GetDict(builtins);
 
-            if (defImp)
+            if (dict)
             {
-                Py_INCREF(defImp);
+                Py_INCREF(dict);
 
-                PythonQtObjectPtr imp = GtpyMyImport_Type.tp_new(
-                                            &GtpyMyImport_Type, NULL, NULL);
+                PyObject* defImp = PyDict_GetItemString(dict, "__import__");
 
-                ((GtpyMyImport*)imp.object())->defaultImp = defImp;
-                PyDict_SetItemString(builtins, "__import__", imp);
+                if (defImp)
+                {
+                    Py_INCREF(defImp);
 
-                Py_DECREF(defImp);
+                    PythonQtObjectPtr imp = GtpyMyImport_Type.tp_new(
+                                                &GtpyMyImport_Type, NULL, NULL);
+
+                    ((GtpyMyImport*)imp.object())->defaultImp = defImp;
+                    PyDict_SetItemString(dict, "__import__", imp);
+
+                    Py_DECREF(defImp);
+                }
+
+                Py_DECREF(dict);
             }
         }
 
@@ -1200,7 +1251,7 @@ GtpyContextManager::importCalcModule(int contextId)
         return;
     }
 
-    QString pyCode = "from " + GtpyGlobals::MODULE_GtCalculators + " import *";
+    QString pyCode = "__import__." + GtpyGlobals::FUNC_importGtCalc + "()";
 
     GTPY_GIL_SCOPE
 
@@ -1241,8 +1292,8 @@ GtpyContextManager::lineOutOfMessage(const QString& message)
 }
 
 void
-GtpyContextManager::setMetaDataToThreadDict(int contextId, bool output,
-        bool error)
+GtpyContextManager::setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData
+        metaData)
 {
     GTPY_GIL_SCOPE
 
@@ -1255,27 +1306,39 @@ GtpyContextManager::setMetaDataToThreadDict(int contextId, bool output,
 
     Py_INCREF(threadDict);
 
-    QString contextName = contextNameById(contextId);
+    PyObject* key = PyString_FromString(QSTRING_TO_CHAR_PTR(
+                                            metaData.contextName));
 
-    PyObject* key = PyString_FromString(contextName.toStdString().c_str());
-
-    PyDict_SetItemString(threadDict, GtpyStdOut::CONTEXT_KEY, key);
+    PyDict_SetItemString(threadDict, GtpyGlobals::CONTEXT_KEY, key);
 
     Py_DECREF(key);
 
-    PyObject* outputVal = PyLong_FromLong(output ? 1 : 0);
+    PyObject* outputVal = PyLong_FromLong(metaData.output ? 1 : 0);
 
-    PyDict_SetItemString(threadDict, GtpyStdOut::OUTPUT_KEY, outputVal);
+    PyDict_SetItemString(threadDict, GtpyGlobals::OUTPUT_KEY, outputVal);
 
     Py_DECREF(outputVal);
 
-    PyObject* errorVal = PyLong_FromLong(error ? 1 : 0);
+    PyObject* errorVal = PyLong_FromLong(metaData.error ? 1 : 0);
 
-    PyDict_SetItemString(threadDict, GtpyStdOut::ERROR_KEY, errorVal);
+    PyDict_SetItemString(threadDict, GtpyGlobals::ERROR_KEY, errorVal);
 
     Py_DECREF(errorVal);
 
     Py_DECREF(threadDict);
+}
+
+void
+GtpyContextManager::prvSetMetaDataToThreadDict(int contextId, bool output,
+        bool error)
+{
+    GtpyGlobals::StdOutMetaData metaData;
+
+    metaData.contextName = contextNameById(contextId);
+    metaData.output = output;
+    metaData.error = error;
+
+    setMetaDataToThreadDict(metaData);
 }
 
 QMultiMap<QString, GtpyFunction>
@@ -2013,7 +2076,7 @@ GtpyContextManager::onErrorMessage(const QString& message)
     Py_INCREF(threadDict);
 
     PyObject* item = PyDict_GetItem(threadDict, PyString_FromString(
-                                        GtpyStdOut::CONTEXT_KEY));
+                                        GtpyGlobals::CONTEXT_KEY));
 
     int contextId = -1;
 
@@ -2029,7 +2092,7 @@ GtpyContextManager::onErrorMessage(const QString& message)
     }
 
     item = PyDict_GetItem(threadDict, PyString_FromString(
-                              GtpyStdOut::ERROR_KEY));
+                              GtpyGlobals::ERROR_KEY));
 
     Py_XINCREF(item);
 

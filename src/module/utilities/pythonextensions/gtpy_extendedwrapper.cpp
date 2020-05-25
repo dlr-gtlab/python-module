@@ -34,7 +34,7 @@ pointerAdress(QObject* obj)
     QString retVal = obj->metaObject()->className();
     retVal += " ";
     retVal += QString("0x%1").arg((quintptr)obj,
-                     QT_POINTER_SIZE * 2, 16, QChar('0'));
+                                  QT_POINTER_SIZE * 2, 16, QChar('0'));
     return retVal;
 }
 
@@ -70,6 +70,7 @@ PythonQtSlotFunction_MyCall(PyObject* func, PyObject* args, PyObject* kw)
             }
         }
     }
+
     return pythonqt_slot_call(func, args, kw);
 }
 
@@ -93,7 +94,7 @@ GtpyExtendedWrapper_dealloc(GtpyExtendedWrapper* self)
 
 static PyObject*
 GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* args,
-                       PyObject* /*kwds*/)
+                        PyObject* /*kwds*/)
 {
     GtpyExtendedWrapper* self;
 
@@ -127,8 +128,8 @@ GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* args,
     else if (argsCount > 1)
     {
         QString error = "__init__(slef, " +
-                          QString(GtObject::staticMetaObject.className()) +
-                          ") takes 2 positional arguments but ";
+                        QString(GtObject::staticMetaObject.className()) +
+                        ") takes 2 positional arguments but ";
         error += QString::number(argsCount);
         error += " were given";
 
@@ -143,13 +144,13 @@ GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* args,
                 obj->ob_type == &PythonQtInstanceWrapper_Type))
     {
         PythonQtInstanceWrapper* pyQtwrapper =
-                static_cast<PythonQtInstanceWrapper*>((void*)obj);
+            static_cast<PythonQtInstanceWrapper*>((void*)obj);
 
         if (pyQtwrapper)
         {
             QPointer<QObject> wrappedObj = pyQtwrapper->_obj;
 
-            if(static_cast<GtObject*>(wrappedObj.data()))
+            if (static_cast<GtObject*>(wrappedObj.data()))
             {
                 self->_obj = pyQtwrapper;
                 Py_INCREF(self->_obj);
@@ -164,17 +165,17 @@ GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* args,
 
 int
 GtpyExtendedWrapper_init(GtpyExtendedWrapper* /*self*/, PyObject* /*args*/,
-                        PyObject* /*kwds*/)
+                         PyObject* /*kwds*/)
 {
     return 0;
 }
 
 static PyObject*
 GtpyExtendedWrapper_richcompare(GtpyExtendedWrapper* self,
-                                    PyObject* other, int code)
+                                PyObject* other, int code)
 {
     return PythonQtInstanceWrapper_Type.tp_richcompare((PyObject*)self->_obj,
-                                                       other, code);
+            other, code);
 }
 
 static PyObject*
@@ -211,12 +212,12 @@ object___dir__(PyObject* self/*, PyObject* Py_UNUSED(ignored)*/)
             Py_XINCREF(key);
             PyList_Append(result, key);
             Py_XDECREF(key);
-        }        
+        }
     }
 
     ///look for create helper function
     QStringList helperList = gtCalculatorHelperFactory->connectedHelper(
-                Py_TYPE(wrapper->_obj)->tp_name);
+                                 Py_TYPE(wrapper->_obj)->tp_name);
 
     foreach (QString helperName, helperList)
     {
@@ -234,15 +235,18 @@ object___dir__(PyObject* self/*, PyObject* Py_UNUSED(ignored)*/)
 }
 
 static PyMethodDef
-GtpyExtendedWrapper_methods[] = {
-    {"__dir__", (PyCFunction)object___dir__, METH_NOARGS,
-     "GtpyExtendedWrapper dir() implementation"},
-{Q_NULLPTR, Q_NULLPTR, 0, Q_NULLPTR}  /* Sentinel */
+GtpyExtendedWrapper_methods[] =
+{
+    {
+        "__dir__", (PyCFunction)object___dir__, METH_NOARGS,
+        "GtpyExtendedWrapper dir() implementation"
+    },
+    {Q_NULLPTR, Q_NULLPTR, 0, Q_NULLPTR}  /* Sentinel */
 };
 
 static int
 GtpyExtendedWrapper_setattro(PyObject* obj, PyObject* name, PyObject* value)
-{    
+{
     QString strName = QString(PyString_AsString(name));
 
     if (strName.isEmpty())
@@ -256,7 +260,7 @@ GtpyExtendedWrapper_setattro(PyObject* obj, PyObject* name, PyObject* value)
     QObject* qObj = Q_NULLPTR;
     GtObject* gtObj = Q_NULLPTR;
 
-    if(!wrapper->_obj)
+    if (!wrapper->_obj)
     {
         error = "Invalid " + QString(GtObject::staticMetaObject.className()) +
                 " instance";
@@ -301,7 +305,7 @@ GtpyExtendedWrapper_setattro(PyObject* obj, PyObject* name, PyObject* value)
 
                 GtpyDecorator decorator;
                 decorator.setPropertyValue(gtObj, prop->ident(),
-                                          PythonQtConv::PyObjToQVariant(value));
+                                           PythonQtConv::PyObjToQVariant(value));
 
                 return 0;
             }
@@ -326,7 +330,7 @@ GtpyExtendedWrapper_setattro(PyObject* obj, PyObject* name, PyObject* value)
     }
 
     return PythonQtInstanceWrapper_Type.tp_setattro((PyObject*)wrapper->_obj,
-                                                    name, value);
+            name, value);
 }
 
 static PyObject*
@@ -358,7 +362,7 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
     QObject* qObj = Q_NULLPTR;
     GtObject* gtObj = Q_NULLPTR;
 
-    if(!wrapper->_obj)
+    if (!wrapper->_obj)
     {
         error = "Invalid " + QString(GtObject::staticMetaObject.className()) +
                 " instance";
@@ -406,7 +410,7 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
             PyDict_Merge(dict, pyQtWrapperDict, false);
         }
 
-        if(!gtObj)
+        if (!gtObj)
         {
             return dict;
         }
@@ -490,8 +494,9 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
     PyObject* internalMethod = PyObject_GenericGetAttr(obj, name);
 #else
     PyObject* internalMethod = Py_FindMethod(GtpyExtendedWrapper_methods,
-                                              obj, (char*)attributeName);
+                               obj, (char*)attributeName);
 #endif
+
     if (internalMethod)
     {
         return internalMethod;
@@ -514,7 +519,7 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
                                         prop->valueToVariant());
                 return propVal;
             }
-            else if(strName.startsWith("set"))
+            else if (strName.startsWith("set"))
             {
                 pyName.replace(0, 1, pyName.at(0).toUpper());
                 pyName.prepend("set");
@@ -552,7 +557,7 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
 
     ///look for create helper function
     QStringList helperList = gtCalculatorHelperFactory->connectedHelper(
-                Py_TYPE(wrapper->_obj)->tp_name);
+                                 Py_TYPE(wrapper->_obj)->tp_name);
 
     foreach (QString helperName, helperList)
     {
@@ -560,12 +565,26 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
 
         if (strName == temp)
         {
-            return GtpyCreateHelperFunction_New(helperName, obj, Q_NULLPTR);
+            PyObject* childArg = PyTuple_New(2);
+
+            PyTuple_SetItem(childArg, 0, PyString_FromString(
+                                helperName.toStdString().data()));
+
+            Py_INCREF(obj);
+            PyTuple_SetItem(childArg, 1, obj);
+
+            PyObject* retVal = GtpyCreateHelperFunction_Type.tp_new(
+                                   &GtpyCreateHelperFunction_Type, childArg,
+                                   Q_NULLPTR);
+
+            Py_DECREF(childArg);
+
+            return retVal;
         }
     }
 
     error = qObj->objectName() + "(" + pointerAdress(qObj) + ") " +
-                    "has no attribute named '" + QString(attributeName) + "'";
+            "has no attribute named '" + QString(attributeName) + "'";
     PyErr_SetString(PyExc_AttributeError, error.toLatin1().data());
 
     return Q_NULLPTR;
@@ -596,12 +615,13 @@ GtpyExtendedWrapper_builtin_nonzero(PyObject* self)
 {
     GtpyExtendedWrapper* wrapper = (GtpyExtendedWrapper*)self;
     return (wrapper->_obj->_wrappedPtr ==
-          Q_NULLPTR && wrapper->_obj->_obj == Q_NULLPTR)?0:1;
+            Q_NULLPTR && wrapper->_obj->_obj == Q_NULLPTR) ? 0 : 1;
 }
 
 static PyNumberMethods
-GtpyExtendedWrapper_as_number = {
-  0,      /* nb_add */
+GtpyExtendedWrapper_as_number =
+{
+    0,      /* nb_add */
     0,      /* nb_subtract */
     0,      /* nb_multiply */
 #ifndef PY3K
@@ -686,11 +706,11 @@ GtpyExtendedWrapper_Type =
     0,                   /* tp_weaklistoffset */
     0,                   /* tp_iter */
     0,                   /* tp_iternext */
-    #ifdef PY3K
+#ifdef PY3K
     GtpyExtendedWrapper_methods,
-    #else
-     GtpyExtendedWrapper_methods,             /* tp_methods */
-    #endif
+#else
+    GtpyExtendedWrapper_methods,             /* tp_methods */
+#endif
     0,//GtpyGtObjectWrapper_members,                   /* tp_members */
     0,                   /* tp_getset */
     0,                         /* tp_base */
