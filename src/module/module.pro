@@ -64,9 +64,7 @@ HEADERS += \
     post/gtpy_pythonplotwidget.h \
     post/gtpy_pythonsvgwidget.h \
     utilities/gtpy_globals.h \
-    utilities/gtpy_importfunction.h \
     utilities/pythonextensions/gtpy_calculatorsmodule.h \
-    utilities/pythonextensions/gtpy_taskfindermodule.h \
     wizards/gtpy_abstractscriptingwizardpage.h \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_completer.h \
@@ -91,6 +89,7 @@ HEADERS += \
     utilities/pythonextensions/gtpy_stdout.h \
     utilities/pythonextensions/gtpy_extendedwrapper.h \
     utilities/pythonextensions/gtpy_createhelperfunction.h \
+    utilities/pythonextensions/gtpy_importfunction.h \
     utilities/pythonextensions/gtpy_propertysetter.h
 
 SOURCES += \
@@ -102,9 +101,7 @@ SOURCES += \
     post/gtpy_pythonplotwidget.cpp \
     post/gtpy_pythonsvgwidget.cpp \
     utilities/gtpy_globals.cpp \
-    utilities/gtpy_importfunction.cpp \
     utilities/pythonextensions/gtpy_calculatorsmodule.cpp \
-    utilities/pythonextensions/gtpy_taskfindermodule.cpp \
     wizards/gtpy_abstractscriptingwizardpage.cpp \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_completer.cpp \
@@ -128,6 +125,7 @@ SOURCES += \
     utilities/pythonextensions/gtpy_stdout.cpp \
     utilities/pythonextensions/gtpy_extendedwrapper.cpp \
     utilities/pythonextensions/gtpy_createhelperfunction.cpp \
+    utilities/pythonextensions/gtpy_importfunction.cpp \
     utilities/pythonextensions/gtpy_propertysetter.cpp
 
 

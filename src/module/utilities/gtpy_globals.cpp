@@ -11,8 +11,21 @@
 
 namespace GtpyGlobals
 {
-    ///Python Modules
-    const QString GTOBJECT_WRAPPER_MODULE = "GtObjectWrapperModuleC";
-    const QString GTOBJECT_WRAPPER = "GtpyExtendedWrapper";
-    const QString GTPYTASKFINDER_MODULE = "GtpyTaskFinder";
+///Python Modules
+const QString GTOBJECT_WRAPPER_MODULE = "GtObjectWrapperModuleC";
+const QString MODULE_GtCalculators = "GtCalculators";
+const QString MODULE_GtLogging = "GtLogging";
+
+///Python Classes
+const QString GTOBJECT_WRAPPER = "GtpyExtendedWrapper";
+
+///Python Attribute
+const QString ATTR_task = "__task";
+
+const QString FUNC_importGtCalc = "importGtCalculators";
+
+///StdOut meta data
+const char* CONTEXT_KEY = "CONTEXT_NAME";
+const char* OUTPUT_KEY  = "OUTPUT_TO_CONSOLE";
+const char* ERROR_KEY   = "ERROR_TO_CONSOLE";
 }

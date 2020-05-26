@@ -76,9 +76,9 @@ public:
      * @param obj Object to convert.
      * @return The converted GtObject.
      */
-    GtObject* pyObjectToGtObject(PythonQtObjectPtr obj);
+    static GtObject* pyObjectToGtObject(PythonQtObjectPtr obj);
 
-    PyObject* wrapGtObject(GtObject* obj);
+    static PyObject* wrapGtObject(GtObject* obj);
 
 public slots:
 
