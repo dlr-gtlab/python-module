@@ -20,8 +20,8 @@
 #include "gtpy_scriptcalculatorwizardpage.h"
 
 GtpyScriptCalculatorWizardPage::GtpyScriptCalculatorWizardPage() :
-   GtpyAbstractScriptingWizardPage(GtpyContextManager::ScriptEditorContext),
-   m_calc(Q_NULLPTR)
+    GtpyAbstractScriptingWizardPage(GtpyContextManager::ScriptEditorContext),
+    m_calc(Q_NULLPTR)
 {
 
 }
@@ -58,6 +58,8 @@ GtpyScriptCalculatorWizardPage::initialization()
     setPlainTextToEditor(m_calc->script());
 
     setPackageNames(m_calc->packageNames());
+
+    reloadWizardGeometry(m_calc->uuid());
 }
 
 bool

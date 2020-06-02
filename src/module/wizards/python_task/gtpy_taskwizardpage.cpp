@@ -106,20 +106,13 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
 
     calcEditor->hide();
 
-//    addTabWidget(calcEditor, "Calculators");
+    //    addTabWidget(calcEditor, "Calculators");
 }
 
 void
 GtpyTaskWizardPage::initialization()
 {
     acceptCalculatorDrops(true);
-
-    GtProcessWizard* wiz = findParentWizard();
-
-    if (wiz)
-    {
-        wiz->setWindowModality(Qt::NonModal);
-    }
 
     GtObjectMemento memento = provider()->componentData();
 
@@ -190,6 +183,8 @@ GtpyTaskWizardPage::initialization()
             SLOT(calculatorAppendedToTask(GtObject*, GtObject*)));
     connect(this, SIGNAL(calculatorDropReceived(GtCalculator*)), this,
             SLOT(onCalculatorDropReceived(GtCalculator*)));
+
+    reloadWizardGeometry(m_task->uuid());
 }
 
 bool
@@ -212,14 +207,6 @@ GtpyTaskWizardPage::validation()
     }
 
     provider()->setComponentData(m_task->toMemento());
-
-
-    GtProcessWizard* wiz = findParentWizard();
-
-    if (wiz)
-    {
-        wiz->setWindowModality(Qt::ApplicationModal);
-    }
 
     return true;
 }
@@ -287,8 +274,8 @@ GtpyTaskWizardPage::configCalculator(GtCalculator* calc)
 
     int newHeadlineSize = headline.size();
 
-    headline = ("#" + GtpyTaskWizardPage::ARROW_LEFT + headline+
-                   GtpyTaskWizardPage::ARROW_RIGHT);
+    headline = ("#" + GtpyTaskWizardPage::ARROW_LEFT + headline +
+                GtpyTaskWizardPage::ARROW_RIGHT);
 
     QString caption;
 
@@ -335,7 +322,7 @@ GtpyTaskWizardPage::addCalculator()
     }
 
     GtProcessComponent* component = memento.restore<GtProcessComponent*>(
-                                   gtProcessFactory);
+                                        gtProcessFactory);
 
     GtCalculator* calc = qobject_cast<GtCalculator*>(component);
 
@@ -439,7 +426,7 @@ GtpyTaskWizardPage::appendCalcToTask(GtCalculator* calc)
     while (sameNamedCalcs > 0)
     {
         sameNamedCalcs =
-                m_task->findDirectChildren<GtCalculator*>(objName).count();
+            m_task->findDirectChildren<GtCalculator*>(objName).count();
 
         if (sameNamedCalcs > 0)
         {
@@ -613,13 +600,13 @@ GtpyTaskWizardPage::onProcessComponentRenamed(QString className,
     int oldHeadlineSize = oldHeadline.size();
 
     oldHeadline = ("#" + GtpyTaskWizardPage::ARROW_LEFT + oldHeadline +
-               GtpyTaskWizardPage::ARROW_RIGHT);
+                   GtpyTaskWizardPage::ARROW_RIGHT);
 
     QString newHeadline = " " + newName + " ";
 
     int newHeadlineSize = newHeadline.size();
 
-    newHeadline = ("#" + GtpyTaskWizardPage::ARROW_LEFT + newHeadline+
+    newHeadline = ("#" + GtpyTaskWizardPage::ARROW_LEFT + newHeadline +
                    GtpyTaskWizardPage::ARROW_RIGHT);
 
     QString oldCaption;
@@ -630,7 +617,7 @@ GtpyTaskWizardPage::onProcessComponentRenamed(QString className,
     }
 
     oldCaption = ("#" + GtpyTaskWizardPage::ARROW_LEFT + oldCaption +
-               GtpyTaskWizardPage::ARROW_RIGHT);
+                  GtpyTaskWizardPage::ARROW_RIGHT);
 
     QString newCaption;
 
@@ -640,14 +627,14 @@ GtpyTaskWizardPage::onProcessComponentRenamed(QString className,
     }
 
     newCaption = ("#" + GtpyTaskWizardPage::ARROW_LEFT + newCaption +
-               GtpyTaskWizardPage::ARROW_RIGHT);
+                  GtpyTaskWizardPage::ARROW_RIGHT);
 
     replaceBlockHeaders(oldHeadline, newHeadline, oldCaption, newCaption);
 
-//    QString search = className + "(\"" + oldName + "\")";
-//    QString replace = className + "(\"" + newName + "\")";
+    //    QString search = className + "(\"" + oldName + "\")";
+    //    QString replace = className + "(\"" + newName + "\")";
 
-//    searchAndReplaceEditorText(search, replace, true);
+    //    searchAndReplaceEditorText(search, replace, true);
 
     QString pattern = "(" + className + "\\( *\"" + oldName + "\" *\\))";
     QString replace = className + "(\"" + newName + "\")";

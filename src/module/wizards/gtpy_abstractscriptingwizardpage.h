@@ -42,7 +42,7 @@ public:
      */
     GtpyAbstractScriptingWizardPage(GtpyContextManager::Context type);
 
-    ~GtpyAbstractScriptingWizardPage();
+    virtual ~GtpyAbstractScriptingWizardPage();
 
     /**
      * @brief Will be called just before page is shown. Adds registered
@@ -55,7 +55,7 @@ public:
      * objects from the python context.
      * @return True if validation was successful.
      */
-     virtual bool validatePage() Q_DECL_OVERRIDE Q_DECL_FINAL;
+    virtual bool validatePage() Q_DECL_OVERRIDE Q_DECL_FINAL;
 
 protected:
     /**
@@ -180,12 +180,6 @@ protected:
     void showEvalButton(bool show);
 
     /**
-     * @brief Searchs the parent GtProcessWizard and returns it.
-     * @return The parent GtProcessWizard.
-     */
-    GtProcessWizard* findParentWizard();
-
-    /**
      * @brief Sets drops of calculator instances to accept.
      * @param accept Decides whether drops of calculator instances are
      * accepted or not.
@@ -203,6 +197,19 @@ protected:
      *  disabled.
      */
     void enableSaving(bool enable = true);
+
+    /**
+     * @brief Registers the current size ot the wizard in the
+     * GtpyWizardSettings.
+     */
+    void registerGeometry();
+
+    /**
+     * @brief Change the size of the wizard to the size stored in the
+     * GtpyWizardSettings.
+     * @param uuid Uuid of the task.
+     */
+    void reloadWizardGeometry(const QString& uuid);
 
     /// Python Context id
     int m_contextId;
@@ -254,12 +261,18 @@ private:
     void saveMesssageBox();
 
     /**
+     * @brief Searchs the parent GtProcessWizard and returns it.
+     * @return The parent GtProcessWizard.
+     */
+    QWidget* findParentWizard();
+
+    /**
      * @brief Searchs the parent GtProcessWizard of the given object
      * and returns it.
      * @param obj Object which parent GtProcessWizard is searched.
      * @return The parent GtProcessWizard.
      */
-    GtProcessWizard* findParentWizard(QObject* obj);
+    QWidget* findParentWizard(QObject* obj);
 
     /// Search Widget
     GtSearchWidget* m_searchWidget;
@@ -313,6 +326,8 @@ private:
 
     /// Saving the script
     bool m_savingEnabled;
+
+    QString m_componentUuid;
 
 private slots:
 

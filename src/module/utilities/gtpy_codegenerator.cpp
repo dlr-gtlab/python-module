@@ -8,8 +8,6 @@
  */
 
 #include <QMetaProperty>
-#include <QDebug>
-
 
 #include "gt_application.h"
 #include "gt_calculator.h"
@@ -117,7 +115,7 @@ GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc)
     tempObjName.replace(0, 1, objName.at(0).toLower());
 
     pyCode += (tempObjName + " = " + className + "(\"" +
-             objName + "\")\n");
+               objName + "\")\n");
 
     GtObjectMementoDiff diff(before, calc->toMemento());
 
@@ -201,7 +199,7 @@ GtpyCodeGenerator::propValToString(GtAbstractProperty* prop)
     else if (qobject_cast<GtObjectLinkProperty*>(prop))
     {
         GtObject* obj = gtDataModel->objectByUuid(prop->valueToVariant().
-                                                  toString());
+                        toString());
 
         if (obj)
         {
@@ -215,10 +213,10 @@ GtpyCodeGenerator::propValToString(GtAbstractProperty* prop)
                             QRegExp(QStringLiteral("^[a-zA-Z0-9_]*$"))))
                 {
                     QString funcName =
-                            GtpyContextManager::instance()->findChildFuncName();
+                        GtpyContextManager::instance()->findChildFuncName();
 
                     objName = funcName + "(\"" + objName +
-                                   "\")";
+                              "\")";
                 }
 
                 obj = qobject_cast<GtObject*>(obj->parent());
@@ -242,11 +240,11 @@ GtpyCodeGenerator::propValToString(GtAbstractProperty* prop)
                                 QRegExp(QStringLiteral("^[a-zA-Z0-9_]*$"))))
                     {
                         QString funcName =
-                                GtpyContextManager::instance()->
-                                findChildFuncName();
+                            GtpyContextManager::instance()->
+                            findChildFuncName();
 
                         objName = funcName + "(\"" + objName +
-                                       "\")";
+                                  "\")";
                     }
 
                     val.insert(0, objName);
@@ -331,8 +329,8 @@ GtpyCodeGenerator::helperPyCode(GtObject* obj, const QString& pyObjName)
                     helperObjName = childClassName;
                 }
 
-                QList<GtObject*> sameNamedChildren = obj->findDirectChildren<
-                                           GtObject*>(helperObjName);
+                QList<GtObject*> sameNamedChildren = obj->findDirectChildren <
+                                                     GtObject* > (helperObjName);
                 int count = 1;
 
                 foreach (GtObject* sameNamedChild, sameNamedChildren)
@@ -414,7 +412,7 @@ GtpyCodeGenerator::helperPyCode(GtObject* obj, const QString& pyObjName)
 
                         pyCode += (helperObjName + "." +
                                    GtpyContextManager::instance()->
-                                   setPropertyValueFuncName() +"(\""
+                                   setPropertyValueFuncName() + "(\""
                                    + ident + "\", " + val + ")\n");
 
                     }

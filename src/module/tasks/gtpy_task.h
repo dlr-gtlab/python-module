@@ -21,13 +21,15 @@ class GtpyContextManager;
  */
 class GtpyTask : public GtTask
 {
-     Q_OBJECT
+    Q_OBJECT
 
 public:
     /**
      * @brief GtpyTask
      */
     Q_INVOKABLE GtpyTask();
+
+    virtual ~GtpyTask();
 
     /**
      * @brief Adds all available packages to python context and starts
@@ -95,6 +97,9 @@ private:
 
 private slots:
     void onStateChanged(GtProcessComponent::STATE state);
+
+signals:
+    void taskDestroyed(GtProcessComponent* task);
 };
 
 #endif // GTPY_TASK_H

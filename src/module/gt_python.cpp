@@ -12,7 +12,6 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QDir>
-#include <QDebug>
 
 #include "gt_taskdata.h"
 #include "gt_calculatordata.h"
@@ -93,13 +92,13 @@ GtPythonModule::init()
     pythonConsoleTab->setLayout(pythonConsoleLayout);
 
     GtpyConsole* pythonConsole =
-            new GtpyConsole(GtpyContextManager::GlobalContext,
-                            pythonConsoleTab);
+        new GtpyConsole(GtpyContextManager::GlobalContext,
+                        pythonConsoleTab);
 
     pythonConsole->showAdditionalContextOutput(
-                GtpyContextManager::CalculatorRunContext);
+        GtpyContextManager::CalculatorRunContext);
     pythonConsole->showAdditionalContextOutput(
-                GtpyContextManager::TaskRunContext);
+        GtpyContextManager::TaskRunContext);
 
     connect(GtpyContextManager::instance(), SIGNAL(newContextCreated(int)),
             pythonConsole, SLOT(showAdditionalContextOutput(int)));
@@ -241,7 +240,7 @@ GtPythonModule::findWidget(QStringList path, QWidget* parent)
 
     QString widId = path.takeFirst();
     QWidget* child = parent->findChild<QWidget*>(widId,
-                                                 Qt::FindDirectChildrenOnly);
+                     Qt::FindDirectChildrenOnly);
 
     if (child == Q_NULLPTR)
     {

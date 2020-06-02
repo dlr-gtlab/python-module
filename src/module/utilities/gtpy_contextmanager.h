@@ -81,14 +81,13 @@ public:
 
     /**
     * @brief Returns instance of context manager based on singleton pattern.
-    * @return Instance of calculator helper factory
+    * @return Instance of context manager
     */
     static GtpyContextManager* instance();
 
     ~GtpyContextManager();
 
     void initExtensions();
-
 
     /**
     * @brief Evaluates the given script into the given python context.
