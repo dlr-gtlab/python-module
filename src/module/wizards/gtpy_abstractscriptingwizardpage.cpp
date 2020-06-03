@@ -294,17 +294,25 @@ GtpyAbstractScriptingWizardPage::initializePage()
 
     if (wiz)
     {
-        QWidgetList widgets = QApplication::topLevelWidgets();
+        QWizard* wizard = qobject_cast<QWizard*>(wiz);
 
-        foreach (QWidget* wid, widgets)
+        if (wizard)
         {
-            QMainWindow* mainWin = qobject_cast<QMainWindow*>(wid);
-
-            if (mainWin)
+            if (wizard->pageIds().count() == 1)
             {
-                wiz->setParent(mainWin);
-                wiz->setWindowModality(Qt::NonModal);
-                wiz->setWindowFlags(Qt::Dialog);
+                QWidgetList widgets = QApplication::topLevelWidgets();
+
+                foreach (QWidget* wid, widgets)
+                {
+                    QMainWindow* mainWin = qobject_cast<QMainWindow*>(wid);
+
+                    if (mainWin)
+                    {
+                        wiz->setWindowModality(Qt::NonModal);
+                        wiz->setParent(mainWin);
+                        wiz->setWindowFlags(Qt::Dialog);
+                    }
+                }
             }
         }
     }
@@ -752,14 +760,11 @@ GtpyAbstractScriptingWizardPage::findParentWizard(QObject* obj)
         return Q_NULLPTR;
     }
 
-    GtProcessWizard* temp = qobject_cast<GtProcessWizard*>(obj);
-
-    if (temp)
+    if (!obj->parent())
     {
-        return temp;
+        return qobject_cast<QWidget*>(obj);
     }
-
-    if (obj->parent())
+    else
     {
         QMainWindow* mainWin = qobject_cast<QMainWindow*>(obj->parent());
 
@@ -831,6 +836,7 @@ GtpyAbstractScriptingWizardPage::registerGeometry()
 
     if (wiz && !m_componentUuid.isEmpty())
     {
+
         QRect rect = wiz->frameGeometry();
 
         GtpyWizardSettings::instance()->registerGeometry(m_componentUuid, rect);
