@@ -37,6 +37,7 @@
 #include "gtpy_calculatorfactory.h"
 #include "gtpy_decorator.h"
 #include "gtpy_interruptrunnable.h"
+#include "gtpy_projectpathfunction.h"
 
 #include "gtpy_extendedwrapper.h"
 #include "gtpy_createhelperfunction.h"
@@ -178,6 +179,14 @@ GtpyContextManager::initExtensions()
     }
 
     Py_INCREF(&GtpyCalculatorsModule::GtpyCreateCalculator_Type);
+
+    if (PyType_Ready(&GtpyProjectPathFunction::GtpyProjectPathFunction_Type)
+            < 0)
+    {
+        gtError() << "could not initialize GtpyProjectPathFunction_Type";
+    }
+
+    Py_INCREF(&GtpyProjectPathFunction::GtpyProjectPathFunction_Type);
 }
 
 bool
@@ -563,7 +572,6 @@ GtpyContextManager::initContexts()
 
     initStdOut();
 
-
     m_contextsInitialized = true;
 }
 
@@ -778,6 +786,15 @@ GtpyContextManager::defaultContextConfig(
     context.module.evalScript(pyCode);
 
     m_addedObjectNames.insert(contextId, QStringList());
+
+    PyObject* projectPathFunc =
+        GtpyProjectPathFunction::GtpyProjectPathFunction_Type.tp_new(
+            &GtpyProjectPathFunction::GtpyProjectPathFunction_Type, Q_NULLPTR,
+            Q_NULLPTR);
+
+    PyModule_AddObject(context.module,
+                       QSTRING_TO_CHAR_PTR(GtpyGlobals::FUNC_currentProPath),
+                       projectPathFunc);
 
     specificContextConfig(type, contextId);
 }
@@ -1121,10 +1138,12 @@ GtpyContextManager::initStdOut()
     sys.setNewRef(PyImport_ImportModule("sys"));
 
     // create a redirection object for stdout and stderr
-    m_out = GtpyStdOutRedirect_Type.tp_new(&GtpyStdOutRedirect_Type, NULL, NULL);
+    m_out = GtpyStdOutRedirect_Type.tp_new(&GtpyStdOutRedirect_Type, NULL,
+                                           NULL);
     ((GtpyStdOutRedirect*)m_out.object())->callback = stdOutRedirectCB;
 
-    m_err = GtpyStdOutRedirect_Type.tp_new(&GtpyStdOutRedirect_Type, NULL, NULL);
+    m_err = GtpyStdOutRedirect_Type.tp_new(&GtpyStdOutRedirect_Type, NULL,
+                                           NULL);
     ((GtpyStdOutRedirect*)m_err.object())->callback = stdErrRedirectCB;
 
     // replace the built in file objects with the new objects
@@ -1442,12 +1461,12 @@ GtpyContextManager::introspectObject(PyObject* object) const
                 }
                 else if (value->ob_type == &PyCFunction_Type ||
                          value->ob_type == &PyFunction_Type ||
-                         value->ob_type == &PyMethod_Type)
+                         value->ob_type == &PyMethod_Type ||
+                         PyCallable_Check(value))
                 {
                     func.name = keystr + QStringLiteral("()");
                     func.toolTip = func.name;
                     func.completion = func.name;
-
                 }
                 else
                 {
@@ -1466,8 +1485,6 @@ GtpyContextManager::introspectObject(PyObject* object) const
         Py_DECREF(keys);
     }
 
-    //    if (PyObject_TypeCheck(object, &PythonQtInstanceWrapper_Type))
-    //    {
     PythonQtObjectPtr p = object;
 
     QString childrenFunc = m_decorator->getFunctionName(
@@ -1681,8 +1698,6 @@ GtpyContextManager::introspectObject(PyObject* object) const
             }
         }
     }
-
-    //    }
 
     Py_DECREF(object);
 

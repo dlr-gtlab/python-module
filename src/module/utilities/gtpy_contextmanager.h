@@ -87,6 +87,9 @@ public:
 
     ~GtpyContextManager();
 
+    /**
+     * @brief Initialize the Python extensions written in C++.
+     */
     void initExtensions();
 
     /**

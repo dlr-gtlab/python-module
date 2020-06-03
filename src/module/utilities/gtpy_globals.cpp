@@ -22,7 +22,9 @@ const QString GTOBJECT_WRAPPER = "GtpyExtendedWrapper";
 ///Python Attribute
 const QString ATTR_task = "__task";
 
+///Python Functions
 const QString FUNC_importGtCalc = "importGtCalculators";
+const QString FUNC_currentProPath = "projectPath";
 
 ///StdOut meta data
 const char* CONTEXT_KEY = "CONTEXT_NAME";
