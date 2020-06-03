@@ -14,6 +14,7 @@
 #include "gt_processdata.h"
 
 #include "gtpy_contextmanager.h"
+#include "gtpy_wizardsettings.h"
 
 #include "gtpy_task.h"
 
@@ -52,6 +53,16 @@ GtpyTask::GtpyTask():
 
     connect(this, SIGNAL(stateChanged(GtProcessComponent::STATE)), this,
             SLOT(onStateChanged(GtProcessComponent::STATE)));
+
+    connect(this, SIGNAL(taskDestroyed(GtProcessComponent*)),
+            GtpyWizardSettings::instance(),
+            SLOT(processElementDestroyed(GtProcessComponent*)));
+}
+
+GtpyTask::~GtpyTask()
+{
+    qDeleteAll(m_dynamicPathProps);
+    emit taskDestroyed(this);
 }
 
 bool

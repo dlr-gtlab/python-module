@@ -74,7 +74,7 @@ public:
      * @param newCaption New caption string
      */
     void replaceBlockHeaders(const QString& oldHeader, const QString& newHeader,
-                      const QString& oldCaption, const QString& newCaption);
+                             const QString& oldCaption, const QString& newCaption);
 
     /**
      * @brief Searchs for the given regular expression and replaces it
@@ -102,6 +102,22 @@ public:
      * @param accept Determines whether drops are accepted or not.
      */
     void acceptCalculatorDrops(bool accept);
+
+    /**
+     * @brief Returns current cursor postion.
+     * @return Current cursor position.
+     */
+    int cursorPosition();
+
+    /**
+     * @brief Sets the cursor to the given position.
+     * @param pos New cursor position.
+     */
+    void setCursorPosition(int pos);
+
+    int verticalSliderPos();
+
+    void setVerticalSliderPos(int pos);
 
 public slots:
     /**

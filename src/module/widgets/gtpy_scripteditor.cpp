@@ -13,6 +13,7 @@
 #include <QFontMetrics>
 #include <QRegularExpression>
 #include <QMimeData>
+#include <QScrollBar>
 
 #include "gt_objectmemento.h"
 #include "gt_objectfactory.h"
@@ -51,11 +52,11 @@ GtpyScriptEditor::GtpyScriptEditor(int contextId, QWidget* parent) :
     GtpyContextManager* python = GtpyContextManager::instance();
 
     connect(python, SIGNAL(errorCodeLine(int, int)), this,
-          SLOT(highlightErrorLine(int, int)));
+            SLOT(highlightErrorLine(int, int)));
     connect(python, SIGNAL(errorMessage(QString, int)), this,
-         SLOT(appendErrorMessage(QString, int)));
+            SLOT(appendErrorMessage(QString, int)));
     connect(this, SIGNAL(cursorPositionChanged()), this,
-         SLOT(resetErrorLine()));
+            SLOT(resetErrorLine()));
     connect(m_cpl, SIGNAL(activated(QModelIndex)), this,
             SLOT(insertCompletion()));
 
@@ -209,7 +210,7 @@ GtpyScriptEditor::replaceIntoBlock(const QString& header,
             startCursor.insertText("\n");
 
             startCursor.insertText(functionCallPyCode(newVal, functionName,
-                                               pyObjName));
+                                   pyObjName));
         }
     }
 }
@@ -341,6 +342,36 @@ GtpyScriptEditor::acceptCalculatorDrops(bool accept)
     setAcceptDrops(accept);
 }
 
+int
+GtpyScriptEditor::cursorPosition()
+{
+    return textCursor().position();
+}
+
+void
+GtpyScriptEditor::setCursorPosition(int pos)
+{
+    QTextCursor cursor = textCursor();
+
+    cursor.setPosition(pos);
+
+    setTextCursor(cursor);
+
+    centerCursor();
+}
+
+int
+GtpyScriptEditor::verticalSliderPos()
+{
+    return verticalScrollBar()->sliderPosition();
+}
+
+void
+GtpyScriptEditor::setVerticalSliderPos(int pos)
+{
+    verticalScrollBar()->setSliderPosition(pos);
+}
+
 void
 GtpyScriptEditor::searchHighlighting(const QString& searchText,
                                      bool moveToNextFound)
@@ -388,8 +419,8 @@ GtpyScriptEditor::searchHighlighting(const QString& searchText,
             if (highlightingCursor.isNull())
             {
                 highlightingCursor = document()->find(searchText,
-                                              highlightingCursor,
-                                              QTextDocument::FindBackward);
+                                                      highlightingCursor,
+                                                      QTextDocument::FindBackward);
             }
 
             if (!highlightingCursor.isNull())
@@ -580,6 +611,7 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
                 {
                     handleCompletion();
                 }
+
                 return;
 
             default:
@@ -644,6 +676,7 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
             {
                 GtCodeEditor::keyPressEvent(event);
             }
+
             break;
 
         /* indent selection with tab to the rigth */
@@ -653,6 +686,7 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
             {
                 GtCodeEditor::keyPressEvent(event);
             }
+
             break;
 
         /* indent selection with backtab to the left */
@@ -662,6 +696,7 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
             {
                 GtCodeEditor::keyPressEvent(event);
             }
+
             break;
 
         default:
@@ -752,7 +787,7 @@ GtpyScriptEditor::dropEvent(QDropEvent* event)
         if (!droppedM.isNull())
         {
             QString gtCalculatorClassName =
-                    GtCalculator::staticMetaObject.className();
+                GtCalculator::staticMetaObject.className();
 
             bool castable = droppedM.canCastTo(
                                 gtCalculatorClassName, gtObjectFactory);
@@ -760,8 +795,8 @@ GtpyScriptEditor::dropEvent(QDropEvent* event)
             if (castable)
             {
                 GtCalculator* calc =
-                        droppedM.restore<GtCalculator*>(gtObjectFactory,
-                                                        true);
+                    droppedM.restore<GtCalculator*>(gtObjectFactory,
+                                                    true);
 
                 if (calc)
                 {
@@ -865,8 +900,8 @@ GtpyScriptEditor::insertCompletion()
 
 QString
 GtpyScriptEditor::functionCallPyCode(const QString& newVal,
-                              const QString& functionName,
-                              const QString& pyObjName)
+                                     const QString& functionName,
+                                     const QString& pyObjName)
 {
     return pyObjName + "." + functionName + "(" + newVal + ")";
 }
@@ -1019,7 +1054,7 @@ GtpyScriptEditor::isCurrentLineHighlighted()
 
     QTextEdit::ExtraSelection firstSelection = selectionList.first();
     QVariant fullWidth = firstSelection.format.property(
-                         QTextFormat::FullWidthSelection);
+                             QTextFormat::FullWidthSelection);
 
     return fullWidth.toBool();
 }
@@ -1193,7 +1228,7 @@ GtpyScriptEditor::validateDrop(const QMimeData* droppedData)
         if (!droppedM.isNull())
         {
             QString gtCalculatorClassName =
-                    GtCalculator::staticMetaObject.className();
+                GtCalculator::staticMetaObject.className();
 
             bool castable = droppedM.canCastTo(
                                 gtCalculatorClassName, gtObjectFactory);

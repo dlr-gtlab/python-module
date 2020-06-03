@@ -21,11 +21,14 @@
 #include <QMetaProperty>
 #include <QTabBar>
 #include <QThreadPool>
+#include <QMainWindow>
+#include <QApplication>
 
 // python includes
 #include "gtpy_scripteditor.h"
 #include "gtpy_console.h"
 #include "gtpy_scriptrunnable.h"
+#include "gtpy_wizardsettings.h"
 
 // GTlab framework includes
 #include "gt_object.h"
@@ -46,7 +49,7 @@
 #include "gtpy_abstractscriptingwizardpage.h"
 
 GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
-        GtpyContextManager::Context type) :
+    GtpyContextManager::Context type) :
     m_contextId(-1),
     m_contextType(type),
     m_editor(Q_NULLPTR),
@@ -54,7 +57,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     m_tabWidget(Q_NULLPTR),
     m_isEvaluating(false),
     m_runnable(Q_NULLPTR),
-    m_savingEnabled(true)
+    m_savingEnabled(true),
+    m_componentUuid(QString())
 {
     setTitle(tr("Python Script Editor"));
 
@@ -98,7 +102,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     separatorLay->setSpacing(0);
     separatorLay->setMargin(0);
-    separatorLay->setContentsMargins(0,0,0,0);
+    separatorLay->setContentsMargins(0, 0, 0, 0);
 
     QLabel* label = new QLabel("Output Console:", this);
 
@@ -110,7 +114,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     m_backwardButton = new QPushButton;
     m_backwardButton->setIcon(gtApp->icon("arrowleftIcon.png"));
-//    m_backwardButton->setToolTip(tr("Import Python Script"));
+    m_backwardButton->setToolTip(tr("Search backwards"));
     m_backwardButton->setMaximumSize(QSize(15, 20));
     m_backwardButton->setFlat(true);
     m_backwardButton->setVisible(false);
@@ -119,7 +123,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     m_forwardButton = new QPushButton;
     m_forwardButton->setIcon(gtApp->icon("arrowrightIcon.png"));
-//    m_forwardButton->setToolTip(tr("Import Python Script"));
+    m_forwardButton->setToolTip(tr("Search forwards"));
     m_forwardButton->setMaximumSize(QSize(15, 20));
     m_forwardButton->setFlat(true);
     m_forwardButton->setVisible(false);
@@ -280,18 +284,38 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 GtpyAbstractScriptingWizardPage::~GtpyAbstractScriptingWizardPage()
 {
     GtpyContextManager::instance()->deleteContext(m_contextId);
+    registerGeometry();
 }
 
 void
 GtpyAbstractScriptingWizardPage::initializePage()
 {
+    QWidget* wiz = findParentWizard();
+
+    if (wiz)
+    {
+        QWidgetList widgets = QApplication::topLevelWidgets();
+
+        foreach (QWidget* wid, widgets)
+        {
+            QMainWindow* mainWin = qobject_cast<QMainWindow*>(wid);
+
+            if (mainWin)
+            {
+                wiz->setParent(mainWin);
+                wiz->setWindowModality(Qt::NonModal);
+                wiz->setWindowFlags(Qt::Dialog);
+            }
+        }
+    }
+
     initialization();
 
     foreach (QString packageName, m_packageNames)
     {
         GtObject* obj = scope()->getObjectByPath(QStringList() <<
-                                                 scope()->objectName()
-                                                 << packageName);
+                        scope()->objectName()
+                        << packageName);
 
         if (obj != Q_NULLPTR)
         {
@@ -299,7 +323,7 @@ GtpyAbstractScriptingWizardPage::initializePage()
             clone->setParent(this);
 
             GtpyContextManager::instance()->addGtObject(
-                        m_contextId, clone->objectName(), clone);
+                m_contextId, clone->objectName(), clone);
         }
     }
 
@@ -325,7 +349,8 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
     {
         case Qt::Key_Return:
             // Ignore return
-         return;
+            return;
+
         case Qt::Key_Escape:
 
             if (m_saveButton->isEnabled())
@@ -342,7 +367,7 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
 
     // Evaluation shortcut
     if (((e->modifiers() & Qt::ControlModifier) &&
-         e->key() == Qt::Key_E))
+            e->key() == Qt::Key_E))
     {
         onEvalShortCutTriggered();
 
@@ -351,7 +376,7 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
 
     // Interrupt shortcut
     if (((e->modifiers() & Qt::ControlModifier) &&
-         e->key() == Qt::Key_I))
+            e->key() == Qt::Key_I))
     {
         if (m_isEvaluating)
         {
@@ -363,7 +388,7 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
 
     // Save shortcut
     if (((e->modifiers() & Qt::ControlModifier) &&
-         e->key() == Qt::Key_S))
+            e->key() == Qt::Key_S))
     {
         onSaveButtonClicked();
         return;
@@ -386,8 +411,8 @@ GtpyAbstractScriptingWizardPage::endEval(bool /*success*/)
 
 void
 GtpyAbstractScriptingWizardPage::insertWidgetNextToEditor(QWidget* widget,
-                                                          int index,
-                                                          int stretchFactor)
+        int index,
+        int stretchFactor)
 {
     if (m_editorSplitter == Q_NULLPTR)
     {
@@ -439,8 +464,8 @@ GtpyAbstractScriptingWizardPage::editorText()
 
 void
 GtpyAbstractScriptingWizardPage::replaceCalcPyCode(const QString& header,
-                                                   const QString& caption,
-                                                   const QString& pyCode)
+        const QString& caption,
+        const QString& pyCode)
 {
     QTextCursor cursor = m_editor->textCursor();
 
@@ -476,9 +501,9 @@ GtpyAbstractScriptingWizardPage::replaceCalcPyCode(const QString& header,
 
 void
 GtpyAbstractScriptingWizardPage::replaceBlockHeaders(const QString& oldHeader,
-                                                     const QString& newHeader,
-                                                     const QString& oldCaption,
-                                                     const QString& newCaption)
+        const QString& newHeader,
+        const QString& oldCaption,
+        const QString& newCaption)
 {
     if (m_editor == Q_NULLPTR)
     {
@@ -490,7 +515,7 @@ GtpyAbstractScriptingWizardPage::replaceBlockHeaders(const QString& oldHeader,
 
 void
 GtpyAbstractScriptingWizardPage::searchAndReplaceEditorText(
-        const QRegExp& searchFor, const QString& replaceBy, bool all)
+    const QRegExp& searchFor, const QString& replaceBy, bool all)
 {
     if (m_editor == Q_NULLPTR)
     {
@@ -502,7 +527,7 @@ GtpyAbstractScriptingWizardPage::searchAndReplaceEditorText(
 
 void
 GtpyAbstractScriptingWizardPage::searchAndReplaceEditorText(
-        const QString& searchFor, const QString& replaceBy, bool all)
+    const QString& searchFor, const QString& replaceBy, bool all)
 {
     if (m_editor == Q_NULLPTR)
     {
@@ -550,7 +575,7 @@ GtpyAbstractScriptingWizardPage::setPackageNames(QStringList packageNames)
 
 void
 GtpyAbstractScriptingWizardPage::addTabWidget(QWidget* wid,
-                                              const QString& label)
+        const QString& label)
 {
     if (wid == Q_NULLPTR || m_tabWidget == Q_NULLPTR)
     {
@@ -571,7 +596,7 @@ GtpyAbstractScriptingWizardPage::evalScript(bool outputToConsole)
 
 void
 GtpyAbstractScriptingWizardPage::evalScript(const QString& script,
-                                            bool outputToConsole)
+        bool outputToConsole)
 {
     if (m_isEvaluating)
     {
@@ -675,7 +700,7 @@ GtpyAbstractScriptingWizardPage::enableSaveButton(bool enable)
 void
 GtpyAbstractScriptingWizardPage::saveMesssageBox()
 {
-    GtProcessWizard* wiz = findParentWizard();
+    QWidget* wiz = findParentWizard();
 
     if (wiz == Q_NULLPTR)
     {
@@ -683,10 +708,12 @@ GtpyAbstractScriptingWizardPage::saveMesssageBox()
     }
 
     QString text =
-    tr("Do you want to ") +
-    tr("save your changes before closing the wizard?");
+        tr("Do you want to ") +
+        tr("save your changes before closing the wizard?");
 
     GtSaveProjectMessageBox mb(text);
+
+    mb.setWindowFlags(mb.windowFlags() | Qt::WindowStaysOnTopHint);
 
     int ret;
 
@@ -711,7 +738,13 @@ GtpyAbstractScriptingWizardPage::saveMesssageBox()
     }
 }
 
-GtProcessWizard*
+QWidget*
+GtpyAbstractScriptingWizardPage::findParentWizard()
+{
+    return findParentWizard(parent());
+}
+
+QWidget*
 GtpyAbstractScriptingWizardPage::findParentWizard(QObject* obj)
 {
     if (obj == Q_NULLPTR)
@@ -724,6 +757,16 @@ GtpyAbstractScriptingWizardPage::findParentWizard(QObject* obj)
     if (temp)
     {
         return temp;
+    }
+
+    if (obj->parent())
+    {
+        QMainWindow* mainWin = qobject_cast<QMainWindow*>(obj->parent());
+
+        if (mainWin)
+        {
+            return qobject_cast<QWidget*>(obj);
+        }
     }
 
     return findParentWizard(obj->parent());
@@ -751,24 +794,6 @@ GtpyAbstractScriptingWizardPage::showEvalButton(bool show)
 
         m_shortCutEval->setText("<font color='grey'>  Ctrl+I</font>");
     }
-}
-
-GtProcessWizard*
-GtpyAbstractScriptingWizardPage::findParentWizard()
-{
-    if (parent() == Q_NULLPTR)
-    {
-        return Q_NULLPTR;
-    }
-
-    GtProcessWizard* temp = qobject_cast<GtProcessWizard*>(parent());
-
-    if (temp)
-    {
-        return temp;
-    }
-
-    return findParentWizard(parent());
 }
 
 void
@@ -800,6 +825,56 @@ GtpyAbstractScriptingWizardPage::enableSaving(bool enable)
 }
 
 void
+GtpyAbstractScriptingWizardPage::registerGeometry()
+{
+    QWidget* wiz = findParentWizard();
+
+    if (wiz && !m_componentUuid.isEmpty())
+    {
+        QRect rect = wiz->frameGeometry();
+
+        GtpyWizardSettings::instance()->registerGeometry(m_componentUuid, rect);
+
+        int cursorPos = m_editor->cursorPosition();
+        GtpyWizardSettings::instance()->registerCursorPos(m_componentUuid,
+                cursorPos);
+
+        int vSliderPos = m_editor->verticalSliderPos();
+
+        GtpyWizardSettings::instance()->registerVSliderPos(m_componentUuid,
+                vSliderPos);
+    }
+}
+
+void
+GtpyAbstractScriptingWizardPage::reloadWizardGeometry(const QString& uuid)
+{
+    m_componentUuid = uuid;
+
+    QWidget* wiz = findParentWizard();
+
+    if (!wiz)
+    {
+        return;
+    }
+
+    QRect rect = GtpyWizardSettings::instance()->lastGeometry(uuid);
+
+    if (!rect.isNull())
+    {
+        wiz->setGeometry(rect);
+    }
+
+    int cursorPos = GtpyWizardSettings::instance()->lastCursorPos(uuid);
+
+    m_editor->setCursorPosition(cursorPos);
+
+    int vSliderPos = GtpyWizardSettings::instance()->lastVSliderPos(uuid);
+
+    m_editor->setVerticalSliderPos(vSliderPos);
+}
+
+void
 GtpyAbstractScriptingWizardPage::onImportScript()
 {
     QString filename = GtFileDialog::getOpenFileName(this,
@@ -813,7 +888,7 @@ GtpyAbstractScriptingWizardPage::onImportScript()
 
     QFile file(filename);
 
-    if(!file.open(QIODevice::ReadOnly))
+    if (!file.open(QIODevice::ReadOnly))
     {
         m_pythonConsole->stdErr("Script \"" + filename + "\" not found!",
                                 m_contextId);
@@ -823,7 +898,7 @@ GtpyAbstractScriptingWizardPage::onImportScript()
 
     QString script;
 
-    while(!in.atEnd())
+    while (!in.atEnd())
     {
         QString line = in.readLine();
         script = script + line + "\n";
@@ -842,7 +917,7 @@ void
 GtpyAbstractScriptingWizardPage::onExportScript()
 {
     QString filename = GtFileDialog::getSaveFileName(this, tr("Save Script"),
-                  QString(), "*.py", "pythonTaskScript.py");
+                       QString(), "*.py", "pythonTaskScript.py");
 
     if (!filename.endsWith(".py"))
     {
@@ -935,7 +1010,7 @@ GtpyAbstractScriptingWizardPage::evaluationFinished()
 
         // connect runnable signals to task runner slots
         disconnect(m_runnable, &GtpyScriptRunnable::runnableFinished,
-                this, &GtpyAbstractScriptingWizardPage::evaluationFinished);
+                   this, &GtpyAbstractScriptingWizardPage::evaluationFinished);
 
         delete m_runnable;
         m_runnable = Q_NULLPTR;

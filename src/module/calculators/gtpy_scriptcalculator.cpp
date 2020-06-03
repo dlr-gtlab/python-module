@@ -13,8 +13,9 @@
 #include "gt_project.h"
 #include "gt_objectpathproperty.h"
 
+
 #include "gtpy_contextmanager.h"
-//#include "gtpy_globals.h"
+#include "gtpy_wizardsettings.h"
 
 #include "gtpy_scriptcalculator.h"
 
@@ -49,11 +50,16 @@ GtpyScriptCalculator::GtpyScriptCalculator() :
 
     connect(this, SIGNAL(stateChanged(GtProcessComponent::STATE)), this,
             SLOT(onStateChanged(GtProcessComponent::STATE)));
+
+    connect(this, SIGNAL(calcDestroyed(GtProcessComponent*)),
+            GtpyWizardSettings::instance(),
+            SLOT(processElementDestroyed(GtProcessComponent*)));
 }
 
 GtpyScriptCalculator::~GtpyScriptCalculator()
 {
     qDeleteAll(m_dynamicPathProps);
+    emit calcDestroyed(this);
 }
 
 bool
