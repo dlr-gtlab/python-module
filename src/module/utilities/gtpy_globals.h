@@ -30,6 +30,7 @@ extern const QString ATTR_task;
 
 ///Python Functions
 extern const QString FUNC_importGtCalc;
+extern const QString FUNC_currentProPath;
 
 ///StdOut meta data
 extern const char* CONTEXT_KEY;
