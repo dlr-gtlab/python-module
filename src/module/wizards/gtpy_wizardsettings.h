@@ -16,6 +16,9 @@
 
 class GtProcessComponent;
 
+/**
+ * @brief The GtpyWizardSettings class
+ */
 class GtpyWizardSettings : public QObject
 {
     Q_OBJECT

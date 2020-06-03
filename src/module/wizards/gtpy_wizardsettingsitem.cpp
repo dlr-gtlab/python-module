@@ -27,7 +27,7 @@ GtpyWizardSettingsItem::value(const QString& key)
 }
 
 void
-GtpyWizardSettingsItem::remove(const QString& uuid)
+GtpyWizardSettingsItem::remove(const QString& key)
 {
-    m_settings.remove(uuid);
+    m_settings.remove(key);
 }

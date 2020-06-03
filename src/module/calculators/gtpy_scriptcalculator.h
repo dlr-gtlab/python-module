@@ -95,6 +95,9 @@ private slots:
      * @param state State of the root task.
      */
     void onTaskStateChanged(GtProcessComponent::STATE state);
+
+signals:
+    void calcDestroyed(GtProcessComponent* task);
 };
 
 #endif // GTPY_SCRIPTCALCULATOR_H

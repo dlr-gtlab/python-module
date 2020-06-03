@@ -13,20 +13,41 @@
 #include <QHash>
 #include <QVariant>
 
+/**
+ * @brief The GtpyWizardSettingsItem class
+ */
 class GtpyWizardSettingsItem
 {
     friend class GtpyWizardSettings;
 
 protected:
+    /**
+     * @brief GtpyWizardSettingsItem
+     */
     GtpyWizardSettingsItem();
 
+    /**
+     * @brief Register a key value pair to the settings.
+     * @param key Identifies the value.
+     * @param value Setting value.
+     */
     void registerValue(const QString& key, const QVariant& value);
 
+    /**
+     * @brief Returns the value for the given key.
+     * @param key Identifies the value to return.
+     * @return The value for the given key.
+     */
     QVariant value(const QString& key);
 
-    void remove(const QString& uuid);
+    /**
+     * @brief Removes the value with the given key.
+     * @param key Identifies the value to remove.
+     */
+    void remove(const QString& key);
 
 private:
+    ///Settings
     QHash<QString, QVariant> m_settings;
 };
 

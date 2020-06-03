@@ -14,7 +14,6 @@
 #include <QDomDocument>
 #include <QObject>
 #include <QDir>
-#include <QDebug>
 
 #include "gt_application.h"
 #include "gtpy_contextmanager.h"
@@ -48,7 +47,7 @@ parseScriptFile(const QString& filename)
         return QString();
     }
 
-    if (!scriptFile.open(QIODevice::ReadOnly| QIODevice::Text))
+    if (!scriptFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         cout << "ERROR: could not open script file!" << endl;
         return QString();

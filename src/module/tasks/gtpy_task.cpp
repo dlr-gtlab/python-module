@@ -61,6 +61,7 @@ GtpyTask::GtpyTask():
 
 GtpyTask::~GtpyTask()
 {
+    qDeleteAll(m_dynamicPathProps);
     emit taskDestroyed(this);
 }
 
