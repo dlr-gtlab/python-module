@@ -100,7 +100,7 @@ private slots:
      * @brief Removes the settings for the destroyed process component.
      * @param comp Destroyed process compenent.
      */
-    void processElementDestroyed(GtProcessComponent* comp);
+    void processElementDeleted(const QString& uuid);
 };
 
 #endif // GTPYWIZARDSETTINGS_H

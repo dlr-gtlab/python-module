@@ -35,8 +35,6 @@ meth_dealloc(GtpyCreateHelperFunctionObject* m)
     Py_TYPE(m)->tp_free((PyObject*)m);
 }
 
-
-
 static PyObject*
 GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args,
                               PyObject* /*kw*/)

@@ -79,19 +79,7 @@ GtpyWizardSettings::remove(const QString& uuid)
 }
 
 void
-GtpyWizardSettings::processElementDestroyed(GtProcessComponent* comp)
+GtpyWizardSettings::processElementDeleted(const QString& uuid)
 {
-    if (!comp)
-    {
-        return;
-    }
-
-    GtProcessData* parent = comp->findParent<GtProcessData*>();
-
-    if (!parent)
-    {
-        return;
-    }
-
-    remove(comp->uuid());
+    remove(uuid);
 }

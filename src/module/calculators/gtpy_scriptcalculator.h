@@ -31,7 +31,7 @@ public:
     /**
      * @brief Destructor.
      */
-    ~GtpyScriptCalculator();
+    virtual ~GtpyScriptCalculator();
 
     /**
      * @brief Main run method of the calculator.
@@ -97,7 +97,7 @@ private slots:
     void onTaskStateChanged(GtProcessComponent::STATE state);
 
 signals:
-    void calcDestroyed(GtProcessComponent* task);
+    void deletedFromDatamodel(const QString& uuid);
 };
 
 #endif // GTPY_SCRIPTCALCULATOR_H
