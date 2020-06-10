@@ -54,15 +54,19 @@ GtpyTask::GtpyTask():
     connect(this, SIGNAL(stateChanged(GtProcessComponent::STATE)), this,
             SLOT(onStateChanged(GtProcessComponent::STATE)));
 
-    connect(this, SIGNAL(taskDestroyed(GtProcessComponent*)),
+    connect(this, SIGNAL(deletedFromDatamodel(QString)),
             GtpyWizardSettings::instance(),
-            SLOT(processElementDestroyed(GtProcessComponent*)));
+            SLOT(processElementDeleted(QString)));
 }
 
 GtpyTask::~GtpyTask()
 {
     qDeleteAll(m_dynamicPathProps);
-    emit taskDestroyed(this);
+
+    if (this->findParent<GtProcessData*>())
+    {
+        emit deletedFromDatamodel(this->uuid());
+    }
 }
 
 bool

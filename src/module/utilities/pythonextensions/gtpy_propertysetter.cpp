@@ -50,8 +50,8 @@ meth_repr(GtpyPropertySetterObject* f)
     if (f->m_self->ob_type == &GtpyExtendedWrapper_Type)
     {
         QString repr = "<Function to set " + QString(
-                            PyString_AsString(f->m_propId)) +
-                        " value>";
+                           PyString_AsString(f->m_propId)) +
+                       " value>";
 
         return PyString_FromFormat(repr.toStdString().c_str());
     }
@@ -80,7 +80,7 @@ meth_hash(GtpyPropertySetterObject* a)
 
 static PyObject*
 GtpyPropertySetter_Call(PyObject* func, PyObject* args,
-                                    PyObject* /*kw*/)
+                        PyObject* /*kw*/)
 {
     GtpyPropertySetterObject* f = (GtpyPropertySetterObject*)func;
 
@@ -123,7 +123,7 @@ GtpyPropertySetter_Call(PyObject* func, PyObject* args,
 
                 GtpyDecorator decorator;
                 decorator.setPropertyValue(gtObj, propId,
-                                          PythonQtConv::PyObjToQVariant(value));
+                                           PythonQtConv::PyObjToQVariant(value));
 
                 Py_INCREF(Py_True);
                 return Py_True;
@@ -169,6 +169,7 @@ meth_richcompare(GtpyPropertySetterObject* a,
     {
         r = x > 0;
     }
+
     if (r)
     {
         Py_RETURN_TRUE;
@@ -195,7 +196,7 @@ GtpyPropertySetter_New(QString propId, PyObject* self, PyObject* module)
     else
     {
         op = PyObject_GC_New(GtpyPropertySetterObject,
-                         &GtpyPropertySetter_Type);
+                             &GtpyPropertySetter_Type);
 
         if (op == Q_NULLPTR)
         {
@@ -219,7 +220,8 @@ GtpyPropertySetter_New(QString propId, PyObject* self, PyObject* module)
 }
 
 PyTypeObject
-GtpyPropertySetter_Type = {
+GtpyPropertySetter_Type =
+{
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     "GtpyPropertySetter",
     sizeof(GtpyPropertySetterObject),

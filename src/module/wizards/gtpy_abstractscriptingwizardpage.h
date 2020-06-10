@@ -274,6 +274,13 @@ private:
      */
     QWidget* findParentWizard(QObject* obj);
 
+    /**
+     * @brief If the runnable is not null, this functions connects it to the
+     * context manager by calling GtpyContextManager::autoDeleteRunnable().
+     * After that this function interrupts the execution of the runnable.
+     */
+    void deleteRunnable();
+
     /// Search Widget
     GtSearchWidget* m_searchWidget;
 

@@ -99,7 +99,7 @@ private slots:
     void onStateChanged(GtProcessComponent::STATE state);
 
 signals:
-    void taskDestroyed(GtProcessComponent* task);
+    void deletedFromDatamodel(const QString& uuid);
 };
 
 #endif // GTPY_TASK_H

@@ -12,7 +12,7 @@
 #include "gt_package.h"
 #include "gt_project.h"
 #include "gt_objectpathproperty.h"
-
+#include "gt_processdata.h"
 
 #include "gtpy_contextmanager.h"
 #include "gtpy_wizardsettings.h"
@@ -51,15 +51,19 @@ GtpyScriptCalculator::GtpyScriptCalculator() :
     connect(this, SIGNAL(stateChanged(GtProcessComponent::STATE)), this,
             SLOT(onStateChanged(GtProcessComponent::STATE)));
 
-    connect(this, SIGNAL(calcDestroyed(GtProcessComponent*)),
+    connect(this, SIGNAL(deletedFromDatamodel(QString)),
             GtpyWizardSettings::instance(),
-            SLOT(processElementDestroyed(GtProcessComponent*)));
+            SLOT(processElementDeleted(QString)));
 }
 
 GtpyScriptCalculator::~GtpyScriptCalculator()
 {
     qDeleteAll(m_dynamicPathProps);
-    emit calcDestroyed(this);
+
+    if (this->findParent<GtProcessData*>())
+    {
+        emit deletedFromDatamodel(this->uuid());
+    }
 }
 
 bool
