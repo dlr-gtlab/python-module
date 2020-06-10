@@ -759,6 +759,11 @@ GtpyDecorator::propertyValue(GtObject* obj, const QString& id)
 
     if (prop == Q_NULLPTR)
     {
+        QString message = "\n\n" + QString(obj->metaObject()->className()) +
+                          " has no GtProperty with the id: " + id;
+
+        throw std::runtime_error(message.toStdString());
+
         return QVariant();
     }
 
@@ -778,6 +783,13 @@ GtpyDecorator::setPropertyValue(GtObject* obj, const QString& id,
 
     if (prop == Q_NULLPTR)
     {
+        QString message = "\n\n" + QString(obj->metaObject()->className()) +
+                          " has no GtProperty with the id: " + id +
+                          "\nIf you want to set a QProperty, use the function "
+                          "setProperty()!";
+
+        throw std::runtime_error(message.toStdString());
+
         return;
     }
 
@@ -919,6 +931,12 @@ GtpyDecorator::propertyValue(GtAbstractProperty* prop, const QString& id)
 
     if (subProp == Q_NULLPTR)
     {
+        QString message = "\n\n" + QString(prop->metaObject()->className()) +
+                          " has no subproperty of type GtProperty with the "
+                          "id: " + id;
+
+        throw std::runtime_error(message.toStdString());
+
         return QVariant();
     }
 
@@ -938,6 +956,12 @@ GtpyDecorator::setPropertyValue(GtAbstractProperty* prop,
 
     if (subProp == Q_NULLPTR)
     {
+        QString message = "\n\n" + QString(prop->metaObject()->className()) +
+                          " has no subproperty of type GtProperty with the "
+                          "id: " + id;
+
+        throw std::runtime_error(message.toStdString());
+
         return;
     }
 
