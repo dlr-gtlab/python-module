@@ -283,6 +283,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
 GtpyAbstractScriptingWizardPage::~GtpyAbstractScriptingWizardPage()
 {
+    deleteRunnable();
+
     GtpyContextManager::instance()->deleteContext(m_contextId);
     registerGeometry();
 }
@@ -341,11 +343,7 @@ GtpyAbstractScriptingWizardPage::initializePage()
 bool
 GtpyAbstractScriptingWizardPage::validatePage()
 {
-    if (m_runnable)
-    {
-        m_runnable->interrupt();
-        m_runnable->setAutoDelete(true);
-    }
+    deleteRunnable();
 
     return validation();
 }
@@ -775,6 +773,17 @@ GtpyAbstractScriptingWizardPage::findParentWizard(QObject* obj)
     }
 
     return findParentWizard(obj->parent());
+}
+
+void
+GtpyAbstractScriptingWizardPage::deleteRunnable()
+{
+    if (m_runnable)
+    {
+        GtpyContextManager::instance()->autoDeleteRunnable(m_runnable);
+        m_runnable->interrupt();
+        m_runnable = Q_NULLPTR;
+    }
 }
 
 void
