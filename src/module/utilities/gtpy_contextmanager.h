@@ -24,7 +24,6 @@
 class GtObject;
 class GtTask;
 class GtpyDecorator;
-class GtpyScriptRunnable;
 
 /**
 * @brief The GtpyFunction struct
@@ -244,13 +243,6 @@ public:
     * @return Id of the current Python thread.
     */
     long currentPyThreadId();
-
-    /**
-     * @brief Connects the runnable with the deleteRunnable() function of this
-     * class.
-     * @param runnable Runnable to delete.
-     */
-    void autoDeleteRunnable(GtpyScriptRunnable* runnable);
 
     /**
     * @brief Starts a runnable instance which interrupt the current Python
@@ -564,12 +556,6 @@ private slots:
     * @param exep Exception.
     */
     void onSystemExitExceptionRaised(const int exep) const;
-
-    /**
-     * @brief Deletes the runnable. Don't call this function. Connect a runnable
-     * with this function by using the autoDeleteRunnable() of this class.
-     */
-    void deleteRunnable();
 
 signals:
     /**
