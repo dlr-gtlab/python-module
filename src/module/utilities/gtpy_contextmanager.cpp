@@ -625,8 +625,6 @@ GtpyContextManager::deleteContext(int contextId, bool emitSignal)
         return false;
     }
 
-    deleteCalcsFromTask(contextId);
-
     PythonContext con = m_contextMap.take(contextId);
 
     if (!con.module)
