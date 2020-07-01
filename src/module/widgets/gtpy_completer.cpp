@@ -121,12 +121,12 @@ GtpyCompleter::getTextToComplete(int pos, QString line, int spaces)
                               "(?(DEFINE)(?<braces>\\(.*\\)|\\[.*\\]|{.*}))"
                               "(?(DEFINE)(?<words>\\w+[-\\w]*(\\s|$)))"
                               "(?(qoutes)\\K|"
-                                "(?(?=(?&words){1," +
-                                  QString::number(spaces + 1) + "})"
-                                 "(?&words){1," +
-                                  QString::number(spaces + 1) + "}|"
-                                "(\\w+(?&braces)?[\\.-]?)+\\s?(?&words){0," +
-                                  QString::number(spaces) + "})"
+                              "(?(?=(?&words){1," +
+                              QString::number(spaces + 1) + "})"
+                              "(?&words){1," +
+                              QString::number(spaces + 1) + "}|"
+                              "(\\w+(?&braces)?[\\.-]?)+\\s?(?&words){0," +
+                              QString::number(spaces) + "})"
                               ")");
 
     QRegularExpression regExp;
@@ -168,7 +168,7 @@ GtpyCompleter::getCompletions(QString textToCompare, QString objToLookup)
     QMultiMap<QString, GtpyFunction> map;
 
     if (textToCompare == QStringLiteral("import") ||
-        textToCompare == QStringLiteral("from"))
+            textToCompare == QStringLiteral("from"))
     {
         GtpyContextManager* python = GtpyContextManager::instance();
         map = python->introspection(m_contextId, objToLookup, true);
@@ -313,15 +313,23 @@ GtpyCompleter::insertCompletion(QTextCursor& textCursor)
         }
         else
         {
-            QString c = completion.at(offset);
-
-            if (c.contains(QRegularExpression("(\\)|\\]|})")))
+            if (!completion.isEmpty())
             {
-                completion = completion.left(offset);
+                QString c;
 
-                if (cursorOffset > 0)
+                if (0 <= offset && offset < completion.size())
                 {
-                    cursorOffset -= completion.size() + offset;
+                    c = completion.at(offset);
+                }
+
+                if (c.contains(QRegularExpression("(\\)|\\]|})")))
+                {
+                    completion = completion.left(offset);
+
+                    if (cursorOffset > 0)
+                    {
+                        cursorOffset -= completion.size() + offset;
+                    }
                 }
             }
         }
@@ -351,20 +359,20 @@ GtpyCompleter::compareStrings(QString s1, QString s2)
 {
     int i;
 
-    for (i = 0; i < s1.size() && i < s2.size(); ++i)
-     {
-         QChar s = s1.at(i).toLower();
-         QChar c = s2.at(i).toLower();
+    for (i = 0; i < s1.size() && i < s2.size(); i++)
+    {
+        QChar s = s1.at(i).toLower();
+        QChar c = s2.at(i).toLower();
 
-         if (s == c)
-         {
-             continue;
-         }
-         else
-         {
-             break;
-         }
-     }
+        if (s == c)
+        {
+            continue;
+        }
+        else
+        {
+            break;
+        }
+    }
 
     return i;
 }

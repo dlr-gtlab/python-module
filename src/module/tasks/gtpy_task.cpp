@@ -72,9 +72,11 @@ GtpyTask::~GtpyTask()
 bool
 GtpyTask::runIteration()
 {
+    ///Create new context
     int contextId = GtpyContextManager::instance()->createNewContext(
                         GtpyContextManager::TaskRunContext, true);
 
+    ///Initialize context with data model objects
     GtpyContextManager::instance()->addTaskValue(contextId, this);
 
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
@@ -84,23 +86,25 @@ GtpyTask::runIteration()
         if (package != Q_NULLPTR)
         {
             GtpyContextManager::instance()->addGtObject(contextId,
-
                     package->objectName(), package);
         }
     }
 
-    gtInfo() << "running script...";
-
+    ///Save the current thread settings
     m_pyThreadId = GtpyContextManager::instance()->currentPyThreadId();
 
     GtpyGlobals::StdOutMetaData metaData =
         GtpyContextManager::instance()->threadDictMetaData();
 
-    bool success;
+    ///Running Script
+    gtInfo() << "running script...";
+
+    bool success = true;
 
     success = GtpyContextManager::instance()->evalScript(
                   contextId, script(), true);
 
+    ///Remove the data model objects from the context
     foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
     {
         GtPackage* package = data<GtPackage*>(pathProp->path());
@@ -112,8 +116,10 @@ GtpyTask::runIteration()
         }
     }
 
+    ///Delete the context
     GtpyContextManager::instance()->deleteContext(contextId, true);
 
+    ///Reset the thread settings
     GtpyContextManager::instance()->setMetaDataToThreadDict(metaData);
 
     gtInfo() << "...done!";
