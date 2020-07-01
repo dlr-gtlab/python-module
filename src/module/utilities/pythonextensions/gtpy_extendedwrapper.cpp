@@ -513,6 +513,11 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
         {
             QString pyName = pyValidGtPropertyId(prop->ident());
 
+            if (pyName.isEmpty())
+            {
+                continue;
+            }
+
             if (pyName == strName)
             {
                 PyObject* propVal = PythonQtConv::QVariantToPyObject(

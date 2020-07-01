@@ -1805,7 +1805,7 @@ GtpyContextManager::builtInCompletions(int contextId) const
 
     foreach (QString name, builtinFunctions)
     {
-        if (name.startsWith(QStringLiteral("_")))
+        if (name.isEmpty() || name.startsWith("_"))
         {
             continue;
         }

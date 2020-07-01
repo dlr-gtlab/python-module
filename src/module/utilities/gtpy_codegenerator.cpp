@@ -112,7 +112,7 @@ GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc)
         pos = regExp.indexIn(tempObjName);
     }
 
-    tempObjName.replace(0, 1, objName.at(0).toLower());
+    tempObjName.replace(0, 1, tempObjName.at(0).toLower());
 
     pyCode += (tempObjName + " = " + className + "(\"" +
                objName + "\")\n");
@@ -140,6 +140,11 @@ GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc)
         {
             QString ident = changeElement.attribute("name");
 
+            if (ident.isEmpty())
+            {
+                continue;
+            }
+
             GtAbstractProperty* prop = calc->findProperty(ident);
 
             if (prop != Q_NULLPTR)
@@ -155,7 +160,6 @@ GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc)
                 ident.replace(0, 1, ident.at(0).toUpper());
 
                 ident.insert(0, "set");
-
 
                 QString val = propValToString(prop);
 
