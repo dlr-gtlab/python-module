@@ -12,3 +12,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Migration to new build configuration (Qt12, MSVC 2017 Build Tools)
+- PythonScriptCalculator and PythonTask to RELEASE mode - #99
