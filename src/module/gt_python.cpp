@@ -139,6 +139,7 @@ GtPythonModule::calculators()
     python->version = 0.1;
     python->author = QStringLiteral("Marvin Nöthen");
     python->icon = gtApp->icon(QStringLiteral("pythonIcon_16.png"));
+    python->status = GtAbstractProcessData::RELEASE;
 
     GtCustomProcessWizard* pythonWizard = new GtCustomProcessWizard;
     pythonWizard->setPage(1, GtpyScriptCalculatorWizardPage::staticMetaObject);
@@ -160,6 +161,7 @@ GtPythonModule::tasks()
     pythonTask->version = 0.1;
     pythonTask->author = QStringLiteral("Marvin Nöthen");
     pythonTask->icon = gtApp->icon(QStringLiteral("pythonIcon_16.png"));
+    pythonTask->status = GtAbstractProcessData::RELEASE;
 
     GtCustomProcessWizard* pythonWizard = new GtCustomProcessWizard;
     pythonWizard->setPage(1, GtpyTaskWizardPage::staticMetaObject);
