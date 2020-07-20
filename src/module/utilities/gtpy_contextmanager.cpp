@@ -10,7 +10,7 @@
 #include <QMetaObject>
 #include <QMetaMethod>
 #include <QMetaEnum>
-#include <QSettings>
+#include <QDir>
 #include <QThreadPool>
 #include <QRegularExpression>
 
@@ -21,6 +21,7 @@
 #include "PythonQtProperty.h"
 #include "PythonQtConversion.h"
 
+#include "gt_environment.h"
 #include "gt_logging.h"
 #include "gt_abstractproperty.h"
 #include "gt_project.h"
@@ -71,6 +72,8 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
 {
     qRegisterMetaType<GtpyContextManager::Context>
     ("GtpyContextManager::Context");
+
+    setEnvironmentPaths();
 
     PythonQt::init(PythonQt::RedirectStdOut);
 
@@ -134,6 +137,51 @@ GtpyContextManager::~GtpyContextManager()
     {
         PyEval_RestoreThread(m_pyThreadState);
     }
+
+    PythonQt::cleanup();
+}
+
+void
+GtpyContextManager::setEnvironmentPaths() const
+{
+    QString var = gtEnvironment->value(GtpyGlobals::PYTHONHOME_VAR).toString();
+
+    if (var.isEmpty())
+    {
+        return;
+    }
+
+    QDir pythonDir(var);
+
+    if (!pythonDir.exists())
+    {
+        return;
+    }
+
+    QByteArray pathEnvVar = qgetenv("PATH");
+    QString paths(pathEnvVar);
+
+    if (!paths.isEmpty())
+    {
+        if (!paths.endsWith(";"))
+        {
+            paths.append(";");
+        }
+    }
+
+    paths += QDir::toNativeSeparators(pythonDir.path()) + ";";
+
+    if (pythonDir.cd("Library"))
+    {
+        paths += QDir::toNativeSeparators(pythonDir.path()) + ";";
+    }
+
+    if (pythonDir.cd("bin"))
+    {
+        paths += QDir::toNativeSeparators(pythonDir.path()) + ";";
+    }
+
+    qputenv("PATH", paths.toUtf8());
 }
 
 void
