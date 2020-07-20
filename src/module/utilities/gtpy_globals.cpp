@@ -11,6 +11,9 @@
 
 namespace GtpyGlobals
 {
+///Environment Variables
+const QString PYTHONHOME_VAR = "PYTHONHOME";
+
 ///Python Modules
 const QString GTOBJECT_WRAPPER_MODULE = "GtObjectWrapperModuleC";
 const QString MODULE_GtCalculators = "GtCalculators";
