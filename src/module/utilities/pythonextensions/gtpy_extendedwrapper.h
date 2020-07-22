@@ -19,29 +19,32 @@
 
 extern PyTypeObject GtpyExtendedWrapper_Type;
 
-typedef struct {
-  PyObject_HEAD
-  PythonQtInstanceWrapper* _obj;
+typedef struct
+{
+    PyObject_HEAD
+    PythonQtInstanceWrapper* _obj;
 
 } GtpyExtendedWrapper;
 
 namespace GtpyCustomization
 {
-    void customizeSlotCalling();
+void customizeSlotCalling();
 }
 
 
 #ifdef PY3K
-static PyModuleDef customPyModule = {
-  PyModuleDef_HEAD_INIT,
-  GtpyGlobals::GTOBJECT_WRAPPER_MODULE.toStdString().data(),
-  NULL,
-  -1,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL
+static PyModuleDef
+customPyModule =
+{
+    PyModuleDef_HEAD_INIT,
+    QSTRING_TO_CHAR_PTR(GtpyGlobals::GTOBJECT_WRAPPER_MODULE),
+    NULL,
+    -1,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
 };
 #endif
 

@@ -14,12 +14,12 @@
 
 #include "PythonQtPythonInclude.h"
 
-#include "gtpy_globals.h"
 #include "gt_task.h"
+
+#include "gtpy_globals.h"
 
 namespace GtpyCalculatorsModule
 {
-
 extern PyTypeObject GtpyCreateCalculator_Type;
 
 typedef struct
@@ -52,7 +52,7 @@ static PyModuleDef
 GtpyCalculators_Module =
 {
     PyModuleDef_HEAD_INIT,
-    GtpyGlobals::MODULE_GtCalculators.toStdString().data(),
+    QSTRING_TO_CHAR_PTR(GtpyGlobals::MODULE_GtCalculators),
     NULL,
     -1,
     GtpyCalculatorsModule_StaticMethods,

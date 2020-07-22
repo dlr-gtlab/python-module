@@ -942,8 +942,13 @@ GtpyContextManager::initCalculatorsModule()
     }
 
 #ifdef PY3K
-    PyDict_SetItem(PyObject_GetAttrString(sys.object(), "modules"),
-                   PyUnicode_FromString(name.constData()), myMod);
+    PyObject* modules = PyObject_GetAttrString(sys.object(), "modules");
+    PyObject* modName = PyUnicode_FromString(name.constData());
+
+    PyDict_SetItem(modules, modName, myMod);
+
+    Py_XDECREF(modules);
+    Py_XDECREF(modName);
 #endif
 
     GtpyCalculatorsModule::createCalcConstructors();
