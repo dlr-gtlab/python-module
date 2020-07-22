@@ -521,7 +521,7 @@ GtpyCalculatorsModule::createCalcConstructors()
 {
     PythonQtObjectPtr mod =
         PyImport_ImportModule(
-            GtpyGlobals::MODULE_GtCalculators.toStdString().data());
+            QSTRING_TO_CHAR_PTR(GtpyGlobals::MODULE_GtCalculators));
 
     if (!mod)
     {

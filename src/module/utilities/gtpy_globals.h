@@ -12,7 +12,7 @@
 
 #include <QString>
 
-#define QSTRING_TO_CHAR_PTR(x) x.toStdString().data()
+#define QSTRING_TO_CHAR_PTR(x) x.toLocal8Bit().data()
 #define QSTRING_AS_PYSTRING(x) PyString_FromString(QSTRING_TO_CHAR_PTR(x))
 
 namespace GtpyGlobals
