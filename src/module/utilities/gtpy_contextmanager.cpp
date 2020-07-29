@@ -40,6 +40,7 @@
 #include "gtpy_interruptrunnable.h"
 #include "gtpy_scriptrunnable.h"
 #include "gtpy_projectpathfunction.h"
+#include "gtpy_loggingmodule.h"
 
 #include "gtpy_extendedwrapper.h"
 #include "gtpy_createhelperfunction.h"
@@ -236,6 +237,13 @@ GtpyContextManager::initExtensions()
     }
 
     Py_INCREF(&GtpyProjectPathFunction::GtpyProjectPathFunction_Type);
+
+    if (PyType_Ready(&GtpyLoggingModule::GtpyPyLogger_Type) < 0)
+    {
+        gtError() << "could not initialize GtpyPyLogger_Type";
+    }
+
+    Py_INCREF(&GtpyLoggingModule::GtpyPyLogger_Type);
 }
 
 bool
@@ -597,6 +605,7 @@ void
 GtpyContextManager::initContexts()
 {
     initLoggingModule();
+    initLoggingModuleC();
     initWrapperModule();
     initCalculatorsModule();
 
@@ -953,6 +962,60 @@ GtpyContextManager::initCalculatorsModule()
 
     GtpyCalculatorsModule::createCalcConstructors();
 }
+
+void
+GtpyContextManager::initLoggingModuleC()
+{
+    GTPY_GIL_SCOPE
+
+    PythonQtObjectPtr sys;
+    sys.setNewRef(PyImport_ImportModule("sys"));
+
+    QByteArray name = GtpyGlobals::MODULE_GtLogging_C.toUtf8();;
+    PyObject* myMod;
+#ifdef PY3K
+    GtpyLoggingModule::GtpyLogging_Module.m_name = name.constData();
+    myMod = PyModule_Create(&GtpyLoggingModule::GtpyLogging_Module);
+#else
+    myMod = Py_InitModule(name.constData(), NULL);
+#endif
+    // add GtObjectWrapperModuleC to the list of builtin module names
+    PyObject* old_module_names =
+        PyObject_GetAttrString(sys.object(), "builtin_module_names");
+
+    if (old_module_names && PyTuple_Check(old_module_names))
+    {
+        Py_ssize_t old_size = PyTuple_Size(old_module_names);
+        PyObject* module_names = PyTuple_New(old_size + 1);
+
+        for (Py_ssize_t i = 0; i < old_size; i++)
+        {
+            PyTuple_SetItem(module_names, i,
+                            PyTuple_GetItem(old_module_names, i));
+        }
+
+        PyTuple_SetItem(module_names, old_size,
+                        PyString_FromString(name.constData()));
+        PyModule_AddObject(sys.object(), "builtin_module_names", module_names);
+    }
+
+    //    Py_XDECREF(old_module_names);
+
+#ifdef PY3K
+    PyDict_SetItem(PyObject_GetAttrString(sys.object(), "modules"),
+                   PyUnicode_FromString(name.constData()), myMod);
+#endif
+
+    if (PyModule_AddObject(myMod,
+                           QSTRING_TO_CHAR_PTR(GtpyGlobals::CLASS_GtpyPyLogger),// "GtpyPyLogger",
+                           (PyObject*)
+                           &GtpyLoggingModule::GtpyPyLogger_Type) < 0)
+    {
+        Py_DECREF(&GtpyLoggingModule::GtpyPyLogger_Type);
+        Py_DECREF(myMod);
+    }
+}
+
 void
 GtpyContextManager::initLoggingModule()
 {
@@ -1038,7 +1101,7 @@ GtpyContextManager::initImportBehaviour()
 
     if (builtins)
     {
-        Py_INCREF(builtins);
+        //        Py_INCREF(builtins);
 
         if (PyModule_Check(builtins))
         {

@@ -326,6 +326,8 @@ private:
     */
     void initCalculatorsModule();
 
+    void initLoggingModuleC();
+
     /**
     * @brief Initializes the logging module.
     */

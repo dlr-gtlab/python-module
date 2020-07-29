@@ -16,17 +16,19 @@ const QString PYTHONHOME_VAR = "PYTHONHOME";
 
 ///Python Modules
 const QString GTOBJECT_WRAPPER_MODULE = "GtObjectWrapperModuleC";
-const QString MODULE_GtCalculators = "GtCalculators";
-const QString MODULE_GtLogging = "GtLogging";
+const QString MODULE_GtCalculators    = "GtCalculators";
+const QString MODULE_GtLogging        = "GtLogging";
+const QString MODULE_GtLogging_C      = "GtLoggingC";
 
 ///Python Classes
-const QString GTOBJECT_WRAPPER = "GtpyExtendedWrapper";
+const QString GTOBJECT_WRAPPER   = "GtpyExtendedWrapper";
+const QString CLASS_GtpyPyLogger = "GtpyPyLogger";
 
 ///Python Attribute
 const QString ATTR_task = "__task";
 
 ///Python Functions
-const QString FUNC_importGtCalc = "importGtCalculators";
+const QString FUNC_importGtCalc   = "importGtCalculators";
 const QString FUNC_currentProPath = "projectPath";
 
 ///StdOut meta data
