@@ -26,6 +26,7 @@ const QString CLASS_GtpyPyLogger = "GtpyPyLogger";
 
 ///Python Attribute
 const QString ATTR_task = "__task";
+const QString ATTR_outputToApp = "__outputToAppConsole";
 
 ///Python Functions
 const QString FUNC_importGtCalc   = "importGtCalculators";

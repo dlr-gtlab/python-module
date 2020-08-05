@@ -10,6 +10,8 @@
 #include "gtpy_loggingmodule.h"
 using namespace GtpyLoggingModule;
 
+
+
 static void
 GtpyPyLogger_dealloc(GtpyPyLogger* self)
 {
@@ -202,41 +204,95 @@ GtpyPyLogger_lshift(PyObject* self, PyObject* arg)
 
     int outputType = PyInt_AsLong(logger->m_outputType);
 
+    bool outputToAppConsol = false;
+
+    PyObject* globals = PyEval_GetGlobals();
+
+    if (globals)
+    {
+        Py_INCREF(globals);
+
+        if (PyDict_Check(globals))
+        {
+            PyObject* appOutputObj = PyDict_GetItemString(globals,
+                                     QSTRING_TO_CHAR_PTR(
+                                         GtpyGlobals::ATTR_outputToApp));
+
+            if (appOutputObj)
+            {
+                Py_INCREF(appOutputObj);
+
+                if (PyLong_Check(appOutputObj))
+                {
+                    outputToAppConsol = (bool)PyLong_AsLong(appOutputObj);
+                }
+
+                Py_DECREF(appOutputObj);
+            }
+        }
+
+        Py_DECREF(globals);
+    }
+
     switch (outputType)
     {
         case DEBUG:
 
-            gtDebug() << message;
-            printOutput(message.prepend("[DEBUG] "));
+            if (outputToAppConsol)
+            {
+                gtDebug() << message;
+            }
+
+            printOutput(message.prepend("[DEBUG]   "));
             break;
 
         case INFO:
 
-            gtInfo() << message;
-            printOutput(message.prepend("[INFO] "));
+            if (outputToAppConsol)
+            {
+                gtInfo() << message;
+            }
+
+            printOutput(message.prepend("[INFO]    "));
             break;
 
         case ERROR:
 
-            gtError() << message;
-            printOutput(message.prepend("[ERROR] "));
+            if (outputToAppConsol)
+            {
+                gtError() << message;
+            }
+
+            printOutput(message.prepend("[ERROR]   "));
             break;
 
         case FATAL:
 
-            gtFatal() << message;
-            printOutput(message.prepend("[FATAL] "));
+            if (outputToAppConsol)
+            {
+                gtFatal() << message;
+            }
+
+            printOutput(message.prepend("[FATAL]   "));
             break;
 
         case WARNING:
 
-            gtWarning() << message;
+            if (outputToAppConsol)
+            {
+                gtWarning() << message;
+            }
+
             printOutput(message.prepend("[WARNING] "));
             break;
 
         default:
 
-            gtDebug() << message;
+            if (outputToAppConsol)
+            {
+                gtDebug() << message;
+            }
+
             printOutput(message.prepend("[DEBUG] "));
             break;
     }

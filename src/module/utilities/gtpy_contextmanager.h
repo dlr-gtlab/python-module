@@ -326,12 +326,15 @@ private:
     */
     void initCalculatorsModule();
 
-    void initLoggingModuleC();
-
     /**
     * @brief Initializes the logging module.
     */
-    void initLoggingModule();
+    void initLoggingModuleC();
+
+    //    /**
+    //    * @brief Initializes the logging module.
+    //    */
+    //    void initLoggingModule();
 
     /**
     * @brief Initializes the import behaviour of python.
@@ -385,7 +388,16 @@ private:
     */
     void initStdOut();
 
+    /**
+     * @brief Initializes the wrapper module for GtObjects.
+     */
     void initWrapperModule();
+
+    /**
+     * @brief Enables to send output to the application console.
+     * @param contextId Python context identifier.
+     */
+    void enableOutputToAppConsole(int contextId);
 
     /**
     * @brief Imports the default modules to the Python context identified by

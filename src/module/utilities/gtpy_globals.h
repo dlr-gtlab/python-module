@@ -32,6 +32,7 @@ extern const QString CLASS_GtpyPyLogger;
 
 ///Python Attribute
 extern const QString ATTR_task;
+extern const QString ATTR_outputToApp;
 
 ///Python Functions
 extern const QString FUNC_importGtCalc;
