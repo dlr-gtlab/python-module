@@ -4,102 +4,115 @@ stages:
   - codingstyle
   - badges
 
-buildWindows:
+buildWindowsQt512Py37:
   stage: build
   script:
-    - .\tests\build\build.bat 1>buildLog.txt
-  tags:
-    - Windows7
-  artifacts:
-    paths:
-      - lib\python373\GTlabPython373.dll
-      - lib\python373\GTlabPython373.exp
-      - lib\python373\GTlabPython373.lib
-      - build\GTlabPython373.pdb
-      - build\GTlabPython373.ilk
-      - build\GTlabUnitTest.exe
-      - build\GTlabUnitTest.pdb
-
-      - buildLog.txt
-    expire_in: 1 week
-
-nightlyBuildPy273:
-  stage: build
-  script:
-    - .\tests\build\build-nightly273.bat
-    - .\tests\build\copyHeaders273.bat
-  tags:
-    - Windows7
-  only:
-    - master
-
-nightlyBuildPy373:
-  stage: build
-  script:
-    - .\tests\build\build-nightly373.bat
-    - .\tests\build\copyHeaders373.bat
-  tags:
-    - Windows7
-  only:
-    - master
-    
-buildWindowsQt512:
-  stage: build
-  script:
-    - .\tests\build\buildQt512.bat 1>buildLogQt512.txt
+    - .\tests\build\build-512.bat 1>buildLogQt512.txt
   tags:
     - Win7Qt512
   artifacts:
     paths:
-      - lib\python373\GTlabPython373-d.dll
-      - lib\python373\GTlabPython373-d.lib
-      - lib\python373\GTlabPython373-d.pdb
-      - lib\python373\GTlabPython373-d.ilk
-      - lib\python373\GTlabPython373-d.exp
+#      - lib\python37\GTlabPython37-d.dll
+#      - lib\python37\GTlabPython37-d.lib
+#      - lib\python37\GTlabPython37-d.pdb
+#      - lib\python37\GTlabPython37-d.ilk
+#      - lib\python37\GTlabPython37-d.exp
+#      - buildLogQt512.txt
+      - lib\python37\GTlabPython37.dll
+      - lib\python37\GTlabPython37.lib
+      - lib\python37\GTlabPython37.pdb
+      - lib\python37\GTlabPython37.ilk
+      - lib\python37\GTlabPython37.exp
+      - build\GTlabUnitTest.exe
+      - build\GTlabUnitTest.pdb
       - buildLogQt512.txt
     expire_in: 1 week
     when: always
 
-nightlyBuildQt512Py373:
+nightlyBuildQt512Py37:
   stage: build
   script:
-    - .\tests\build\build-nightlyQt512Py373.bat
-    - .\tests\build\copyHeadersQt512Py373.bat
+    - .\tests\build\build-nightly-512-py37.bat
+    - .\tests\build\copyHeaders-512-py37.bat
   tags:
     - Win7Qt512
   only:
     - master
   artifacts:
     paths:
-      - lib\python373\GTlabPython373.dll
-      - lib\python373\GTlabPython373.lib
-      - include/python373/*.h  
+      - lib\python37\GTlabPython37.dll
+      - lib\python37\GTlabPython37.lib
+      - include\python37\*.h  
     expire_in: 1 week
     when: always
 
-# run tests using the binary built before
-testWin:
-  stage: test
+buildLinuxPy37:
+  stage: build
   script:
-    - .\tests\unittests\runUnittests.bat
-  dependencies:
-    - buildWindows
+    - chmod a+rwx ./tests/build/build-py37.sh
+    - ./tests/build/build-py37.sh |& tee linuxBuild.txt
   tags:
-    - Windows7
+    - Linux
   artifacts:
     paths:
-      - "GTlabUnitTestCoverage.xml"
-      - "CoverageReport*"
+      - build/GTlabUnitTest
+      - lib/python373/libGTlabPython373.so*
+      - linuxBuild.txt
+    when: always  	
+    expire_in: 1 week	
+
+nightlyBuildLinuxPy37:
+  stage: build
+  script:
+    - chmod a+rwx ./tests/build/build-nightly-py37.sh
+    - ./tests/build/build-nightly-py37.sh
+  tags:
+    - Linux
+  artifacts:
+    paths:
+      - lib/python373/libGTlabPython373.so*    
+      - include/python373/*.h   	   
+    expire_in: 1 week	  
+  only:
+    - master	
+
+# run tests using the binary built before
+
+testWinQt512Py37:
+  stage: test
+  script:
+    - .\tests\unittests\runUnittestsQt512.bat
+  dependencies:
+    - buildWindowsQt512Py37
+  tags:
+    - Win7Qt512
+  artifacts:
+    paths:
       - "unittests.xml"
     reports:
       junit: unittests.xml
 
+testLinuxPy37:
+  stage: test
+  script:
+    - chmod a+rwx ./tests/unittests/runUnittests.sh
+    - ./tests/unittests/runUnittests.sh
+  dependencies:
+    - buildLinuxPy37
+  tags:
+    - Linux
+  artifacts:
+    paths:
+      - "unittests.xml"
+    reports:
+      junit: unittests.xml
+      
 codingstyle:
   stage: codingstyle
   script:
     - .\tests\codingstyle\runCodingstyle.bat 1>codingStyleLog.txt
   tags:
-    - Windows7
+    - Win7Qt512
   dependencies:
   artifacts:
     paths:
@@ -121,9 +134,9 @@ badges:
     - .\tests\badges\badges.bat --bw .\buildLog.txt .
     - .\tests\badges\badges.bat --cs .\codingStyleLog.txt .
   tags:
-    - Windows7
-  only:
-    - master
+    - Win7Qt512
+#  only:
+#    - master
   artifacts:
     paths:
       - "New_commits.svg"
