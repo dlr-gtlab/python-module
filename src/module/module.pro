@@ -144,10 +144,11 @@ CONFIG(debug, debug|release){
     # GTLAB MODULES
 
     # THIRD PARTY
-    equals(PY_VERSION, 373) {
+    equals(PY_VERSION, 37) {
         win32: LIBS += -lPythonQt-Qt5-Python37_d3
         unix: LIBS += -lPythonQt-Qt5-Python3.7
     } else {
+
         win32: LIBS += -lPythonQt-Qt5-Python27_d3
     }
 
@@ -160,7 +161,20 @@ CONFIG(debug, debug|release){
 
     # THIRD PARTY
     win32: LIBS += -lPythonQt-Qt5-Python$${PY_VERSION}
-    unix: LIBS += -lPythonQt-Qt5-Python3.7
+    unix {
+
+        equals(PY_VERSION, 37) {
+            LIBS += -lPythonQt-Qt5-Python3.7
+        }
+
+        equals(PY_VERSION, 373) {
+            LIBS += -lPythonQt-Qt5-Python3.7
+        }
+
+        equals(PY_VERSION, 273) {
+            LIBS += -lPythonQt-Qt5-Python2.7
+        }
+   }
 }
 
 ######################################################################
