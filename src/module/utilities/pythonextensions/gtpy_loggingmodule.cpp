@@ -8,6 +8,7 @@
  */
 
 #include "gtpy_loggingmodule.h"
+
 using namespace GtpyLoggingModule;
 
 static void
@@ -136,44 +137,97 @@ GtpyLoggingModule::gtWarning_C_function()
 static void
 printOutput(QString message)
 {
-    PyObject* builtins = PyImport_ImportModule("builtins");
+    PyObject* globals = PyEval_GetGlobals();
 
-    if (builtins)
+    if (globals)
     {
-        if (PyModule_Check(builtins))
+        Py_INCREF(globals);
+
+        if (PyDict_Check(globals))
         {
-            PyObject* dict = PyModule_GetDict(builtins);
+            PyObject* builtinsDict = PyDict_GetItemString(globals,
+                                     "__builtins__");
 
-            if (dict)
+            if (builtinsDict)
             {
-                Py_INCREF(dict);
+                Py_INCREF(builtinsDict);
 
-                PyObject* print = PyDict_GetItemString(dict, "print");
-
-                if (print)
+                if (PyDict_Check(builtinsDict))
                 {
-                    Py_INCREF(print);
+                    PyObject* print = PyDict_GetItemString(builtinsDict,
+                                                           "print");
 
-                    if (PyCallable_Check(print))
+                    if (print)
                     {
-                        PyObject* argsTuple = PyTuple_New(1);
-                        PyTuple_SetItem(argsTuple, 0,
-                                        QSTRING_AS_PYSTRING(message));
+                        Py_INCREF(print);
 
-                        PyObject_Call(print, argsTuple, NULL);
+                        if (PyCallable_Check(print))
+                        {
+                            PyObject* argsTuple = PyTuple_New(1);
+                            PyTuple_SetItem(argsTuple, 0,
+                                            QSTRING_AS_PYSTRING(message));
 
-                        Py_DECREF(argsTuple);
+                            PyObject_Call(print, argsTuple, NULL);
+
+                            Py_DECREF(argsTuple);
+                        }
+
+                        Py_DECREF(print);
                     }
-
-                    Py_DECREF(print);
                 }
 
-                Py_DECREF(dict);
+                Py_DECREF(builtinsDict);
             }
         }
 
-        Py_DECREF(builtins);
+        Py_DECREF(globals);
     }
+
+
+
+    //    PyObject* builtins = PyImport_ImportModule("builtins");
+
+    //    if (builtins)
+    //    {
+    //        if (PyModule_Check(builtins))
+    //        {
+    //            qDebug() << "builtins valid";
+    //            PyObject* dict = PyModule_GetDict(builtins);
+
+    //            if (dict)
+    //            {
+    //                qDebug() << "dict valid";
+    //                Py_INCREF(dict);
+
+    //                PyObject* print = PyDict_GetItemString(dict, "print");
+
+    //                if (print)
+    //                {
+    //                    qDebug() << "print valid";
+    //                    Py_INCREF(print);
+
+    //                    if (PyCallable_Check(print))
+    //                    {
+    //                        qDebug() << "print is callback";
+    //                        PyObject* argsTuple = PyTuple_New(1);
+    //                        PyTuple_SetItem(argsTuple, 0,
+    //                                        QSTRING_AS_PYSTRING(message));
+
+    //                        PyObject_Call(print, argsTuple, NULL);
+
+    //                        qDebug() << "call ready";
+    //                        Py_DECREF(argsTuple);
+    //                    }
+
+    //                    Py_DECREF(print);
+    //                }
+
+    //                Py_DECREF(dict);
+    //            }
+    //        }
+
+    //        Py_DECREF(builtins);
+    //    }
 }
 
 static PyObject*
@@ -220,7 +274,7 @@ GtpyPyLogger_lshift(PyObject* self, PyObject* arg)
             {
                 Py_INCREF(appOutputObj);
 
-                if (PyLong_Check(appOutputObj))
+                if (PyBool_Check(appOutputObj))
                 {
                     outputToAppConsol = (bool)PyLong_AsLong(appOutputObj);
                 }

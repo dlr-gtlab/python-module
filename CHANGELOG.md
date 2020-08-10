@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
  - user-specific Python path variables are set before the initialization of PythonQt
  - Remove bug in GtpyGlobals (convert QString safely to char*)
+ - GtLogging is implemented as a C++ Python extension
+ - Bug Fix: Memory leak in the initialization of extension modules
 
 ## [1.0.0] - 2020-07-02
 ### Added

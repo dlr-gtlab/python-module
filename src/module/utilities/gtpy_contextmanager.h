@@ -318,6 +318,12 @@ private:
     */
     PythonQtObjectPtr context(int contextId) const;
 
+    void initExtensionModule(QString moduleName,
+#ifdef PY3K
+                             PyModuleDef* def);
+#else
+                             PyMethodDef* methods);
+#endif
     /**
     * @brief Initializes the calculator module.
     */

@@ -12,10 +12,26 @@
 
 #include "gtpy_importfunction.h"
 
+static void
+GtpyMyImport_dealloc(GtpyMyImport* self)
+{
+    qDebug() << "Dealloc import!°!!!!!!!!!!!!!!!!!!!!!!!!!";
+
+    if (self->defaultImp)
+    {
+        Py_DECREF(self->defaultImp);
+        self->defaultImp = Q_NULLPTR;
+    }
+
+    Py_TYPE(self)->tp_free((PyObject*)self);
+}
+
+
 static PyObject*
 GtpyMyImport_new(PyTypeObject* type, PyObject* /*args*/,
                  PyObject* /*kwds*/)
 {
+    qDebug() << "new import!°!!!!!!!!!!!!!!!!!!!!!!!!!";
     GtpyMyImport* self;
     self = (GtpyMyImport*)type->tp_alloc(type, 0);
     self->defaultImp = Q_NULLPTR;
@@ -159,7 +175,7 @@ meth_importGtCalculators(PyObject* self)
 }
 
 static PyMethodDef
-GtpyExtendedWrapper_methods[] =
+GtpyMyImport_methods[] =
 {
     {
         "importGtCalculators", (PyCFunction)meth_importGtCalculators,
@@ -176,7 +192,7 @@ GtpyMyImport_Type =
     "GtpyMyImport",             /*tp_name*/
     sizeof(GtpyMyImport),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
-    0, /*tp_dealloc*/
+    (destructor)GtpyMyImport_dealloc, /*tp_dealloc*/
     0,                         /*tp_print*/
     0,                         /*tp_getattr*/
     0,                         /*tp_setattr*/
@@ -199,7 +215,7 @@ GtpyMyImport_Type =
     0,                   /* tp_weaklistoffset */
     0,                   /* tp_iter */
     0,                   /* tp_iternext */
-    GtpyExtendedWrapper_methods,                   /* tp_methods */
+    GtpyMyImport_methods,                   /* tp_methods */
     0,                   /* tp_members */
     0,                   /* tp_getset */
     0,                         /* tp_base */

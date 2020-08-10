@@ -55,7 +55,7 @@ extern PyObject*
 gtWarning_C_function();
 
 static PyMethodDef
-GtpyCalculatorsModule_StaticMethods[] =
+GtpyLoggingModule_StaticMethods[] =
 {
     {
         "gtDebug", (PyCFunction)gtDebug_C_function, METH_NOARGS,
@@ -94,7 +94,7 @@ GtpyLogging_Module =
     QSTRING_TO_CHAR_PTR(GtpyGlobals::MODULE_GtLogging_C),
     NULL,
     -1,
-    GtpyCalculatorsModule_StaticMethods,
+    GtpyLoggingModule_StaticMethods,
     NULL,
     NULL,
     NULL,
