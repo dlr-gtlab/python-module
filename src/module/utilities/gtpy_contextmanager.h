@@ -175,9 +175,6 @@ public:
     */
     bool addTaskValue(int contextId, GtTask* task);
 
-    //    bool addDataModelObject(int contextId, const QString& name,
-    //                            GtObject* package);
-
     /**
     * @brief Checks whether the Python context indicated by contextId as access
     *  to calculators. If the context has access, this function deletes all
@@ -330,11 +327,6 @@ private:
     * @brief Initializes the logging module.
     */
     void initLoggingModuleC();
-
-    //    /**
-    //    * @brief Initializes the logging module.
-    //    */
-    //    void initLoggingModule();
 
     /**
     * @brief Initializes the import behaviour of python.
@@ -531,9 +523,6 @@ private:
 
     /// Whether the contexts send messages to the application console
     QMap<int, bool> m_appLogging;
-
-    /// Logging Module
-    PythonQtObjectPtr m_loggingModule;
 
     /// Error message emitter
     PythonQtObjectPtr m_err;

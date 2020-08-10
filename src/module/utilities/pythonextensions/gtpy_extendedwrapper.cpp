@@ -74,7 +74,8 @@ PythonQtSlotFunction_MyCall(PyObject* func, PyObject* args, PyObject* kw)
     return pythonqt_slot_call(func, args, kw);
 }
 
-void GtpyCustomization::customizeSlotCalling()
+void
+GtpyCustomization::customizeSlotCalling()
 {
     pythonqt_slot_call = PythonQtSlotFunction_Type.tp_call;
     PythonQtSlotFunction_Type.tp_call = PythonQtSlotFunction_MyCall;

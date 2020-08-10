@@ -67,7 +67,6 @@ const QString GtpyContextManager::CLASS_WRAPPER_MODULE =
 GtpyContextManager::GtpyContextManager(QObject* parent) :
     QObject(parent), m_decorator(Q_NULLPTR),
     m_errorEmitted(false),
-    m_loggingModule(Q_NULLPTR),
     m_pyThreadState(Q_NULLPTR),
     m_contextsInitialized(false)
 {
@@ -90,8 +89,6 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
                                     CLASS_WRAPPER_MODULE.toLocal8Bit().data());
     PythonQt::self()->registerClass(&GtTask::staticMetaObject,
                                     CLASS_WRAPPER_MODULE.toLocal8Bit().data());
-    //    PythonQt::self()->registerClass(&GtPythonLogger::staticMetaObject,
-    //                                    CLASS_WRAPPER_MODULE.toLocal8Bit().data());
     PythonQt::self()->registerClass(&GtCalculator::staticMetaObject,
                                     CLASS_WRAPPER_MODULE.toLocal8Bit().data());
     PythonQt::self()->registerClass(&GtDataZone0D::staticMetaObject,
@@ -103,8 +100,9 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
 
     PythonQt::self()->addDecorators(m_decorator);
 
-    PythonQt::self()->registerCPPClass("GtpyProcessDataDistributor", 0,
-                                       CLASS_WRAPPER_MODULE.toLocal8Bit().data());
+    PythonQt::self()->registerCPPClass(
+        "GtpyProcessDataDistributor", 0,
+        CLASS_WRAPPER_MODULE.toLocal8Bit().data());
 
     connect(m_decorator, SIGNAL(sendErrorMessage(QString)), this,
             SLOT(onErrorMessage(QString)));
@@ -273,17 +271,6 @@ GtpyContextManager::evalScript(int contextId,
     {
         return false;
     }
-
-    //    if (m_appLogging.value(contextId, false))
-    //    {
-    //        m_loggingModule.evalScript("PyLogger._PyLogger__outputToConsole = "
-    //                                   "True");
-    //    }
-    //    else
-    //    {
-    //        m_loggingModule.evalScript("PyLogger._PyLogger__outputToConsole = "
-    //                                   "False");
-    //    }
 
     bool hadError = false;
 
@@ -604,8 +591,6 @@ GtpyContextManager::setPropertyValueFuncName() const
 void
 GtpyContextManager::initContexts()
 {
-    //        initLoggingModule();
-
     initLoggingModuleC();
     initWrapperModule();
     initCalculatorsModule();
@@ -928,8 +913,9 @@ GtpyContextManager::initCalculatorsModule()
     customPyModule.m_name = name.constData();
     myMod = PyModule_Create(&GtpyCalculatorsModule::GtpyCalculators_Module);
 #else
-    myMod = Py_InitModule(name.constData(),
-                          GtpyCalculatorsModule::GtpyCalculatorsModule_StaticMethods);
+    myMod = Py_InitModule(
+                name.constData(),
+                GtpyCalculatorsModule::GtpyCalculatorsModule_StaticMethods);
 #endif
     // add GtTaskFinder to the list of builtin module names
     PyObject* old_module_names =
@@ -1016,81 +1002,6 @@ GtpyContextManager::initLoggingModuleC()
         Py_DECREF(myMod);
     }
 }
-
-//void
-//GtpyContextManager::initLoggingModule()
-//{
-//    GTPY_GIL_SCOPE
-
-//    QString loggingClass = GtPythonLogger::staticMetaObject.className();
-
-//    m_loggingModule = PythonQt::self()->createModuleFromScript(
-//                          GtpyGlobals::MODULE_GtLogging);
-
-//    m_loggingModule.evalScript(QStringLiteral("from PythonQt.") +
-//                               CLASS_WRAPPER_MODULE + QStringLiteral(" import ") +
-//                               loggingClass);
-
-//    m_loggingModule.evalScript(
-//        QStringLiteral("class PyLogger:\n") +
-//        QStringLiteral("     __instance = None \n") +
-//        QStringLiteral("     __outputToConsole = False \n") +
-
-//        QStringLiteral("     def __init__(self, type = 0): \n") +
-//        QStringLiteral("         self.type = type \n") +
-//        QStringLiteral("         PyLogger.__instance = self \n") +
-
-//        QStringLiteral("     @staticmethod  \n") +
-//        QStringLiteral("     def getInstance(type): \n") +
-//        QStringLiteral("         if PyLogger.__instance == None: \n") +
-//        QStringLiteral("             PyLogger(type) \n") +
-//        QStringLiteral("         else: \n") +
-//        QStringLiteral("             PyLogger.__instance.type = type \n") +
-//        QStringLiteral("         return PyLogger.__instance \n") +
-
-//        QStringLiteral("     def __lshift__(self, other): \n") +
-//        QStringLiteral("         if self.type is 0: \n") +
-//        QStringLiteral("             print (\"[DEBUG] \" + str(other)) \n") +
-//        QStringLiteral("             if PyLogger.__outputToConsole:\n") +
-//        QStringLiteral("                 GtPythonLogger.gtPyDebug(other)\n") +
-//        QStringLiteral("             return \n") +
-//        QStringLiteral("         if self.type is 1: \n") +
-//        QStringLiteral("             print (\"[INFO] \" + str(other)) \n") +
-//        QStringLiteral("             if PyLogger.__outputToConsole:\n") +
-//        QStringLiteral("                 GtPythonLogger.gtPyInfo(other)\n") +
-//        QStringLiteral("             return \n") +
-//        QStringLiteral("         if self.type is 2: \n") +
-//        QStringLiteral("             print (\"[ERROR] \" + str(other)) \n") +
-//        QStringLiteral("             if PyLogger.__outputToConsole:\n") +
-//        QStringLiteral("                 GtPythonLogger.gtPyError(other)\n") +
-//        QStringLiteral("             return \n") +
-//        QStringLiteral("         if self.type is 3: \n") +
-//        QStringLiteral("             print (\"[FATAL] \" + str(other)) \n") +
-//        QStringLiteral("             if PyLogger.__outputToConsole:\n") +
-//        QStringLiteral("                 GtPythonLogger.gtPyFatal(other)\n") +
-//        QStringLiteral("             return \n") +
-//        QStringLiteral("         if self.type is 4: \n") +
-//        QStringLiteral("             print (\"[WARNING] \" + str(other)) \n") +
-//        QStringLiteral("             if PyLogger.__outputToConsole:\n") +
-//        QStringLiteral("                 GtPythonLogger.gtPyWarning(other)\n") +
-//        QStringLiteral("             return \n"));
-
-
-//    m_loggingModule.evalScript(QStringLiteral("def gtDebug(): \n") +
-//                               QStringLiteral("     return PyLogger.getInstance(0)\n"));
-
-//    m_loggingModule.evalScript(QStringLiteral("def gtInfo(): \n") +
-//                               QStringLiteral("     return PyLogger.getInstance(1)\n"));
-
-//    m_loggingModule.evalScript(QStringLiteral("def gtError(): \n") +
-//                               QStringLiteral("     return PyLogger.getInstance(2)\n"));
-
-//    m_loggingModule.evalScript(QStringLiteral("def gtFatal(): \n") +
-//                               QStringLiteral("     return PyLogger.getInstance(3)\n"));
-
-//    m_loggingModule.evalScript(QStringLiteral("def gtWarning(): \n") +
-//                               QStringLiteral("     return PyLogger.getInstance(4)\n"));
-//}
 
 void
 GtpyContextManager::initImportBehaviour()
