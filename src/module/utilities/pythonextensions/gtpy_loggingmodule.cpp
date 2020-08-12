@@ -413,10 +413,10 @@ PyTypeObject
 GtpyLoggingModule::GtpyPyLogger_Type =
 {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "GtLoggingC.GtpyPyLogger",          /*tp_name*/
-    sizeof(GtpyPyLogger),               /*tp_basicsize*/
-    0,                                  /*tp_itemsize*/
-    (destructor)GtpyPyLogger_dealloc,   /*tp_dealloc*/
+    "GtLogging.GtpyPyLogger",         /*tp_name*/
+    sizeof(GtpyPyLogger),             /*tp_basicsize*/
+    0,                                /*tp_itemsize*/
+    (destructor)GtpyPyLogger_dealloc, /*tp_dealloc*/
     0,  /*tp_print*/
     0,  /*tp_getattr*/
     0,  /*tp_setattr*/
