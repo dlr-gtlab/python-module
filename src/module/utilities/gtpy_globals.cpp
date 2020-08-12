@@ -18,7 +18,7 @@ const QString PYTHONHOME_VAR = "PYTHONHOME";
 const QString MODULE_GtObjectWrapperModuleC = "GtObjectWrapperModuleC";
 const QString MODULE_GtCalculators    = "GtCalculators";
 const QString MODULE_GtLogging        = "GtLogging";
-const QString MODULE_GtLogging_C      = "GtLoggingC";
+const QString MODULE_GtLogging_C      = "GtLogging";
 
 ///Python Classes
 const QString GTOBJECT_WRAPPER   = "GtpyExtendedWrapper";
