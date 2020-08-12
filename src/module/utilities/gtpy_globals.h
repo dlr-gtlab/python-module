@@ -21,7 +21,7 @@ namespace GtpyGlobals
 extern const QString PYTHONHOME_VAR;
 
 ///Python Modules
-extern const QString GTOBJECT_WRAPPER_MODULE;
+extern const QString MODULE_GtObjectWrapperModuleC;
 extern const QString MODULE_GtCalculators;
 extern const QString MODULE_GtLogging;
 extern const QString MODULE_GtLogging_C;

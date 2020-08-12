@@ -318,12 +318,33 @@ private:
     */
     PythonQtObjectPtr context(int contextId) const;
 
-    void initExtensionModule(QString moduleName,
 #ifdef PY3K
-                             PyModuleDef* def);
+    /**
+     * @brief Initializes the extension module defined in def and adds it to
+     * the built-in modules of Python. The new module is named after moduleName.
+     * @param moduleName The name of the extension module.
+     * @param def The module definition.
+     * @return A new reference of the extension module.
+     */
+    PyObject* initExtensionModule(QString moduleName, PyModuleDef* def);
 #else
-                             PyMethodDef* methods);
+    /**
+     * @brief Initializes the extension module and assigns it the static
+     * methods defined in methods. The new module is added to the built-in
+     * modules of Python and is named after moduleName.
+     * @param moduleName The name of the extension module.
+     * @param methods Definition of the static methods.
+     * @return A new reference of the extension module.
+     */
+    PyObject* initExtensionModule(QString moduleName, PyMethodDef* methods);
 #endif
+
+    /**
+     * @brief Adds the given name to the list of built-in modules in Python.
+     * @param name Name of an extension Python module.
+     */
+    void modulenameToBuiltins(QString name);
+
     /**
     * @brief Initializes the calculator module.
     */

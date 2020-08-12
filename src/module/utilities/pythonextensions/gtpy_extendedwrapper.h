@@ -17,6 +17,8 @@
 
 #include "gtpy_globals.h"
 
+namespace GtpyExtendedWrapperModule
+{
 extern PyTypeObject GtpyExtendedWrapper_Type;
 
 typedef struct
@@ -26,18 +28,12 @@ typedef struct
 
 } GtpyExtendedWrapper;
 
-namespace GtpyCustomization
-{
-void customizeSlotCalling();
-}
-
-
 #ifdef PY3K
 static PyModuleDef
-customPyModule =
+GtpyExtendedWrapper_Module =
 {
     PyModuleDef_HEAD_INIT,
-    QSTRING_TO_CHAR_PTR(GtpyGlobals::GTOBJECT_WRAPPER_MODULE),
+    QSTRING_TO_CHAR_PTR(GtpyGlobals::MODULE_GtObjectWrapperModuleC),
     NULL,
     -1,
     NULL,
@@ -47,5 +43,12 @@ customPyModule =
     NULL
 };
 #endif
+}
+
+namespace GtpyCustomization
+{
+void customizeSlotCalling();
+}
+
 
 #endif // GTPY_EXAMPLEWRAPPER_H

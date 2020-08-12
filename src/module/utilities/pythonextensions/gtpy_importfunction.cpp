@@ -15,8 +15,6 @@
 static void
 GtpyMyImport_dealloc(GtpyMyImport* self)
 {
-    qDebug() << "Dealloc import!°!!!!!!!!!!!!!!!!!!!!!!!!!";
-
     if (self->defaultImp)
     {
         Py_DECREF(self->defaultImp);
@@ -31,7 +29,6 @@ static PyObject*
 GtpyMyImport_new(PyTypeObject* type, PyObject* /*args*/,
                  PyObject* /*kwds*/)
 {
-    qDebug() << "new import!°!!!!!!!!!!!!!!!!!!!!!!!!!";
     GtpyMyImport* self;
     self = (GtpyMyImport*)type->tp_alloc(type, 0);
     self->defaultImp = Q_NULLPTR;

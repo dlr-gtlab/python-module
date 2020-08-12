@@ -30,6 +30,8 @@
 
 #include "gtpy_decorator.h"
 
+using namespace GtpyExtendedWrapperModule;
+
 GtpyDecorator::GtpyDecorator(QObject* parent) : QObject(parent)
 {
 

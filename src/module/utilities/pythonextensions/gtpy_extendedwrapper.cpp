@@ -22,6 +22,8 @@
 
 #include "gtpy_extendedwrapper.h"
 
+using namespace GtpyExtendedWrapperModule;
+
 static QString
 pyValidGtPropertyId(QString id)
 {
@@ -305,8 +307,9 @@ GtpyExtendedWrapper_setattro(PyObject* obj, PyObject* name, PyObject* value)
                 }
 
                 GtpyDecorator decorator;
-                decorator.setPropertyValue(gtObj, prop->ident(),
-                                           PythonQtConv::PyObjToQVariant(value));
+                decorator.setPropertyValue(
+                    gtObj, prop->ident(),
+                    PythonQtConv::PyObjToQVariant(value));
 
                 return 0;
             }
@@ -679,53 +682,53 @@ GtpyExtendedWrapper_as_number =
 };
 
 PyTypeObject
-GtpyExtendedWrapper_Type =
+GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type =
 {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "GtObjectWrapperModuleC.GtpyExtendedWrapper",             /*tp_name*/
-    sizeof(GtpyExtendedWrapper),             /*tp_basicsize*/
-    0,                         /*tp_itemsize*/
-    (destructor)GtpyExtendedWrapper_dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
-    0,           /*tp_compare*/
-    GtpyExtendedWrapper_repr,              /*tp_repr*/
-    &GtpyExtendedWrapper_as_number,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    (hashfunc)GtpyExtendedWrapper_hash,                         /*tp_hash */
-    0,                         /*tp_call*/
-    GtpyExtendedWrapper_str,                         /*tp_str*/
+    "GtObjectWrapperModuleC.GtpyExtendedWrapper", /*tp_name*/
+    sizeof(GtpyExtendedWrapper),                  /*tp_basicsize*/
+    0,                                            /*tp_itemsize*/
+    (destructor)GtpyExtendedWrapper_dealloc,      /*tp_dealloc*/
+    0, /*tp_print*/
+    0, /*tp_getattr*/
+    0, /*tp_setattr*/
+    0, /*tp_compare*/
+    GtpyExtendedWrapper_repr,       /*tp_repr*/
+    &GtpyExtendedWrapper_as_number, /*tp_as_number*/
+    0, /*tp_as_sequence*/
+    0, /*tp_as_mapping*/
+    (hashfunc)GtpyExtendedWrapper_hash, /*tp_hash */
+    0, /*tp_call*/
+    GtpyExtendedWrapper_str,      /*tp_str*/
     GtpyExtendedWrapper_getattro, /*tp_getattro*/
-    GtpyExtendedWrapper_setattro,             /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
+    GtpyExtendedWrapper_setattro, /*tp_setattro*/
+    0,                            /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE
 #ifndef PY3K
     | Py_TPFLAGS_CHECKTYPES
 #endif
     , /*tp_flags*/
-    "GtpyExtendedWrapper object",           /* tp_doc */
-    0,                   /* tp_traverse */
-    0,                   /* tp_clear */
-    (richcmpfunc)GtpyExtendedWrapper_richcompare,                   /* tp_richcompare */
-    0,                   /* tp_weaklistoffset */
-    0,                   /* tp_iter */
-    0,                   /* tp_iternext */
+    "GtpyExtendedWrapper object", /* tp_doc */
+    0, /* tp_traverse */
+    0, /* tp_clear */
+    (richcmpfunc)GtpyExtendedWrapper_richcompare, /* tp_richcompare */
+    0, /* tp_weaklistoffset */
+    0, /* tp_iter */
+    0, /* tp_iternext */
 #ifdef PY3K
     GtpyExtendedWrapper_methods,
 #else
-    GtpyExtendedWrapper_methods,             /* tp_methods */
+    GtpyExtendedWrapper_methods, /* tp_methods */
 #endif
-    0,//GtpyGtObjectWrapper_members,                   /* tp_members */
-    0,                   /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
-    0,                         /* tp_dictoffset */
-    (initproc)GtpyExtendedWrapper_init,                       /* tp_init */
-    0,                         /* tp_alloc */
-    GtpyExtendedWrapper_new,
+    0, /* tp_members */
+    0, /* tp_getset */
+    0, /* tp_base */
+    0, /* tp_dict */
+    0, /* tp_descr_get */
+    0, /* tp_descr_set */
+    0, /* tp_dictoffset */
+    (initproc)GtpyExtendedWrapper_init, /* tp_init */
+    0, /* tp_alloc */
+    GtpyExtendedWrapper_new, /* tp_new */
 
 };
