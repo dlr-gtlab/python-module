@@ -18,6 +18,8 @@
 
 #include "gtpy_propertysetter.h"
 
+using namespace GtpyExtendedWrapperModule;
+
 static GtpyPropertySetterObject* setterfunction_free_list = Q_NULLPTR;
 
 static void
@@ -122,8 +124,10 @@ GtpyPropertySetter_Call(PyObject* func, PyObject* args,
                 }
 
                 GtpyDecorator decorator;
-                decorator.setPropertyValue(gtObj, propId,
-                                           PythonQtConv::PyObjToQVariant(value));
+                decorator.setPropertyValue(
+                    gtObj,
+                    propId,
+                    PythonQtConv::PyObjToQVariant(value));
 
                 Py_INCREF(Py_True);
                 return Py_True;

@@ -20,7 +20,6 @@ class GtProject;
 class GtTask;
 class GtObject;
 class GtAbstractProperty;
-class GtPythonLogger;
 class GtCalculator;
 class GtDataZone0D;
 class GtpyTask;
@@ -425,18 +424,6 @@ public slots:
     bool appendData(GtDataZone0D* dataZone, const QString& paramName,
                     const QString& unit, double value);
 
-    ///-------> functions of GtPythonLogger <-------\\\
-
-    void static_GtPythonLogger_gtPyDebug(const QVariant& mes);
-
-    void static_GtPythonLogger_gtPyInfo(const QVariant& mes);
-
-    void static_GtPythonLogger_gtPyError(const QVariant& mes);
-
-    void static_GtPythonLogger_gtPyFatal(const QVariant& mes);
-
-    void static_GtPythonLogger_gtPyWarning(const QVariant& mes);
-
 signals:
     /**
      * @brief sendPythonConsoleOutput signal for transmitting an output message
@@ -445,20 +432,5 @@ signals:
     void sendErrorMessage(const QString& output);
 };
 
-class GtPythonLogger : public QObject
-{
-    Q_OBJECT
-
-public:
-    static void gtPyDebug(const QVariant& mes);
-
-    static void gtPyInfo(const QVariant& mes);
-
-    static void gtPyError(const QVariant& mes);
-
-    static void gtPyFatal(const QVariant& mes);
-
-    static void gtPyWarning(const QVariant& mes);
-};
 
 #endif // GTPY_DECORATOR_H

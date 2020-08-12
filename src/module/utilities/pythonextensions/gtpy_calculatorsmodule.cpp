@@ -175,8 +175,9 @@ findTaskByRunnable()
     {
         QThread* thread = QThread::currentThread();
 
-        GtAbstractRunnable* runnable = thread->findChild<GtAbstractRunnable*>(
-                                           QString(), Qt::FindDirectChildrenOnly);
+        GtAbstractRunnable* runnable =
+            thread->findChild<GtAbstractRunnable*>(QString(),
+                    Qt::FindDirectChildrenOnly);
 
         if (runnable)
         {
@@ -546,10 +547,12 @@ GtpyCalculatorsModule::createCalcConstructors()
                             className.toStdString().data()));
 
         PythonQtObjectPtr calcConstructor = GtpyCreateCalculator_Type.tp_new(
-                                                &GtpyCreateCalculator_Type, argsTuple, NULL);
+                                                &GtpyCreateCalculator_Type,
+                                                argsTuple, NULL);
 
         Py_DECREF(argsTuple);
 
-        PyModule_AddObject(mod, className.toStdString().data(), calcConstructor);
+        PyModule_AddObject(mod, className.toStdString().data(),
+                           calcConstructor);
     }
 }

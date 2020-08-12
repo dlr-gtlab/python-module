@@ -12,7 +12,7 @@
 
 #include <QString>
 
-#define QSTRING_TO_CHAR_PTR(x) x.toLocal8Bit().data()
+#define QSTRING_TO_CHAR_PTR(x) QString(x).toLocal8Bit().data()
 #define QSTRING_AS_PYSTRING(x) PyString_FromString(QSTRING_TO_CHAR_PTR(x))
 
 namespace GtpyGlobals
@@ -21,15 +21,18 @@ namespace GtpyGlobals
 extern const QString PYTHONHOME_VAR;
 
 ///Python Modules
-extern const QString GTOBJECT_WRAPPER_MODULE;
+extern const QString MODULE_GtObjectWrapperModuleC;
 extern const QString MODULE_GtCalculators;
 extern const QString MODULE_GtLogging;
+extern const QString MODULE_GtLogging_C;
 
 ///Python Classes
 extern const QString GTOBJECT_WRAPPER;
+extern const QString CLASS_GtpyPyLogger;
 
 ///Python Attribute
 extern const QString ATTR_task;
+extern const QString ATTR_outputToApp;
 
 ///Python Functions
 extern const QString FUNC_importGtCalc;

@@ -17,6 +17,8 @@
 
 #include "gtpy_createhelperfunction.h"
 
+using namespace GtpyExtendedWrapperModule;
+
 static void
 meth_dealloc(GtpyCreateHelperFunctionObject* m)
 {

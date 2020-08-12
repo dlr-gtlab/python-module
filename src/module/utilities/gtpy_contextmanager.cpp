@@ -40,6 +40,7 @@
 #include "gtpy_interruptrunnable.h"
 #include "gtpy_scriptrunnable.h"
 #include "gtpy_projectpathfunction.h"
+#include "gtpy_loggingmodule.h"
 
 #include "gtpy_extendedwrapper.h"
 #include "gtpy_createhelperfunction.h"
@@ -66,7 +67,6 @@ const QString GtpyContextManager::CLASS_WRAPPER_MODULE =
 GtpyContextManager::GtpyContextManager(QObject* parent) :
     QObject(parent), m_decorator(Q_NULLPTR),
     m_errorEmitted(false),
-    m_loggingModule(Q_NULLPTR),
     m_pyThreadState(Q_NULLPTR),
     m_contextsInitialized(false)
 {
@@ -89,8 +89,6 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
                                     CLASS_WRAPPER_MODULE.toLocal8Bit().data());
     PythonQt::self()->registerClass(&GtTask::staticMetaObject,
                                     CLASS_WRAPPER_MODULE.toLocal8Bit().data());
-    PythonQt::self()->registerClass(&GtPythonLogger::staticMetaObject,
-                                    CLASS_WRAPPER_MODULE.toLocal8Bit().data());
     PythonQt::self()->registerClass(&GtCalculator::staticMetaObject,
                                     CLASS_WRAPPER_MODULE.toLocal8Bit().data());
     PythonQt::self()->registerClass(&GtDataZone0D::staticMetaObject,
@@ -102,8 +100,9 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
 
     PythonQt::self()->addDecorators(m_decorator);
 
-    PythonQt::self()->registerCPPClass("GtpyProcessDataDistributor", 0,
-                                       CLASS_WRAPPER_MODULE.toLocal8Bit().data());
+    PythonQt::self()->registerCPPClass(
+        "GtpyProcessDataDistributor", 0,
+        CLASS_WRAPPER_MODULE.toLocal8Bit().data());
 
     connect(m_decorator, SIGNAL(sendErrorMessage(QString)), this,
             SLOT(onErrorMessage(QString)));
@@ -194,12 +193,12 @@ GtpyContextManager::initExtensions()
 
     Py_INCREF(&GtpyStdOutRedirect_Type);
 
-    if (PyType_Ready(&GtpyExtendedWrapper_Type) < 0)
+    if (PyType_Ready(&GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type) < 0)
     {
         gtError() << "could not initialize GtpyExtendedWrapper_Type";
     }
 
-    Py_INCREF(&GtpyExtendedWrapper_Type);
+    Py_INCREF(&GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type);
 
     if (PyType_Ready(&GtpyCreateHelperFunction_Type) < 0)
     {
@@ -236,6 +235,13 @@ GtpyContextManager::initExtensions()
     }
 
     Py_INCREF(&GtpyProjectPathFunction::GtpyProjectPathFunction_Type);
+
+    if (PyType_Ready(&GtpyLoggingModule::GtpyPyLogger_Type) < 0)
+    {
+        gtError() << "could not initialize GtpyPyLogger_Type";
+    }
+
+    Py_INCREF(&GtpyLoggingModule::GtpyPyLogger_Type);
 }
 
 bool
@@ -264,17 +270,6 @@ GtpyContextManager::evalScript(int contextId,
     if (currentContext == Q_NULLPTR)
     {
         return false;
-    }
-
-    if (m_appLogging.value(contextId, false))
-    {
-        m_loggingModule.evalScript("PyLogger._PyLogger__outputToConsole = "
-                                   "True");
-    }
-    else
-    {
-        m_loggingModule.evalScript("PyLogger._PyLogger__outputToConsole = "
-                                   "False");
     }
 
     bool hadError = false;
@@ -344,7 +339,8 @@ GtpyContextManager::introspection(int contextId, const QString& objectname,
         QString temp = QStringLiteral("obj");
         QString script = temp + QStringLiteral(" = ") + objectname;
 
-        bool eval = evalScript(contextId, script, false, false, EvalSingleString);
+        bool eval = evalScript(contextId, script, false, false,
+                               EvalSingleString);
 
         if (eval)
         {
@@ -468,8 +464,10 @@ GtpyContextManager::addGtObject(int contextId, const QString& name,
         return false;
     }
 
-    PyObject* wrapped = GtpyExtendedWrapper_Type.tp_new(
-                            &GtpyExtendedWrapper_Type, argsTuple, NULL);
+    PyObject* wrapped =
+        GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type.tp_new(
+            &GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type, argsTuple,
+            NULL);
 
     Py_DECREF(argsTuple);
 
@@ -596,7 +594,7 @@ GtpyContextManager::setPropertyValueFuncName() const
 void
 GtpyContextManager::initContexts()
 {
-    initLoggingModule();
+    initLoggingModuleC();
     initWrapperModule();
     initCalculatorsModule();
 
@@ -903,27 +901,76 @@ GtpyContextManager::context(int contextId) const
     return con.module;
 }
 
-void
-GtpyContextManager::initCalculatorsModule()
+
+#ifdef PY3K
+PyObject*
+GtpyContextManager::initExtensionModule(QString moduleName, PyModuleDef* def)
+{
+    if (!def)
+    {
+        return Q_NULLPTR;
+    }
+
+    GTPY_GIL_SCOPE
+
+    QByteArray name = moduleName.toUtf8();;
+
+    GtpyLoggingModule::GtpyLogging_Module.m_name = name.constData();
+    PyObject* myMod = PyModule_Create(def);
+
+    modulenameToBuiltins(moduleName);
+
+    PyObject* sys = PyImport_ImportModule("sys");
+
+    if (!sys)
+    {
+        return Q_NULLPTR;
+    }
+
+    PyObject* modules = PyObject_GetAttrString(sys, "modules");
+
+    PyDict_SetItemString(modules, name.constData(), myMod);
+
+    Py_DECREF(modules);
+
+    Py_DECREF(sys);
+
+    return myMod;
+}
+#else
+PyObject*
+GtpyContextManager::initExtensionModule(QString moduleName,
+                                        PyMethodDef* methods)
 {
     GTPY_GIL_SCOPE
 
-    PythonQtObjectPtr sys;
-    sys.setNewRef(PyImport_ImportModule("sys"));
+    QByteArray name = moduleName.toUtf8();;
+    PyObject* myMod = Q_NULLPTR;
 
-    QByteArray name = GtpyGlobals::MODULE_GtCalculators.toUtf8();
+    myMod = Py_InitModule(name.constData(), methods);
+    Py_INCREF(myMod);
 
-    PyObject* myMod;
-#ifdef PY3K
-    customPyModule.m_name = name.constData();
-    myMod = PyModule_Create(&GtpyCalculatorsModule::GtpyCalculators_Module);
-#else
-    myMod = Py_InitModule(name.constData(),
-                          GtpyCalculatorsModule::GtpyCalculatorsModule_StaticMethods);
+    modulenameToBuiltins(moduleName);
+
+    return myMod;
+}
 #endif
-    // add GtTaskFinder to the list of builtin module names
+
+void
+GtpyContextManager::modulenameToBuiltins(QString name)
+{
+    GTPY_GIL_SCOPE
+
+    PyObject* sys = PyImport_ImportModule("sys");
+
+    if (!sys)
+    {
+        return;
+    }
+
+    // add the new module to the list of builtin module names
     PyObject* old_module_names =
-        PyObject_GetAttrString(sys.object(), "builtin_module_names");
+        PyObject_GetAttrString(sys, "builtin_module_names");
 
     if (old_module_names && PyTuple_Check(old_module_names))
     {
@@ -932,100 +979,68 @@ GtpyContextManager::initCalculatorsModule()
 
         for (Py_ssize_t i = 0; i < old_size; i++)
         {
-            PyTuple_SetItem(module_names, i,
-                            PyTuple_GetItem(old_module_names, i));
+            PyObject* item = PyTuple_GetItem(old_module_names, i);
+
+            if (item)
+            {
+                Py_INCREF(item);
+                PyTuple_SetItem(module_names, i, item);
+            }
         }
 
-        PyTuple_SetItem(module_names, old_size,
-                        PyString_FromString(name.constData()));
-        PyModule_AddObject(sys.object(), "builtin_module_names", module_names);
+        PyObject* moduleName = QSTRING_AS_PYSTRING(name);
+
+        PyTuple_SetItem(module_names, old_size, moduleName);
+
+        if (PyModule_AddObject(sys, "builtin_module_names", module_names) < 0)
+        {
+            Py_DECREF(module_names);
+        }
     }
 
-#ifdef PY3K
-    PyObject* modules = PyObject_GetAttrString(sys.object(), "modules");
-    PyObject* modName = PyUnicode_FromString(name.constData());
+    Py_XDECREF(old_module_names);
 
-    PyDict_SetItem(modules, modName, myMod);
-
-    Py_XDECREF(modules);
-    Py_XDECREF(modName);
-#endif
-
-    GtpyCalculatorsModule::createCalcConstructors();
+    Py_DECREF(sys);
 }
+
 void
-GtpyContextManager::initLoggingModule()
+GtpyContextManager::initCalculatorsModule()
 {
     GTPY_GIL_SCOPE
 
-    QString loggingClass = GtPythonLogger::staticMetaObject.className();
+    PyObject* mod = Q_NULLPTR;
 
-    m_loggingModule = PythonQt::self()->createModuleFromScript(
-                          GtpyGlobals::MODULE_GtLogging);
+#ifdef PY3K
+    mod = initExtensionModule(GtpyGlobals::MODULE_GtCalculators,
+                              &GtpyCalculatorsModule::GtpyCalculators_Module);
+#else
+    mod = initExtensionModule(
+              GtpyGlobals::MODULE_GtCalculators,
+              GtpyCalculatorsModule::GtpyCalculatorsModule_StaticMethods);
+#endif
 
-    m_loggingModule.evalScript(QStringLiteral("from PythonQt.") +
-                               CLASS_WRAPPER_MODULE + QStringLiteral(" import ") +
-                               loggingClass);
+    Py_XDECREF(mod);
 
-    m_loggingModule.evalScript(
-        QStringLiteral("class PyLogger:\n") +
-        QStringLiteral("     __instance = None \n") +
-        QStringLiteral("     __outputToConsole = False \n") +
+    GtpyCalculatorsModule::createCalcConstructors();
+}
 
-        QStringLiteral("     def __init__(self, type = 0): \n") +
-        QStringLiteral("         self.type = type \n") +
-        QStringLiteral("         PyLogger.__instance = self \n") +
+void
+GtpyContextManager::initLoggingModuleC()
+{
+    GTPY_GIL_SCOPE
 
-        QStringLiteral("     @staticmethod  \n") +
-        QStringLiteral("     def getInstance(type): \n") +
-        QStringLiteral("         if PyLogger.__instance == None: \n") +
-        QStringLiteral("             PyLogger(type) \n") +
-        QStringLiteral("         else: \n") +
-        QStringLiteral("             PyLogger.__instance.type = type \n") +
-        QStringLiteral("         return PyLogger.__instance \n") +
+    PyObject* mod = Q_NULLPTR;
 
-        QStringLiteral("     def __lshift__(self, other): \n") +
-        QStringLiteral("         if self.type is 0: \n") +
-        QStringLiteral("             print (\"[DEBUG] \" + str(other)) \n") +
-        QStringLiteral("             if PyLogger.__outputToConsole:\n") +
-        QStringLiteral("                 GtPythonLogger.gtPyDebug(other)\n") +
-        QStringLiteral("             return \n") +
-        QStringLiteral("         if self.type is 1: \n") +
-        QStringLiteral("             print (\"[INFO] \" + str(other)) \n") +
-        QStringLiteral("             if PyLogger.__outputToConsole:\n") +
-        QStringLiteral("                 GtPythonLogger.gtPyInfo(other)\n") +
-        QStringLiteral("             return \n") +
-        QStringLiteral("         if self.type is 2: \n") +
-        QStringLiteral("             print (\"[ERROR] \" + str(other)) \n") +
-        QStringLiteral("             if PyLogger.__outputToConsole:\n") +
-        QStringLiteral("                 GtPythonLogger.gtPyError(other)\n") +
-        QStringLiteral("             return \n") +
-        QStringLiteral("         if self.type is 3: \n") +
-        QStringLiteral("             print (\"[FATAL] \" + str(other)) \n") +
-        QStringLiteral("             if PyLogger.__outputToConsole:\n") +
-        QStringLiteral("                 GtPythonLogger.gtPyFatal(other)\n") +
-        QStringLiteral("             return \n") +
-        QStringLiteral("         if self.type is 4: \n") +
-        QStringLiteral("             print (\"[WARNING] \" + str(other)) \n") +
-        QStringLiteral("             if PyLogger.__outputToConsole:\n") +
-        QStringLiteral("                 GtPythonLogger.gtPyWarning(other)\n") +
-        QStringLiteral("             return \n"));
+#ifdef PY3K
+    mod = initExtensionModule(GtpyGlobals::MODULE_GtLogging_C,
+                              &GtpyLoggingModule::GtpyLogging_Module);
+#else
+    mod = initExtensionModule(
+              GtpyGlobals::MODULE_GtLogging_C,
+              GtpyLoggingModule::GtpyLoggingModule_StaticMethods);
+#endif
 
-
-    m_loggingModule.evalScript(QStringLiteral("def gtDebug(): \n") +
-                               QStringLiteral("     return PyLogger.getInstance(0)\n"));
-
-    m_loggingModule.evalScript(QStringLiteral("def gtInfo(): \n") +
-                               QStringLiteral("     return PyLogger.getInstance(1)\n"));
-
-    m_loggingModule.evalScript(QStringLiteral("def gtError(): \n") +
-                               QStringLiteral("     return PyLogger.getInstance(2)\n"));
-
-    m_loggingModule.evalScript(QStringLiteral("def gtFatal(): \n") +
-                               QStringLiteral("     return PyLogger.getInstance(3)\n"));
-
-    m_loggingModule.evalScript(QStringLiteral("def gtWarning(): \n") +
-                               QStringLiteral("     return PyLogger.getInstance(4)\n"));
+    Py_XDECREF(mod);
 }
 
 void
@@ -1033,13 +1048,15 @@ GtpyContextManager::initImportBehaviour()
 {
     GTPY_GIL_SCOPE
 
-    PythonQtObjectPtr builtins;
-    builtins.setNewRef(PyImport_ImportModule("builtins"));
+    PyObject* builtins = PyImport_ImportModule("builtins");
+
+    if (!builtins)
+    {
+        builtins = PyImport_ImportModule("__builtin__");
+    }
 
     if (builtins)
     {
-        Py_INCREF(builtins);
-
         if (PyModule_Check(builtins))
         {
             PyObject* dict = PyModule_GetDict(builtins);
@@ -1059,8 +1076,6 @@ GtpyContextManager::initImportBehaviour()
 
                     ((GtpyMyImport*)imp.object())->defaultImp = defImp;
                     PyDict_SetItemString(dict, "__import__", imp);
-
-                    Py_DECREF(defImp);
                 }
 
                 Py_DECREF(dict);
@@ -1146,9 +1161,9 @@ GtpyContextManager::initGlobalContext(int contextId)
     }
 
     QString pyCode =
-        QStringLiteral("import sys\n") +
-        QStringLiteral("sys.argv.append('')\n") +
-        QStringLiteral("del sys\n");
+        "import sys\n"
+        "sys.argv.append('')\n"
+        "del sys\n";
 
     GTPY_GIL_SCOPE
 
@@ -1218,52 +1233,86 @@ GtpyContextManager::initStdOut()
 void
 GtpyContextManager::initWrapperModule()
 {
+    //    GTPY_GIL_SCOPE
+
+    //    PythonQtObjectPtr sys;
+    //    sys.setNewRef(PyImport_ImportModule("sys"));
+
+    //    QByteArray name = "GtObjectWrapperModuleC";
+    //    PyObject* myMod;
+    //#ifdef PY3K
+    //    customPyModule.m_name = name.constData();
+    //    myMod = PyModule_Create(&customPyModule);
+    //#else
+    //    myMod = Py_InitModule(name.constData(), NULL);
+    //#endif
+    //    // add GtObjectWrapperModuleC to the list of builtin module names
+    //    PyObject* old_module_names =
+    //        PyObject_GetAttrString(sys.object(), "builtin_module_names");
+
+    //    if (old_module_names && PyTuple_Check(old_module_names))
+    //    {
+    //        Py_ssize_t old_size = PyTuple_Size(old_module_names);
+    //        PyObject* module_names = PyTuple_New(old_size + 1);
+
+    //        for (Py_ssize_t i = 0; i < old_size; i++)
+    //        {
+    //            PyTuple_SetItem(module_names, i,
+    //                            PyTuple_GetItem(old_module_names, i));
+    //        }
+
+    //        PyTuple_SetItem(module_names, old_size,
+    //                        PyString_FromString(name.constData()));
+    //        PyModule_AddObject(sys.object(), "builtin_module_names", module_names);
+    //    }
+
+    //#ifdef PY3K
+    //    PyDict_SetItem(PyObject_GetAttrString(sys.object(), "modules"),
+    //                   PyUnicode_FromString(name.constData()), myMod);
+    //#endif
+
+
+
+
     GTPY_GIL_SCOPE
 
-    PythonQtObjectPtr sys;
-    sys.setNewRef(PyImport_ImportModule("sys"));
+    PyObject* mod = Q_NULLPTR;
 
-    QByteArray name = "GtObjectWrapperModuleC";
-    PyObject* myMod;
 #ifdef PY3K
-    customPyModule.m_name = name.constData();
-    myMod = PyModule_Create(&customPyModule);
+    mod = initExtensionModule(
+              GtpyGlobals::MODULE_GtObjectWrapperModuleC,
+              &GtpyExtendedWrapperModule::GtpyExtendedWrapper_Module);
 #else
-    myMod = Py_InitModule(name.constData(), NULL);
-#endif
-    // add GtObjectWrapperModuleC to the list of builtin module names
-    PyObject* old_module_names =
-        PyObject_GetAttrString(sys.object(), "builtin_module_names");
-
-    if (old_module_names && PyTuple_Check(old_module_names))
-    {
-        Py_ssize_t old_size = PyTuple_Size(old_module_names);
-        PyObject* module_names = PyTuple_New(old_size + 1);
-
-        for (Py_ssize_t i = 0; i < old_size; i++)
-        {
-            PyTuple_SetItem(module_names, i,
-                            PyTuple_GetItem(old_module_names, i));
-        }
-
-        PyTuple_SetItem(module_names, old_size,
-                        PyString_FromString(name.constData()));
-        PyModule_AddObject(sys.object(), "builtin_module_names", module_names);
-    }
-
-    //    Py_XDECREF(old_module_names);
-
-#ifdef PY3K
-    PyDict_SetItem(PyObject_GetAttrString(sys.object(), "modules"),
-                   PyUnicode_FromString(name.constData()), myMod);
+    mod = initExtensionModule(GtpyGlobals::MODULE_GtObjectWrapperModuleC,
+                              Q_NULLPTR);
 #endif
 
-    if (PyModule_AddObject(myMod, "GtpyExtendedWrapper",
-                           (PyObject*) &GtpyExtendedWrapper_Type) < 0)
+    if (PyModule_AddObject(
+                mod, QSTRING_TO_CHAR_PTR(GtpyGlobals::GTOBJECT_WRAPPER),
+                (PyObject*)
+                &GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type) < 0)
     {
-        Py_DECREF(&GtpyExtendedWrapper_Type);
-        Py_DECREF(myMod);
+        Py_DECREF(&GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type);
     }
+
+    Py_XDECREF(mod);
+}
+
+void
+GtpyContextManager::enableOutputToAppConsole(int contextId)
+{
+    PythonQtObjectPtr con = context(contextId);
+
+    if (con == Q_NULLPTR)
+    {
+        return;
+    }
+
+    QString pyCode = GtpyGlobals::ATTR_outputToApp + " = True\n";
+
+    GTPY_GIL_SCOPE
+
+    con.evalScript(pyCode);
 }
 
 void
@@ -1279,7 +1328,7 @@ GtpyContextManager::importDefaultModules(int contextId)
     QString pyCode =
         "from PythonQt import " + CLASS_WRAPPER_MODULE + "\n" +
         "from PythonQt import QtCore\n"
-        "from " + GtpyGlobals::GTOBJECT_WRAPPER_MODULE + " import " +
+        "from " + GtpyGlobals::MODULE_GtObjectWrapperModuleC + " import " +
         GtpyGlobals::GTOBJECT_WRAPPER + "\n";
 
     GTPY_GIL_SCOPE
@@ -1299,16 +1348,21 @@ GtpyContextManager::importLoggingFuncs(int contextId,
     }
 
     QString pyCode =
-        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
+        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging_C +
         QStringLiteral(" import gtDebug\n") +
-        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
+        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging_C +
         QStringLiteral(" import gtInfo\n") +
-        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
+        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging_C +
         QStringLiteral(" import gtError\n") +
-        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
+        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging_C +
         QStringLiteral(" import gtFatal\n") +
-        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging +
+        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging_C +
         QStringLiteral(" import gtWarning\n");
+
+    if (appConsole)
+    {
+        enableOutputToAppConsole(contextId);
+    }
 
     GTPY_GIL_SCOPE
 

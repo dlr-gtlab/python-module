@@ -175,9 +175,6 @@ public:
     */
     bool addTaskValue(int contextId, GtTask* task);
 
-    //    bool addDataModelObject(int contextId, const QString& name,
-    //                            GtObject* package);
-
     /**
     * @brief Checks whether the Python context indicated by contextId as access
     *  to calculators. If the context has access, this function deletes all
@@ -321,6 +318,33 @@ private:
     */
     PythonQtObjectPtr context(int contextId) const;
 
+#ifdef PY3K
+    /**
+     * @brief Initializes the extension module defined in def and adds it to
+     * the built-in modules of Python. The new module is named after moduleName.
+     * @param moduleName The name of the extension module.
+     * @param def The module definition.
+     * @return A new reference of the extension module.
+     */
+    PyObject* initExtensionModule(QString moduleName, PyModuleDef* def);
+#else
+    /**
+     * @brief Initializes the extension module and assigns it the static
+     * methods defined in methods. The new module is added to the built-in
+     * modules of Python and is named after moduleName.
+     * @param moduleName The name of the extension module.
+     * @param methods Definition of the static methods.
+     * @return A new reference of the extension module.
+     */
+    PyObject* initExtensionModule(QString moduleName, PyMethodDef* methods);
+#endif
+
+    /**
+     * @brief Adds the given name to the list of built-in modules in Python.
+     * @param name Name of an extension Python module.
+     */
+    void modulenameToBuiltins(QString name);
+
     /**
     * @brief Initializes the calculator module.
     */
@@ -329,7 +353,7 @@ private:
     /**
     * @brief Initializes the logging module.
     */
-    void initLoggingModule();
+    void initLoggingModuleC();
 
     /**
     * @brief Initializes the import behaviour of python.
@@ -383,7 +407,16 @@ private:
     */
     void initStdOut();
 
+    /**
+     * @brief Initializes the wrapper module for GtObjects.
+     */
     void initWrapperModule();
+
+    /**
+     * @brief Enables to send output to the application console.
+     * @param contextId Python context identifier.
+     */
+    void enableOutputToAppConsole(int contextId);
 
     /**
     * @brief Imports the default modules to the Python context identified by
@@ -517,9 +550,6 @@ private:
 
     /// Whether the contexts send messages to the application console
     QMap<int, bool> m_appLogging;
-
-    /// Logging Module
-    PythonQtObjectPtr m_loggingModule;
 
     /// Error message emitter
     PythonQtObjectPtr m_err;
