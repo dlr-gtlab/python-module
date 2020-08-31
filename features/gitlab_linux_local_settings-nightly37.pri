@@ -10,7 +10,7 @@ BUILD_UNITTESTS =   false
 PY_VERSION = 373
 
 # path to dev tools
-DEV_TOOLS = /home/schm_j13/devel/GTlab-DevTools
+DEV_TOOLS = /home/gitlab-runner/gtlab-devtools
 
 # path to GTlab Core repository
 GTLAB_CORE_PATH    = $${DEV_TOOLS}
