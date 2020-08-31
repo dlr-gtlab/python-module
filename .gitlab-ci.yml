@@ -3,6 +3,9 @@ stages:
   - test
   - codingstyle
   - badges
+  - tagsBuild
+
+# build on Windows system
 
 buildWindowsQt512Py37:
   stage: build
@@ -46,6 +49,8 @@ nightlyBuildQt512Py37:
     expire_in: 1 week
     when: always
 
+# build on Linux system
+
 buildLinuxPy37:
   stage: build
   script:
@@ -53,13 +58,15 @@ buildLinuxPy37:
     - ./tests/build/build-py37.sh |& tee linuxBuild.txt
   tags:
     - Linux
+  except:
+    - tags
   artifacts:
     paths:
       - build/GTlabUnitTest
       - lib/python373/libGTlabPython373.so*
       - linuxBuild.txt
     when: always  	
-    expire_in: 1 week	
+    expire_in: 1 week
 
 nightlyBuildLinuxPy37:
   stage: build
@@ -68,13 +75,15 @@ nightlyBuildLinuxPy37:
     - ./tests/build/build-nightly-py37.sh
   tags:
     - Linux
+  only:
+    - master
+  except:
+    - tags
   artifacts:
     paths:
       - lib/python373/libGTlabPython373.so*    
       - include/python373/*.h   	   
-    expire_in: 1 week	  
-  only:
-    - master	
+    expire_in: 1 week
 
 # run tests using the binary built before
 
@@ -145,3 +154,12 @@ badges:
       - "New_BuildWarn-W.svg"
       - "New_CodingStyle.svg"
       - "New_Coverage.svg"
+
+tagsBuildWin:
+  stage: tagsBuild
+  tags:
+    - Win7Qt512
+  script:
+    - echo "first tag build"
+  only:
+    - tags
