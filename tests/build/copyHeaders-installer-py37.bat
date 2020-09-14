@@ -1,4 +1,4 @@
-SET SERVERPATH=C:\deployment\de.dlr.gtlab.dev.stable.1.6.modules.python37\%CI_COMMIT_TAG%
+SET SERVERPATH=C:\deployment\%CI_PROJECT_NAME%\%CI_COMMIT_TAG%
 
 if exist "%SERVERPATH%\include\python37\" rmdir /s /q %SERVERPATH%\include\python37\
 if not exist "%SERVERPATH%\include\python37\" mkdir %SERVERPATH%\include\python37\
@@ -17,4 +17,3 @@ dir %SERVERPATH%\include\python37
 dir %SERVERPATH%\lib\python37
 dir %SERVERPATH%\binDebug\modules
 dir %SERVERPATH%\bin\modules\
-
