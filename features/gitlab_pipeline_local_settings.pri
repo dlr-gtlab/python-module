@@ -4,24 +4,25 @@
 #          / /_/ / / / / / /_/ / /_/ /
 #          \____/ /_/ /_/\__,_/_.___/
 
-BUILD_BATCH     =   false
-BUILD_UNITTESTS =   false
+BUILD_BATCH     =   $$(BUILDBATCH)
+BUILD_UNITTESTS =   $$(BUILDUNITTESTS)
 
-PY_VERSION = 273
+PY_VERSION = $$(PYVERSION)
 
 # path to dev tools
-DEV_TOOLS = D:\GTlab-DevTools
+DEV_TOOLS = $$(DEVTOOLS)
 
 # path to GTlab Core repository
 GTLAB_CORE_PATH    = $${DEV_TOOLS}
 GTLAB_LOGGING_PATH = $${DEV_TOOLS}
 
 # Third Party
-PYTHON_PATH = $${DEV_TOOLS}\ThirdPartyLibraries\Python\Python_$${PY_VERSION}
-PYTHON_QT_PATH = $${DEV_TOOLS}\ThirdPartyLibraries\PythonQt\PythonQt_$${PY_VERSION}
-GOOGLE_TEST_PATH = $${DEV_TOOLS}\ThirdPartyLibraries\GoogleTest
+PYTHON_PATH 	 = $${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_$${PY_VERSION}
+PYTHON_QT_PATH 	 = $${DEV_TOOLS}/ThirdPartyLibraries/PythonQt/PythonQt_$${PY_VERSION}
+GOOGLE_TEST_PATH = $${DEV_TOOLS}/ThirdPartyLibraries/GoogleTest
 
 # Deployment
 GTLAB_ENVIRONMENT_PATH = 
+
 
 
