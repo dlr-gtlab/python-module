@@ -33,7 +33,7 @@ static PyModuleDef
 GtpyExtendedWrapper_Module =
 {
     PyModuleDef_HEAD_INIT,
-    QSTRING_TO_CHAR_PTR(GtpyGlobals::MODULE_GtObjectWrapperModuleC),
+    "GtObjectWrapperModuleC",
     NULL,
     -1,
     NULL,
