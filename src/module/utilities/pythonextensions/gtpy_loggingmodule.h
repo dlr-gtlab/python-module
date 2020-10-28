@@ -91,7 +91,7 @@ static PyModuleDef
 GtpyLogging_Module =
 {
     PyModuleDef_HEAD_INIT,
-    QSTRING_TO_CHAR_PTR(GtpyGlobals::MODULE_GtLogging_C),
+    "GtLogging",
     NULL,
     -1,
     GtpyLoggingModule_StaticMethods,

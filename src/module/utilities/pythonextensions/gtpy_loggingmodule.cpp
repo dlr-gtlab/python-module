@@ -88,10 +88,10 @@ GtpyPyLogger_new(PyTypeObject* type, PyObject* args,
 PyObject*
 newLoggerInstance(OutputType outputType)
 {
-    if (PyType_Ready(&GtpyPyLogger_Type) < 0)
-    {
-        gtError() << "could not initialize GtpyPyLogger_Type";
-    }
+    //    if (PyType_Ready(&GtpyPyLogger_Type) < 0)
+    //    {
+    //        gtError() << "could not initialize GtpyPyLogger_Type";
+    //    }
 
     PyObject* argsTuple = PyTuple_New(1);
     PyTuple_SetItem(argsTuple, 0, PyInt_FromLong(outputType));
@@ -437,7 +437,7 @@ GtpyLoggingModule::GtpyPyLogger_Type =
 #else
     ,
 #endif
-    QSTRING_TO_CHAR_PTR(GtpyGlobals::CLASS_GtpyPyLogger + "doc"), /* tp_doc */
+    "GtpyPyLogger doc",/* tp_doc */
     0,  /* tp_traverse */
     0,  /* tp_clear */
     0,  /* tp_richcompare */
