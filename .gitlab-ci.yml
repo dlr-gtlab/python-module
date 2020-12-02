@@ -1,6 +1,7 @@
 ########################################################
-###############GTlab Pipeline Version 1.1.0 ############
+###############GTlab Pipeline Version 1.3.0 ############
 ########################################################
+# This is a slight changed version
 
 # Environment variables to use in the pipeline globally
 variables:
@@ -32,9 +33,22 @@ devtoolsUpdateWindows:
   variables:
     MAINTENANCETOOL: "C:\\devel\\GTlab-DevTools\\Setup GTlab-DevTools.exe"  
 
-# build on Windows system
+#devtoolsUpdateLinux:
+#  stage: update
+#  timeout: 1 minute
+#  allow_failure: true
+#  script:
+#    - $MAINTENANCETOOL/Setup\ GTlab-DevTools --silentUpdate -v
+#  tags:
+#    - Linux
+#  only:
+#    - master
+#  variables:
+#    MAINTENANCETOOL: "/home/gitlab-runner/GTlab-Devtools"
+#    QT_QPA_PLATFORM: minimal
 
-debugBuildWinPy37:
+# build on Windows system
+debugBuildWin512Py37:
   stage: build
   script:
     - .\tests\build\build-512.bat 1>buildLog512.txt
@@ -65,7 +79,7 @@ debugBuildWinPy37:
     BUILDUNITTESTS: "true"
     DEVTOOLS: "$DEVTOOLS_Win"
 
-releaseBuildWinPy37:
+releaseBuildWin512Py37:
   stage: build
   script:
     - .\tests\build\build-512.bat
@@ -89,8 +103,7 @@ releaseBuildWinPy37:
     DEVTOOLS: "$DEVTOOLS_Win"
     
 # build on Linux system
-
-debugBuildLinuxPy37:
+debugBuildLinux512Py37:
   stage: build
   before_script:
     - chmod a+rwx ./tests/build/build-512.sh
@@ -137,15 +150,14 @@ releaseBuildLinuxPy37:
     DEVTOOLS: "$DEVTOOLS_Linux"
     
 # run tests using the binary built before
-
-testWinPy37:
-  needs: ["debugBuildWinPy37"]
+testWin512Py37:
+  needs: ["debugBuildWin512Py37"]
   stage: test
   script:
     - .\tests\unittests\runUnittestsQt512.bat
     - get-content CoverageReport*\index.html
   dependencies:
-    - debugBuildWinPy37
+    - debugBuildWin512Py37
   tags:
     - Win10
   artifacts:
@@ -160,15 +172,15 @@ testWinPy37:
   variables:
     DEVTOOLS: "$DEVTOOLS_Win"
 
-testLinuxPy37:
-  needs: ["debugBuildLinuxPy37"]
+testLinux512Py37:
+  needs: ["debugBuildLinux512Py37"]
   stage: test
   before_script:
     - chmod +x ./tests/unittests/runUnittests.sh
   script:
     - ./tests/unittests/runUnittests.sh
   dependencies:
-    - debugBuildLinuxPy37
+    - debugBuildLinux512Py37
   tags:
     - Linux
   artifacts:
@@ -179,14 +191,13 @@ testLinuxPy37:
   variables:
     DEVTOOLS: "$DEVTOOLS_Linux"
 
-# copy file to servers
-
+# copy files to servers
 copyToNightlyBuildWin:
   stage: copy
   script:
     - .\tests\build\copyHeaders-nightlybuild.bat
   dependencies:
-    - releaseBuildWinPy37
+    - releaseBuildWin512Py37
   tags:
     - Win10
   only:
@@ -195,20 +206,39 @@ copyToNightlyBuildWin:
   variables:
     NIGHTLYBUILD: "G:\\AT-TW\\GTlab\\Nightly_Builds_512"
 
-copyToInstallerServer:
+copyDeploymentWin:
   stage: copy
   script:
-    - .\tests\build\copyHeaders-installer.bat
+    - .\tests\build\copyHeaders-deployment.bat
   dependencies:
-    - debugBuildWinPy37
-    - releaseBuildWinPy37
+    - debugBuildWin512Py37
+    - releaseBuildWin512Py37
   tags:
     - Win10
   only:
     - tags
+  variables:
+    PLATFORMNAME: windows
+    BINDIRECTORY: bin\modules
+    DEBUGBINDIRECTORY: binDebug\modules
 
-# checking the coding style
+copyDeploymentLinux:
+  stage: copy
+  script:
+    - .\tests\build\copyHeaders-deployment.bat
+  dependencies:
+    - debugBuildLinux512Py37
+    - releaseBuildLinuxPy37
+  tags:
+    - Win10
+  only:
+    - tags
+  variables:
+    PLATFORMNAME: linux
+    BINDIRECTORY: bin\modules
+    DEBUGBINDIRECTORY: binDebug\modules
 
+# code quality
 codingstyle:
   needs: []
   stage: codequality
@@ -243,9 +273,7 @@ cppcheck:
     - cppcheck-codequality --input-file=cppcheck_out.xml --output-file=codequality.json
   artifacts:
     reports:
-      codequality: codequality.json  
-
-# badges
+      codequality: codequality.json
 
 # badges
 badges:
@@ -279,4 +307,3 @@ badges:
     expire_in: 52 week
   variables:
     BADGEGENERATOR: C:\devel\BadgeBuilder\BadgeGenerator.exe
-
