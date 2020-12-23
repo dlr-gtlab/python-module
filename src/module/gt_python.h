@@ -14,6 +14,11 @@
 #include "gt_processinterface.h"
 #include "gt_mdiinterface.h"
 #include "gt_initmoduleinterface.h"
+#include "gt_application.h"
+
+#if GT_VERSION >= 0x010700
+#include "gt_versionnumber.h"
+#endif
 
 /**
  * @brief The GtPythonModule class
@@ -36,7 +41,11 @@ public:
      * @brief Returns current version number of datamodel extension
      * @return version number
      */
+#if GT_VERSION >= 0x010700
+    GtVersionNumber version() Q_DECL_OVERRIDE;
+#else
     int version() Q_DECL_OVERRIDE;
+#endif
 
     /**
      * @brief Returns module identification string.

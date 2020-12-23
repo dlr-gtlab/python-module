@@ -44,11 +44,19 @@
 
 #include "gt_python.h"
 
+#if GT_VERSION >= 0x010700
+GtVersionNumber
+GtPythonModule::version()
+{
+    return GtVersionNumber(1, 0, 3);
+}
+#else
 int
 GtPythonModule::version()
 {
     return 1;
 }
+#endif
 
 QString
 GtPythonModule::ident() const
@@ -136,7 +144,13 @@ GtPythonModule::calculators()
     GtExtendedCalculatorData python = GT_EXTENDED_CALC_DATA(
                                           GtpyScriptCalculator);
     python->id = QStringLiteral("Python Script Calculator");
+
+#if GT_VERSION >= 0x010700
+    python->version = GtVersionNumber(0, 1);
+#else
     python->version = 0.1;
+#endif
+
     python->author = QStringLiteral("Marvin Nöthen");
     python->icon = gtApp->icon(QStringLiteral("pythonIcon_16.png"));
     python->status = GtAbstractProcessData::RELEASE;
