@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2020-12-23
+### Changed
+- Module structure adapted to framework version 1.7 - #117
+
 ## [1.0.2] - 2020-10-29
 ### Fixed
 - Bug Fix: QSTRING_TO_CHAR_PTR is no longer called during initialization of Python extension modules
