@@ -322,6 +322,14 @@ public slots:
      */
     void acceptChangesRecursively(GtObject* obj);
 
+
+    /**
+     * @brief Decorator function to get the class name of a GtObject instance.
+     * @param obj Pointer to GtObject.
+     * @return Class name of GtObject.
+     */
+    QString className(GtObject* obj);
+
     ///-------> functions of GtAbstractProperty <-------\\\
 
     /**
