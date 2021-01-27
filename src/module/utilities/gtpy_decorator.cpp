@@ -899,6 +899,17 @@ GtpyDecorator::acceptChangesRecursively(GtObject* obj)
     return obj->acceptChangesRecursively();
 }
 
+QString
+GtpyDecorator::className(GtObject* obj)
+{
+    if (obj == Q_NULLPTR)
+    {
+        return QString();
+    }
+
+    return obj->metaObject()->className();
+}
+
 QList<GtAbstractProperty*>
 GtpyDecorator::findGtProperties(GtAbstractProperty* prop)
 {
