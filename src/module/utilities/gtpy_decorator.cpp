@@ -1135,6 +1135,29 @@ GtpyDecorator::value(GtDataZone0D* dataZone, const QString& paramName,
     return dataZone->value(paramName, ok);
 }
 
+QMap<QString, double>
+GtpyDecorator::entries(GtDataZone0D* dataZone, bool* ok)
+{
+    if (dataZone == Q_NULLPTR)
+    {
+        if (ok)
+        {
+            *ok = false;
+        }
+
+        return QMap<QString, double>();
+    }
+
+    QMap<QString, double> retVal;
+
+    foreach(QString s, dataZone->params())
+    {
+        retVal.insert(s, dataZone->value(s));
+    }
+
+    return retVal;
+}
+
 bool
 GtpyDecorator::setValue(GtDataZone0D* dataZone, const QString& paramName,
                         const double& value)
