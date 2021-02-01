@@ -7,8 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [1.0.3] - 2020-12-23
+### Added
+- GtpyDecorator::className() function added - #120
+
 ### Changed
 - Module structure adapted to framework version 1.7 - #117
+- Add object class filter to GtpyDecorator::findGtChildren -function -#121
 
 ## [1.0.2] - 2020-10-29
 ### Fixed

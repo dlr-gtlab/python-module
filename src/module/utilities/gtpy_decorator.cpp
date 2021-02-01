@@ -699,7 +699,8 @@ GtpyDecorator::findGtChild(GtObject* obj, const QString& childName)
 }
 
 QList<PyObject*>
-GtpyDecorator::findGtChildren(GtObject* obj, const QString& childrenName)
+GtpyDecorator::findGtChildren(GtObject* obj, const QString& childrenName,
+                              const QString& objectClassName)
 {
     if (obj == Q_NULLPTR)
     {
@@ -715,6 +716,32 @@ GtpyDecorator::findGtChildren(GtObject* obj, const QString& childrenName)
     else
     {
         children = obj->findDirectChildren<GtObject*>(childrenName);
+    }
+
+
+    if (!objectClassName.trimmed().isEmpty())
+    {
+        for (auto it = children.begin(); it < children.end();)
+        {
+            GtObject* loopObj = (*it);
+
+            if (!loopObj)
+            {
+                it = children.erase(it);
+
+                continue;
+            }
+
+            if (QString(loopObj->metaObject()->className()).trimmed() !=
+                    objectClassName.trimmed())
+            {
+                it = children.erase(it);
+
+                continue;
+            }
+
+            ++ it;
+        }
     }
 
     QList<PyObject*> retval;
