@@ -253,10 +253,12 @@ public slots:
      * given name
      * @param obj pointer to GtObject
      * @param childrenName name of children that should be found
+     * @param objectClassName : class name filter
      * @return See GtObject class documentation.
      */
     FIND_GT_CHILDREN QList<PyObject*> findGtChildren(GtObject* obj,
-            const QString& childrenName = QString());
+            const QString& childrenName = QString(),
+            const QString& objectClassName = QString());
 
     /**
      * @brief findGtProperties returns all properties of a GtObject
