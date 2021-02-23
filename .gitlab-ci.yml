@@ -1,5 +1,5 @@
 ########################################################
-###############GTlab Pipeline Version 1.4.0 ############
+###############GTlab Pipeline Version 1.4.1 ############
 ########################################################
 # This is a slight changed version
 # - PYVERSION variable to support the build using different Python versions
@@ -8,7 +8,7 @@
 
 # Environment variables to use in the pipeline globally
 variables:
-  PIPELINEVERSION: "1.4.0"
+  PIPELINEVERSION: "1.4.1"
 
 #  PROFILENAME: gtlab_python.pro
 #  TARGETDIRNAME: python37
@@ -164,7 +164,7 @@ debugBuildLinux512Py37:
     - Linux
   artifacts:
     paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so
+      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so*
       - include/$TARGETDIRNAME/*.h
       - build/$UNITTESTSNAME
       - linuxBuild.txt
@@ -210,7 +210,7 @@ debugBuildLinux512Py37Unstable:
     - Linux
   artifacts:
     paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so
+      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so*
       - include/$TARGETDIRNAME/*.h
       - build/$UNITTESTSNAME
       - linuxBuild.txt
@@ -356,8 +356,23 @@ copyForDeploymentWin:
   only:
     - tags
   variables:
-    PLATFORMNAME: windows
-#    CATEGORY: 03_core_modules
+    PLATFORMNAME:  windows
+    RELEASESTATUS: stable
+
+copyForDeploymentWinUnstable:
+  stage: copy
+  script:
+    - .\tests\build\copyHeaders-deployment.bat
+  dependencies:
+    - debugBuildWin512Py37Unstable
+    - releaseBuildWin512Py37Unstable
+  tags:
+    - Win10
+  only:
+    - tags
+  variables:
+    PLATFORMNAME:  windows
+    RELEASESTATUS: unstable
 
 copyForDeploymentLinux:
   stage: copy
@@ -371,8 +386,23 @@ copyForDeploymentLinux:
   only:
     - tags
   variables:
-    PLATFORMNAME: linux
-    #CATEGORY: 03_core_modules
+    PLATFORMNAME:  linux
+    RELEASESTATUS: stable
+
+copyForDeploymentLinuxUnstable:
+  stage: copy
+  script:
+    - .\tests\build\copyHeaders-deployment.bat
+  dependencies:
+    - debugBuildLinux512Py37Unstable
+    - releaseBuildLinuxPy37Unstable
+  tags:
+    - Win10
+  only:
+    - tags
+  variables:
+    PLATFORMNAME:  linux
+    RELEASESTATUS: unstable
 
 # code quality
 codingstyle:
