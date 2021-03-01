@@ -147,7 +147,7 @@ meth_richcompare(GtpyPropertySetterObject* a,
                  GtpyPropertySetterObject* b, int op)
 {
     int x = meth_compare(a, b);
-    bool r;
+    bool r = false;
 
     if (op == Py_LT)
     {

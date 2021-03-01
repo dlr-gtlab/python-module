@@ -25,11 +25,6 @@ public:
     Q_INVOKABLE GtCalculator* createCalculator(const QString& className,
                                                const QString& objName,
                                                GtTask* parent);
-
-//    void setTask(GtTask* task);
-
-private:
-    GtTask* m_task;
 };
 
 #endif // GTPYCALCULATORFACTORY_H
