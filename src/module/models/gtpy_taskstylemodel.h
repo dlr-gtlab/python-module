@@ -20,7 +20,7 @@ class GtpyTaskStyleModel: public QIdentityProxyModel
     Q_OBJECT
 
 public:
-    GtpyTaskStyleModel(QObject* parent = Q_NULLPTR);
+    explicit GtpyTaskStyleModel(QObject* parent = Q_NULLPTR);
 
     /**
      * @brief data

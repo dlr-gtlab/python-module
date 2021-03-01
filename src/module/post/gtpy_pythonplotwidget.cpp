@@ -41,7 +41,8 @@ GtpyPythonPlotWidget::GtpyPythonPlotWidget(GtpyPythonPlotItem* dm,
     lay->setSpacing(0);
 
     m_labelStart = new QLabel(tr("Python Post Plot"));
-    m_labelStart->setAlignment(Qt::AlignCenter | Qt::AlignCenter);
+
+    m_labelStart->setAlignment(Qt::AlignCenter);
     m_labelStart->setContentsMargins(0, 0, 0, 0);
     m_labelStart->setStyleSheet(GtStyleSheets::standardLabel());
     m_labelStart->setFixedHeight(300);
