@@ -1414,11 +1414,11 @@ GtpyContextManager::lineOutOfMessage(const QString& message)
 
     QRegularExpressionMatch match = errorLine.match(message);
 
-    lineNumber = match.captured().mid(17).toInt(&ok);
+    int errorLineNumber = match.captured().mid(17).toInt(&ok);
 
     if (ok)
     {
-        return lineNumber ;
+        return errorLineNumber;
     }
     else
     {

@@ -149,12 +149,12 @@ GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc)
 
             if (prop != Q_NULLPTR)
             {
-                int pos = regExp.indexIn(ident);
+                int propIdpos = regExp.indexIn(ident);
 
-                while (pos >= 0)
+                while (propIdpos >= 0)
                 {
-                    ident = ident.remove(pos, 1);
-                    pos = regExp.indexIn(ident);
+                    ident = ident.remove(propIdpos, 1);
+                    propIdpos = regExp.indexIn(ident);
                 }
 
                 ident.replace(0, 1, ident.at(0).toUpper());

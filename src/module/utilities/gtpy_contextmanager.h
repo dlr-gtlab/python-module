@@ -769,8 +769,6 @@ private:
 
         if (PyMapping_Check(obj))
         {
-            QMap<Key, Val>& map = *((QMap<Key, Val>*) outMap);
-
             QString tempFunc = "items";
             QByteArray ba = tempFunc.toLocal8Bit();
             char* func = ba.data();
@@ -779,6 +777,7 @@ private:
 
             if (items)
             {
+                QMap<Key, Val>& map = *((QMap<Key, Val>*) outMap);
                 int count = PyList_Size(items);
 
                 PyObject* pyValue = Q_NULLPTR;
