@@ -179,6 +179,8 @@ CONFIG(debug, debug|release){
    }
 }
 
+# add search paths to shared libraries
+unix: QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN:\$$ORIGIN/..\''
 ######################################################################
 
 copyHeaders($$HEADERS)
