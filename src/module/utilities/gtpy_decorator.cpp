@@ -27,6 +27,7 @@
 
 #include "gtpy_processdatadistributor.h"
 #include "gtpy_extendedwrapper.h"
+#include "gtpy_task.h"
 
 #include "gtpy_decorator.h"
 
@@ -506,18 +507,17 @@ GtpyDecorator::run(GtTask* task)
 {
     bool success = false;
 
-    Py_BEGIN_ALLOW_THREADS
-
-    if (task == Q_NULLPTR || !task->findParent<GtAbstractRunnable*>())
+    if (task != Q_NULLPTR)
     {
-        success = false;
-    }
-    else
-    {
-        success = task->exec();
-    }
+        Py_BEGIN_ALLOW_THREADS
 
-    Py_END_ALLOW_THREADS
+        if (task->findParent<GtAbstractRunnable*>())
+        {
+            success = task->exec();
+        }
+
+        Py_END_ALLOW_THREADS
+    }
 
     return success;
 }
@@ -665,7 +665,7 @@ GtpyDecorator::hasWarnings(GtProcessComponent* comp)
 PythonQtPassOwnershipToPython<GtpyProcessDataDistributor*>
 GtpyDecorator::new_GtpyProcessDataDistributor(GtpyTask* pythonTask)
 {
-    return new GtpyProcessDataDistributor((GtTask*) pythonTask);
+    return new GtpyProcessDataDistributor(qobject_cast<GtTask*>(pythonTask));
 }
 
 void
@@ -821,8 +821,10 @@ GtpyDecorator::setPropertyValue(GtObject* obj, const QString& id,
         return;
     }
 
-    if (GtObjectLinkProperty* objLinkProp =
-                qobject_cast<GtObjectLinkProperty*>(prop))
+    GtObjectLinkProperty* objLinkProp =
+                    qobject_cast<GtObjectLinkProperty*>(prop);
+
+    if (objLinkProp)
     {
         GtObject* dataObj = qvariant_cast<GtObject*>(val);
 
@@ -1004,8 +1006,10 @@ GtpyDecorator::setPropertyValue(GtAbstractProperty* prop,
         return;
     }
 
-    if (GtObjectLinkProperty* objLinkProp =
-                qobject_cast<GtObjectLinkProperty*>(subProp))
+    GtObjectLinkProperty* objLinkProp =
+                    qobject_cast<GtObjectLinkProperty*>(subProp);
+
+    if (objLinkProp)
     {
         GtObject* dataObj = qvariant_cast<GtObject*>(val);
 
