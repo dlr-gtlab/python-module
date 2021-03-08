@@ -486,18 +486,17 @@ GtpyDecorator::run(GtCalculator* calc)
 {
     bool success = false;
 
-    Py_BEGIN_ALLOW_THREADS
-
-    if (calc == Q_NULLPTR || !calc->findParent<GtAbstractRunnable*>())
+    if (calc != Q_NULLPTR)
     {
-        success = false;
-    }
-    else
-    {
-        success = calc->exec();
-    }
+        Py_BEGIN_ALLOW_THREADS
 
-    Py_END_ALLOW_THREADS
+        if (calc->findParent<GtAbstractRunnable*>())
+        {
+            success = calc->exec();
+        }
+
+        Py_END_ALLOW_THREADS
+    }
 
     return success;
 }

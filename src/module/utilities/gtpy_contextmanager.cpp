@@ -2254,14 +2254,13 @@ GtpyContextManager::deleteRunnable()
 {
     GtpyScriptRunnable* runnable = qobject_cast<GtpyScriptRunnable*>(sender());
 
-    if (runnable)
+    if (runnable != Q_NULLPTR)
     {
         // connect runnable signals to task runner slots
         disconnect(runnable, &GtpyScriptRunnable::runnableFinished,
                    this, &GtpyContextManager::deleteRunnable);
 
         delete runnable;
-        runnable = Q_NULLPTR;
     }
 }
 
