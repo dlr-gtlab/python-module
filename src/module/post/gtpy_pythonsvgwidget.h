@@ -26,7 +26,7 @@ public:
      * @brief Constructor.
      * @param parent Parent widget.
      */
-    GtpyPythonSvgWidget(QWidget* parent = Q_NULLPTR);
+    explicit GtpyPythonSvgWidget(QWidget* parent = Q_NULLPTR);
 
 
     /**

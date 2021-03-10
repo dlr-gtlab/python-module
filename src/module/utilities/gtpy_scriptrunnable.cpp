@@ -11,7 +11,7 @@
 #include "gtpy_gilscope.h"
 
 GtpyScriptRunnable::GtpyScriptRunnable(int contextId) : m_successfulRun(false),
-    m_contextId(contextId)
+    m_outputToConsole(false), m_threadId(0), m_contextId(contextId)
 {
 
 }

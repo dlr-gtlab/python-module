@@ -277,8 +277,6 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
             SLOT(onEvalButtonClicked()));
     connect(importButton, SIGNAL(clicked(bool)), this, SLOT(onImportScript()));
     connect(exportButton, SIGNAL(clicked(bool)), this, SLOT(onExportScript()));
-    connect(m_saveButton, SIGNAL(clicked(bool)), this,
-            SLOT(onSaveButtonClicked()));
 }
 
 GtpyAbstractScriptingWizardPage::~GtpyAbstractScriptingWizardPage()
@@ -292,6 +290,11 @@ GtpyAbstractScriptingWizardPage::~GtpyAbstractScriptingWizardPage()
 void
 GtpyAbstractScriptingWizardPage::initializePage()
 {
+    /// Can not be connected in the constructor because onSaveButtonClicked()
+    /// calls the pure virtual function saveScript()
+    connect(m_saveButton, SIGNAL(clicked(bool)), this,
+            SLOT(onSaveButtonClicked()));
+
     QWidget* wiz = findParentWizard();
 
     if (wiz)

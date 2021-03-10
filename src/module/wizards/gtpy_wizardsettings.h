@@ -78,7 +78,7 @@ private:
      * @brief GtpyWizardSettings
      * @param parent
      */
-    GtpyWizardSettings(QObject* parent = Q_NULLPTR);
+    explicit GtpyWizardSettings(QObject* parent = Q_NULLPTR);
 
     /**
      * @brief Removes the sttings entries identified by the given uuid.

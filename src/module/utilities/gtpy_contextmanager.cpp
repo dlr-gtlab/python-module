@@ -915,7 +915,6 @@ GtpyContextManager::initExtensionModule(QString moduleName, PyModuleDef* def)
 
     QByteArray name = moduleName.toUtf8();;
 
-    GtpyLoggingModule::GtpyLogging_Module.m_name = name.constData();
     PyObject* myMod = PyModule_Create(def);
 
     modulenameToBuiltins(moduleName);
@@ -1414,11 +1413,11 @@ GtpyContextManager::lineOutOfMessage(const QString& message)
 
     QRegularExpressionMatch match = errorLine.match(message);
 
-    lineNumber = match.captured().mid(17).toInt(&ok);
+    int errorLineNumber = match.captured().mid(17).toInt(&ok);
 
     if (ok)
     {
-        return lineNumber ;
+        return errorLineNumber;
     }
     else
     {
@@ -2254,14 +2253,13 @@ GtpyContextManager::deleteRunnable()
 {
     GtpyScriptRunnable* runnable = qobject_cast<GtpyScriptRunnable*>(sender());
 
-    if (runnable)
+    if (runnable != Q_NULLPTR)
     {
         // connect runnable signals to task runner slots
         disconnect(runnable, &GtpyScriptRunnable::runnableFinished,
                    this, &GtpyContextManager::deleteRunnable);
 
         delete runnable;
-        runnable = Q_NULLPTR;
     }
 }
 

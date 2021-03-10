@@ -133,11 +133,6 @@ private:
     void executeCode(const QString& code);
 
     /**
-     * @brief Cuts selected text from console.
-     */
-    void consoleCut();
-
-    /**
      * @brief Returns the position of the command prompt.
      * @return Position of the command prompt
      */

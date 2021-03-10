@@ -45,7 +45,7 @@ protected:
      * @brief The GtpyCodeGenerator constructor.
      * @param parent Parent object.
      */
-    GtpyCodeGenerator(QObject* parent = Q_NULLPTR);
+    explicit GtpyCodeGenerator(QObject* parent = Q_NULLPTR);
 
 private:
     /**

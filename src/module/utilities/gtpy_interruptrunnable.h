@@ -26,7 +26,7 @@ public:
      * @brief The GtpyInterruptRunnable constructor.
      * @param pyThreadId Id of the python thread to be interrupted.
      */
-    GtpyInterruptRunnable(long pyThreadId);
+    explicit GtpyInterruptRunnable(long pyThreadId);
 
     /**
      * @brief Throws an KeyboardInterrupt to the python thread with the id

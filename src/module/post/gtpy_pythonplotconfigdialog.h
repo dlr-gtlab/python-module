@@ -26,7 +26,7 @@ public:
      * @brief Constructor.
      * @param parent Parent widget
      */
-    GtpyPythonPlotConfigDialog(QWidget* parent = Q_NULLPTR);
+    explicit GtpyPythonPlotConfigDialog(QWidget* parent = Q_NULLPTR);
 
     /**
      * @brief Returns user defined script.

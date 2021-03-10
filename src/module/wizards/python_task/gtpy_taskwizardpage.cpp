@@ -339,7 +339,6 @@ GtpyTaskWizardPage::addCalculator()
     insertConstructor(calc);
 
     delete calc;
-    calc = Q_NULLPTR;
 }
 
 void
@@ -403,53 +402,6 @@ GtpyTaskWizardPage::insertConstructor(GtCalculator* calc)
 
     evalScript(pyCode, false);
     showEvalButton(false);
-}
-
-bool
-GtpyTaskWizardPage::appendCalcToTask(GtCalculator* calc)
-{
-    if (m_task == Q_NULLPTR)
-    {
-        return false;
-    }
-
-    if (calc == Q_NULLPTR)
-    {
-        return false;
-    }
-
-    QString objName = calc->objectName();
-
-    int sameNamedCalcs = 1;
-    int iterations = 1;
-
-    while (sameNamedCalcs > 0)
-    {
-        sameNamedCalcs =
-            m_task->findDirectChildren<GtCalculator*>(objName).count();
-
-        if (sameNamedCalcs > 0)
-        {
-            objName = calc->objectName();
-            objName = objName + " " + QString::number(iterations);
-        }
-
-        iterations++;
-    }
-
-    calc->setObjectName(objName);
-
-    m_task->appendChild(calc);
-
-    if (m_calcModel != Q_NULLPTR &&
-            m_treeView != Q_NULLPTR)
-    {
-        m_treeView->setFocus();
-        m_calcModel->updateView();
-        m_treeView->expandAll();
-    }
-
-    return true;
 }
 
 void
@@ -795,7 +747,6 @@ GtpyTaskWizardPage::actionTriggered(QObject* obj)
         insertConstructor(calc);
 
         delete calc;
-        calc = Q_NULLPTR;
     }
 }
 
@@ -892,7 +843,6 @@ GtpyTaskWizardPage::onCalculatorDropReceived(GtCalculator* calc)
     insertConstructor(calc);
 
     delete calc;
-    calc = Q_NULLPTR;
 }
 
 void

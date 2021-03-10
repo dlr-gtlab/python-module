@@ -99,9 +99,3 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
 
     return calc;
 }
-
-//void
-//GtpyCalculatorFactory::setTask(GtTask* task)
-//{
-//    m_task = task;
-//}

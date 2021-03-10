@@ -25,7 +25,7 @@ public:
      * @brief GtpyTaskDelegate
      * @param parent Parent object.
      */
-    GtpyTaskDelegate(QObject* parent);
+    explicit GtpyTaskDelegate(QObject* parent);
 
     /**
      * @brief Creates a line editor.

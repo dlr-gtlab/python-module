@@ -32,7 +32,7 @@ public:
     /**
      * @brief GtpyTaskWizardPage
      */
-    Q_INVOKABLE GtpyTaskWizardPage();
+    Q_INVOKABLE explicit GtpyTaskWizardPage();
 
 protected:
     /**
@@ -88,13 +88,6 @@ private:
      * @param before Memento object of the calculator before editing.
      */
     void insertConstructor(GtCalculator* calc);
-
-    /**
-     * @brief Appends the given calculator to the Python Task.
-     * @param calc Calculator to be added to Python Task.
-     * @return True if appending was successful.
-     */
-    bool appendCalcToTask(GtCalculator* calc);
 
     /// Task.
     QPointer<GtpyTask> m_task;

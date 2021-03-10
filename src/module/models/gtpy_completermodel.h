@@ -26,7 +26,7 @@ public:
      * @brief GtPythonCompleterModel
      * @param parent Parent of the model
      */
-    GtpyCompleterModel(QObject* parent = Q_NULLPTR);
+    explicit GtpyCompleterModel(QObject* parent);
 
     /**
      * @brief Retruns the number of rows.
