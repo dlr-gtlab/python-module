@@ -673,7 +673,6 @@ GtpyDecorator::delete_GtpyProcessDataDistributor(
     GtpyProcessDataDistributor* obj)
 {
     delete obj;
-    obj = Q_NULLPTR;
 }
 
 PyObject*

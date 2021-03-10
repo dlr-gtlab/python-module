@@ -915,7 +915,6 @@ GtpyContextManager::initExtensionModule(QString moduleName, PyModuleDef* def)
 
     QByteArray name = moduleName.toUtf8();;
 
-    GtpyLoggingModule::GtpyLogging_Module.m_name = name.constData();
     PyObject* myMod = PyModule_Create(def);
 
     modulenameToBuiltins(moduleName);

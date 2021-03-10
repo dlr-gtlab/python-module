@@ -460,18 +460,6 @@ GtpyConsole::executeCode(const QString& code)
     gtApp->endCommand(com);
 }
 
-void
-GtpyConsole::consoleCut()
-{
-    bool deletionAllowed = verifySelectionBeforeDeletion();
-
-    if (deletionAllowed)
-    {
-        QTextEdit::cut();
-    }
-}
-
-
 int
 GtpyConsole::commandPromptPosition()
 {
