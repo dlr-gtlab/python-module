@@ -843,7 +843,6 @@ GtpyTaskWizardPage::onCalculatorDropReceived(GtCalculator* calc)
     insertConstructor(calc);
 
     delete calc;
-    calc = Q_NULLPTR;
 }
 
 void
