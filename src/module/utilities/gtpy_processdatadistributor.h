@@ -17,7 +17,7 @@ class GtTask;
 class GtpyProcessDataDistributor
 {
 public:
-    GtpyProcessDataDistributor(GtTask* pythonTask);
+    explicit GtpyProcessDataDistributor(GtTask* pythonTask);
 
     GtTask* taskElement(const QString& name);
 

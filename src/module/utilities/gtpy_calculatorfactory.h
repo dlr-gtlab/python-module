@@ -20,7 +20,7 @@ class GtpyCalculatorFactory: public QObject
     Q_OBJECT
 
 public:
-    Q_INVOKABLE GtpyCalculatorFactory(QObject* parent = Q_NULLPTR);
+    Q_INVOKABLE explicit GtpyCalculatorFactory(QObject* parent = Q_NULLPTR);
 
     Q_INVOKABLE GtCalculator* createCalculator(const QString& className,
                                                const QString& objName,

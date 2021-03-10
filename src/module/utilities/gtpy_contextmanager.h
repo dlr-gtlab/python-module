@@ -273,7 +273,7 @@ protected:
     * @brief The GtpyContextManager constructor.
     * @param parent Parent object.
     */
-    GtpyContextManager(QObject* parent = Q_NULLPTR);
+    explicit GtpyContextManager(QObject* parent = Q_NULLPTR);
 
 private:
     /// Private static strings

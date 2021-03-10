@@ -26,7 +26,7 @@ public:
      * @brief GtpyTaskTreeView
      * @param parent Parent widget.
      */
-    GtpyTaskTreeView(QWidget* parent);
+    explicit GtpyTaskTreeView(QWidget* parent);
 
 protected:
     /**

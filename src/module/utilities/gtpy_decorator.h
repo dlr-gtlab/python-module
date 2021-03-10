@@ -61,7 +61,7 @@ public:
      * @brief Constructor.
      * @param parent Parent object.
      */
-    GtpyDecorator(QObject* parent = NULL);
+    explicit GtpyDecorator(QObject* parent = NULL);
 
     /**
      * @brief getFunctionName returns the name of function with given tag.

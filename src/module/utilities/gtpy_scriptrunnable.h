@@ -29,7 +29,7 @@ public:
      * @brief The GtpyScriptRunnable constructor.
      * @param contextId Python context identifier.
      */
-    GtpyScriptRunnable(int contextId);
+    explicit GtpyScriptRunnable(int contextId);
 
     /**
      * @brief ~GtpyScriptRunnable

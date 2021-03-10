@@ -32,7 +32,7 @@ public:
     /**
      * @brief GtpyTaskWizardPage
      */
-    Q_INVOKABLE GtpyTaskWizardPage();
+    Q_INVOKABLE explicit GtpyTaskWizardPage();
 
 protected:
     /**
