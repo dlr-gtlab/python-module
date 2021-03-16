@@ -136,7 +136,12 @@ GtpyTask::script() const
 void
 GtpyTask::setScript(QString script)
 {
+
+#if GT_VERSION >= 0x010700
+
+#else
     script.replace("\n", "\r");
+#endif
 
     m_script = script;
 }
@@ -201,7 +206,12 @@ GtpyTask::calcDefinitions() const
 void
 GtpyTask::setCalcDefinitions(QString& calcDefinitions)
 {
+
+#if GT_VERSION >= 0x010700
+
+#else
     calcDefinitions.replace("\n", "\r");
+#endif
 
     m_calcDefinitions = calcDefinitions;
 }
