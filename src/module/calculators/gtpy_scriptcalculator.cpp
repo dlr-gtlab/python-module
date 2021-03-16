@@ -124,7 +124,12 @@ GtpyScriptCalculator::script() const
 void
 GtpyScriptCalculator::setScript(QString script)
 {
+
+#if GT_VERSION >= 0x010700
+
+#else
     script.replace("\n", "\r");
+#endif
 
     m_script = script;
 }

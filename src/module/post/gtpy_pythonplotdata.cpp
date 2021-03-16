@@ -7,6 +7,8 @@
  *  Tel.: +49 2203 601 2907
  */
 
+#include "gt_application.h"
+
 #include "gtpy_pythonplotdata.h"
 
 GtpyPythonPlotData::GtpyPythonPlotData()
@@ -25,5 +27,10 @@ GtpyPythonPlotData::setScript(const QString& script)
 {
     m_script = script;
 
+#if GT_VERSION >= 0x010700
+
+#else
     m_script.replace("\n", "\r");
+#endif
+
 }
