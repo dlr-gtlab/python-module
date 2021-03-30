@@ -32,7 +32,7 @@ devtoolsUpdateWindows:
   allow_failure: true
   script:
     - '& $env:MAINTENANCETOOL up --confirm-command'
-  except:
+  only:
     - master  
   tags:
     - Win10
@@ -44,7 +44,7 @@ devtoolsUpdateLinux:
   script:
     - cd /home/gitlab-runner/GTlab-Devtools/
     - ./Setup\ GTlab-DevTools up --confirm-command
-  except:
+  only:
     - master  
   tags:
     - Linux
