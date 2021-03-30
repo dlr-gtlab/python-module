@@ -1,5 +1,5 @@
 ########################################################
-###############GTlab Pipeline Version 1.4.2 ############
+###############GTlab Pipeline Version 1.4.3 ############
 ########################################################
 # This is a slight changed version
 # - PYVERSION variable to support the build using different Python versions
@@ -8,7 +8,7 @@
 
 # Environment variables to use in the pipeline globally
 variables:
-  PIPELINEVERSION: "1.4.2"
+  PIPELINEVERSION: "1.4.3"
 
 #  PROFILENAME: gtlab_python.pro
 #  TARGETDIRNAME: python37
@@ -29,28 +29,27 @@ stages:
 
 devtoolsUpdateWindows:
   stage: update
+  allow_failure: true
   script:
-    - '& $env:MAINTENANCETOOL --silentUpdate'
-  only:
+    - '& $env:MAINTENANCETOOL up --confirm-command'
+  except:
     - master  
   tags:
     - Win10
   variables:
     MAINTENANCETOOL: "C:\\devel\\GTlab-DevTools\\Setup GTlab-DevTools.exe"  
 
-#devtoolsUpdateLinux:
-#  stage: update
-#  timeout: 1 minute
-#  allow_failure: true
-#  script:
-#    - $MAINTENANCETOOL/Setup\ GTlab-DevTools --silentUpdate -v
-#  tags:
-#    - Linux
-#  only:
-#    - master
-#  variables:
-#    MAINTENANCETOOL: "/home/gitlab-runner/GTlab-Devtools"
-#    QT_QPA_PLATFORM: minimal
+devtoolsUpdateLinux:
+  stage: update
+  script:
+    - cd /home/gitlab-runner/GTlab-Devtools/
+    - ./Setup\ GTlab-DevTools up --confirm-command
+  except:
+    - master  
+  tags:
+    - Linux
+  variables:
+    MAINTENANCETOOL: "/home/gitlab-runner/GTlab-Devtools/"  
 
 # build on Windows system
 debugBuildWin512Py37:
