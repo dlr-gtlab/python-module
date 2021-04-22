@@ -908,6 +908,14 @@ GtpyDecorator::uuid(GtObject* obj)
     return obj->uuid();
 }
 
+PyObject*
+GtpyDecorator::objectByUUID(GtObject* obj, const QString& uuid)
+{
+    Q_UNUSED(obj)
+
+    return wrapGtObject(obj->getObjectByUuid(uuid));
+}
+
 QString
 GtpyDecorator::calcHash(GtObject* obj)
 {
