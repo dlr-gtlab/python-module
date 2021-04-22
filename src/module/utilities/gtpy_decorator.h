@@ -303,6 +303,14 @@ public slots:
     QString uuid(GtObject* obj);
 
     /**
+     * @brief returns the object with the given UUID
+     * @param obj : root element (searching under this object)
+     * @param uuid : univerally unique identifier
+     * @return object with the given uuid
+     */
+    PyObject* objectByUUID(GtObject* obj, const QString& uuid);
+
+    /**
      * @brief Decorator function to calcHash function of GtObject.
      * @param obj Pointer to GtObject.
      * @return See GtObject class documentation.
