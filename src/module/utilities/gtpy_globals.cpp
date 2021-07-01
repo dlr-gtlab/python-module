@@ -36,4 +36,9 @@ const QString FUNC_currentProPath = "projectPath";
 const char* CONTEXT_KEY = "CONTEXT_NAME";
 const char* OUTPUT_KEY  = "OUTPUT_TO_CONSOLE";
 const char* ERROR_KEY   = "ERROR_TO_CONSOLE";
+
+const char* calcModName()
+{
+    return MODULE_GtCalculators.toStdString().data();
+};
 }
