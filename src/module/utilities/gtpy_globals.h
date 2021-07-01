@@ -50,5 +50,7 @@ struct StdOutMetaData
     bool error = false;
 };
 
+const char* calcModName();
+
 }
 #endif // GTPYGLOBALS_H
