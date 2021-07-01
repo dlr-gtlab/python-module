@@ -71,17 +71,17 @@ isImportAllowed(PyObject* args)
 {
     if (checkModuleName(args, GtpyGlobals::MODULE_GtCalculators))
     {
-        if (!GtpyCalculatorsModule::findRunningParentTask())
-        {
-            QString error =  "The import of " +
-                             GtpyGlobals::MODULE_GtCalculators +
-                             " is not allowed in this context! Maybe you have "
-                             "to use a Python Task.";
-
-            PyErr_SetString(PyExc_ImportError, error.toLatin1().data());
-
-            return false;
-        }
+        //if (!GtpyCalculatorsModule::findRunningParentTask())
+        //{
+        //    QString error =  "The import of " +
+        //                     GtpyGlobals::MODULE_GtCalculators +
+        //                     " is not allowed in this context! Maybe you have "
+        //                     "to use a Python Task.";
+        //
+        //    PyErr_SetString(PyExc_ImportError, error.toLatin1().data());
+        //
+        //    return false;
+        //}
     }
 
     return true;

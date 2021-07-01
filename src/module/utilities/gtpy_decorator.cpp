@@ -894,9 +894,9 @@ GtpyDecorator::setPropertyValue(GtObject* obj, const QString& id,
 
     if (!success)
     {
-        QString output =  QStringLiteral("ERROR: ") +
-                          QObject::tr("Invalid input type for ") +
-                          prop->objectName() + QObject::tr("!");
+        QString output = QStringLiteral("ERROR: ") +
+                         QObject::tr("Invalid input type for ") +
+                         prop->objectName() + QObject::tr("!");
 
         emit sendErrorMessage(output);
     }

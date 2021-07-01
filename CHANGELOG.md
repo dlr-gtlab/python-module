@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - GtpyDecorator:: add function to get object by uuid -#130
+- Disable import check for GtCalculators module to enable better usage in performance module - #131
 
 ## [1.0.5] - 2021-03-16
 ### Fixed
