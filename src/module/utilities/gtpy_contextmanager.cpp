@@ -913,7 +913,7 @@ GtpyContextManager::initExtensionModule(QString moduleName, PyModuleDef* def)
 
     GTPY_GIL_SCOPE
 
-    QByteArray name = moduleName.toUtf8();;
+    QByteArray name = moduleName.toUtf8();
 
     PyObject* myMod = PyModule_Create(def);
 
