@@ -52,7 +52,7 @@ static PyModuleDef
 GtpyCalculators_Module =
 {
     PyModuleDef_HEAD_INIT,
-    "GtCalculators", //GtpyGlobals::MODULE_GtCalculators.toStdString().data(),
+    MODULE_GTCALCULATORS,
     NULL,
     -1,
     GtpyCalculatorsModule_StaticMethods,

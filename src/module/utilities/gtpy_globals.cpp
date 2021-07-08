@@ -16,7 +16,7 @@ const QString PYTHONHOME_VAR = "PYTHONHOME";
 
 ///Python Modules
 const QString MODULE_GtObjectWrapperModuleC = "GtObjectWrapperModuleC";
-const QString MODULE_GtCalculators    = "GtCalculators";
+const QString MODULE_GtCalculators    = MODULE_GTCALCULATORS;
 const QString MODULE_GtLogging        = "GtLogging";
 const QString MODULE_GtLogging_C      = "GtLogging";
 
@@ -37,8 +37,4 @@ const char* CONTEXT_KEY = "CONTEXT_NAME";
 const char* OUTPUT_KEY  = "OUTPUT_TO_CONSOLE";
 const char* ERROR_KEY   = "ERROR_TO_CONSOLE";
 
-const char* calcModName()
-{
-    return MODULE_GtCalculators.toStdString().data();
-};
 }

@@ -82,7 +82,7 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     setEnvironmentPaths();
 
 #ifdef Q_OS_LINUX
-    dlopen("libpython3.7m.so.1.0", RTLD_LAZY | RTLD_GLOBAL);
+    dlopen(PYTHON_LIBRARY, RTLD_LAZY | RTLD_GLOBAL);
 #endif
 
     PythonQt::init(PythonQt::RedirectStdOut);

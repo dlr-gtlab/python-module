@@ -15,6 +15,8 @@
 #define QSTRING_TO_CHAR_PTR(x) QString(x).toLocal8Bit().data()
 #define QSTRING_AS_PYSTRING(x) PyString_FromString(QSTRING_TO_CHAR_PTR(x))
 
+#define MODULE_GTCALCULATORS "GtCalculators"
+
 namespace GtpyGlobals
 {
 ///Environment Variables
@@ -49,8 +51,6 @@ struct StdOutMetaData
     bool output = false;
     bool error = false;
 };
-
-const char* calcModName();
 
 }
 #endif // GTPYGLOBALS_H
