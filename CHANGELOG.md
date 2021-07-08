@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Bug Fix: Importing numpy on Linux machines is possible - #133
 ### Added
 - GtpyDecorator:: add function to get object by uuid -#130
 - Disable import check for GtCalculators module to enable better usage in performance module - #131
