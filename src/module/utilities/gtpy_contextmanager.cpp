@@ -7,6 +7,12 @@
  *  Tel.: +49 2203 601 2692
  */
 
+#include <Qt>
+
+#ifdef Q_OS_LINUX
+#include <dlfcn.h>
+#endif
+
 #include <QMetaObject>
 #include <QMetaMethod>
 #include <QMetaEnum>
@@ -70,6 +76,11 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     m_pyThreadState(Q_NULLPTR),
     m_contextsInitialized(false)
 {
+#ifdef Q_OS_LINUX
+    gtInfo() << "loading python!!!";
+    dlopen("libpython3.7m.so", RTLD_LAZY | RTLD_GLOBAL);
+#endif
+
     qRegisterMetaType<GtpyContextManager::Context>
     ("GtpyContextManager::Context");
 
