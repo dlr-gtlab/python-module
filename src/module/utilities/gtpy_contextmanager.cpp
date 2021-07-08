@@ -76,15 +76,14 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     m_pyThreadState(Q_NULLPTR),
     m_contextsInitialized(false)
 {
-#ifdef Q_OS_LINUX
-    gtInfo() << "loading python!!!";
-    dlopen("libpython3.7m.so.1.0", RTLD_LAZY | RTLD_GLOBAL);
-#endif
-
     qRegisterMetaType<GtpyContextManager::Context>
     ("GtpyContextManager::Context");
 
     setEnvironmentPaths();
+
+#ifdef Q_OS_LINUX
+    dlopen("libpython3.7m.so.1.0", RTLD_LAZY | RTLD_GLOBAL);
+#endif
 
     PythonQt::init(PythonQt::RedirectStdOut);
 
