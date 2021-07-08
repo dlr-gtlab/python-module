@@ -7,6 +7,12 @@
  *  Tel.: +49 2203 601 2692
  */
 
+#include <Qt>
+
+#ifdef Q_OS_LINUX
+#include <dlfcn.h>
+#endif
+
 #include <QMetaObject>
 #include <QMetaMethod>
 #include <QMetaEnum>
@@ -74,6 +80,10 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     ("GtpyContextManager::Context");
 
     setEnvironmentPaths();
+
+#ifdef Q_OS_LINUX
+    dlopen(PYTHON_LIBRARY, RTLD_LAZY | RTLD_GLOBAL);
+#endif
 
     PythonQt::init(PythonQt::RedirectStdOut);
 

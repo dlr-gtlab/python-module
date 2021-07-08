@@ -149,6 +149,7 @@ CONFIG(debug, debug|release){
     equals(PY_VERSION, 37) {
         win32: LIBS += -lPythonQt-Qt5-Python37_d3
         unix: LIBS += -lPythonQt-Qt5-Python3.7
+        unix: DEFINES += PYTHON_LIBRARY=\\\"libpython3.7m.so.1.0\\\"
     } else {
 
         win32: LIBS += -lPythonQt-Qt5-Python27_d3
@@ -167,10 +168,12 @@ CONFIG(debug, debug|release){
 
         equals(PY_VERSION, 37) {
             LIBS += -lPythonQt-Qt5-Python3.7
+            DEFINES += PYTHON_LIBRARY=\\\"libpython3.7m.so.1.0\\\"
         }
 
         equals(PY_VERSION, 373) {
             LIBS += -lPythonQt-Qt5-Python3.7
+            DEFINES += PYTHON_LIBRARY=\\\"libpython3.7m.so.1.0\\\"
         }
 
         equals(PY_VERSION, 273) {
