@@ -1082,8 +1082,8 @@ GtpyAbstractScriptingWizardPage::onCalculatorDropped(GtCalculator* calc)
 }
 
 void
-GtpyAbstractScriptingWizardPage::componentRenamed(const QString& title)
+GtpyAbstractScriptingWizardPage::componentRenamed(const QString& name)
 {
-    setComponentName(title);
-    setTitle(title);
+    setComponentName(name);
+    setTitle(name);
 }

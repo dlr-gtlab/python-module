@@ -54,8 +54,9 @@ private slots:
     virtual QString componentUuid() const Q_DECL_OVERRIDE;
 
     /**
-     * @brief setComponentName
-     * @param name
+     * @brief Sets the object name of the process component m_calc to the
+     * given name.
+     * @param name New name of the process component m_calc
      */
     virtual void setComponentName(const QString& name) Q_DECL_OVERRIDE;
 };

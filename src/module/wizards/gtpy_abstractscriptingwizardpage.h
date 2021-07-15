@@ -440,10 +440,11 @@ private slots:
     void onCalculatorDropped(GtCalculator* calc);
 
     /**
-     * @brief Sets the wizard title to the given string.
-     * @param title New wizard title
+     * @brief Renames the cloned process component object and replaces the
+     * wizard title with the new name.
+     * @param title New process component name
      */
-    void componentRenamed(const QString& title);
+    void componentRenamed(const QString& name);
 
 signals:
     /// Calculator was dropped to the editor.
