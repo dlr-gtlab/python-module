@@ -198,19 +198,6 @@ protected:
      */
     void enableSaving(bool enable = true);
 
-    /**
-     * @brief Registers the current size ot the wizard in the
-     * GtpyWizardSettings.
-     */
-    void registerGeometry();
-
-    /**
-     * @brief Change the size of the wizard to the size stored in the
-     * GtpyWizardSettings.
-     * @param uuid Uuid of the task.
-     */
-    void reloadWizardGeometry(const QString& uuid);
-
     /// Python Context id
     int m_contextId;
 
@@ -249,6 +236,13 @@ private:
     virtual void saveScript() = 0;
 
     /**
+     * @brief This pure virtual function must return the uuid of the restored
+     * process component.
+     * @return uuid of the restored process component
+     */
+    virtual const QString componentUuid() = 0;
+
+    /**
      * @brief Enables of disables the save button.
      * @param enable If true, the Save button is enabled, otherwise it is
      *  disabled.
@@ -273,6 +267,19 @@ private:
      * @return The parent GtProcessWizard.
      */
     QWidget* findParentWizard(QObject* obj);
+
+    /**
+     * @brief Registers the current size ot the wizard in the
+     * GtpyWizardSettings.
+     */
+    void registerGeometry();
+
+    /**
+     * @brief Change the size of the wizard to the size stored in the
+     * GtpyWizardSettings.
+     * @param uuid Uuid of the task.
+     */
+    void reloadWizardGeometry();
 
     /**
      * @brief If the runnable is not null, this functions connects it to the
@@ -334,6 +341,7 @@ private:
     /// Saving the script
     bool m_savingEnabled;
 
+    /// Process component uuid
     QString m_componentUuid;
 
 private slots:

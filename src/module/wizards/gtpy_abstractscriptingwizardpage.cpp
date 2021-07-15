@@ -324,6 +324,10 @@ GtpyAbstractScriptingWizardPage::initializePage()
 
     initialization();
 
+    m_componentUuid = componentUuid();
+
+    reloadWizardGeometry();
+
     foreach (QString packageName, m_packageNames)
     {
         GtObject* obj = scope()->getObjectByPath(QStringList() <<
@@ -779,6 +783,66 @@ GtpyAbstractScriptingWizardPage::findParentWizard(QObject* obj)
 }
 
 void
+GtpyAbstractScriptingWizardPage::registerGeometry()
+{
+    if (!m_componentUuid.isEmpty())
+    {
+        QWidget* wiz = findParentWizard();
+
+        if (wiz)
+        {
+
+            QRect rect = wiz->frameGeometry();
+
+            GtpyWizardSettings::instance()->registerGeometry(m_componentUuid,
+                    rect);
+
+            int cursorPos = m_editor->cursorPosition();
+            GtpyWizardSettings::instance()->registerCursorPos(m_componentUuid,
+                    cursorPos);
+
+            int vSliderPos = m_editor->verticalSliderPos();
+
+            GtpyWizardSettings::instance()->registerVSliderPos(m_componentUuid,
+                    vSliderPos);
+        }
+    }
+}
+
+void
+GtpyAbstractScriptingWizardPage::reloadWizardGeometry()
+{
+    if (!m_componentUuid.isEmpty())
+    {
+
+        QWidget* wiz = findParentWizard();
+
+        if (!wiz)
+        {
+            return;
+        }
+
+        QRect rect = GtpyWizardSettings::instance()->lastGeometry(
+                         m_componentUuid);
+
+        if (!rect.isNull())
+        {
+            wiz->setGeometry(rect);
+        }
+
+        int cursorPos = GtpyWizardSettings::instance()->lastCursorPos(
+                            m_componentUuid);
+
+        m_editor->setCursorPosition(cursorPos);
+
+        int vSliderPos = GtpyWizardSettings::instance()->lastVSliderPos(
+                             m_componentUuid);
+
+        m_editor->setVerticalSliderPos(vSliderPos);
+    }
+}
+
+void
 GtpyAbstractScriptingWizardPage::deleteRunnable()
 {
     if (m_runnable)
@@ -839,57 +903,6 @@ void
 GtpyAbstractScriptingWizardPage::enableSaving(bool enable)
 {
     m_savingEnabled = enable;
-}
-
-void
-GtpyAbstractScriptingWizardPage::registerGeometry()
-{
-    QWidget* wiz = findParentWizard();
-
-    if (wiz && !m_componentUuid.isEmpty())
-    {
-
-        QRect rect = wiz->frameGeometry();
-
-        GtpyWizardSettings::instance()->registerGeometry(m_componentUuid, rect);
-
-        int cursorPos = m_editor->cursorPosition();
-        GtpyWizardSettings::instance()->registerCursorPos(m_componentUuid,
-                cursorPos);
-
-        int vSliderPos = m_editor->verticalSliderPos();
-
-        GtpyWizardSettings::instance()->registerVSliderPos(m_componentUuid,
-                vSliderPos);
-    }
-}
-
-void
-GtpyAbstractScriptingWizardPage::reloadWizardGeometry(const QString& uuid)
-{
-    m_componentUuid = uuid;
-
-    QWidget* wiz = findParentWizard();
-
-    if (!wiz)
-    {
-        return;
-    }
-
-    QRect rect = GtpyWizardSettings::instance()->lastGeometry(uuid);
-
-    if (!rect.isNull())
-    {
-        wiz->setGeometry(rect);
-    }
-
-    int cursorPos = GtpyWizardSettings::instance()->lastCursorPos(uuid);
-
-    m_editor->setCursorPosition(cursorPos);
-
-    int vSliderPos = GtpyWizardSettings::instance()->lastVSliderPos(uuid);
-
-    m_editor->setVerticalSliderPos(vSliderPos);
 }
 
 void

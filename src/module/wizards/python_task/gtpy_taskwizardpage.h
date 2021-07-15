@@ -166,14 +166,20 @@ private slots:
     void calculatorDestroyed(QObject* obj);
 
     /**
-     * @brief Saves the script into the task instance.
-     */
-    virtual void saveScript();
-
-    /**
      * @brief Inserts the python code of the dropped calculator in the editor.
      * @param calc Dropped calculator.
      */
     void onCalculatorDropReceived(GtCalculator* calc);
+
+    /**
+     * @brief Saves the script into the task instance.
+     */
+    virtual void saveScript() Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Returns the uuid of the restored GtpyScriptCalculator.
+     * @return uuid of the restored GtpyScriptCalculator
+     */
+    virtual const QString componentUuid() Q_DECL_OVERRIDE;
 };
 #endif // GTPY_TASKWIZARDPAGE_H

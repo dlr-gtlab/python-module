@@ -58,8 +58,6 @@ GtpyScriptCalculatorWizardPage::initialization()
     setPlainTextToEditor(m_calc->script());
 
     setPackageNames(m_calc->packageNames());
-
-    reloadWizardGeometry(m_calc->uuid());
 }
 
 bool
@@ -105,4 +103,17 @@ GtpyScriptCalculatorWizardPage::saveScript()
         calc->fromMemento(memento);
         gtApp->endCommand(command);
     }
+}
+
+const QString
+GtpyScriptCalculatorWizardPage::componentUuid()
+{
+    QString uuid;
+
+    if (m_calc != Q_NULLPTR)
+    {
+        uuid = m_calc->uuid();
+    }
+
+    return uuid;
 }
