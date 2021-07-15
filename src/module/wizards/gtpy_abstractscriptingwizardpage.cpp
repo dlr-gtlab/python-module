@@ -29,6 +29,7 @@
 #include "gtpy_console.h"
 #include "gtpy_scriptrunnable.h"
 #include "gtpy_wizardsettings.h"
+#include "gtpy_editorsettingsdialog.h"
 
 // GTlab framework includes
 #include "gt_object.h"
@@ -240,6 +241,27 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     toolBarLayout->addLayout(exportButtonLay);
 
+
+    //Settings Button
+    QLabel* shortCutSetting = new QLabel("<font color='grey'></font>");
+    QFont fontSettings = shortCutSetting->font();
+    fontSettings.setItalic(true);
+    fontSettings.setPointSize(7);
+    shortCutSetting->setFont(fontSettings);
+
+    QPushButton* settingsButton = new QPushButton;
+    settingsButton->setIcon(gtApp->icon("configIcon.png"));
+    settingsButton->setToolTip(tr("Editor settings"));
+
+    QVBoxLayout* settingsButtonLay = new QVBoxLayout;
+
+    settingsButtonLay->addWidget(settingsButton);
+    settingsButtonLay->addWidget(shortCutSetting);
+
+    toolBarLayout->addLayout(settingsButtonLay);
+
+
+
     splitter->setCollapsible(splitter->indexOf(m_editorSplitter), false);
     splitter->setCollapsible(splitter->indexOf(m_separator), false);
 
@@ -277,6 +299,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
             SLOT(onEvalButtonClicked()));
     connect(importButton, SIGNAL(clicked(bool)), this, SLOT(onImportScript()));
     connect(exportButton, SIGNAL(clicked(bool)), this, SLOT(onExportScript()));
+    connect(settingsButton, SIGNAL(clicked(bool)), this,
+            SLOT(onSettingsButton()));
 }
 
 GtpyAbstractScriptingWizardPage::~GtpyAbstractScriptingWizardPage()
@@ -987,6 +1011,22 @@ GtpyAbstractScriptingWizardPage::onExportScript()
         QTextStream stream(&file);
         stream << m_editor->script();
         file.close();
+    }
+}
+
+void
+GtpyAbstractScriptingWizardPage::onSettingsButton()
+{
+    GtpyEditorSettingsDialog* dialog = new GtpyEditorSettingsDialog;
+    dialog->setWindowTitle("Editor settings");
+
+    if (dialog->exec())
+    {
+        qDebug() << "exec ture";
+    }
+    else
+    {
+        qDebug() << "exec false";
     }
 }
 

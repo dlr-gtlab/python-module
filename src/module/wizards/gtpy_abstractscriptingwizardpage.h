@@ -373,6 +373,9 @@ private slots:
      */
     void onExportScript();
 
+
+    void onSettingsButton();
+
     /**
      * @brief Sets text to search widget.
      * @param text Text to be set on the search widget.

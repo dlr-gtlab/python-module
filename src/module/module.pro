@@ -71,6 +71,7 @@ HEADERS += \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_completer.h \
     models/gtpy_completermodel.h \
+    wizards/gtpy_editorsettingsdialog.h \
     wizards/gtpy_wizardsettings.h \
     wizards/gtpy_wizardsettingsitem.h \
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.h \
@@ -112,6 +113,7 @@ SOURCES += \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_completer.cpp \
     models/gtpy_completermodel.cpp \
+    wizards/gtpy_editorsettingsdialog.cpp \
     wizards/gtpy_wizardsettings.cpp \
     wizards/gtpy_wizardsettingsitem.cpp \
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.cpp \
