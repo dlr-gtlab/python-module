@@ -295,49 +295,27 @@ GtpyAbstractScriptingWizardPage::initializePage()
     connect(m_saveButton, SIGNAL(clicked(bool)), this,
             SLOT(onSaveButtonClicked()));
 
-    QWidget* wiz = findParentWizard();
-
-    if (wiz)
-    {
-        QWizard* wizard = qobject_cast<QWizard*>(wiz);
-
-        if (wizard)
-        {
-            if (wizard->pageIds().count() == 1)
-            {
-                QWidgetList widgets = QApplication::topLevelWidgets();
-
-                foreach (QWidget* wid, widgets)
-                {
-                    QMainWindow* mainWin = qobject_cast<QMainWindow*>(wid);
-
-                    if (mainWin)
-                    {
-                        wiz->setWindowModality(Qt::NonModal);
-                        wiz->setParent(mainWin);
-                        wiz->setWindowFlags(Qt::Dialog);
-                    }
-                }
-            }
-        }
-    }
+    setWizardNonModal();
 
     initialization();
 
-    foreach (QString packageName, m_packageNames)
+    m_componentUuid = componentUuid();
+
+    reloadWizardGeometry();
+
+    loadPackages();
+
+    GtObject* component = gtDataModel->objectByUuid(m_componentUuid);
+
+    if (component == Q_NULLPTR)
     {
-        GtObject* obj = scope()->getObjectByPath(QStringList() <<
-                        scope()->objectName()
-                        << packageName);
-
-        if (obj != Q_NULLPTR)
-        {
-            GtObject* clone = obj->clone();
-            clone->setParent(this);
-
-            GtpyContextManager::instance()->addGtObject(
-                m_contextId, clone->objectName(), clone);
-        }
+        enableSaving(false);
+    }
+    else
+    {
+        setTitle(component->objectName());
+        connect(component, SIGNAL(objectNameChanged(QString)), this,
+                SLOT(componentRenamed(QString)));
     }
 
     connect(m_editor, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
@@ -779,6 +757,117 @@ GtpyAbstractScriptingWizardPage::findParentWizard(QObject* obj)
 }
 
 void
+GtpyAbstractScriptingWizardPage::setWizardNonModal()
+{
+    QWidget* wiz = findParentWizard();
+
+    if (wiz)
+    {
+        QWizard* wizard = qobject_cast<QWizard*>(wiz);
+
+        if (wizard)
+        {
+            if (wizard->pageIds().count() == 1)
+            {
+                QWidgetList widgets = QApplication::topLevelWidgets();
+
+                foreach (QWidget* wid, widgets)
+                {
+                    QMainWindow* mainWin = qobject_cast<QMainWindow*>(wid);
+
+                    if (mainWin)
+                    {
+                        wiz->setWindowModality(Qt::NonModal);
+                        wiz->setParent(mainWin);
+                        wiz->setWindowFlags(Qt::Dialog);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void
+GtpyAbstractScriptingWizardPage::registerGeometry()
+{
+    if (!m_componentUuid.isEmpty())
+    {
+        QWidget* wiz = findParentWizard();
+
+        if (wiz)
+        {
+
+            QRect rect = wiz->frameGeometry();
+
+            GtpyWizardSettings::instance()->registerGeometry(m_componentUuid,
+                    rect);
+
+            int cursorPos = m_editor->cursorPosition();
+            GtpyWizardSettings::instance()->registerCursorPos(m_componentUuid,
+                    cursorPos);
+
+            int vSliderPos = m_editor->verticalSliderPos();
+
+            GtpyWizardSettings::instance()->registerVSliderPos(m_componentUuid,
+                    vSliderPos);
+        }
+    }
+}
+
+void
+GtpyAbstractScriptingWizardPage::reloadWizardGeometry()
+{
+    if (!m_componentUuid.isEmpty())
+    {
+
+        QWidget* wiz = findParentWizard();
+
+        if (!wiz)
+        {
+            return;
+        }
+
+        QRect rect = GtpyWizardSettings::instance()->lastGeometry(
+                         m_componentUuid);
+
+        if (!rect.isNull())
+        {
+            wiz->setGeometry(rect);
+        }
+
+        int cursorPos = GtpyWizardSettings::instance()->lastCursorPos(
+                            m_componentUuid);
+
+        m_editor->setCursorPosition(cursorPos);
+
+        int vSliderPos = GtpyWizardSettings::instance()->lastVSliderPos(
+                             m_componentUuid);
+
+        m_editor->setVerticalSliderPos(vSliderPos);
+    }
+}
+
+void
+GtpyAbstractScriptingWizardPage::loadPackages()
+{
+    foreach (QString packageName, m_packageNames)
+    {
+        GtObject* obj = scope()->getObjectByPath(QStringList() <<
+                        scope()->objectName()
+                        << packageName);
+
+        if (obj != Q_NULLPTR)
+        {
+            GtObject* clone = obj->clone();
+            clone->setParent(this);
+
+            GtpyContextManager::instance()->addGtObject(
+                m_contextId, clone->objectName(), clone);
+        }
+    }
+}
+
+void
 GtpyAbstractScriptingWizardPage::deleteRunnable()
 {
     if (m_runnable)
@@ -839,57 +928,6 @@ void
 GtpyAbstractScriptingWizardPage::enableSaving(bool enable)
 {
     m_savingEnabled = enable;
-}
-
-void
-GtpyAbstractScriptingWizardPage::registerGeometry()
-{
-    QWidget* wiz = findParentWizard();
-
-    if (wiz && !m_componentUuid.isEmpty())
-    {
-
-        QRect rect = wiz->frameGeometry();
-
-        GtpyWizardSettings::instance()->registerGeometry(m_componentUuid, rect);
-
-        int cursorPos = m_editor->cursorPosition();
-        GtpyWizardSettings::instance()->registerCursorPos(m_componentUuid,
-                cursorPos);
-
-        int vSliderPos = m_editor->verticalSliderPos();
-
-        GtpyWizardSettings::instance()->registerVSliderPos(m_componentUuid,
-                vSliderPos);
-    }
-}
-
-void
-GtpyAbstractScriptingWizardPage::reloadWizardGeometry(const QString& uuid)
-{
-    m_componentUuid = uuid;
-
-    QWidget* wiz = findParentWizard();
-
-    if (!wiz)
-    {
-        return;
-    }
-
-    QRect rect = GtpyWizardSettings::instance()->lastGeometry(uuid);
-
-    if (!rect.isNull())
-    {
-        wiz->setGeometry(rect);
-    }
-
-    int cursorPos = GtpyWizardSettings::instance()->lastCursorPos(uuid);
-
-    m_editor->setCursorPosition(cursorPos);
-
-    int vSliderPos = GtpyWizardSettings::instance()->lastVSliderPos(uuid);
-
-    m_editor->setVerticalSliderPos(vSliderPos);
 }
 
 void
@@ -1041,4 +1079,11 @@ void
 GtpyAbstractScriptingWizardPage::onCalculatorDropped(GtCalculator* calc)
 {
     emit calculatorDropReceived(calc);
+}
+
+void
+GtpyAbstractScriptingWizardPage::componentRenamed(const QString& name)
+{
+    setComponentName(name);
+    setTitle(name);
 }

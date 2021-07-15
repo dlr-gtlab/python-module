@@ -110,6 +110,18 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
 }
 
 void
+GtpyTaskWizardPage::endEval(bool /*success*/)
+{
+    if (m_calcModel != Q_NULLPTR &&
+            m_task != Q_NULLPTR &&
+            m_treeView != Q_NULLPTR)
+    {
+        m_calcModel->updateView();
+        m_treeView->expandAll();
+    }
+}
+
+void
 GtpyTaskWizardPage::initialization()
 {
     acceptCalculatorDrops(true);
@@ -183,8 +195,6 @@ GtpyTaskWizardPage::initialization()
             SLOT(calculatorAppendedToTask(GtObject*, GtObject*)));
     connect(this, SIGNAL(calculatorDropReceived(GtCalculator*)), this,
             SLOT(onCalculatorDropReceived(GtCalculator*)));
-
-    reloadWizardGeometry(m_task->uuid());
 }
 
 bool
@@ -806,6 +816,16 @@ GtpyTaskWizardPage::calculatorDestroyed(QObject* obj)
 }
 
 void
+GtpyTaskWizardPage::onCalculatorDropReceived(GtCalculator* calc)
+{
+    cursorToNewLine();
+
+    insertConstructor(calc);
+
+    delete calc;
+}
+
+void
 GtpyTaskWizardPage::saveScript()
 {
     if (m_task == Q_NULLPTR)
@@ -835,24 +855,24 @@ GtpyTaskWizardPage::saveScript()
     }
 }
 
-void
-GtpyTaskWizardPage::onCalculatorDropReceived(GtCalculator* calc)
+QString
+GtpyTaskWizardPage::componentUuid() const
 {
-    cursorToNewLine();
+    QString uuid;
 
-    insertConstructor(calc);
+    if (m_task != Q_NULLPTR)
+    {
+        uuid = m_task->uuid();
+    }
 
-    delete calc;
+    return uuid;
 }
 
 void
-GtpyTaskWizardPage::endEval(bool /*success*/)
+GtpyTaskWizardPage::setComponentName(const QString& name)
 {
-    if (m_calcModel != Q_NULLPTR &&
-            m_task != Q_NULLPTR &&
-            m_treeView != Q_NULLPTR)
+    if (m_task != Q_NULLPTR)
     {
-        m_calcModel->updateView();
-        m_treeView->expandAll();
+        m_task->setObjectName(name);
     }
 }

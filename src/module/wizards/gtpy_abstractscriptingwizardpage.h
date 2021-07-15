@@ -198,19 +198,6 @@ protected:
      */
     void enableSaving(bool enable = true);
 
-    /**
-     * @brief Registers the current size ot the wizard in the
-     * GtpyWizardSettings.
-     */
-    void registerGeometry();
-
-    /**
-     * @brief Change the size of the wizard to the size stored in the
-     * GtpyWizardSettings.
-     * @param uuid Uuid of the task.
-     */
-    void reloadWizardGeometry(const QString& uuid);
-
     /// Python Context id
     int m_contextId;
 
@@ -249,6 +236,15 @@ private:
     virtual void saveScript() = 0;
 
     /**
+     * @brief This pure virtual function must return the uuid of the restored
+     * process component.
+     * @return uuid of the restored process component
+     */
+    virtual QString componentUuid() const = 0;
+
+    virtual void setComponentName(const QString& name) = 0;
+
+    /**
      * @brief Enables of disables the save button.
      * @param enable If true, the Save button is enabled, otherwise it is
      *  disabled.
@@ -273,6 +269,32 @@ private:
      * @return The parent GtProcessWizard.
      */
     QWidget* findParentWizard(QObject* obj);
+
+    /**
+     * @brief Sets the window modality of the wizard to non modal. This allows
+     * the interaction with the GTlab UI while the wizard is open.
+     */
+    void setWizardNonModal();
+
+    /**
+     * @brief Registers the current size ot the wizard in the
+     * GtpyWizardSettings.
+     */
+    void registerGeometry();
+
+    /**
+     * @brief Change the size of the wizard to the size stored in the
+     * GtpyWizardSettings.
+     * @param uuid Uuid of the task.
+     */
+    void reloadWizardGeometry();
+
+    /**
+     * @brief Loads the packages whose names are stored in m_packageNames.
+     * After calling this function the packages are available in the Python
+     * context with the id m_contextId.
+     */
+    void loadPackages();
 
     /**
      * @brief If the runnable is not null, this functions connects it to the
@@ -334,6 +356,7 @@ private:
     /// Saving the script
     bool m_savingEnabled;
 
+    /// Process component uuid
     QString m_componentUuid;
 
 private slots:
@@ -415,6 +438,13 @@ private slots:
      * @param calc Calculator which was dropped.
      */
     void onCalculatorDropped(GtCalculator* calc);
+
+    /**
+     * @brief Renames the cloned process component object and replaces the
+     * wizard title with the new name.
+     * @param title New process component name
+     */
+    void componentRenamed(const QString& name);
 
 signals:
     /// Calculator was dropped to the editor.

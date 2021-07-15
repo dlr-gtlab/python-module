@@ -46,6 +46,19 @@ private slots:
      * @brief Saves the script into the calculator instance.
      */
     virtual void saveScript() Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Returns the uuid of the restored GtpyScriptCalculator.
+     * @return uuid of the restored GtpyScriptCalculator
+     */
+    virtual QString componentUuid() const Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Sets the object name of the process component m_calc to the
+     * given name.
+     * @param name New name of the process component m_calc
+     */
+    virtual void setComponentName(const QString& name) Q_DECL_OVERRIDE;
 };
 
 
