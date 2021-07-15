@@ -51,7 +51,13 @@ private slots:
      * @brief Returns the uuid of the restored GtpyScriptCalculator.
      * @return uuid of the restored GtpyScriptCalculator
      */
-    virtual const QString componentUuid() Q_DECL_OVERRIDE;
+    virtual QString componentUuid() const Q_DECL_OVERRIDE;
+
+    /**
+     * @brief setComponentName
+     * @param name
+     */
+    virtual void setComponentName(const QString& name) Q_DECL_OVERRIDE;
 };
 
 

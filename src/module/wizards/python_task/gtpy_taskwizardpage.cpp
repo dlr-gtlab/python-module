@@ -855,8 +855,8 @@ GtpyTaskWizardPage::saveScript()
     }
 }
 
-const QString
-GtpyTaskWizardPage::componentUuid()
+QString
+GtpyTaskWizardPage::componentUuid() const
 {
     QString uuid;
 
@@ -866,4 +866,13 @@ GtpyTaskWizardPage::componentUuid()
     }
 
     return uuid;
+}
+
+void
+GtpyTaskWizardPage::setComponentName(const QString& name)
+{
+    if (m_task != Q_NULLPTR)
+    {
+        m_task->setObjectName(name);
+    }
 }

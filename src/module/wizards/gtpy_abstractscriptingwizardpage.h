@@ -240,7 +240,9 @@ private:
      * process component.
      * @return uuid of the restored process component
      */
-    virtual const QString componentUuid() = 0;
+    virtual QString componentUuid() const = 0;
+
+    virtual void setComponentName(const QString& name) = 0;
 
     /**
      * @brief Enables of disables the save button.
@@ -269,6 +271,12 @@ private:
     QWidget* findParentWizard(QObject* obj);
 
     /**
+     * @brief Sets the window modality of the wizard to non modal. This allows
+     * the interaction with the GTlab UI while the wizard is open.
+     */
+    void setWizardNonModal();
+
+    /**
      * @brief Registers the current size ot the wizard in the
      * GtpyWizardSettings.
      */
@@ -280,6 +288,13 @@ private:
      * @param uuid Uuid of the task.
      */
     void reloadWizardGeometry();
+
+    /**
+     * @brief Loads the packages whose names are stored in m_packageNames.
+     * After calling this function the packages are available in the Python
+     * context with the id m_contextId.
+     */
+    void loadPackages();
 
     /**
      * @brief If the runnable is not null, this functions connects it to the
@@ -423,6 +438,12 @@ private slots:
      * @param calc Calculator which was dropped.
      */
     void onCalculatorDropped(GtCalculator* calc);
+
+    /**
+     * @brief Sets the wizard title to the given string.
+     * @param title New wizard title
+     */
+    void componentRenamed(const QString& title);
 
 signals:
     /// Calculator was dropped to the editor.

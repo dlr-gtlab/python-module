@@ -295,32 +295,7 @@ GtpyAbstractScriptingWizardPage::initializePage()
     connect(m_saveButton, SIGNAL(clicked(bool)), this,
             SLOT(onSaveButtonClicked()));
 
-    QWidget* wiz = findParentWizard();
-
-    if (wiz)
-    {
-        QWizard* wizard = qobject_cast<QWizard*>(wiz);
-
-        if (wizard)
-        {
-            if (wizard->pageIds().count() == 1)
-            {
-                QWidgetList widgets = QApplication::topLevelWidgets();
-
-                foreach (QWidget* wid, widgets)
-                {
-                    QMainWindow* mainWin = qobject_cast<QMainWindow*>(wid);
-
-                    if (mainWin)
-                    {
-                        wiz->setWindowModality(Qt::NonModal);
-                        wiz->setParent(mainWin);
-                        wiz->setWindowFlags(Qt::Dialog);
-                    }
-                }
-            }
-        }
-    }
+    setWizardNonModal();
 
     initialization();
 
@@ -328,20 +303,19 @@ GtpyAbstractScriptingWizardPage::initializePage()
 
     reloadWizardGeometry();
 
-    foreach (QString packageName, m_packageNames)
+    loadPackages();
+
+    GtObject* component = gtDataModel->objectByUuid(m_componentUuid);
+
+    if (component == Q_NULLPTR)
     {
-        GtObject* obj = scope()->getObjectByPath(QStringList() <<
-                        scope()->objectName()
-                        << packageName);
-
-        if (obj != Q_NULLPTR)
-        {
-            GtObject* clone = obj->clone();
-            clone->setParent(this);
-
-            GtpyContextManager::instance()->addGtObject(
-                m_contextId, clone->objectName(), clone);
-        }
+        enableSaving(false);
+    }
+    else
+    {
+        setTitle(component->objectName());
+        connect(component, SIGNAL(objectNameChanged(QString)), this,
+                SLOT(componentRenamed(QString)));
     }
 
     connect(m_editor, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
@@ -783,6 +757,37 @@ GtpyAbstractScriptingWizardPage::findParentWizard(QObject* obj)
 }
 
 void
+GtpyAbstractScriptingWizardPage::setWizardNonModal()
+{
+    QWidget* wiz = findParentWizard();
+
+    if (wiz)
+    {
+        QWizard* wizard = qobject_cast<QWizard*>(wiz);
+
+        if (wizard)
+        {
+            if (wizard->pageIds().count() == 1)
+            {
+                QWidgetList widgets = QApplication::topLevelWidgets();
+
+                foreach (QWidget* wid, widgets)
+                {
+                    QMainWindow* mainWin = qobject_cast<QMainWindow*>(wid);
+
+                    if (mainWin)
+                    {
+                        wiz->setWindowModality(Qt::NonModal);
+                        wiz->setParent(mainWin);
+                        wiz->setWindowFlags(Qt::Dialog);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void
 GtpyAbstractScriptingWizardPage::registerGeometry()
 {
     if (!m_componentUuid.isEmpty())
@@ -839,6 +844,26 @@ GtpyAbstractScriptingWizardPage::reloadWizardGeometry()
                              m_componentUuid);
 
         m_editor->setVerticalSliderPos(vSliderPos);
+    }
+}
+
+void
+GtpyAbstractScriptingWizardPage::loadPackages()
+{
+    foreach (QString packageName, m_packageNames)
+    {
+        GtObject* obj = scope()->getObjectByPath(QStringList() <<
+                        scope()->objectName()
+                        << packageName);
+
+        if (obj != Q_NULLPTR)
+        {
+            GtObject* clone = obj->clone();
+            clone->setParent(this);
+
+            GtpyContextManager::instance()->addGtObject(
+                m_contextId, clone->objectName(), clone);
+        }
     }
 }
 
@@ -1054,4 +1079,11 @@ void
 GtpyAbstractScriptingWizardPage::onCalculatorDropped(GtCalculator* calc)
 {
     emit calculatorDropReceived(calc);
+}
+
+void
+GtpyAbstractScriptingWizardPage::componentRenamed(const QString& title)
+{
+    setComponentName(title);
+    setTitle(title);
 }

@@ -105,8 +105,8 @@ GtpyScriptCalculatorWizardPage::saveScript()
     }
 }
 
-const QString
-GtpyScriptCalculatorWizardPage::componentUuid()
+QString
+GtpyScriptCalculatorWizardPage::componentUuid() const
 {
     QString uuid;
 
@@ -116,4 +116,13 @@ GtpyScriptCalculatorWizardPage::componentUuid()
     }
 
     return uuid;
+}
+
+void
+GtpyScriptCalculatorWizardPage::setComponentName(const QString& name)
+{
+    if (m_calc != Q_NULLPTR)
+    {
+        m_calc->setObjectName(name);
+    }
 }
