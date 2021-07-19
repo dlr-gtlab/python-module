@@ -1,8 +1,8 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_editorsettingsdialog.cpp
+ * Source File: gtpywizardpreferences.cpp
  * copyright 2009-2019 by DLR
  *
- *  Created on: 15.07.2021
+ *  Created on: 19.07.2021
  *  Author: Marvin Noethen (AT-TW)
  *  Tel.: +49 2203 601 2692
  */
@@ -15,9 +15,11 @@
 
 #include "gt_application.h"
 
-#include "gtpy_editorsettingsdialog.h"
+#include "gtpy_preferenceseditor.h"
 
-GtpyEditorSettingsDialog::GtpyEditorSettingsDialog()
+#include "gtpy_wizardpreferences.h"
+
+GtpyWizardPreferences::GtpyWizardPreferences()
 {
     Qt::WindowFlags flags = windowFlags();
     flags = flags & (~Qt::WindowContextHelpButtonHint);
@@ -35,6 +37,7 @@ GtpyEditorSettingsDialog::GtpyEditorSettingsDialog()
 
     m_pagesWidget = new QStackedWidget;
     m_pagesWidget->setMinimumWidth(400);
+    m_pagesWidget->addWidget(new GtpyPreferencesEditor);
 
     QPushButton* saveButton = new QPushButton(tr("Save"));
     saveButton->setIcon(gtApp->icon("saveProjectIcon_16.png"));
@@ -70,19 +73,31 @@ GtpyEditorSettingsDialog::GtpyEditorSettingsDialog()
 }
 
 void
-GtpyEditorSettingsDialog::createIcons()
+GtpyWizardPreferences::createIcons()
 {
     QListWidgetItem* configButton = new QListWidgetItem(m_contentsWidget);
     configButton->setIcon(gtApp->icon("configIcon.png"));
-    configButton->setText(tr("Settings"));
+    configButton->setText(tr("Editor"));
     configButton->setTextAlignment(Qt::AlignHCenter);
     configButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-    configButton->setWhatsThis(tr("Editor Settings"));
+    configButton->setWhatsThis(tr("Editor Preferences"));
     configButton->setSizeHint(QSize(100, 50));
 }
 
 void
-GtpyEditorSettingsDialog::saveChanges()
+GtpyWizardPreferences::saveChanges()
 {
+    //    QObjectList pageList = m_pagesWidget->children();
 
+    //    for (int i = 0; i < pageList.size(); i++)
+    //    {
+    //        GtPreferencesPage* page = dynamic_cast<GtPreferencesPage*>(pageList[i]);
+
+    //        if (page != NULL)
+    //        {
+    //            page->saveSettings();
+    //        }
+    //    }
+
+    //    accept();
 }

@@ -21,12 +21,17 @@
 GtpyTask::GtpyTask():
     m_script("script", "Skript"),
     m_calcDefinitions("calcDefinitions", "Calculator Definitions"),
+    m_replaceTabBySpaces("replaceTab", "Replace tab by spaces"),
+    m_tabSize("tabSize", "Tab size"),
     m_pyThreadId(-1)
 {
     setObjectName("Python Task");
 
     registerProperty(m_script);
     registerProperty(m_calcDefinitions);
+
+    registerProperty(m_replaceTabBySpaces);
+    registerProperty(m_tabSize);
 
     m_script.hide();
     m_calcDefinitions.hide();
@@ -183,20 +188,6 @@ GtpyTask::getModuleIds()
     return project->moduleIds();
 }
 
-void
-GtpyTask::onStateChanged(STATE state)
-{
-    if (m_pyThreadId < 0)
-    {
-        return;
-    }
-
-    if (state == GtProcessComponent::TERMINATION_REQUESTED)
-    {
-        GtpyContextManager::instance()->interruptPyThread(m_pyThreadId);
-    }
-}
-
 QString
 GtpyTask::calcDefinitions() const
 {
@@ -215,3 +206,42 @@ GtpyTask::setCalcDefinitions(QString& calcDefinitions)
 
     m_calcDefinitions = calcDefinitions;
 }
+
+bool
+GtpyTask::replaceTabBySpaces() const
+{
+    return m_replaceTabBySpaces;
+}
+
+void
+GtpyTask::setReplaceTabBySpaces(bool replaceTabBySpaces)
+{
+    m_replaceTabBySpaces = replaceTabBySpaces;
+}
+
+int
+GtpyTask::tabSize() const
+{
+    return m_tabSize;
+}
+
+void
+GtpyTask::setTabSize(int tabSize)
+{
+    m_tabSize = tabSize;
+}
+
+void
+GtpyTask::onStateChanged(STATE state)
+{
+    if (m_pyThreadId < 0)
+    {
+        return;
+    }
+
+    if (state == GtProcessComponent::TERMINATION_REQUESTED)
+    {
+        GtpyContextManager::instance()->interruptPyThread(m_pyThreadId);
+    }
+}
+

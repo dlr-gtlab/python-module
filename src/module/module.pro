@@ -50,6 +50,8 @@ INCLUDEPATH += .\
     wizards \
     wizards/script_calculator \
     wizrads/python_task \
+    wizards/wizard_preferences \
+    wizards/wizard_preferences/pages \
     models \
     widgets
 
@@ -71,7 +73,6 @@ HEADERS += \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_completer.h \
     models/gtpy_completermodel.h \
-    wizards/gtpy_editorsettingsdialog.h \
     wizards/gtpy_wizardsettings.h \
     wizards/gtpy_wizardsettingsitem.h \
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.h \
@@ -95,7 +96,10 @@ HEADERS += \
     utilities/pythonextensions/gtpy_extendedwrapper.h \
     utilities/pythonextensions/gtpy_createhelperfunction.h \
     utilities/pythonextensions/gtpy_importfunction.h \
-    utilities/pythonextensions/gtpy_propertysetter.h
+    utilities/pythonextensions/gtpy_propertysetter.h \
+    wizards/wizard_preferences/pages/gtpy_preferenceseditor.h \
+    wizards/wizard_preferences/pages/gtpy_preferencespage.h \
+    wizards/wizard_preferences/gtpy_wizardpreferences.h
 
 SOURCES += \
     gt_python.cpp \
@@ -113,7 +117,6 @@ SOURCES += \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_completer.cpp \
     models/gtpy_completermodel.cpp \
-    wizards/gtpy_editorsettingsdialog.cpp \
     wizards/gtpy_wizardsettings.cpp \
     wizards/gtpy_wizardsettingsitem.cpp \
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.cpp \
@@ -136,7 +139,10 @@ SOURCES += \
     utilities/pythonextensions/gtpy_extendedwrapper.cpp \
     utilities/pythonextensions/gtpy_createhelperfunction.cpp \
     utilities/pythonextensions/gtpy_importfunction.cpp \
-    utilities/pythonextensions/gtpy_propertysetter.cpp
+    utilities/pythonextensions/gtpy_propertysetter.cpp \
+    wizards/wizard_preferences/pages/gtpy_preferenceseditor.cpp \
+    wizards/wizard_preferences/pages/gtpy_preferencespage.cpp \
+    wizards/wizard_preferences/gtpy_wizardpreferences.cpp
 
 
 

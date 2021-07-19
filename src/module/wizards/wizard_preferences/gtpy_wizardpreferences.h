@@ -1,15 +1,14 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_editorsettingsdialog.h
+ * Source File: gtpywizardpreferences.h
  * copyright 2009-2019 by DLR
  *
- *  Created on: 15.07.2021
+ *  Created on: 19.07.2021
  *  Author: Marvin Noethen (AT-TW)
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPYEDITORSETTINGSDIALOG_H
-#define GTPYEDITORSETTINGSDIALOG_H
-
+#ifndef GTPYWIZARDPREFERENCES_H
+#define GTPYWIZARDPREFERENCES_H
 
 #include <QDialog>
 
@@ -17,10 +16,10 @@ class QListWidgetItem;
 class QListWidget;
 class QStackedWidget;
 
-class GtpyEditorSettingsDialog : public QDialog
+class GtpyWizardPreferences : public QDialog
 {
 public:
-    GtpyEditorSettingsDialog();
+    GtpyWizardPreferences();
 
 private:
     /**
@@ -39,4 +38,4 @@ private slots:
     void saveChanges();
 };
 
-#endif // GTPYEDITORSETTINGSDIALOG_H
+#endif // GTPYWIZARDPREFERENCES_H

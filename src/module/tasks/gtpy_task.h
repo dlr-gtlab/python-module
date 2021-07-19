@@ -12,6 +12,8 @@
 
 #include "gt_task.h"
 #include "gt_stringproperty.h"
+#include "gt_boolproperty.h"
+#include "gt_intproperty.h"
 
 class GtObjectPathProperty;
 class GtpyContextManager;
@@ -68,6 +70,12 @@ public:
      */
     void setCalcDefinitions(QString& calcDefinitions);
 
+    bool replaceTabBySpaces() const;
+    void setReplaceTabBySpaces(bool replaceTabBySpaces);
+
+    int tabSize() const;
+    void setTabSize(int tabSize);
+
 protected:
     /**
      * @brief Checks if parent of task is a process data instance. Is this true
@@ -85,6 +93,10 @@ private:
 
     /// Script.
     GtStringProperty m_script;
+
+    GtBoolProperty m_replaceTabBySpaces;
+
+    GtIntProperty m_tabSize;
 
     /// Calculator definitions
     GtStringProperty m_calcDefinitions;

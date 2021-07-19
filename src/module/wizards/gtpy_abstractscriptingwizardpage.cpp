@@ -29,7 +29,7 @@
 #include "gtpy_console.h"
 #include "gtpy_scriptrunnable.h"
 #include "gtpy_wizardsettings.h"
-#include "gtpy_editorsettingsdialog.h"
+#include "gtpy_wizardpreferences.h"
 
 // GTlab framework includes
 #include "gt_object.h"
@@ -242,23 +242,23 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     toolBarLayout->addLayout(exportButtonLay);
 
 
-    //Settings Button
-    QLabel* shortCutSetting = new QLabel("<font color='grey'></font>");
-    QFont fontSettings = shortCutSetting->font();
+    //Preferences Button
+    QLabel* shortCutPreferences = new QLabel("<font color='grey'></font>");
+    QFont fontSettings = shortCutPreferences->font();
     fontSettings.setItalic(true);
     fontSettings.setPointSize(7);
-    shortCutSetting->setFont(fontSettings);
+    shortCutPreferences->setFont(fontSettings);
 
-    QPushButton* settingsButton = new QPushButton;
-    settingsButton->setIcon(gtApp->icon("configIcon.png"));
-    settingsButton->setToolTip(tr("Editor settings"));
+    QPushButton* preferencesButton = new QPushButton;
+    preferencesButton->setIcon(gtApp->icon("configIcon.png"));
+    preferencesButton->setToolTip(tr("Editor preferences"));
 
-    QVBoxLayout* settingsButtonLay = new QVBoxLayout;
+    QVBoxLayout* preferencesButtonLay = new QVBoxLayout;
 
-    settingsButtonLay->addWidget(settingsButton);
-    settingsButtonLay->addWidget(shortCutSetting);
+    preferencesButtonLay->addWidget(preferencesButton);
+    preferencesButtonLay->addWidget(shortCutPreferences);
 
-    toolBarLayout->addLayout(settingsButtonLay);
+    toolBarLayout->addLayout(preferencesButtonLay);
 
 
 
@@ -299,8 +299,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
             SLOT(onEvalButtonClicked()));
     connect(importButton, SIGNAL(clicked(bool)), this, SLOT(onImportScript()));
     connect(exportButton, SIGNAL(clicked(bool)), this, SLOT(onExportScript()));
-    connect(settingsButton, SIGNAL(clicked(bool)), this,
-            SLOT(onSettingsButton()));
+    connect(preferencesButton, SIGNAL(clicked(bool)), this,
+            SLOT(onPreferencesButton()));
 }
 
 GtpyAbstractScriptingWizardPage::~GtpyAbstractScriptingWizardPage()
@@ -1015,10 +1015,10 @@ GtpyAbstractScriptingWizardPage::onExportScript()
 }
 
 void
-GtpyAbstractScriptingWizardPage::onSettingsButton()
+GtpyAbstractScriptingWizardPage::onPreferencesButton()
 {
-    GtpyEditorSettingsDialog* dialog = new GtpyEditorSettingsDialog;
-    dialog->setWindowTitle("Editor settings");
+    GtpyWizardPreferences* dialog = new GtpyWizardPreferences;
+    dialog->setWindowTitle("Editor preferences");
 
     if (dialog->exec())
     {
