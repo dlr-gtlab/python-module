@@ -16,15 +16,15 @@
 /**
  * @brief The GtpyWizardSettingsItem class
  */
-class GtpyWizardSettingsItem
+class GtpyWizardGeometryItem
 {
-    friend class GtpyWizardSettings;
+    friend class GtpyWizardGeometries;
 
 protected:
     /**
      * @brief GtpyWizardSettingsItem
      */
-    GtpyWizardSettingsItem();
+    GtpyWizardGeometryItem();
 
     /**
      * @brief Register a key value pair to the settings.

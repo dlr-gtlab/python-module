@@ -12,14 +12,14 @@
 
 #include <QObject>
 
-#include "gtpy_wizardsettingsitem.h"
+#include "gtpy_wizardgeometryitem.h"
 
 class GtProcessComponent;
 
 /**
  * @brief The GtpyWizardSettings class
  */
-class GtpyWizardSettings : public QObject
+class GtpyWizardGeometries : public QObject
 {
     Q_OBJECT
 
@@ -28,7 +28,7 @@ public:
      * @brief Returns instance of GtpyWizardSettings based on singleton pattern.
      * @return Instance of GtpyWizardSettings.
      */
-    static GtpyWizardSettings* instance();
+    static GtpyWizardGeometries* instance();
 
     /**
      * @brief Regeisters the given geometry of the wizard to the settings item.
@@ -78,7 +78,7 @@ private:
      * @brief GtpyWizardSettings
      * @param parent
      */
-    explicit GtpyWizardSettings(QObject* parent = Q_NULLPTR);
+    explicit GtpyWizardGeometries(QObject* parent = Q_NULLPTR);
 
     /**
      * @brief Removes the sttings entries identified by the given uuid.
@@ -87,13 +87,13 @@ private:
     void remove(const QString& uuid);
 
     ///Last geometry settings
-    GtpyWizardSettingsItem m_lastGeometry;
+    GtpyWizardGeometryItem m_lastGeometry;
 
     ///Last cursor position
-    GtpyWizardSettingsItem m_lastCursorPos;
+    GtpyWizardGeometryItem m_lastCursorPos;
 
     ///Last slider position
-    GtpyWizardSettingsItem m_lastVSlidPos;
+    GtpyWizardGeometryItem m_lastVSlidPos;
 
 private slots:
     /**

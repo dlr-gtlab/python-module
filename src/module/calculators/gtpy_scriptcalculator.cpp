@@ -15,7 +15,7 @@
 #include "gt_processdata.h"
 
 #include "gtpy_contextmanager.h"
-#include "gtpy_wizardsettings.h"
+#include "gtpy_wizardgeometries.h"
 
 #include "gtpy_scriptcalculator.h"
 
@@ -52,7 +52,7 @@ GtpyScriptCalculator::GtpyScriptCalculator() :
             SLOT(onStateChanged(GtProcessComponent::STATE)));
 
     connect(this, SIGNAL(deletedFromDatamodel(QString)),
-            GtpyWizardSettings::instance(),
+            GtpyWizardGeometries::instance(),
             SLOT(processElementDeleted(QString)));
 }
 

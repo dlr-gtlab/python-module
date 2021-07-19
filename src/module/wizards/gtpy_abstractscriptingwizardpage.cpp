@@ -28,7 +28,7 @@
 #include "gtpy_scripteditor.h"
 #include "gtpy_console.h"
 #include "gtpy_scriptrunnable.h"
-#include "gtpy_wizardsettings.h"
+#include "gtpy_wizardgeometries.h"
 #include "gtpy_wizardpreferences.h"
 
 // GTlab framework includes
@@ -823,16 +823,16 @@ GtpyAbstractScriptingWizardPage::registerGeometry()
 
             QRect rect = wiz->frameGeometry();
 
-            GtpyWizardSettings::instance()->registerGeometry(m_componentUuid,
+            GtpyWizardGeometries::instance()->registerGeometry(m_componentUuid,
                     rect);
 
             int cursorPos = m_editor->cursorPosition();
-            GtpyWizardSettings::instance()->registerCursorPos(m_componentUuid,
+            GtpyWizardGeometries::instance()->registerCursorPos(m_componentUuid,
                     cursorPos);
 
             int vSliderPos = m_editor->verticalSliderPos();
 
-            GtpyWizardSettings::instance()->registerVSliderPos(m_componentUuid,
+            GtpyWizardGeometries::instance()->registerVSliderPos(m_componentUuid,
                     vSliderPos);
         }
     }
@@ -851,7 +851,7 @@ GtpyAbstractScriptingWizardPage::reloadWizardGeometry()
             return;
         }
 
-        QRect rect = GtpyWizardSettings::instance()->lastGeometry(
+        QRect rect = GtpyWizardGeometries::instance()->lastGeometry(
                          m_componentUuid);
 
         if (!rect.isNull())
@@ -859,12 +859,12 @@ GtpyAbstractScriptingWizardPage::reloadWizardGeometry()
             wiz->setGeometry(rect);
         }
 
-        int cursorPos = GtpyWizardSettings::instance()->lastCursorPos(
+        int cursorPos = GtpyWizardGeometries::instance()->lastCursorPos(
                             m_componentUuid);
 
         m_editor->setCursorPosition(cursorPos);
 
-        int vSliderPos = GtpyWizardSettings::instance()->lastVSliderPos(
+        int vSliderPos = GtpyWizardGeometries::instance()->lastVSliderPos(
                              m_componentUuid);
 
         m_editor->setVerticalSliderPos(vSliderPos);

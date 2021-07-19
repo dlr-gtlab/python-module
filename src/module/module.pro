@@ -73,8 +73,8 @@ HEADERS += \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_completer.h \
     models/gtpy_completermodel.h \
-    wizards/gtpy_wizardsettings.h \
-    wizards/gtpy_wizardsettingsitem.h \
+    wizards/gtpy_wizardgeometries.h \
+    wizards/gtpy_wizardgeometryitem.h \
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.h \
     widgets/gtpy_console.h \
     tasks/gtpy_task.h \
@@ -117,8 +117,8 @@ SOURCES += \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_completer.cpp \
     models/gtpy_completermodel.cpp \
-    wizards/gtpy_wizardsettings.cpp \
-    wizards/gtpy_wizardsettingsitem.cpp \
+    wizards/gtpy_wizardgeometries.cpp \
+    wizards/gtpy_wizardgeometryitem.cpp \
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.cpp \
     widgets/gtpy_console.cpp \
     tasks/gtpy_task.cpp \

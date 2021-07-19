@@ -14,7 +14,7 @@
 #include "gt_processdata.h"
 
 #include "gtpy_contextmanager.h"
-#include "gtpy_wizardsettings.h"
+#include "gtpy_wizardgeometries.h"
 
 #include "gtpy_task.h"
 
@@ -60,7 +60,7 @@ GtpyTask::GtpyTask():
             SLOT(onStateChanged(GtProcessComponent::STATE)));
 
     connect(this, SIGNAL(deletedFromDatamodel(QString)),
-            GtpyWizardSettings::instance(),
+            GtpyWizardGeometries::instance(),
             SLOT(processElementDeleted(QString)));
 }
 
