@@ -10,14 +10,14 @@
 #ifndef GTPYPREFERENCESEDITOR_H
 #define GTPYPREFERENCESEDITOR_H
 
-#include "gtpy_preferencespage.h"
+#include "gtpy_abstractpreferencespage.h"
 
-class GtpyPreferencesEditor : public GtpyPreferencesPage
+class GtpyGeneralPage : public GtpyAbstractPreferencesPage
 {
     Q_OBJECT
 
 public:
-    GtpyPreferencesEditor();
+    GtpyGeneralPage();
 
     void saveSettings() Q_DECL_OVERRIDE;
 

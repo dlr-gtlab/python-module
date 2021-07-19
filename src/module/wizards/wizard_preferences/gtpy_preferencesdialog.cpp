@@ -15,11 +15,11 @@
 
 #include "gt_application.h"
 
-#include "gtpy_preferenceseditor.h"
+#include "gtpy_generalpage.h"
 
-#include "gtpy_wizardpreferences.h"
+#include "gtpy_preferencesdialog.h"
 
-GtpyWizardPreferences::GtpyWizardPreferences()
+GtpyPreferencesDialog::GtpyPreferencesDialog()
 {
     Qt::WindowFlags flags = windowFlags();
     flags = flags & (~Qt::WindowContextHelpButtonHint);
@@ -37,7 +37,7 @@ GtpyWizardPreferences::GtpyWizardPreferences()
 
     m_pagesWidget = new QStackedWidget;
     m_pagesWidget->setMinimumWidth(400);
-    m_pagesWidget->addWidget(new GtpyPreferencesEditor);
+    m_pagesWidget->addWidget(new GtpyGeneralPage);
 
     QPushButton* saveButton = new QPushButton(tr("Save"));
     saveButton->setIcon(gtApp->icon("saveProjectIcon_16.png"));
@@ -73,7 +73,7 @@ GtpyWizardPreferences::GtpyWizardPreferences()
 }
 
 void
-GtpyWizardPreferences::createIcons()
+GtpyPreferencesDialog::createIcons()
 {
     QListWidgetItem* configButton = new QListWidgetItem(m_contentsWidget);
     configButton->setIcon(gtApp->icon("configIcon.png"));
@@ -85,7 +85,7 @@ GtpyWizardPreferences::createIcons()
 }
 
 void
-GtpyWizardPreferences::saveChanges()
+GtpyPreferencesDialog::saveChanges()
 {
     //    QObjectList pageList = m_pagesWidget->children();
 

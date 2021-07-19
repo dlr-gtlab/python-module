@@ -16,10 +16,10 @@ class QListWidgetItem;
 class QListWidget;
 class QStackedWidget;
 
-class GtpyWizardPreferences : public QDialog
+class GtpyPreferencesDialog : public QDialog
 {
 public:
-    GtpyWizardPreferences();
+    GtpyPreferencesDialog();
 
 private:
     /**

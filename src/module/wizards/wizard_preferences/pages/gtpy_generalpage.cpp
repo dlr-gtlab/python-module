@@ -12,9 +12,9 @@
 #include <QSpinBox>
 #include <QCheckBox>
 
-#include "gtpy_preferenceseditor.h"
+#include "gtpy_generalpage.h"
 
-GtpyPreferencesEditor::GtpyPreferencesEditor()
+GtpyGeneralPage::GtpyGeneralPage()
 {
     setTitle(tr("Editor"));
 
@@ -51,12 +51,12 @@ GtpyPreferencesEditor::GtpyPreferencesEditor()
 }
 
 void
-GtpyPreferencesEditor::saveSettings()
+GtpyGeneralPage::saveSettings()
 {
 
 }
 
-void GtpyPreferencesEditor::loadSettings()
+void GtpyGeneralPage::loadSettings()
 {
 
 }

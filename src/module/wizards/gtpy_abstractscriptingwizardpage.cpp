@@ -29,7 +29,7 @@
 #include "gtpy_console.h"
 #include "gtpy_scriptrunnable.h"
 #include "gtpy_wizardgeometries.h"
-#include "gtpy_wizardpreferences.h"
+#include "gtpy_preferencesdialog.h"
 
 // GTlab framework includes
 #include "gt_object.h"
@@ -1017,7 +1017,7 @@ GtpyAbstractScriptingWizardPage::onExportScript()
 void
 GtpyAbstractScriptingWizardPage::onPreferencesButton()
 {
-    GtpyWizardPreferences* dialog = new GtpyWizardPreferences;
+    GtpyPreferencesDialog* dialog = new GtpyPreferencesDialog;
     dialog->setWindowTitle("Editor preferences");
 
     if (dialog->exec())

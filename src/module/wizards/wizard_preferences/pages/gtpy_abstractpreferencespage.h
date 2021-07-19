@@ -15,7 +15,7 @@ class QVBoxLayout;
 
 #include <QWidget>
 
-class GtpyPreferencesPage : public QWidget
+class GtpyAbstractPreferencesPage : public QWidget
 {
 public:
     /**
@@ -24,7 +24,7 @@ public:
     virtual void saveSettings() = 0;
 
 protected:
-    GtpyPreferencesPage(QWidget* parent = NULL);
+    GtpyAbstractPreferencesPage(QWidget* parent = NULL);
 
     /**
      * @brief loadSettings
