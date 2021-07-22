@@ -59,9 +59,12 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     m_isEvaluating(false),
     m_runnable(Q_NULLPTR),
     m_savingEnabled(true),
-    m_componentUuid(QString())
+    m_componentUuid(QString()),
+    m_editorPreferences(Q_NULLPTR)
 {
     setTitle(tr("Python Script Editor"));
+
+
 
     m_contextId = GtpyContextManager::instance()->createNewContext(type);
 
@@ -241,7 +244,6 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     toolBarLayout->addLayout(exportButtonLay);
 
-
     //Preferences Button
     QLabel* shortCutPreferences = new QLabel("<font color='grey'></font>");
     QFont fontSettings = shortCutPreferences->font();
@@ -259,8 +261,6 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     preferencesButtonLay->addWidget(shortCutPreferences);
 
     toolBarLayout->addLayout(preferencesButtonLay);
-
-
 
     splitter->setCollapsible(splitter->indexOf(m_editorSplitter), false);
     splitter->setCollapsible(splitter->indexOf(m_separator), false);
@@ -324,6 +324,8 @@ GtpyAbstractScriptingWizardPage::initializePage()
     initialization();
 
     m_componentUuid = componentUuid();
+
+    m_editorPreferences = createPreferences();
 
     reloadWizardGeometry();
 
@@ -1017,16 +1019,29 @@ GtpyAbstractScriptingWizardPage::onExportScript()
 void
 GtpyAbstractScriptingWizardPage::onPreferencesButton()
 {
-    GtpyPreferencesDialog* dialog = new GtpyPreferencesDialog;
+    GtpyPreferencesDialog* dialog = new GtpyPreferencesDialog(
+        m_editorPreferences);
     dialog->setWindowTitle("Editor preferences");
 
     if (dialog->exec())
     {
         qDebug() << "exec ture";
+
+        savePreferences(m_editorPreferences);
     }
     else
     {
         qDebug() << "exec false";
+    }
+
+    if (m_editorPreferences)
+    {
+        qDebug() << "tab == " << m_editorPreferences->tabSize();
+        qDebug() << "replace == " << m_editorPreferences->replaceTabbySpace();
+    }
+    else
+    {
+        qDebug() << "nope!!!";
     }
 }
 

@@ -12,6 +12,9 @@
 
 #include "gtpy_abstractpreferencespage.h"
 
+class QSpinBox;
+class QCheckBox;
+
 class GtpyGeneralPage : public GtpyAbstractPreferencesPage
 {
     Q_OBJECT
@@ -19,13 +22,17 @@ class GtpyGeneralPage : public GtpyAbstractPreferencesPage
 public:
     GtpyGeneralPage();
 
-    void saveSettings() Q_DECL_OVERRIDE;
+    void saveSettings(GtpyEditorPreferences* pref) Q_DECL_OVERRIDE;
 
 private:
     /**
      * @brief loadSettings
      */
-    void loadSettings();
+    void loadSettings(GtpyEditorPreferences* pref);
+
+    QSpinBox* m_tabSize;
+
+    QCheckBox* m_replaceBySpaces;
 };
 
 #endif // GTPYPREFERENCESEDITOR_H

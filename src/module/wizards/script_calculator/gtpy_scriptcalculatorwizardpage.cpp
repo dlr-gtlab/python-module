@@ -126,3 +126,15 @@ GtpyScriptCalculatorWizardPage::setComponentName(const QString& name)
         m_calc->setObjectName(name);
     }
 }
+
+GtpyEditorPreferences*
+GtpyScriptCalculatorWizardPage::createPreferences()
+{
+    return Q_NULLPTR;
+}
+
+void
+GtpyScriptCalculatorWizardPage::savePreferences(GtpyEditorPreferences* pref)
+{
+
+}

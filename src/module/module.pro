@@ -97,6 +97,7 @@ HEADERS += \
     utilities/pythonextensions/gtpy_createhelperfunction.h \
     utilities/pythonextensions/gtpy_importfunction.h \
     utilities/pythonextensions/gtpy_propertysetter.h \
+    wizards/wizard_preferences/gtpy_editorpreferences.h \
     wizards/wizard_preferences/gtpy_preferencesdialog.h \
     wizards/wizard_preferences/pages/gtpy_abstractpreferencespage.h \
     wizards/wizard_preferences/pages/gtpy_generalpage.h
@@ -140,6 +141,7 @@ SOURCES += \
     utilities/pythonextensions/gtpy_createhelperfunction.cpp \
     utilities/pythonextensions/gtpy_importfunction.cpp \
     utilities/pythonextensions/gtpy_propertysetter.cpp \
+    wizards/wizard_preferences/gtpy_editorpreferences.cpp \
     wizards/wizard_preferences/gtpy_preferencesdialog.cpp \
     wizards/wizard_preferences/pages/gtpy_abstractpreferencespage.cpp \
     wizards/wizard_preferences/pages/gtpy_generalpage.cpp

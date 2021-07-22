@@ -12,14 +12,18 @@
 
 #include <QDialog>
 
+#include "gtpy_editorpreferences.h"
+
 class QListWidgetItem;
 class QListWidget;
 class QStackedWidget;
 
 class GtpyPreferencesDialog : public QDialog
 {
+    Q_OBJECT
+
 public:
-    GtpyPreferencesDialog();
+    GtpyPreferencesDialog(GtpyEditorPreferences* preferences);
 
 private:
     /**
@@ -27,12 +31,15 @@ private:
      */
     void createIcons();
 
+    void loadSettings();
+
     ///
     QListWidget* m_contentsWidget;
 
     ///
     QStackedWidget* m_pagesWidget;
 
+    GtpyEditorPreferences* m_preferences;
 
 private slots:
     void saveChanges();

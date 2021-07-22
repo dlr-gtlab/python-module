@@ -31,17 +31,16 @@ GtpyGeneralPage::GtpyGeneralPage()
 
     QFormLayout* formLay = new QFormLayout;
 
-    QSpinBox* m_maxLogSpin = new QSpinBox;
-    m_maxLogSpin->setMinimum(1);
-    m_maxLogSpin->setMaximum(100);
-    m_maxLogSpin->setValue(4);
+    m_tabSize = new QSpinBox;
+    m_tabSize->setMinimum(1);
+    m_tabSize->setMaximum(100);
 
-    QCheckBox* m_replaceBySpaces =
+    m_replaceBySpaces =
         new QCheckBox(tr("Replace tab by spaces"));
 
     QHBoxLayout* tabLay = new QHBoxLayout();
 
-    tabLay->addWidget(m_maxLogSpin);
+    tabLay->addWidget(m_tabSize);
     tabLay->addWidget(m_replaceBySpaces);
 
     formLay->addRow(tr("Tab size:"), tabLay);
@@ -51,12 +50,26 @@ GtpyGeneralPage::GtpyGeneralPage()
 }
 
 void
-GtpyGeneralPage::saveSettings()
+GtpyGeneralPage::saveSettings(GtpyEditorPreferences* pref)
 {
-
+    if (pref != Q_NULLPTR)
+    {
+        pref->setTabSize(m_tabSize->value());
+        pref->setReplaceTabBySpace(m_replaceBySpaces->isChecked());
+    }
 }
 
-void GtpyGeneralPage::loadSettings()
+void
+GtpyGeneralPage::loadSettings(GtpyEditorPreferences* pref)
 {
-
+    if (pref != Q_NULLPTR)
+    {
+        m_tabSize->setValue(pref->tabSize());
+        m_replaceBySpaces->setChecked(pref->replaceTabbySpace());
+    }
+    else
+    {
+        m_tabSize->setValue(4);
+        m_replaceBySpaces->setChecked(false);
+    }
 }

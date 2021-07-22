@@ -10,10 +10,12 @@
 #ifndef GTPYPREFERENCESPAGE_H
 #define GTPYPREFERENCESPAGE_H
 
+#include <QWidget>
+
+#include <gtpy_editorpreferences.h>
+
 class QLabel;
 class QVBoxLayout;
-
-#include <QWidget>
 
 class GtpyAbstractPreferencesPage : public QWidget
 {
@@ -21,15 +23,15 @@ public:
     /**
      * @brief saveSettings
      */
-    virtual void saveSettings() = 0;
-
-protected:
-    GtpyAbstractPreferencesPage(QWidget* parent = NULL);
+    virtual void saveSettings(GtpyEditorPreferences* pref) = 0;
 
     /**
      * @brief loadSettings
      */
-    virtual void loadSettings() = 0;
+    virtual void loadSettings(GtpyEditorPreferences* pref) = 0;
+
+protected:
+    GtpyAbstractPreferencesPage(QWidget* parent = NULL);
 
     /**
      * @brief setTitle

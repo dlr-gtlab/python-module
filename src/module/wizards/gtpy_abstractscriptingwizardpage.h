@@ -16,17 +16,18 @@
 #include "gt_calculator.h"
 
 #include "gtpy_contextmanager.h"
+#include "gtpy_editorpreferences.h"
 
+class QSplitter;
+class QTabWidget;
+class QLabel;
+class GtObject;
+class GtSearchWidget;
+class GtAbstractProperty;
+class GtProcessComponent;
 class GtpyScriptEditor;
 class GtpyConsole;
 class GtpyScriptRunnable;
-class GtSearchWidget;
-class QSplitter;
-class QTabWidget;
-class GtObject;
-class GtAbstractProperty;
-class GtProcessComponent;
-class QLabel;
 
 /**
  * @brief The GtpyAbstractScriptingWizardPage class
@@ -244,6 +245,10 @@ private:
 
     virtual void setComponentName(const QString& name) = 0;
 
+    virtual GtpyEditorPreferences* createPreferences() = 0;
+
+    virtual void savePreferences(GtpyEditorPreferences* pref) = 0;
+
     /**
      * @brief Enables of disables the save button.
      * @param enable If true, the Save button is enabled, otherwise it is
@@ -343,6 +348,8 @@ private:
 
     /// Editor Tab Widget
     QTabWidget* m_tabWidget;
+
+    GtpyEditorPreferences* m_editorPreferences;
 
     /// Package Names
     QStringList m_packageNames;

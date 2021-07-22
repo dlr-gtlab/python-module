@@ -19,7 +19,8 @@
 
 #include "gtpy_preferencesdialog.h"
 
-GtpyPreferencesDialog::GtpyPreferencesDialog()
+GtpyPreferencesDialog::GtpyPreferencesDialog(GtpyEditorPreferences* preferences)
+    : m_preferences(preferences)
 {
     Qt::WindowFlags flags = windowFlags();
     flags = flags & (~Qt::WindowContextHelpButtonHint);
@@ -45,6 +46,8 @@ GtpyPreferencesDialog::GtpyPreferencesDialog()
     closeButton->setIcon(gtApp->icon("closeIcon_16.png"));
 
     createIcons();
+    loadSettings();
+
     m_contentsWidget->setCurrentRow(0);
 
     connect(closeButton, SIGNAL(clicked()), this, SLOT(close()));
@@ -85,19 +88,37 @@ GtpyPreferencesDialog::createIcons()
 }
 
 void
+GtpyPreferencesDialog::loadSettings()
+{
+    QObjectList pageList = m_pagesWidget->children();
+
+    for (int i = 0; i < pageList.size(); i++)
+    {
+        GtpyAbstractPreferencesPage* page =
+            dynamic_cast<GtpyAbstractPreferencesPage*>(pageList[i]);
+
+        if (page != NULL)
+        {
+            page->loadSettings(m_preferences);
+        }
+    }
+}
+
+void
 GtpyPreferencesDialog::saveChanges()
 {
-    //    QObjectList pageList = m_pagesWidget->children();
+    QObjectList pageList = m_pagesWidget->children();
 
-    //    for (int i = 0; i < pageList.size(); i++)
-    //    {
-    //        GtPreferencesPage* page = dynamic_cast<GtPreferencesPage*>(pageList[i]);
+    for (int i = 0; i < pageList.size(); i++)
+    {
+        GtpyAbstractPreferencesPage* page =
+            dynamic_cast<GtpyAbstractPreferencesPage*>(pageList[i]);
 
-    //        if (page != NULL)
-    //        {
-    //            page->saveSettings();
-    //        }
-    //    }
+        if (page != NULL)
+        {
+            page->saveSettings(m_preferences);
+        }
+    }
 
-    //    accept();
+    accept();
 }
