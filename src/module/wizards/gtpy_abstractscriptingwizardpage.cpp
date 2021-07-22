@@ -326,6 +326,8 @@ GtpyAbstractScriptingWizardPage::initializePage()
     m_componentUuid = componentUuid();
 
     m_editorSettings = createSettings();
+    m_editor->setTabSize(m_editorSettings->tabSize());
+    m_editor->replaceTabsBySpaces(m_editorSettings->replaceTabBySpace());
 
     reloadWizardGeometry();
 
@@ -1028,6 +1030,8 @@ GtpyAbstractScriptingWizardPage::onSettingsButton()
         qDebug() << "exec ture";
 
         saveSettings(m_editorSettings);
+        m_editor->setTabSize(m_editorSettings->tabSize());
+        m_editor->replaceTabsBySpaces(m_editorSettings->replaceTabBySpace());
     }
     else
     {

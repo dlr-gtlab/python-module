@@ -41,6 +41,12 @@ public:
     virtual bool event(QEvent* event) Q_DECL_OVERRIDE;
 
     /**
+     * @brief Handles the wheel events.
+     * @param event Wheel event
+     */
+    virtual void wheelEvent(QWheelEvent* event) Q_DECL_OVERRIDE;
+
+    /**
      * @brief Returns the written script.
      * @return the written script
      */
@@ -118,6 +124,14 @@ public:
     int verticalSliderPos();
 
     void setVerticalSliderPos(int pos);
+
+    /**
+     * @brief Sets the tab size to the given size.
+     * @param size Tab size
+     */
+    void setTabSize(int size);
+
+    void replaceTabsBySpaces(bool enable = true);
 
 public slots:
     /**
@@ -238,6 +252,11 @@ private:
 
     /// Python Context id
     int m_contextId;
+
+    /// Tab size
+    int m_tabSize;
+
+    bool m_replaceTabBySpaces;
 
     /**
      * @brief Returns the python code of a function call as string value.

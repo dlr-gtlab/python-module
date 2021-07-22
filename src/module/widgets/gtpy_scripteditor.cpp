@@ -23,7 +23,8 @@
 #include "gtpy_scripteditor.h"
 
 GtpyScriptEditor::GtpyScriptEditor(int contextId, QWidget* parent) :
-    GtCodeEditor(parent), m_searchActivated(false)
+    GtCodeEditor(parent), m_searchActivated(false), m_tabSize(4),
+    m_replaceTabBySpaces(false)
 {
     const QFont sysFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
@@ -35,9 +36,7 @@ GtpyScriptEditor::GtpyScriptEditor(int contextId, QWidget* parent) :
 
     setMouseTracking(true);
 
-    const int tabStop = 4;
-    QFontMetrics metrics(font());
-    setTabStopWidth(tabStop * metrics.width(' '));
+    setTabSize(4);
 
     QPalette p = palette();
     const QColor cHighlight = p.color(QPalette::Active, QPalette::Highlight);
@@ -116,6 +115,28 @@ bool GtpyScriptEditor::event(QEvent* event)
     }
 
     return QPlainTextEdit::event(event);
+}
+
+void
+GtpyScriptEditor::wheelEvent(QWheelEvent* event)
+{
+    if (event->modifiers() == Qt::ControlModifier && !isReadOnly())
+    {
+        if (event->delta() > 0)
+        {
+            zoomIn(2);
+        }
+        else
+        {
+            zoomOut(2);
+        }
+
+        setTabSize(m_tabSize);
+    }
+    else
+    {
+        QPlainTextEdit::wheelEvent(event);
+    }
 }
 
 QString
@@ -370,6 +391,24 @@ void
 GtpyScriptEditor::setVerticalSliderPos(int pos)
 {
     verticalScrollBar()->setSliderPosition(pos);
+}
+
+void GtpyScriptEditor::setTabSize(int size)
+{
+    m_tabSize = size;
+    setTabStopDistance(font().pointSize() * m_tabSize);
+}
+
+void
+GtpyScriptEditor::replaceTabsBySpaces(bool enable)
+{
+    m_replaceTabBySpaces = enable;
+
+    if (m_replaceTabBySpaces)
+    {
+        QString spaces = " ";
+        searchAndReplace("\t", spaces.repeated(m_tabSize));
+    }
 }
 
 void
@@ -684,7 +723,28 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
 
             if (!indentSelectedLines(true))
             {
-                GtCodeEditor::keyPressEvent(event);
+                if (m_replaceTabBySpaces)
+                {
+                    QTextCursor cursor = this->textCursor();
+                    int currentPos = cursor.position();
+
+                    cursor.movePosition(QTextCursor::StartOfLine,
+                                        QTextCursor::KeepAnchor);
+
+                    int tabSize = cursor.selectedText().count();
+
+                    tabSize = tabSize % m_tabSize;
+
+                    QString spaces = " ";
+                    spaces = spaces.repeated(m_tabSize - tabSize);
+
+                    cursor.setPosition(currentPos);
+                    cursor.insertText(spaces);
+                }
+                else
+                {
+                    GtCodeEditor::keyPressEvent(event);
+                }
             }
 
             break;
@@ -1098,7 +1158,15 @@ GtpyScriptEditor::indentNewLine(QKeyEvent* event)
     // append tab
     if (match.hasMatch())
     {
-        newLine += QStringLiteral("\t");
+        if (m_replaceTabBySpaces)
+        {
+            QString spaces = " ";
+            newLine += spaces.repeated(m_tabSize);
+        }
+        else
+        {
+            newLine += QStringLiteral("\t");
+        }
     }
 
     if (newLine.isEmpty())
@@ -1174,6 +1242,8 @@ GtpyScriptEditor::indentSelectedLines(bool direction)
         return false;
     }
 
+    qDebug() << "indent Selected Line ";
+
     QTextCursor cursor = this->textCursor();
 
     QString selection = cursor.selectedText();
@@ -1184,27 +1254,51 @@ GtpyScriptEditor::indentSelectedLines(bool direction)
 
     cursor.setPosition(selectionStart);
 
+    QString tabSpaces = " ";
+    tabSpaces = tabSpaces.repeated(m_tabSize);
+
+    cursor.beginEditBlock();
+
     for (int i = 0; i < count; i++)
     {
         cursor.movePosition(QTextCursor::StartOfLine);
 
         if (direction) // indent right
         {
-            cursor.insertText(QStringLiteral("\t"));
+            if (m_replaceTabBySpaces)
+            {
+                cursor.insertText(tabSpaces);
+            }
+            else
+            {
+                cursor.insertText(QStringLiteral("\t"));
+            }
         }
         else // indent left
         {
             cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
 
-            if (cursor.selectedText() == QStringLiteral("\t"))
+            if (m_replaceTabBySpaces)
             {
-                cursor.removeSelectedText();
+                if (cursor.selectedText() == tabSpaces)
+                {
+                    cursor.removeSelectedText();
+                }
+            }
+            else
+            {
+                if (cursor.selectedText() == QStringLiteral("\t"))
+                {
+                    cursor.removeSelectedText();
+                }
             }
         }
 
         cursor.movePosition(QTextCursor::EndOfLine);
         cursor.movePosition(QTextCursor::Right);
     }
+
+    cursor.endEditBlock();
 
     return true;
 }
