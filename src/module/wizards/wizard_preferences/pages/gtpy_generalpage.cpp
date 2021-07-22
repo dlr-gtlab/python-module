@@ -50,7 +50,7 @@ GtpyGeneralPage::GtpyGeneralPage()
 }
 
 void
-GtpyGeneralPage::saveSettings(GtpyEditorPreferences* pref)
+GtpyGeneralPage::savePreferences(GtpyEditorPreferences* pref)
 {
     if (pref != Q_NULLPTR)
     {
@@ -60,7 +60,7 @@ GtpyGeneralPage::saveSettings(GtpyEditorPreferences* pref)
 }
 
 void
-GtpyGeneralPage::loadSettings(GtpyEditorPreferences* pref)
+GtpyGeneralPage::loadPreferences(GtpyEditorPreferences* pref)
 {
     if (pref != Q_NULLPTR)
     {

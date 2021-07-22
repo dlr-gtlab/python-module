@@ -43,6 +43,9 @@ public:
      */
     GtpyAbstractScriptingWizardPage(GtpyContextManager::Context type);
 
+    /**
+     * @brief ~GtpyAbstractScriptingWizardPage
+     */
     virtual ~GtpyAbstractScriptingWizardPage();
 
     /**
@@ -243,10 +246,25 @@ private:
      */
     virtual QString componentUuid() const = 0;
 
+    /**
+     * @brief In this pure virtual function the object name of the process
+     * component must be set to the given name.
+     * @param name New name of the process component
+     */
     virtual void setComponentName(const QString& name) = 0;
 
+    /**
+     * @brief In this pure virtual function a new preferences instance must be
+     * created and returned.
+     * @return A new preferences instance.
+     */
     virtual GtpyEditorPreferences* createPreferences() = 0;
 
+    /**
+     * @brief In this pure virtual function the preferences defined in the
+     * given pointer pref must be passed to the process component.
+     * @param pref Current editor preferences.
+     */
     virtual void savePreferences(GtpyEditorPreferences* pref) = 0;
 
     /**
@@ -341,6 +359,7 @@ private:
     /// Python Editor
     GtpyScriptEditor* m_editor;
 
+    /// Editor Splitter
     QSplitter* m_editorSplitter;
 
     /// Separator Widget
@@ -380,7 +399,9 @@ private slots:
      */
     void onExportScript();
 
-
+    /**
+     * @brief Displays a dialog for defining the editor settings.
+     */
     void onPreferencesButton();
 
     /**

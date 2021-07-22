@@ -14,7 +14,7 @@
 #include <QVariant>
 
 /**
- * @brief The GtpyWizardSettingsItem class
+ * @brief The GtpyWizardGeometryItem class
  */
 class GtpyWizardGeometryItem
 {
@@ -22,7 +22,7 @@ class GtpyWizardGeometryItem
 
 protected:
     /**
-     * @brief GtpyWizardSettingsItem
+     * @brief GtpyWizardGeometryItem
      */
     GtpyWizardGeometryItem();
 

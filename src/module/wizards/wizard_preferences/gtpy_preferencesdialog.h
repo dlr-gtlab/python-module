@@ -18,30 +18,44 @@ class QListWidgetItem;
 class QListWidget;
 class QStackedWidget;
 
+/**
+ * @brief The GtpyPreferencesDialog class
+ */
 class GtpyPreferencesDialog : public QDialog
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief GtpyPreferencesDialog
+     * @param preferences
+     */
     GtpyPreferencesDialog(GtpyEditorPreferences* preferences);
 
 private:
     /**
-     * @brief createIcons
+     * @brief Creates all the page icons
      */
     void createIcons();
 
+    /**
+     * @brief Loads the current setting.
+     */
     void loadSettings();
 
-    ///
+    /// Contents Widget
     QListWidget* m_contentsWidget;
 
-    ///
+    /// Pages Widget
     QStackedWidget* m_pagesWidget;
 
+    /// Preferences
     GtpyEditorPreferences* m_preferences;
 
 private slots:
+    /**
+     * @brief Saves all currently defined preferences.
+     */
     void saveChanges();
 };
 

@@ -99,7 +99,7 @@ GtpyPreferencesDialog::loadSettings()
 
         if (page != NULL)
         {
-            page->loadSettings(m_preferences);
+            page->loadPreferences(m_preferences);
         }
     }
 }
@@ -116,7 +116,7 @@ GtpyPreferencesDialog::saveChanges()
 
         if (page != NULL)
         {
-            page->saveSettings(m_preferences);
+            page->savePreferences(m_preferences);
         }
     }
 

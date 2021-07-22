@@ -15,23 +15,36 @@
 class QSpinBox;
 class QCheckBox;
 
+/**
+ * @brief The GtpyGeneralPage class
+ */
 class GtpyGeneralPage : public GtpyAbstractPreferencesPage
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief GtpyGeneralPage
+     */
     GtpyGeneralPage();
 
-    void saveSettings(GtpyEditorPreferences* pref) Q_DECL_OVERRIDE;
+    /**
+     * @brief Passes the user defined preferences to the given pointer pref.
+     * @param pref Pointer to the object containing all editor preferences.
+     */
+    void savePreferences(GtpyEditorPreferences* pref) Q_DECL_OVERRIDE;
 
 private:
     /**
-     * @brief loadSettings
+     * @brief Reads the current preferences from the given pointer pref and
+     * loads them into the user interface.
      */
-    void loadSettings(GtpyEditorPreferences* pref);
+    void loadPreferences(GtpyEditorPreferences* pref) Q_DECL_OVERRIDE;
 
+    /// Tab Size
     QSpinBox* m_tabSize;
 
+    /// Replace Tabs By Space
     QCheckBox* m_replaceBySpaces;
 };
 

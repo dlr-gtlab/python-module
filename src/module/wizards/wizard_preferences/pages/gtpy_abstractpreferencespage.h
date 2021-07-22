@@ -17,31 +17,48 @@
 class QLabel;
 class QVBoxLayout;
 
+/**
+ * @brief The GtpyAbstractPreferencesPage class
+ */
 class GtpyAbstractPreferencesPage : public QWidget
 {
 public:
     /**
-     * @brief saveSettings
+     * @brief In this pure virtual function the user defined preferences must
+     * be passed to the given pointer pref.
+     * @param pref Pointer to the object containing all editor preferences.
      */
-    virtual void saveSettings(GtpyEditorPreferences* pref) = 0;
+    virtual void savePreferences(GtpyEditorPreferences* pref) = 0;
 
     /**
-     * @brief loadSettings
+     * @brief In this pure virtual function the current preferences must be
+     * read from the given pointer pref and loaded into the user interface.
      */
-    virtual void loadSettings(GtpyEditorPreferences* pref) = 0;
+
+    /**
+     * @brief In this pure virtual function the current preferences must be
+     * read from the given pointer pref and loaded it into the user interface.
+     * @param pref Pointer to the object containing the current editor
+     * preferences.
+     */
+    virtual void loadPreferences(GtpyEditorPreferences* pref) = 0;
 
 protected:
+    /**
+     * @brief GtpyAbstractPreferencesPage
+     * @param parent
+     */
     GtpyAbstractPreferencesPage(QWidget* parent = NULL);
 
     /**
-     * @brief setTitle
-     * @param id
+     * @brief Sets the title of the page to the given id.
+     * @param id Title of the page
      */
     void setTitle(const QString& id);
 
     /**
-     * @brief addStretch
-     * @param val
+     * @brief Add a stretch factor to the layout of the page.
+     * @param val Value of the stretch factor.
      */
     void addStretch(int val = 1);
 

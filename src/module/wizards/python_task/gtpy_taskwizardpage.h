@@ -72,9 +72,18 @@ private:
      */
     virtual void setComponentName(const QString& name) Q_DECL_OVERRIDE;
 
-
+    /**
+     * @brief Creates a new preferences instance containing the current defined
+     * preferences and returns it.
+     * @return A new preferences instace containing the current settings.
+     */
     virtual GtpyEditorPreferences* createPreferences() Q_DECL_OVERRIDE;
 
+    /**
+     * @brief Passes the preferences defined in the given pointer pref to the
+     * task.
+     * @param pref Current editor preferences.
+     */
     virtual void savePreferences(GtpyEditorPreferences* pref) Q_DECL_OVERRIDE;
 
     /**

@@ -17,7 +17,7 @@
 class GtProcessComponent;
 
 /**
- * @brief The GtpyWizardSettings class
+ * @brief The GtpyWizardGeometries class
  */
 class GtpyWizardGeometries : public QObject
 {
@@ -25,8 +25,9 @@ class GtpyWizardGeometries : public QObject
 
 public:
     /**
-     * @brief Returns instance of GtpyWizardSettings based on singleton pattern.
-     * @return Instance of GtpyWizardSettings.
+     * @brief Returns instance of GtpyWizardGeometries based on singleton
+     * pattern.
+     * @return Instance of GtpyWizardGeometries.
      */
     static GtpyWizardGeometries* instance();
 
@@ -75,7 +76,7 @@ public:
 
 private:
     /**
-     * @brief GtpyWizardSettings
+     * @brief GtpyWizardGeometries
      * @param parent
      */
     explicit GtpyWizardGeometries(QObject* parent = Q_NULLPTR);
