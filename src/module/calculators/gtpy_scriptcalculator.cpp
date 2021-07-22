@@ -21,9 +21,19 @@
 
 GtpyScriptCalculator::GtpyScriptCalculator() :
     m_script("script", "Script"),
+    m_replaceTabBySpaces("replaceTab", "Replace tab by spaces"),
+    m_tabSize("tabSize", "Tab size"),
     m_pyThreadId(-1)
 {
     setObjectName("Python Script Editor");
+
+    registerProperty(m_script);
+    registerProperty(m_replaceTabBySpaces);
+    registerProperty(m_tabSize);
+
+    m_script.hide();
+    m_replaceTabBySpaces.hide();
+    m_tabSize.hide();
 
     foreach (const QString& modId, getModuleIds())
     {
@@ -44,9 +54,6 @@ GtpyScriptCalculator::GtpyScriptCalculator() :
             m_dynamicPathProps << pathProp;
         }
     }
-
-    registerProperty(m_script);
-    m_script.hide();
 
     connect(this, SIGNAL(stateChanged(GtProcessComponent::STATE)), this,
             SLOT(onStateChanged(GtProcessComponent::STATE)));
@@ -146,6 +153,31 @@ GtpyScriptCalculator::packageNames()
 
     return list;
 }
+
+bool
+GtpyScriptCalculator::replaceTabBySpaces() const
+{
+    return m_replaceTabBySpaces;
+}
+
+void
+GtpyScriptCalculator::setReplaceTabBySpaces(bool replaceTabBySpaces)
+{
+    m_replaceTabBySpaces = replaceTabBySpaces;
+}
+
+int
+GtpyScriptCalculator::tabSize() const
+{
+    return m_tabSize;
+}
+
+void
+GtpyScriptCalculator::setTabSize(int tabSize)
+{
+    m_tabSize = tabSize;
+}
+
 
 QStringList
 GtpyScriptCalculator::getModuleIds()

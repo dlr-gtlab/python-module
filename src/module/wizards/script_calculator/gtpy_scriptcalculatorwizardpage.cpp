@@ -132,21 +132,21 @@ GtpyScriptCalculatorWizardPage::createSettings()
 {
     GtpyEditorSettings* pref = Q_NULLPTR;
 
-    //    if (m_calc != Q_NULLPTR)
-    //    {
-    //        pref = new GtpyEditorSettings(this);
+    if (m_calc != Q_NULLPTR)
+    {
+        pref = new GtpyEditorSettings(this);
 
-    //        if (m_calc->tabSize() <= 0)
-    //        {
-    //            pref->setTabSize(4);
-    //        }
-    //        else
-    //        {
-    //            pref->setTabSize(m_calc->tabSize());
-    //        }
+        if (m_calc->tabSize() <= 0)
+        {
+            pref->setTabSize(4);
+        }
+        else
+        {
+            pref->setTabSize(m_calc->tabSize());
+        }
 
-    //        pref->setReplaceTabBySpace(m_calc->replaceTabBySpaces());
-    //    }
+        pref->setReplaceTabBySpace(m_calc->replaceTabBySpaces());
+    }
 
     return pref;
 }
@@ -154,9 +154,9 @@ GtpyScriptCalculatorWizardPage::createSettings()
 void
 GtpyScriptCalculatorWizardPage::saveSettings(GtpyEditorSettings* pref)
 {
-    //    if (pref != Q_NULLPTR && m_calc != Q_NULLPTR)
-    //    {
-    //        m_calc->setTabSize(pref->tabSize());
-    //        m_calc->setReplaceTabBySpaces(pref->replaceTabbySpace());
-    //    }
+    if (pref != Q_NULLPTR && m_calc != Q_NULLPTR)
+    {
+        m_calc->setTabSize(pref->tabSize());
+        m_calc->setReplaceTabBySpaces(pref->replaceTabbySpace());
+    }
 }

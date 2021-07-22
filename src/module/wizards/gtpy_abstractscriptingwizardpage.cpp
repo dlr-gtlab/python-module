@@ -1037,7 +1037,7 @@ GtpyAbstractScriptingWizardPage::onSettingsButton()
     if (m_editorSettings)
     {
         qDebug() << "tab == " << m_editorSettings->tabSize();
-        qDebug() << "replace == " << m_editorSettings->replaceTabbySpace();
+        qDebug() << "replace == " << m_editorSettings->replaceTabBySpace();
     }
     else
     {

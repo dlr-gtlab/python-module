@@ -32,11 +32,6 @@ public:
 
     /**
      * @brief In this pure virtual function the current settings must be
-     * read from the given pointer pref and loaded into the user interface.
-     */
-
-    /**
-     * @brief In this pure virtual function the current settings must be
      * read from the given pointer pref and loaded it into the user interface.
      * @param pref Pointer to the object containing the current editor
      * settings.

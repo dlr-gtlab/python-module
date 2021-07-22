@@ -34,13 +34,13 @@ public:
      */
     void saveSettings(GtpyEditorSettings* pref) Q_DECL_OVERRIDE;
 
-private:
     /**
      * @brief Reads the current settings from the given pointer pref and
      * loads them into the user interface.
      */
     void loadSettings(GtpyEditorSettings* pref) Q_DECL_OVERRIDE;
 
+private:
     /// Tab Size
     QSpinBox* m_tabSize;
 

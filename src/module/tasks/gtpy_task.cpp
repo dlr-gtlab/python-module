@@ -29,12 +29,13 @@ GtpyTask::GtpyTask():
 
     registerProperty(m_script);
     registerProperty(m_calcDefinitions);
-
     registerProperty(m_replaceTabBySpaces);
     registerProperty(m_tabSize);
 
     m_script.hide();
     m_calcDefinitions.hide();
+    m_replaceTabBySpaces.hide();
+    m_tabSize.hide();
 
     foreach (const QString& modId, getModuleIds())
     {
