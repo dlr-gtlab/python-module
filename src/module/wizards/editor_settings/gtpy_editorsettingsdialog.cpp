@@ -17,9 +17,10 @@
 
 #include "gtpy_generalpage.h"
 
-#include "gtpy_preferencesdialog.h"
+#include "gtpy_editorsettingsdialog.h"
 
-GtpyPreferencesDialog::GtpyPreferencesDialog(GtpyEditorPreferences* preferences)
+GtpyEditorSettingsDialog::GtpyEditorSettingsDialog(GtpyEditorSettings*
+        preferences)
     : m_preferences(preferences)
 {
     Qt::WindowFlags flags = windowFlags();
@@ -76,7 +77,7 @@ GtpyPreferencesDialog::GtpyPreferencesDialog(GtpyEditorPreferences* preferences)
 }
 
 void
-GtpyPreferencesDialog::createIcons()
+GtpyEditorSettingsDialog::createIcons()
 {
     QListWidgetItem* configButton = new QListWidgetItem(m_contentsWidget);
     configButton->setIcon(gtApp->icon("configIcon.png"));
@@ -88,14 +89,14 @@ GtpyPreferencesDialog::createIcons()
 }
 
 void
-GtpyPreferencesDialog::loadSettings()
+GtpyEditorSettingsDialog::loadSettings()
 {
     QObjectList pageList = m_pagesWidget->children();
 
     for (int i = 0; i < pageList.size(); i++)
     {
-        GtpyAbstractPreferencesPage* page =
-            dynamic_cast<GtpyAbstractPreferencesPage*>(pageList[i]);
+        GtpyAbstractSettingsPage* page =
+            dynamic_cast<GtpyAbstractSettingsPage*>(pageList[i]);
 
         if (page != NULL)
         {
@@ -105,14 +106,14 @@ GtpyPreferencesDialog::loadSettings()
 }
 
 void
-GtpyPreferencesDialog::saveChanges()
+GtpyEditorSettingsDialog::saveChanges()
 {
     QObjectList pageList = m_pagesWidget->children();
 
     for (int i = 0; i < pageList.size(); i++)
     {
-        GtpyAbstractPreferencesPage* page =
-            dynamic_cast<GtpyAbstractPreferencesPage*>(pageList[i]);
+        GtpyAbstractSettingsPage* page =
+            dynamic_cast<GtpyAbstractSettingsPage*>(pageList[i]);
 
         if (page != NULL)
         {

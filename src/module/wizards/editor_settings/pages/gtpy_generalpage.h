@@ -10,7 +10,7 @@
 #ifndef GTPYPREFERENCESEDITOR_H
 #define GTPYPREFERENCESEDITOR_H
 
-#include "gtpy_abstractpreferencespage.h"
+#include "gtpy_abstractsettingspage.h"
 
 class QSpinBox;
 class QCheckBox;
@@ -18,7 +18,7 @@ class QCheckBox;
 /**
  * @brief The GtpyGeneralPage class
  */
-class GtpyGeneralPage : public GtpyAbstractPreferencesPage
+class GtpyGeneralPage : public GtpyAbstractSettingsPage
 {
     Q_OBJECT
 
@@ -32,14 +32,14 @@ public:
      * @brief Passes the user defined preferences to the given pointer pref.
      * @param pref Pointer to the object containing all editor preferences.
      */
-    void savePreferences(GtpyEditorPreferences* pref) Q_DECL_OVERRIDE;
+    void savePreferences(GtpyEditorSettings* pref) Q_DECL_OVERRIDE;
 
 private:
     /**
      * @brief Reads the current preferences from the given pointer pref and
      * loads them into the user interface.
      */
-    void loadPreferences(GtpyEditorPreferences* pref) Q_DECL_OVERRIDE;
+    void loadPreferences(GtpyEditorSettings* pref) Q_DECL_OVERRIDE;
 
     /// Tab Size
     QSpinBox* m_tabSize;

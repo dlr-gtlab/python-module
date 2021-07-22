@@ -7,8 +7,8 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPYWIZARDSETTINGS_H
-#define GTPYWIZARDSETTINGS_H
+#ifndef GTPYWIZARDGEOMETRIES_H
+#define GTPYWIZARDGEOMETRIES_H
 
 #include <QObject>
 
@@ -104,4 +104,4 @@ private slots:
     void processElementDeleted(const QString& uuid);
 };
 
-#endif // GTPYWIZARDSETTINGS_H
+#endif // GTPYWIZARDGEOMETRIES_H

@@ -7,8 +7,8 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPYWIZARDSETTINGSITEM_H
-#define GTPYWIZARDSETTINGSITEM_H
+#ifndef GTPYWIZARDGEOMETRIESITEM_H
+#define GTPYWIZARDGEOMETRIESITEM_H
 
 #include <QHash>
 #include <QVariant>
@@ -51,4 +51,4 @@ private:
     QHash<QString, QVariant> m_settings;
 };
 
-#endif // GTPYWIZARDSETTINGSITEM_H
+#endif // GTPYWIZARDGEOMETRIESITEM_H

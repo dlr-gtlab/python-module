@@ -16,7 +16,7 @@
 #include "gt_calculator.h"
 
 #include "gtpy_contextmanager.h"
-#include "gtpy_editorpreferences.h"
+#include "gtpy_editorsettings.h"
 
 class QSplitter;
 class QTabWidget;
@@ -254,18 +254,18 @@ private:
     virtual void setComponentName(const QString& name) = 0;
 
     /**
-     * @brief In this pure virtual function a new preferences instance must be
+     * @brief In this pure virtual function a new settings instance must be
      * created and returned.
-     * @return A new preferences instance.
+     * @return A new settings instance.
      */
-    virtual GtpyEditorPreferences* createPreferences() = 0;
+    virtual GtpyEditorSettings* createSettings() = 0;
 
     /**
-     * @brief In this pure virtual function the preferences defined in the
+     * @brief In this pure virtual function the settings defined in the
      * given pointer pref must be passed to the process component.
-     * @param pref Current editor preferences.
+     * @param pref Current editor settings.
      */
-    virtual void savePreferences(GtpyEditorPreferences* pref) = 0;
+    virtual void saveSettings(GtpyEditorSettings* pref) = 0;
 
     /**
      * @brief Enables of disables the save button.
@@ -368,7 +368,7 @@ private:
     /// Editor Tab Widget
     QTabWidget* m_tabWidget;
 
-    GtpyEditorPreferences* m_editorPreferences;
+    GtpyEditorSettings* m_editorSettings;
 
     /// Package Names
     QStringList m_packageNames;
@@ -402,7 +402,7 @@ private slots:
     /**
      * @brief Displays a dialog for defining the editor settings.
      */
-    void onPreferencesButton();
+    void onSettingsButton();
 
     /**
      * @brief Sets text to search widget.

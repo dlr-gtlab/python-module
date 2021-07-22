@@ -7,12 +7,12 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPYPREFERENCESPAGE_H
-#define GTPYPREFERENCESPAGE_H
+#ifndef GTPYABSTRACTSETTINGSPAGE_H
+#define GTPYABSTRACTSETTINGSPAGE_H
 
 #include <QWidget>
 
-#include <gtpy_editorpreferences.h>
+#include <gtpy_editorsettings.h>
 
 class QLabel;
 class QVBoxLayout;
@@ -20,7 +20,7 @@ class QVBoxLayout;
 /**
  * @brief The GtpyAbstractPreferencesPage class
  */
-class GtpyAbstractPreferencesPage : public QWidget
+class GtpyAbstractSettingsPage : public QWidget
 {
 public:
     /**
@@ -28,7 +28,7 @@ public:
      * be passed to the given pointer pref.
      * @param pref Pointer to the object containing all editor preferences.
      */
-    virtual void savePreferences(GtpyEditorPreferences* pref) = 0;
+    virtual void savePreferences(GtpyEditorSettings* pref) = 0;
 
     /**
      * @brief In this pure virtual function the current preferences must be
@@ -41,14 +41,14 @@ public:
      * @param pref Pointer to the object containing the current editor
      * preferences.
      */
-    virtual void loadPreferences(GtpyEditorPreferences* pref) = 0;
+    virtual void loadPreferences(GtpyEditorSettings* pref) = 0;
 
 protected:
     /**
      * @brief GtpyAbstractPreferencesPage
      * @param parent
      */
-    GtpyAbstractPreferencesPage(QWidget* parent = NULL);
+    GtpyAbstractSettingsPage(QWidget* parent = NULL);
 
     /**
      * @brief Sets the title of the page to the given id.
@@ -70,4 +70,4 @@ private:
     QVBoxLayout* m_layout;
 };
 
-#endif // GTPYPREFERENCESPAGE_H
+#endif // GTPYABSTRACTSETTINGSPAGE_H

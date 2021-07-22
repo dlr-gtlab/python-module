@@ -127,14 +127,36 @@ GtpyScriptCalculatorWizardPage::setComponentName(const QString& name)
     }
 }
 
-GtpyEditorPreferences*
-GtpyScriptCalculatorWizardPage::createPreferences()
+GtpyEditorSettings*
+GtpyScriptCalculatorWizardPage::createSettings()
 {
-    return Q_NULLPTR;
+    GtpyEditorSettings* pref = Q_NULLPTR;
+
+    //    if (m_calc != Q_NULLPTR)
+    //    {
+    //        pref = new GtpyEditorSettings(this);
+
+    //        if (m_calc->tabSize() <= 0)
+    //        {
+    //            pref->setTabSize(4);
+    //        }
+    //        else
+    //        {
+    //            pref->setTabSize(m_calc->tabSize());
+    //        }
+
+    //        pref->setReplaceTabBySpace(m_calc->replaceTabBySpaces());
+    //    }
+
+    return pref;
 }
 
 void
-GtpyScriptCalculatorWizardPage::savePreferences(GtpyEditorPreferences* pref)
+GtpyScriptCalculatorWizardPage::saveSettings(GtpyEditorSettings* pref)
 {
-
+    //    if (pref != Q_NULLPTR && m_calc != Q_NULLPTR)
+    //    {
+    //        m_calc->setTabSize(pref->tabSize());
+    //        m_calc->setReplaceTabBySpaces(pref->replaceTabbySpace());
+    //    }
 }

@@ -7,19 +7,24 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPYEDITORPREFERENCES_H
-#define GTPYEDITORPREFERENCES_H
+#ifndef GTPYEDITORSETTINGS_H
+#define GTPYEDITORSETTINGS_H
 
 #include "gt_object.h"
 
-class GtpyEditorPreferences : public GtObject
+/**
+ * @brief The GtpyEditorSettings class
+ */
+class GtpyEditorSettings : public GtObject
 {
     Q_OBJECT
 
 public:
-    GtpyEditorPreferences(QObject* parent = Q_NULLPTR);
-
-    ~GtpyEditorPreferences();
+    /**
+     * @brief GtpyEditorSettings
+     * @param parent
+     */
+    GtpyEditorSettings(QObject* parent = Q_NULLPTR);
 
     bool replaceTabbySpace() const;
     void setReplaceTabBySpace(bool replaceTabbySpace);
@@ -34,4 +39,4 @@ private:
     int m_tabSize;
 };
 
-#endif // GTPYEDITORPREFERENCES_H
+#endif // GTPYEDITORSETTINGS_H

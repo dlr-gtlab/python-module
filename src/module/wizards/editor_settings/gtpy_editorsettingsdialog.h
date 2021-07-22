@@ -7,12 +7,12 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPYWIZARDPREFERENCES_H
-#define GTPYWIZARDPREFERENCES_H
+#ifndef GTPYEDITORSETTINGSDIALOG_H
+#define GTPYEDITORSETTINGSDIALOG_H
 
 #include <QDialog>
 
-#include "gtpy_editorpreferences.h"
+#include "gtpy_editorsettings.h"
 
 class QListWidgetItem;
 class QListWidget;
@@ -21,16 +21,16 @@ class QStackedWidget;
 /**
  * @brief The GtpyPreferencesDialog class
  */
-class GtpyPreferencesDialog : public QDialog
+class GtpyEditorSettingsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
     /**
-     * @brief GtpyPreferencesDialog
+     * @brief GtpyEditorSettingsDialog
      * @param preferences
      */
-    GtpyPreferencesDialog(GtpyEditorPreferences* preferences);
+    GtpyEditorSettingsDialog(GtpyEditorSettings* preferences);
 
 private:
     /**
@@ -50,7 +50,7 @@ private:
     QStackedWidget* m_pagesWidget;
 
     /// Preferences
-    GtpyEditorPreferences* m_preferences;
+    GtpyEditorSettings* m_preferences;
 
 private slots:
     /**
@@ -59,4 +59,4 @@ private slots:
     void saveChanges();
 };
 
-#endif // GTPYWIZARDPREFERENCES_H
+#endif // GTPYEDITORSETTINGSDIALOG_H

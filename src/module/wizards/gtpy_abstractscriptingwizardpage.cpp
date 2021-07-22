@@ -29,7 +29,7 @@
 #include "gtpy_console.h"
 #include "gtpy_scriptrunnable.h"
 #include "gtpy_wizardgeometries.h"
-#include "gtpy_preferencesdialog.h"
+#include "gtpy_editorsettingsdialog.h"
 
 // GTlab framework includes
 #include "gt_object.h"
@@ -60,7 +60,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     m_runnable(Q_NULLPTR),
     m_savingEnabled(true),
     m_componentUuid(QString()),
-    m_editorPreferences(Q_NULLPTR)
+    m_editorSettings(Q_NULLPTR)
 {
     setTitle(tr("Python Script Editor"));
 
@@ -244,23 +244,23 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     toolBarLayout->addLayout(exportButtonLay);
 
-    //Preferences Button
-    QLabel* shortCutPreferences = new QLabel("<font color='grey'></font>");
-    QFont fontSettings = shortCutPreferences->font();
+    //Settings Button
+    QLabel* shortCutSettings = new QLabel("<font color='grey'></font>");
+    QFont fontSettings = shortCutSettings->font();
     fontSettings.setItalic(true);
     fontSettings.setPointSize(7);
-    shortCutPreferences->setFont(fontSettings);
+    shortCutSettings->setFont(fontSettings);
 
-    QPushButton* preferencesButton = new QPushButton;
-    preferencesButton->setIcon(gtApp->icon("configIcon.png"));
-    preferencesButton->setToolTip(tr("Editor preferences"));
+    QPushButton* settingsButton = new QPushButton;
+    settingsButton->setIcon(gtApp->icon("configIcon.png"));
+    settingsButton->setToolTip(tr("Editor settings"));
 
-    QVBoxLayout* preferencesButtonLay = new QVBoxLayout;
+    QVBoxLayout* settingsButtonLay = new QVBoxLayout;
 
-    preferencesButtonLay->addWidget(preferencesButton);
-    preferencesButtonLay->addWidget(shortCutPreferences);
+    settingsButtonLay->addWidget(settingsButton);
+    settingsButtonLay->addWidget(shortCutSettings);
 
-    toolBarLayout->addLayout(preferencesButtonLay);
+    toolBarLayout->addLayout(settingsButtonLay);
 
     splitter->setCollapsible(splitter->indexOf(m_editorSplitter), false);
     splitter->setCollapsible(splitter->indexOf(m_separator), false);
@@ -299,8 +299,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
             SLOT(onEvalButtonClicked()));
     connect(importButton, SIGNAL(clicked(bool)), this, SLOT(onImportScript()));
     connect(exportButton, SIGNAL(clicked(bool)), this, SLOT(onExportScript()));
-    connect(preferencesButton, SIGNAL(clicked(bool)), this,
-            SLOT(onPreferencesButton()));
+    connect(settingsButton, SIGNAL(clicked(bool)), this,
+            SLOT(onSettingsButton()));
 }
 
 GtpyAbstractScriptingWizardPage::~GtpyAbstractScriptingWizardPage()
@@ -325,7 +325,7 @@ GtpyAbstractScriptingWizardPage::initializePage()
 
     m_componentUuid = componentUuid();
 
-    m_editorPreferences = createPreferences();
+    m_editorSettings = createSettings();
 
     reloadWizardGeometry();
 
@@ -1017,27 +1017,27 @@ GtpyAbstractScriptingWizardPage::onExportScript()
 }
 
 void
-GtpyAbstractScriptingWizardPage::onPreferencesButton()
+GtpyAbstractScriptingWizardPage::onSettingsButton()
 {
-    GtpyPreferencesDialog* dialog = new GtpyPreferencesDialog(
-        m_editorPreferences);
-    dialog->setWindowTitle("Editor preferences");
+    GtpyEditorSettingsDialog* dialog = new GtpyEditorSettingsDialog(
+        m_editorSettings);
+    dialog->setWindowTitle("Editor settings");
 
     if (dialog->exec())
     {
         qDebug() << "exec ture";
 
-        savePreferences(m_editorPreferences);
+        saveSettings(m_editorSettings);
     }
     else
     {
         qDebug() << "exec false";
     }
 
-    if (m_editorPreferences)
+    if (m_editorSettings)
     {
-        qDebug() << "tab == " << m_editorPreferences->tabSize();
-        qDebug() << "replace == " << m_editorPreferences->replaceTabbySpace();
+        qDebug() << "tab == " << m_editorSettings->tabSize();
+        qDebug() << "replace == " << m_editorSettings->replaceTabbySpace();
     }
     else
     {

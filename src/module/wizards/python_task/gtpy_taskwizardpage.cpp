@@ -188,7 +188,7 @@ GtpyTaskWizardPage::initialization()
 
     setPackageNames(m_task->packageNames());
 
-    createPreferences();
+    createSettings();
 
     connect(m_calcModel, SIGNAL(processComponentRenamed(
                                     QString, QString, QString)), this,
@@ -275,29 +275,34 @@ GtpyTaskWizardPage::setComponentName(const QString& name)
     }
 }
 
-GtpyEditorPreferences*
-GtpyTaskWizardPage::createPreferences()
+GtpyEditorSettings*
+GtpyTaskWizardPage::createSettings()
 {
-    GtpyEditorPreferences* pref = new GtpyEditorPreferences(this);
+    GtpyEditorSettings* pref = Q_NULLPTR;
 
-    if (m_task->tabSize() <= 0)
+    if (m_task != Q_NULLPTR)
     {
-        pref->setTabSize(4);
-    }
-    else
-    {
-        pref->setTabSize(m_task->tabSize());
-    }
+        pref = new GtpyEditorSettings(this);
 
-    pref->setReplaceTabBySpace(m_task->replaceTabBySpaces());
+        if (m_task->tabSize() <= 0)
+        {
+            pref->setTabSize(4);
+        }
+        else
+        {
+            pref->setTabSize(m_task->tabSize());
+        }
+
+        pref->setReplaceTabBySpace(m_task->replaceTabBySpaces());
+    }
 
     return pref;
 }
 
 void
-GtpyTaskWizardPage::savePreferences(GtpyEditorPreferences* pref)
+GtpyTaskWizardPage::saveSettings(GtpyEditorSettings* pref)
 {
-    if (pref != Q_NULLPTR)
+    if (pref != Q_NULLPTR && m_task != Q_NULLPTR)
     {
         m_task->setTabSize(pref->tabSize());
         m_task->setReplaceTabBySpaces(pref->replaceTabbySpace());

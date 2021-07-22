@@ -12,9 +12,10 @@
 #include <QFont>
 #include <QDebug>
 
-#include "gtpy_abstractpreferencespage.h"
+#include "gtpy_abstractsettingspage.h"
 
-GtpyAbstractPreferencesPage::GtpyAbstractPreferencesPage(QWidget* parent) : QWidget(parent)
+GtpyAbstractSettingsPage::GtpyAbstractSettingsPage(QWidget* parent) : QWidget(
+        parent)
 {
     m_layout = new QVBoxLayout;
     m_title = new QLabel("Preferences Page");
@@ -30,13 +31,13 @@ GtpyAbstractPreferencesPage::GtpyAbstractPreferencesPage(QWidget* parent) : QWid
 }
 
 void
-GtpyAbstractPreferencesPage::setTitle(const QString& id)
+GtpyAbstractSettingsPage::setTitle(const QString& id)
 {
     m_title->setText(id);
 }
 
 void
-GtpyAbstractPreferencesPage::addStretch(int val)
+GtpyAbstractSettingsPage::addStretch(int val)
 {
     m_layout->addStretch(val);
 }

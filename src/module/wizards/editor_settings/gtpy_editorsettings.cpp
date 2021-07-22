@@ -7,38 +7,35 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include "gtpy_editorpreferences.h"
+#include "gtpy_editorsettings.h"
 
-GtpyEditorPreferences::GtpyEditorPreferences(QObject* parent)
+GtpyEditorSettings::GtpyEditorSettings(QObject* parent) :
+    m_tabSize(0),
+    m_replaceTabbySpace(false)
 {
     setParent(parent);
 }
 
-GtpyEditorPreferences::~GtpyEditorPreferences()
-{
-
-}
-
 bool
-GtpyEditorPreferences::replaceTabbySpace() const
+GtpyEditorSettings::replaceTabbySpace() const
 {
     return m_replaceTabbySpace;
 }
 
 void
-GtpyEditorPreferences::setReplaceTabBySpace(bool replaceTabbySpace)
+GtpyEditorSettings::setReplaceTabBySpace(bool replaceTabbySpace)
 {
     m_replaceTabbySpace = replaceTabbySpace;
 }
 
 int
-GtpyEditorPreferences::tabSize() const
+GtpyEditorSettings::tabSize() const
 {
     return m_tabSize;
 }
 
 void
-GtpyEditorPreferences::setTabSize(int tabSize)
+GtpyEditorSettings::setTabSize(int tabSize)
 {
     m_tabSize = tabSize;
 }

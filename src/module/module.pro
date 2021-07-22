@@ -50,8 +50,8 @@ INCLUDEPATH += .\
     wizards \
     wizards/script_calculator \
     wizrads/python_task \
-    wizards/wizard_preferences \
-    wizards/wizard_preferences/pages \
+    wizards/editor_settings \
+    wizards/editor_settings/pages \
     models \
     widgets
 
@@ -97,10 +97,10 @@ HEADERS += \
     utilities/pythonextensions/gtpy_createhelperfunction.h \
     utilities/pythonextensions/gtpy_importfunction.h \
     utilities/pythonextensions/gtpy_propertysetter.h \
-    wizards/wizard_preferences/gtpy_editorpreferences.h \
-    wizards/wizard_preferences/gtpy_preferencesdialog.h \
-    wizards/wizard_preferences/pages/gtpy_abstractpreferencespage.h \
-    wizards/wizard_preferences/pages/gtpy_generalpage.h
+    wizards/editor_settings/gtpy_editorsettings.h \
+    wizards/editor_settings/gtpy_editorsettingsdialog.h \
+    wizards/editor_settings/pages/gtpy_abstractsettingspage.h \
+    wizards/editor_settings/pages/gtpy_generalpage.h
 
 SOURCES += \
     gt_python.cpp \
@@ -141,10 +141,10 @@ SOURCES += \
     utilities/pythonextensions/gtpy_createhelperfunction.cpp \
     utilities/pythonextensions/gtpy_importfunction.cpp \
     utilities/pythonextensions/gtpy_propertysetter.cpp \
-    wizards/wizard_preferences/gtpy_editorpreferences.cpp \
-    wizards/wizard_preferences/gtpy_preferencesdialog.cpp \
-    wizards/wizard_preferences/pages/gtpy_abstractpreferencespage.cpp \
-    wizards/wizard_preferences/pages/gtpy_generalpage.cpp
+    wizards/editor_settings/gtpy_editorsettings.cpp \
+    wizards/editor_settings/gtpy_editorsettingsdialog.cpp \
+    wizards/editor_settings/pages/gtpy_abstractsettingspage.cpp \
+    wizards/editor_settings/pages/gtpy_generalpage.cpp
 
 
 

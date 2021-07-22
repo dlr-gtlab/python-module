@@ -73,7 +73,16 @@ public:
     bool replaceTabBySpaces() const;
     void setReplaceTabBySpaces(bool replaceTabBySpaces);
 
+    /**
+     * @brief tabSize
+     * @return
+     */
     int tabSize() const;
+
+    /**
+     * @brief setTabSize
+     * @param tabSize
+     */
     void setTabSize(int tabSize);
 
 protected:
@@ -94,8 +103,10 @@ private:
     /// Script.
     GtStringProperty m_script;
 
+    /// Replace Tab By Spaces.
     GtBoolProperty m_replaceTabBySpaces;
 
+    /// Tab size.
     GtIntProperty m_tabSize;
 
     /// Calculator definitions
