@@ -65,7 +65,7 @@ GtpyGeneralPage::loadSettings(GtpyEditorSettings* pref)
     if (pref != Q_NULLPTR)
     {
         m_tabSize->setValue(pref->tabSize());
-        m_replaceBySpaces->setChecked(pref->replaceTabbySpace());
+        m_replaceBySpaces->setChecked(pref->replaceTabBySpace());
     }
     else
     {

@@ -157,6 +157,6 @@ GtpyScriptCalculatorWizardPage::saveSettings(GtpyEditorSettings* pref)
     if (pref != Q_NULLPTR && m_calc != Q_NULLPTR)
     {
         m_calc->setTabSize(pref->tabSize());
-        m_calc->setReplaceTabBySpaces(pref->replaceTabbySpace());
+        m_calc->setReplaceTabBySpaces(pref->replaceTabBySpace());
     }
 }

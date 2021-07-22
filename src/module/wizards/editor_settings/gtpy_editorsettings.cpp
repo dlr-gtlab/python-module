@@ -11,21 +11,21 @@
 
 GtpyEditorSettings::GtpyEditorSettings(QObject* parent) :
     m_tabSize(0),
-    m_replaceTabbySpace(false)
+    m_replaceTabBySpaces(false)
 {
     setParent(parent);
 }
 
 bool
-GtpyEditorSettings::replaceTabbySpace() const
+GtpyEditorSettings::replaceTabBySpace() const
 {
-    return m_replaceTabbySpace;
+    return m_replaceTabBySpaces;
 }
 
 void
-GtpyEditorSettings::setReplaceTabBySpace(bool replaceTabbySpace)
+GtpyEditorSettings::setReplaceTabBySpace(bool replaceTabBySpaces)
 {
-    m_replaceTabbySpace = replaceTabbySpace;
+    m_replaceTabBySpaces = replaceTabBySpaces;
 }
 
 int

@@ -305,7 +305,7 @@ GtpyTaskWizardPage::saveSettings(GtpyEditorSettings* pref)
     if (pref != Q_NULLPTR && m_task != Q_NULLPTR)
     {
         m_task->setTabSize(pref->tabSize());
-        m_task->setReplaceTabBySpaces(pref->replaceTabbySpace());
+        m_task->setReplaceTabBySpaces(pref->replaceTabBySpace());
     }
 }
 
