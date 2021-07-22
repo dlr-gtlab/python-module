@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpywizardpreferences.h
+ * Source File: gtpy_editorsettingsdialog.h
  * copyright 2009-2019 by DLR
  *
  *  Created on: 19.07.2021
@@ -19,7 +19,7 @@ class QListWidget;
 class QStackedWidget;
 
 /**
- * @brief The GtpyPreferencesDialog class
+ * @brief The GtpyEditorSettingsDialog class
  */
 class GtpyEditorSettingsDialog : public QDialog
 {
@@ -28,9 +28,9 @@ class GtpyEditorSettingsDialog : public QDialog
 public:
     /**
      * @brief GtpyEditorSettingsDialog
-     * @param preferences
+     * @param settings
      */
-    GtpyEditorSettingsDialog(GtpyEditorSettings* preferences);
+    explicit GtpyEditorSettingsDialog(GtpyEditorSettings* settings);
 
 private:
     /**
@@ -49,12 +49,12 @@ private:
     /// Pages Widget
     QStackedWidget* m_pagesWidget;
 
-    /// Preferences
-    GtpyEditorSettings* m_preferences;
+    /// Settings
+    GtpyEditorSettings* m_settings;
 
 private slots:
     /**
-     * @brief Saves all currently defined preferences.
+     * @brief Saves all currently defined settings.
      */
     void saveChanges();
 };

@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_editorpreferences.cpp
+ * Source File: gtpy_editorsettings.cpp
  * copyright 2009-2019 by DLR
  *
  *  Created on: 19.07.2021

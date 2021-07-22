@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_preferenceseditor.h
+ * Source File: gtpy_generalpage.h
  * copyright 2009-2019 by DLR
  *
  *  Created on: 19.07.2021
@@ -7,8 +7,8 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPYPREFERENCESEDITOR_H
-#define GTPYPREFERENCESEDITOR_H
+#ifndef GTPYGENERALPAGE_H
+#define GTPYGENERALPAGE_H
 
 #include "gtpy_abstractsettingspage.h"
 
@@ -29,17 +29,17 @@ public:
     GtpyGeneralPage();
 
     /**
-     * @brief Passes the user defined preferences to the given pointer pref.
-     * @param pref Pointer to the object containing all editor preferences.
+     * @brief Passes the user defined settings to the given pointer pref.
+     * @param pref Pointer to the object containing all editor settings.
      */
-    void savePreferences(GtpyEditorSettings* pref) Q_DECL_OVERRIDE;
+    void saveSettings(GtpyEditorSettings* pref) Q_DECL_OVERRIDE;
 
 private:
     /**
-     * @brief Reads the current preferences from the given pointer pref and
+     * @brief Reads the current settings from the given pointer pref and
      * loads them into the user interface.
      */
-    void loadPreferences(GtpyEditorSettings* pref) Q_DECL_OVERRIDE;
+    void loadSettings(GtpyEditorSettings* pref) Q_DECL_OVERRIDE;
 
     /// Tab Size
     QSpinBox* m_tabSize;
@@ -48,4 +48,4 @@ private:
     QCheckBox* m_replaceBySpaces;
 };
 
-#endif // GTPYPREFERENCESEDITOR_H
+#endif // GTPYGENERALPAGE_H

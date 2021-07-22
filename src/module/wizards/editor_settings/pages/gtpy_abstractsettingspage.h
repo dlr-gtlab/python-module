@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_preferencespage.h
+ * Source File: gtpy_abstractsettingspage.h
  * copyright 2009-2019 by DLR
  *
  *  Created on: 19.07.2021
@@ -18,37 +18,37 @@ class QLabel;
 class QVBoxLayout;
 
 /**
- * @brief The GtpyAbstractPreferencesPage class
+ * @brief The GtpyAbstractSettingsPage class
  */
 class GtpyAbstractSettingsPage : public QWidget
 {
 public:
     /**
-     * @brief In this pure virtual function the user defined preferences must
+     * @brief In this pure virtual function the user defined settings must
      * be passed to the given pointer pref.
-     * @param pref Pointer to the object containing all editor preferences.
+     * @param pref Pointer to the object containing all editor settings.
      */
-    virtual void savePreferences(GtpyEditorSettings* pref) = 0;
+    virtual void saveSettings(GtpyEditorSettings* pref) = 0;
 
     /**
-     * @brief In this pure virtual function the current preferences must be
+     * @brief In this pure virtual function the current settings must be
      * read from the given pointer pref and loaded into the user interface.
      */
 
     /**
-     * @brief In this pure virtual function the current preferences must be
+     * @brief In this pure virtual function the current settings must be
      * read from the given pointer pref and loaded it into the user interface.
      * @param pref Pointer to the object containing the current editor
-     * preferences.
+     * settings.
      */
-    virtual void loadPreferences(GtpyEditorSettings* pref) = 0;
+    virtual void loadSettings(GtpyEditorSettings* pref) = 0;
 
 protected:
     /**
-     * @brief GtpyAbstractPreferencesPage
+     * @brief GtpyAbstractSettingsPage
      * @param parent
      */
-    GtpyAbstractSettingsPage(QWidget* parent = NULL);
+    explicit GtpyAbstractSettingsPage(QWidget* parent = NULL);
 
     /**
      * @brief Sets the title of the page to the given id.
@@ -63,10 +63,10 @@ protected:
     void addStretch(int val = 1);
 
 private:
-    /// Label for preferences page title
+    /// Label for settings page title
     QLabel* m_title;
 
-    /// Main layout for preferences page
+    /// Main layout for settings page
     QVBoxLayout* m_layout;
 };
 

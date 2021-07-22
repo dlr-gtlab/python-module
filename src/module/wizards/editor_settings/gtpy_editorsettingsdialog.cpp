@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpywizardpreferences.cpp
+ * Source File: gtpy_editorsettingsdialog.cpp
  * copyright 2009-2019 by DLR
  *
  *  Created on: 19.07.2021
@@ -20,8 +20,8 @@
 #include "gtpy_editorsettingsdialog.h"
 
 GtpyEditorSettingsDialog::GtpyEditorSettingsDialog(GtpyEditorSettings*
-        preferences)
-    : m_preferences(preferences)
+        settings)
+    : m_settings(settings)
 {
     Qt::WindowFlags flags = windowFlags();
     flags = flags & (~Qt::WindowContextHelpButtonHint);
@@ -84,7 +84,7 @@ GtpyEditorSettingsDialog::createIcons()
     configButton->setText(tr("Editor"));
     configButton->setTextAlignment(Qt::AlignHCenter);
     configButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-    configButton->setWhatsThis(tr("Editor Preferences"));
+    configButton->setWhatsThis(tr("Editor Settings"));
     configButton->setSizeHint(QSize(100, 50));
 }
 
@@ -100,7 +100,7 @@ GtpyEditorSettingsDialog::loadSettings()
 
         if (page != NULL)
         {
-            page->loadPreferences(m_preferences);
+            page->loadSettings(m_settings);
         }
     }
 }
@@ -117,7 +117,7 @@ GtpyEditorSettingsDialog::saveChanges()
 
         if (page != NULL)
         {
-            page->savePreferences(m_preferences);
+            page->saveSettings(m_settings);
         }
     }
 

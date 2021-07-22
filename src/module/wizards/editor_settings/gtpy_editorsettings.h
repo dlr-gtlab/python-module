@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_editorpreferences.h
+ * Source File: gtpy_editorsettings.h
  * copyright 2009-2019 by DLR
  *
  *  Created on: 19.07.2021
@@ -24,7 +24,7 @@ public:
      * @brief GtpyEditorSettings
      * @param parent
      */
-    GtpyEditorSettings(QObject* parent = Q_NULLPTR);
+    explicit GtpyEditorSettings(QObject* parent = Q_NULLPTR);
 
     bool replaceTabbySpace() const;
     void setReplaceTabBySpace(bool replaceTabbySpace);

@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_preferenceseditor.cpp
+ * Source File: gtpy_generalpage.cpp
  * copyright 2009-2019 by DLR
  *
  *  Created on: 19.07.2021
@@ -50,7 +50,7 @@ GtpyGeneralPage::GtpyGeneralPage()
 }
 
 void
-GtpyGeneralPage::savePreferences(GtpyEditorSettings* pref)
+GtpyGeneralPage::saveSettings(GtpyEditorSettings* pref)
 {
     if (pref != Q_NULLPTR)
     {
@@ -60,7 +60,7 @@ GtpyGeneralPage::savePreferences(GtpyEditorSettings* pref)
 }
 
 void
-GtpyGeneralPage::loadPreferences(GtpyEditorSettings* pref)
+GtpyGeneralPage::loadSettings(GtpyEditorSettings* pref)
 {
     if (pref != Q_NULLPTR)
     {

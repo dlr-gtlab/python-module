@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_preferencespage.cpp
+ * Source File: gtpy_abstractsettingspage.cpp
  * copyright 2009-2019 by DLR
  *
  *  Created on: 19.07.2021
@@ -18,7 +18,7 @@ GtpyAbstractSettingsPage::GtpyAbstractSettingsPage(QWidget* parent) : QWidget(
         parent)
 {
     m_layout = new QVBoxLayout;
-    m_title = new QLabel("Preferences Page");
+    m_title = new QLabel("Settings Page");
 
     QFont font = m_title->font();
     font.setBold(true);
