@@ -31,6 +31,9 @@ GtpyScriptCalculator::GtpyScriptCalculator() :
     registerProperty(m_replaceTabBySpaces);
     registerProperty(m_tabSize);
 
+    m_tabSize = 4;
+    m_replaceTabBySpaces = true;
+
     m_script.hide();
     m_replaceTabBySpaces.hide();
     m_tabSize.hide();

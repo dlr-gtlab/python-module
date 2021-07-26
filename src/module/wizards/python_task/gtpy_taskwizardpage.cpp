@@ -287,13 +287,13 @@ GtpyTaskWizardPage::createSettings()
         if (m_task->tabSize() <= 0)
         {
             pref->setTabSize(4);
+            pref->setReplaceTabBySpace(false);
         }
         else
         {
             pref->setTabSize(m_task->tabSize());
+            pref->setReplaceTabBySpace(m_task->replaceTabBySpaces());
         }
-
-        pref->setReplaceTabBySpace(m_task->replaceTabBySpaces());
     }
 
     return pref;

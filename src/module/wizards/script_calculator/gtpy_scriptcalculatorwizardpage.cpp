@@ -139,13 +139,13 @@ GtpyScriptCalculatorWizardPage::createSettings()
         if (m_calc->tabSize() <= 0)
         {
             pref->setTabSize(4);
+            pref->setReplaceTabBySpace(false);
         }
         else
         {
             pref->setTabSize(m_calc->tabSize());
+            pref->setReplaceTabBySpace(m_calc->replaceTabBySpaces());
         }
-
-        pref->setReplaceTabBySpace(m_calc->replaceTabBySpaces());
     }
 
     return pref;
