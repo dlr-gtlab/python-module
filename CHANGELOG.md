@@ -6,11 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     
 
 ## [Unreleased]
+### Fixed
+ - Bug Fix: The correct indentation is used in the automatically generated Python code. #142
+ 
 ### Changed
  - The objects name of the Python process components are used as wizard title. #140
  - The wizards provide a settings dialog. #141
  - It is possible to define the tab size and to replace tabs with spaces. #141
- - The correct indentation is used in the automatically generated Python code. #142
 
 ## [1.0.6] - 2021-07-08
 ### Fixed
