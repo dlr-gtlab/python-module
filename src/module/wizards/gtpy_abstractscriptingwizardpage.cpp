@@ -480,7 +480,7 @@ GtpyAbstractScriptingWizardPage::editorText()
 void
 GtpyAbstractScriptingWizardPage::replaceCalcPyCode(const QString& header,
         const QString& caption,
-        const QString& pyCode)
+        QString pyCode)
 {
     QTextCursor cursor = m_editor->textCursor();
 
@@ -493,6 +493,11 @@ GtpyAbstractScriptingWizardPage::replaceCalcPyCode(const QString& header,
     if (cursor.position() > -1)
     {
         cursor.movePosition(QTextCursor::Down);
+        cursor.movePosition(QTextCursor::StartOfLine);
+
+        cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+        QString firstLine = cursor.selectedText();
+
         cursor.movePosition(QTextCursor::StartOfLine);
 
         int startPos = cursor.position();
@@ -508,6 +513,14 @@ GtpyAbstractScriptingWizardPage::replaceCalcPyCode(const QString& header,
 
             cursor.setPosition(startPos);
             cursor.setPosition(endPos, QTextCursor::KeepAnchor);
+
+            QString indent = indentation(firstLine);
+
+            if (!indent.isEmpty())
+            {
+                pyCode.prepend(indent);
+                pyCode.replace("\n", "\n" + indent);
+            }
 
             cursor.insertText(pyCode);
         }
@@ -571,12 +584,51 @@ GtpyAbstractScriptingWizardPage::setConsoleVisible(bool visible)
     }
 }
 
+QString
+GtpyAbstractScriptingWizardPage::indentation(const QString& codeLine) const
+{
+    QString indent;
+    QRegExp spacesRegExp("^ +\t*");
+    QRegExp tabRegExp("^\t+ *");
+    QRegExp regExp;
+
+    if (codeLine.contains(spacesRegExp))
+    {
+        regExp = spacesRegExp;
+    }
+    else if (codeLine.contains(tabRegExp))
+    {
+        regExp = tabRegExp;
+    }
+
+    int pos = regExp.indexIn(codeLine);
+
+    if (pos > -1)
+    {
+        indent = regExp.cap(0);
+    }
+
+    return indent;
+}
+
 void
-GtpyAbstractScriptingWizardPage::insertToCurrentCursorPos(const QString& text)
+GtpyAbstractScriptingWizardPage::insertToCurrentCursorPos(QString text)
 {
     if (m_editor == Q_NULLPTR)
     {
         return;
+    }
+
+    QTextCursor cur = m_editor->textCursor();
+    cur.clearSelection();
+    cur.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+    QString selection = cur.selectedText();
+
+    QString indent = indentation(selection);
+
+    if (!indent.isEmpty())
+    {
+        text.replace("\n", "\n" + indent);
     }
 
     m_editor->insertToCurrentCursorPos(text);
@@ -1027,25 +1079,9 @@ GtpyAbstractScriptingWizardPage::onSettingsButton()
 
     if (dialog->exec())
     {
-        qDebug() << "exec ture";
-
         saveSettings(m_editorSettings);
         m_editor->setTabSize(m_editorSettings->tabSize());
         m_editor->replaceTabsBySpaces(m_editorSettings->replaceTabBySpace());
-    }
-    else
-    {
-        qDebug() << "exec false";
-    }
-
-    if (m_editorSettings)
-    {
-        qDebug() << "tab == " << m_editorSettings->tabSize();
-        qDebug() << "replace == " << m_editorSettings->replaceTabBySpace();
-    }
-    else
-    {
-        qDebug() << "nope!!!";
     }
 }
 
