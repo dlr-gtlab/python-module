@@ -22,6 +22,8 @@ class QVBoxLayout;
  */
 class GtpyAbstractSettingsPage : public QWidget
 {
+    Q_OBJECT
+
 public:
     /**
      * @brief In this pure virtual function the user defined settings must
