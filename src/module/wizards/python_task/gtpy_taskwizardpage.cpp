@@ -496,7 +496,7 @@ GtpyTaskWizardPage::insertConstructor(GtCalculator* calc)
     pyCode += ("#" + GtpyTaskWizardPage::ARROW_LEFT + caption +
                GtpyTaskWizardPage::ARROW_RIGHT + "\n");
 
-    insertToCurrentCursorPos(pyCode + "\n");
+    insertToCurrentCursorPos(pyCode);
 
     evalScript(pyCode, false);
     showEvalButton(false);

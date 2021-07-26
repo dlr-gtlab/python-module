@@ -115,7 +115,7 @@ protected:
      * @param pyCode Calculator setting.
      */
     void replaceCalcPyCode(const QString& header, const QString& caption,
-                           const QString& pyCode);
+                           QString pyCode);
 
     /**
      * @brief Replaces old header and old caption of a block with given new
@@ -159,10 +159,17 @@ protected:
     void setConsoleVisible(bool visible = true);
 
     /**
+     * @brief Returens the indentation of the given codeLine.
+     * @param codeLine The line of code whose indentation should be returned.
+     * @return The indentation of the given codeLine.
+     */
+    QString indentation(const QString& codeLine) const;
+
+    /**
      * @brief Inserts text at current cursor position of editor widget.
      * @param text Text that should be set to editor.
      */
-    void insertToCurrentCursorPos(const QString& text);
+    void insertToCurrentCursorPos(QString text);
 
     /**
      * @brief Set the list of package names.
