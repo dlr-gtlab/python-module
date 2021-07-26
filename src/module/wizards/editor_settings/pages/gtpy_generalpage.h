@@ -26,7 +26,7 @@ public:
     /**
      * @brief GtpyGeneralPage
      */
-    GtpyGeneralPage();
+    explicit GtpyGeneralPage(QWidget* parent = NULL);
 
     /**
      * @brief Passes the user defined settings to the given pointer pref.

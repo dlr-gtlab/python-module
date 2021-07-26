@@ -14,7 +14,8 @@
 
 #include "gtpy_generalpage.h"
 
-GtpyGeneralPage::GtpyGeneralPage()
+GtpyGeneralPage::GtpyGeneralPage(QWidget* parent) :
+    GtpyAbstractSettingsPage(parent)
 {
     setTitle(tr("Editor"));
 
