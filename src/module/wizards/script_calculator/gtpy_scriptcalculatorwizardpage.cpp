@@ -126,3 +126,37 @@ GtpyScriptCalculatorWizardPage::setComponentName(const QString& name)
         m_calc->setObjectName(name);
     }
 }
+
+GtpyEditorSettings*
+GtpyScriptCalculatorWizardPage::createSettings()
+{
+    GtpyEditorSettings* pref = Q_NULLPTR;
+
+    if (m_calc != Q_NULLPTR)
+    {
+        pref = new GtpyEditorSettings(this);
+
+        if (m_calc->tabSize() <= 0)
+        {
+            pref->setTabSize(4);
+            pref->setReplaceTabBySpace(false);
+        }
+        else
+        {
+            pref->setTabSize(m_calc->tabSize());
+            pref->setReplaceTabBySpace(m_calc->replaceTabBySpaces());
+        }
+    }
+
+    return pref;
+}
+
+void
+GtpyScriptCalculatorWizardPage::saveSettings(GtpyEditorSettings* pref)
+{
+    if (pref != Q_NULLPTR && m_calc != Q_NULLPTR)
+    {
+        m_calc->setTabSize(pref->tabSize());
+        m_calc->setReplaceTabBySpaces(pref->replaceTabBySpace());
+    }
+}

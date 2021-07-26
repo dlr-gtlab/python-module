@@ -188,6 +188,8 @@ GtpyTaskWizardPage::initialization()
 
     setPackageNames(m_task->packageNames());
 
+    createSettings();
+
     connect(m_calcModel, SIGNAL(processComponentRenamed(
                                     QString, QString, QString)), this,
             SLOT(onProcessComponentRenamed(QString, QString, QString)));
@@ -219,6 +221,92 @@ GtpyTaskWizardPage::validation()
     provider()->setComponentData(m_task->toMemento());
 
     return true;
+}
+
+void
+GtpyTaskWizardPage::saveScript()
+{
+    if (m_task == Q_NULLPTR)
+    {
+        return;
+    }
+
+    m_task->setScript(editorText());
+
+    GtObjectMemento memento = m_task->toMemento();
+
+    if (memento.isNull())
+    {
+        return;
+    }
+
+    GtObject* obj = gtDataModel->objectByUuid(m_task->uuid());
+
+    if (GtTask* task = qobject_cast<GtTask*>(obj))
+    {
+        GtCommand command =
+            gtApp->startCommand(gtApp->currentProject(),
+                                task->objectName() +
+                                tr(" configuration changed"));
+        task->fromMemento(memento);
+        gtApp->endCommand(command);
+    }
+}
+
+QString
+GtpyTaskWizardPage::componentUuid() const
+{
+    QString uuid;
+
+    if (m_task != Q_NULLPTR)
+    {
+        uuid = m_task->uuid();
+    }
+
+    return uuid;
+}
+
+void
+GtpyTaskWizardPage::setComponentName(const QString& name)
+{
+    if (m_task != Q_NULLPTR)
+    {
+        m_task->setObjectName(name);
+    }
+}
+
+GtpyEditorSettings*
+GtpyTaskWizardPage::createSettings()
+{
+    GtpyEditorSettings* pref = Q_NULLPTR;
+
+    if (m_task != Q_NULLPTR)
+    {
+        pref = new GtpyEditorSettings(this);
+
+        if (m_task->tabSize() <= 0)
+        {
+            pref->setTabSize(4);
+            pref->setReplaceTabBySpace(false);
+        }
+        else
+        {
+            pref->setTabSize(m_task->tabSize());
+            pref->setReplaceTabBySpace(m_task->replaceTabBySpaces());
+        }
+    }
+
+    return pref;
+}
+
+void
+GtpyTaskWizardPage::saveSettings(GtpyEditorSettings* pref)
+{
+    if (pref != Q_NULLPTR && m_task != Q_NULLPTR)
+    {
+        m_task->setTabSize(pref->tabSize());
+        m_task->setReplaceTabBySpaces(pref->replaceTabBySpace());
+    }
 }
 
 QModelIndex
@@ -823,56 +911,4 @@ GtpyTaskWizardPage::onCalculatorDropReceived(GtCalculator* calc)
     insertConstructor(calc);
 
     delete calc;
-}
-
-void
-GtpyTaskWizardPage::saveScript()
-{
-    if (m_task == Q_NULLPTR)
-    {
-        return;
-    }
-
-    m_task->setScript(editorText());
-
-    GtObjectMemento memento = m_task->toMemento();
-
-    if (memento.isNull())
-    {
-        return;
-    }
-
-    GtObject* obj = gtDataModel->objectByUuid(m_task->uuid());
-
-    if (GtTask* task = qobject_cast<GtTask*>(obj))
-    {
-        GtCommand command =
-            gtApp->startCommand(gtApp->currentProject(),
-                                task->objectName() +
-                                tr(" configuration changed"));
-        task->fromMemento(memento);
-        gtApp->endCommand(command);
-    }
-}
-
-QString
-GtpyTaskWizardPage::componentUuid() const
-{
-    QString uuid;
-
-    if (m_task != Q_NULLPTR)
-    {
-        uuid = m_task->uuid();
-    }
-
-    return uuid;
-}
-
-void
-GtpyTaskWizardPage::setComponentName(const QString& name)
-{
-    if (m_task != Q_NULLPTR)
-    {
-        m_task->setObjectName(name);
-    }
 }

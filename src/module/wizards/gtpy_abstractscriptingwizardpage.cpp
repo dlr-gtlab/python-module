@@ -28,7 +28,8 @@
 #include "gtpy_scripteditor.h"
 #include "gtpy_console.h"
 #include "gtpy_scriptrunnable.h"
-#include "gtpy_wizardsettings.h"
+#include "gtpy_wizardgeometries.h"
+#include "gtpy_editorsettingsdialog.h"
 
 // GTlab framework includes
 #include "gt_object.h"
@@ -58,9 +59,12 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     m_isEvaluating(false),
     m_runnable(Q_NULLPTR),
     m_savingEnabled(true),
-    m_componentUuid(QString())
+    m_componentUuid(QString()),
+    m_editorSettings(Q_NULLPTR)
 {
     setTitle(tr("Python Script Editor"));
+
+
 
     m_contextId = GtpyContextManager::instance()->createNewContext(type);
 
@@ -240,6 +244,24 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     toolBarLayout->addLayout(exportButtonLay);
 
+    //Settings Button
+    QLabel* shortCutSettings = new QLabel("<font color='grey'></font>");
+    QFont fontSettings = shortCutSettings->font();
+    fontSettings.setItalic(true);
+    fontSettings.setPointSize(7);
+    shortCutSettings->setFont(fontSettings);
+
+    QPushButton* settingsButton = new QPushButton;
+    settingsButton->setIcon(gtApp->icon("configIcon.png"));
+    settingsButton->setToolTip(tr("Editor settings"));
+
+    QVBoxLayout* settingsButtonLay = new QVBoxLayout;
+
+    settingsButtonLay->addWidget(settingsButton);
+    settingsButtonLay->addWidget(shortCutSettings);
+
+    toolBarLayout->addLayout(settingsButtonLay);
+
     splitter->setCollapsible(splitter->indexOf(m_editorSplitter), false);
     splitter->setCollapsible(splitter->indexOf(m_separator), false);
 
@@ -277,6 +299,8 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
             SLOT(onEvalButtonClicked()));
     connect(importButton, SIGNAL(clicked(bool)), this, SLOT(onImportScript()));
     connect(exportButton, SIGNAL(clicked(bool)), this, SLOT(onExportScript()));
+    connect(settingsButton, SIGNAL(clicked(bool)), this,
+            SLOT(onSettingsButton()));
 }
 
 GtpyAbstractScriptingWizardPage::~GtpyAbstractScriptingWizardPage()
@@ -300,6 +324,10 @@ GtpyAbstractScriptingWizardPage::initializePage()
     initialization();
 
     m_componentUuid = componentUuid();
+
+    m_editorSettings = createSettings();
+    m_editor->setTabSize(m_editorSettings->tabSize());
+    m_editor->replaceTabsBySpaces(m_editorSettings->replaceTabBySpace());
 
     reloadWizardGeometry();
 
@@ -799,16 +827,16 @@ GtpyAbstractScriptingWizardPage::registerGeometry()
 
             QRect rect = wiz->frameGeometry();
 
-            GtpyWizardSettings::instance()->registerGeometry(m_componentUuid,
+            GtpyWizardGeometries::instance()->registerGeometry(m_componentUuid,
                     rect);
 
             int cursorPos = m_editor->cursorPosition();
-            GtpyWizardSettings::instance()->registerCursorPos(m_componentUuid,
+            GtpyWizardGeometries::instance()->registerCursorPos(m_componentUuid,
                     cursorPos);
 
             int vSliderPos = m_editor->verticalSliderPos();
 
-            GtpyWizardSettings::instance()->registerVSliderPos(m_componentUuid,
+            GtpyWizardGeometries::instance()->registerVSliderPos(m_componentUuid,
                     vSliderPos);
         }
     }
@@ -827,7 +855,7 @@ GtpyAbstractScriptingWizardPage::reloadWizardGeometry()
             return;
         }
 
-        QRect rect = GtpyWizardSettings::instance()->lastGeometry(
+        QRect rect = GtpyWizardGeometries::instance()->lastGeometry(
                          m_componentUuid);
 
         if (!rect.isNull())
@@ -835,12 +863,12 @@ GtpyAbstractScriptingWizardPage::reloadWizardGeometry()
             wiz->setGeometry(rect);
         }
 
-        int cursorPos = GtpyWizardSettings::instance()->lastCursorPos(
+        int cursorPos = GtpyWizardGeometries::instance()->lastCursorPos(
                             m_componentUuid);
 
         m_editor->setCursorPosition(cursorPos);
 
-        int vSliderPos = GtpyWizardSettings::instance()->lastVSliderPos(
+        int vSliderPos = GtpyWizardGeometries::instance()->lastVSliderPos(
                              m_componentUuid);
 
         m_editor->setVerticalSliderPos(vSliderPos);
@@ -987,6 +1015,37 @@ GtpyAbstractScriptingWizardPage::onExportScript()
         QTextStream stream(&file);
         stream << m_editor->script();
         file.close();
+    }
+}
+
+void
+GtpyAbstractScriptingWizardPage::onSettingsButton()
+{
+    GtpyEditorSettingsDialog* dialog = new GtpyEditorSettingsDialog(
+        m_editorSettings);
+    dialog->setWindowTitle("Editor settings");
+
+    if (dialog->exec())
+    {
+        qDebug() << "exec ture";
+
+        saveSettings(m_editorSettings);
+        m_editor->setTabSize(m_editorSettings->tabSize());
+        m_editor->replaceTabsBySpaces(m_editorSettings->replaceTabBySpace());
+    }
+    else
+    {
+        qDebug() << "exec false";
+    }
+
+    if (m_editorSettings)
+    {
+        qDebug() << "tab == " << m_editorSettings->tabSize();
+        qDebug() << "replace == " << m_editorSettings->replaceTabBySpace();
+    }
+    else
+    {
+        qDebug() << "nope!!!";
     }
 }
 

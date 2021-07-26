@@ -14,64 +14,64 @@
 #include "gt_processcomponent.h"
 #include "gt_processdata.h"
 
-#include "gtpy_wizardsettings.h"
+#include "gtpy_wizardgeometries.h"
 
-GtpyWizardSettings::GtpyWizardSettings(QObject* parent) : QObject(parent)
+GtpyWizardGeometries::GtpyWizardGeometries(QObject* parent) : QObject(parent)
 {
 
 }
 
-GtpyWizardSettings*
-GtpyWizardSettings::instance()
+GtpyWizardGeometries*
+GtpyWizardGeometries::instance()
 {
-    static GtpyWizardSettings* retval = Q_NULLPTR;
+    static GtpyWizardGeometries* retval = Q_NULLPTR;
 
     if (retval == Q_NULLPTR)
     {
-        retval = new GtpyWizardSettings(gtApp);
+        retval = new GtpyWizardGeometries(gtApp);
     }
 
     return retval;
 }
 
 void
-GtpyWizardSettings::registerGeometry(const QString& uuid, const QRect& pos)
+GtpyWizardGeometries::registerGeometry(const QString& uuid, const QRect& pos)
 {
     m_lastGeometry.registerValue(uuid, pos);
 }
 
 QRect
-GtpyWizardSettings::lastGeometry(const QString& uuid)
+GtpyWizardGeometries::lastGeometry(const QString& uuid)
 {
     return m_lastGeometry.value(uuid).toRect();
 }
 
 void
-GtpyWizardSettings::registerCursorPos(const QString& uuid, int pos)
+GtpyWizardGeometries::registerCursorPos(const QString& uuid, int pos)
 {
     m_lastCursorPos.registerValue(uuid, pos);
 }
 
 int
-GtpyWizardSettings::lastCursorPos(const QString& uuid)
+GtpyWizardGeometries::lastCursorPos(const QString& uuid)
 {
     return m_lastCursorPos.value(uuid).toInt();
 }
 
 void
-GtpyWizardSettings::registerVSliderPos(const QString& uuid, int pos)
+GtpyWizardGeometries::registerVSliderPos(const QString& uuid, int pos)
 {
     m_lastVSlidPos.registerValue(uuid, pos);
 }
 
 int
-GtpyWizardSettings::lastVSliderPos(const QString& uuid)
+GtpyWizardGeometries::lastVSliderPos(const QString& uuid)
 {
     return m_lastVSlidPos.value(uuid).toInt();
 }
 
 void
-GtpyWizardSettings::remove(const QString& uuid)
+GtpyWizardGeometries::remove(const QString& uuid)
 {
     m_lastGeometry.remove(uuid);
     m_lastCursorPos.remove(uuid);
@@ -79,7 +79,7 @@ GtpyWizardSettings::remove(const QString& uuid)
 }
 
 void
-GtpyWizardSettings::processElementDeleted(const QString& uuid)
+GtpyWizardGeometries::processElementDeleted(const QString& uuid)
 {
     remove(uuid);
 }

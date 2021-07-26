@@ -15,15 +15,28 @@
 #include "gt_processdata.h"
 
 #include "gtpy_contextmanager.h"
-#include "gtpy_wizardsettings.h"
+#include "gtpy_wizardgeometries.h"
 
 #include "gtpy_scriptcalculator.h"
 
 GtpyScriptCalculator::GtpyScriptCalculator() :
     m_script("script", "Script"),
+    m_replaceTabBySpaces("replaceTab", "Replace tab by spaces"),
+    m_tabSize("tabSize", "Tab size"),
     m_pyThreadId(-1)
 {
     setObjectName("Python Script Editor");
+
+    registerProperty(m_script);
+    registerProperty(m_replaceTabBySpaces);
+    registerProperty(m_tabSize);
+
+    m_tabSize = 4;
+    m_replaceTabBySpaces = true;
+
+    m_script.hide();
+    m_replaceTabBySpaces.hide();
+    m_tabSize.hide();
 
     foreach (const QString& modId, getModuleIds())
     {
@@ -45,14 +58,11 @@ GtpyScriptCalculator::GtpyScriptCalculator() :
         }
     }
 
-    registerProperty(m_script);
-    m_script.hide();
-
     connect(this, SIGNAL(stateChanged(GtProcessComponent::STATE)), this,
             SLOT(onStateChanged(GtProcessComponent::STATE)));
 
     connect(this, SIGNAL(deletedFromDatamodel(QString)),
-            GtpyWizardSettings::instance(),
+            GtpyWizardGeometries::instance(),
             SLOT(processElementDeleted(QString)));
 }
 
@@ -146,6 +156,31 @@ GtpyScriptCalculator::packageNames()
 
     return list;
 }
+
+bool
+GtpyScriptCalculator::replaceTabBySpaces() const
+{
+    return m_replaceTabBySpaces;
+}
+
+void
+GtpyScriptCalculator::setReplaceTabBySpaces(bool replaceTabBySpaces)
+{
+    m_replaceTabBySpaces = replaceTabBySpaces;
+}
+
+int
+GtpyScriptCalculator::tabSize() const
+{
+    return m_tabSize;
+}
+
+void
+GtpyScriptCalculator::setTabSize(int tabSize)
+{
+    m_tabSize = tabSize;
+}
+
 
 QStringList
 GtpyScriptCalculator::getModuleIds()

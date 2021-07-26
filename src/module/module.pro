@@ -50,6 +50,8 @@ INCLUDEPATH += .\
     wizards \
     wizards/script_calculator \
     wizrads/python_task \
+    wizards/editor_settings \
+    wizards/editor_settings/pages \
     models \
     widgets
 
@@ -71,8 +73,8 @@ HEADERS += \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_completer.h \
     models/gtpy_completermodel.h \
-    wizards/gtpy_wizardsettings.h \
-    wizards/gtpy_wizardsettingsitem.h \
+    wizards/gtpy_wizardgeometries.h \
+    wizards/gtpy_wizardgeometryitem.h \
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.h \
     widgets/gtpy_console.h \
     tasks/gtpy_task.h \
@@ -94,7 +96,11 @@ HEADERS += \
     utilities/pythonextensions/gtpy_extendedwrapper.h \
     utilities/pythonextensions/gtpy_createhelperfunction.h \
     utilities/pythonextensions/gtpy_importfunction.h \
-    utilities/pythonextensions/gtpy_propertysetter.h
+    utilities/pythonextensions/gtpy_propertysetter.h \
+    wizards/editor_settings/gtpy_editorsettings.h \
+    wizards/editor_settings/gtpy_editorsettingsdialog.h \
+    wizards/editor_settings/pages/gtpy_abstractsettingspage.h \
+    wizards/editor_settings/pages/gtpy_generalpage.h
 
 SOURCES += \
     gt_python.cpp \
@@ -112,8 +118,8 @@ SOURCES += \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_completer.cpp \
     models/gtpy_completermodel.cpp \
-    wizards/gtpy_wizardsettings.cpp \
-    wizards/gtpy_wizardsettingsitem.cpp \
+    wizards/gtpy_wizardgeometries.cpp \
+    wizards/gtpy_wizardgeometryitem.cpp \
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.cpp \
     widgets/gtpy_console.cpp \
     tasks/gtpy_task.cpp \
@@ -134,7 +140,11 @@ SOURCES += \
     utilities/pythonextensions/gtpy_extendedwrapper.cpp \
     utilities/pythonextensions/gtpy_createhelperfunction.cpp \
     utilities/pythonextensions/gtpy_importfunction.cpp \
-    utilities/pythonextensions/gtpy_propertysetter.cpp
+    utilities/pythonextensions/gtpy_propertysetter.cpp \
+    wizards/editor_settings/gtpy_editorsettings.cpp \
+    wizards/editor_settings/gtpy_editorsettingsdialog.cpp \
+    wizards/editor_settings/pages/gtpy_abstractsettingspage.cpp \
+    wizards/editor_settings/pages/gtpy_generalpage.cpp
 
 
 

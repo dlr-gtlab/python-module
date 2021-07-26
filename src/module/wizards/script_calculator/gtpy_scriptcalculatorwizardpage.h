@@ -38,10 +38,6 @@ private:
      */
     virtual bool validation() Q_DECL_OVERRIDE;
 
-    /// Calculator
-    QPointer<GtpyScriptCalculator> m_calc;
-
-private slots:
     /**
      * @brief Saves the script into the calculator instance.
      */
@@ -59,6 +55,23 @@ private slots:
      * @param name New name of the process component m_calc
      */
     virtual void setComponentName(const QString& name) Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Creates a new settings instance containing the current defined
+     * settings and returns it.
+     * @return A new settings instace containing the current settings.
+     */
+    virtual GtpyEditorSettings* createSettings() Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Passes the settings defined in the given pointer pref to the
+     * task.
+     * @param pref Current editor settings.
+     */
+    virtual void saveSettings(GtpyEditorSettings* pref) Q_DECL_OVERRIDE;
+
+    /// Calculator
+    QPointer<GtpyScriptCalculator> m_calc;
 };
 
 

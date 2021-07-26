@@ -55,6 +55,38 @@ private:
     virtual bool validation() Q_DECL_OVERRIDE;
 
     /**
+     * @brief Saves the script into the task instance.
+     */
+    virtual void saveScript() Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Returns the uuid of the restored GtpyScriptCalculator.
+     * @return uuid of the restored GtpyScriptCalculator
+     */
+    virtual QString componentUuid() const Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Sets the object name of the process component m_task to the
+     * given name.
+     * @param name New name of the process component m_task
+     */
+    virtual void setComponentName(const QString& name) Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Creates a new settings instance containing the current defined
+     * settings and returns it.
+     * @return A new settings instace containing the current settings.
+     */
+    virtual GtpyEditorSettings* createSettings() Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Passes the settings defined in the given pointer pref to the
+     * task.
+     * @param pref Current editor settings.
+     */
+    virtual void saveSettings(GtpyEditorSettings* pref) Q_DECL_OVERRIDE;
+
+    /**
      * @brief mapToSource
      * @param index
      * @return
@@ -170,23 +202,5 @@ private slots:
      * @param calc Dropped calculator.
      */
     void onCalculatorDropReceived(GtCalculator* calc);
-
-    /**
-     * @brief Saves the script into the task instance.
-     */
-    virtual void saveScript() Q_DECL_OVERRIDE;
-
-    /**
-     * @brief Returns the uuid of the restored GtpyScriptCalculator.
-     * @return uuid of the restored GtpyScriptCalculator
-     */
-    virtual QString componentUuid() const Q_DECL_OVERRIDE;
-
-    /**
-     * @brief Sets the object name of the process component m_task to the
-     * given name.
-     * @param name New name of the process component m_task
-     */
-    virtual void setComponentName(const QString& name) Q_DECL_OVERRIDE;
 };
 #endif // GTPY_TASKWIZARDPAGE_H

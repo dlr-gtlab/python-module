@@ -7,27 +7,27 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include "gtpy_wizardsettingsitem.h"
+#include "gtpy_wizardgeometryitem.h"
 
-GtpyWizardSettingsItem::GtpyWizardSettingsItem()
+GtpyWizardGeometryItem::GtpyWizardGeometryItem()
 {
 
 }
 
 void
-GtpyWizardSettingsItem::registerValue(const QString& key, const QVariant& value)
+GtpyWizardGeometryItem::registerValue(const QString& key, const QVariant& value)
 {
     m_settings.insert(key, value);
 }
 
 QVariant
-GtpyWizardSettingsItem::value(const QString& key)
+GtpyWizardGeometryItem::value(const QString& key)
 {
     return m_settings.value(key, QVariant());
 }
 
 void
-GtpyWizardSettingsItem::remove(const QString& key)
+GtpyWizardGeometryItem::remove(const QString& key)
 {
     m_settings.remove(key);
 }

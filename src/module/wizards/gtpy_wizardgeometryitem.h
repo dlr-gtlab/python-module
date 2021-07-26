@@ -7,24 +7,24 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPYWIZARDSETTINGSITEM_H
-#define GTPYWIZARDSETTINGSITEM_H
+#ifndef GTPYWIZARDGEOMETRIESITEM_H
+#define GTPYWIZARDGEOMETRIESITEM_H
 
 #include <QHash>
 #include <QVariant>
 
 /**
- * @brief The GtpyWizardSettingsItem class
+ * @brief The GtpyWizardGeometryItem class
  */
-class GtpyWizardSettingsItem
+class GtpyWizardGeometryItem
 {
-    friend class GtpyWizardSettings;
+    friend class GtpyWizardGeometries;
 
 protected:
     /**
-     * @brief GtpyWizardSettingsItem
+     * @brief GtpyWizardGeometryItem
      */
-    GtpyWizardSettingsItem();
+    GtpyWizardGeometryItem();
 
     /**
      * @brief Register a key value pair to the settings.
@@ -51,4 +51,4 @@ private:
     QHash<QString, QVariant> m_settings;
 };
 
-#endif // GTPYWIZARDSETTINGSITEM_H
+#endif // GTPYWIZARDGEOMETRIESITEM_H

@@ -16,17 +16,18 @@
 #include "gt_calculator.h"
 
 #include "gtpy_contextmanager.h"
+#include "gtpy_editorsettings.h"
 
+class QSplitter;
+class QTabWidget;
+class QLabel;
+class GtObject;
+class GtSearchWidget;
+class GtAbstractProperty;
+class GtProcessComponent;
 class GtpyScriptEditor;
 class GtpyConsole;
 class GtpyScriptRunnable;
-class GtSearchWidget;
-class QSplitter;
-class QTabWidget;
-class GtObject;
-class GtAbstractProperty;
-class GtProcessComponent;
-class QLabel;
 
 /**
  * @brief The GtpyAbstractScriptingWizardPage class
@@ -42,6 +43,9 @@ public:
      */
     GtpyAbstractScriptingWizardPage(GtpyContextManager::Context type);
 
+    /**
+     * @brief ~GtpyAbstractScriptingWizardPage
+     */
     virtual ~GtpyAbstractScriptingWizardPage();
 
     /**
@@ -242,7 +246,26 @@ private:
      */
     virtual QString componentUuid() const = 0;
 
+    /**
+     * @brief In this pure virtual function the object name of the process
+     * component must be set to the given name.
+     * @param name New name of the process component
+     */
     virtual void setComponentName(const QString& name) = 0;
+
+    /**
+     * @brief In this pure virtual function a new settings instance must be
+     * created and returned.
+     * @return A new settings instance.
+     */
+    virtual GtpyEditorSettings* createSettings() = 0;
+
+    /**
+     * @brief In this pure virtual function the settings defined in the
+     * given pointer pref must be passed to the process component.
+     * @param pref Current editor settings.
+     */
+    virtual void saveSettings(GtpyEditorSettings* pref) = 0;
 
     /**
      * @brief Enables of disables the save button.
@@ -336,6 +359,7 @@ private:
     /// Python Editor
     GtpyScriptEditor* m_editor;
 
+    /// Editor Splitter
     QSplitter* m_editorSplitter;
 
     /// Separator Widget
@@ -343,6 +367,8 @@ private:
 
     /// Editor Tab Widget
     QTabWidget* m_tabWidget;
+
+    GtpyEditorSettings* m_editorSettings;
 
     /// Package Names
     QStringList m_packageNames;
@@ -372,6 +398,11 @@ private slots:
      *  to export the current script to.
      */
     void onExportScript();
+
+    /**
+     * @brief Displays a dialog for defining the editor settings.
+     */
+    void onSettingsButton();
 
     /**
      * @brief Sets text to search widget.
