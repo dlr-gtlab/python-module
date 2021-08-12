@@ -239,7 +239,7 @@ GtPythonModule::postPlots()
 QIcon
 GtPythonModule::collectionIcon() const
 {
-    return gtApp->icon(QStringLiteral("scriptIcon.png"));
+    return gtApp->icon(QStringLiteral("pythonIcon_16.png"));
 }
 
 QString

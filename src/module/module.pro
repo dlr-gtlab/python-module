@@ -43,6 +43,7 @@ CONFIG(debug, debug|release){
 
 INCLUDEPATH += .\
     calculators \
+    collection \
     tasks \
     post \
     utilities \
@@ -60,7 +61,8 @@ DESTDIR = $${BUILD_DEST}
 HEADERS += \
     gt_python.h \
     calculators/gtpy_scriptcalculator.h \
-    gtpy_scriptcollectionsettings.h \
+    collection/gtpy_scriptcollectionsettings.h \
+    collection/gtpy_collectionwidget.h \
     post/gtpy_pythonplotconfigdialog.h \
     post/gtpy_pythonplotdata.h \
     post/gtpy_pythonplotitem.h \
@@ -106,7 +108,8 @@ HEADERS += \
 SOURCES += \
     gt_python.cpp \
     calculators/gtpy_scriptcalculator.cpp \
-    gtpy_scriptcollectionsettings.cpp \
+    collection/gtpy_scriptcollectionsettings.cpp \
+    collection/gtpy_collectionwidget.cpp \
     post/gtpy_pythonplotconfigdialog.cpp \
     post/gtpy_pythonplotdata.cpp \
     post/gtpy_pythonplotitem.cpp \

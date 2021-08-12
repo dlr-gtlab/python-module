@@ -60,7 +60,8 @@ public:
         ScriptEditorContext,
         CalculatorRunContext,
         TaskEditorContext,
-        TaskRunContext
+        TaskRunContext,
+        CollectionContext
     };
 
     /**
@@ -267,6 +268,9 @@ public:
      * @param metaData
      */
     void setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData metaData);
+
+    void addModulePaths(const QStringList& paths);
+    void addModulePath(const QString& path);
 
 protected:
     /**

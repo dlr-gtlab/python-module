@@ -1473,6 +1473,32 @@ GtpyContextManager::setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData
 }
 
 void
+GtpyContextManager::addModulePaths(const QStringList& paths)
+{
+    foreach (QString path, paths)
+    {
+        addModulePath(path);
+    }
+}
+
+void
+GtpyContextManager::addModulePath(const QString& path)
+{
+    GTPY_GIL_SCOPE
+
+    PyObject* pyPath = PySys_GetObject("path");
+
+    if (pyPath)
+    {
+        Py_INCREF(pyPath);
+
+        PyList_Append(pyPath, PythonQtConv::QStringToPyObject(path));
+
+        Py_DECREF(pyPath);
+    }
+}
+
+void
 GtpyContextManager::setMetaDataToThreadDict(int contextId, bool output,
         bool error)
 {
