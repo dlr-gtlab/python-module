@@ -60,6 +60,7 @@ DESTDIR = $${BUILD_DEST}
 HEADERS += \
     gt_python.h \
     calculators/gtpy_scriptcalculator.h \
+    gtpy_scriptcollectionsettings.h \
     post/gtpy_pythonplotconfigdialog.h \
     post/gtpy_pythonplotdata.h \
     post/gtpy_pythonplotitem.h \
@@ -105,6 +106,7 @@ HEADERS += \
 SOURCES += \
     gt_python.cpp \
     calculators/gtpy_scriptcalculator.cpp \
+    gtpy_scriptcollectionsettings.cpp \
     post/gtpy_pythonplotconfigdialog.cpp \
     post/gtpy_pythonplotdata.cpp \
     post/gtpy_pythonplotitem.cpp \
@@ -151,7 +153,7 @@ SOURCES += \
 CONFIG(debug, debug|release){
     # GTLAB CORE
     LIBS += -lGTlabLogging-d -lGTlabDatamodel-d -lGTlabCalculators-d
-    LIBS += -lGTlabCore-d -lGTlabMdi-d
+    LIBS += -lGTlabCore-d -lGTlabMdi-d -lGTlabNetwork-d
 
     # GTLAB MODULES
 
@@ -168,7 +170,7 @@ CONFIG(debug, debug|release){
 } else {
     # GTLAB CORE
     LIBS += -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators
-    LIBS += -lGTlabCore -lGTlabMdi
+    LIBS += -lGTlabCore -lGTlabMdi -lGTlabNetwork
 
     # GTLAB MODULES
 
