@@ -42,6 +42,8 @@ GtpyCollectionWidget::GtpyCollectionWidget(GtLocalCollectionWidget*
 
     GtPyHighlighter* highlighter = new GtPyHighlighter(m_editor->document());
 
+    m_editor->setVisible(false);
+
     Q_UNUSED(highlighter)
 
     ///Splitter
@@ -98,5 +100,7 @@ GtpyCollectionWidget::onItemSelected(const QModelIndex& index)
                 }
             }
         }
+
+        m_editor->setVisible(true);
     }
 }

@@ -245,7 +245,7 @@ GtPythonModule::collectionIcon() const
 QString
 GtPythonModule::collectionId() const
 {
-    return QStringLiteral("Python Script Collection");
+    return GtpyGlobals::COLLECTION_ID;
 }
 
 QMetaObject
