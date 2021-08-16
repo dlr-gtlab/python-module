@@ -13,6 +13,7 @@
 #include <dlfcn.h>
 #endif
 
+#include "QApplication"
 #include <QMetaObject>
 #include <QMetaMethod>
 #include <QMetaEnum>
@@ -609,6 +610,8 @@ GtpyContextManager::initContexts()
     initCalculatorsModule();
 
     initImportBehaviour();
+
+    addCollectionPaths();
 
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
@@ -1308,6 +1311,38 @@ GtpyContextManager::initWrapperModule()
 }
 
 void
+GtpyContextManager::addCollectionPaths()
+{
+    QDir dir(qApp->applicationDirPath());
+
+    if (dir.cdUp())
+    {
+        dir.setPath(dir.absolutePath() + QDir::separator() + "Collections" +
+                    QDir::separator() + GtpyGlobals::COLLECTION_ID);
+
+        m_watcher.addPath(dir.absolutePath());
+        connect(&m_watcher, SIGNAL(directoryChanged(QString)), this,
+                SLOT(collectionChanged(QString)));
+
+        if (dir.exists())
+        {
+            dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+
+            QStringList subdirs = dir.entryList();
+
+            foreach (QString subdir, subdirs)
+            {
+                QString nativePath = QDir::toNativeSeparators(
+                                         dir.absolutePath());
+                nativePath = nativePath + QDir::separator() + subdir;
+
+                addModulePath(nativePath);
+            }
+        }
+    }
+}
+
+void
 GtpyContextManager::enableOutputToAppConsole(int contextId)
 {
     PythonQtObjectPtr con = context(contextId);
@@ -1492,8 +1527,24 @@ GtpyContextManager::addModulePath(const QString& path)
     {
         Py_INCREF(pyPath);
 
-        PyList_Append(pyPath, PythonQtConv::QStringToPyObject(path));
+        PyObject* pathObj = PythonQtConv::QStringToPyObject(path);
+        bool equal = false;
 
+        for (int i = 0; !equal && i < Py_SIZE(pyPath); i++)
+        {
+            PyObject* item = PyList_GetItem(pyPath, i);
+
+            Py_INCREF(item);
+            equal = PyObject_RichCompareBool(item, pathObj, Py_EQ);
+            Py_DECREF(item);
+        }
+
+        if (!equal)
+        {
+            PyList_Append(pyPath, pathObj);
+        }
+
+        Py_DECREF(pathObj);
         Py_DECREF(pyPath);
     }
 }
@@ -2296,6 +2347,23 @@ GtpyContextManager::deleteRunnable()
                    this, &GtpyContextManager::deleteRunnable);
 
         delete runnable;
+    }
+}
+
+void
+GtpyContextManager::collectionChanged(const QString& collectionPath)
+{
+    QDir dir(collectionPath);
+    dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+
+    QStringList subdirs = dir.entryList();
+
+    foreach (QString subdir, subdirs)
+    {
+        QString nativePath = QDir::toNativeSeparators(dir.absolutePath());
+        nativePath = nativePath + QDir::separator() + subdir;
+
+        addModulePath(nativePath);
     }
 }
 
