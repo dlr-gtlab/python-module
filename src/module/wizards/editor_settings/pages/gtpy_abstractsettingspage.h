@@ -26,6 +26,17 @@ class GtpyAbstractSettingsPage : public QWidget
 
 public:
     /**
+     * @brief GtpyAbstractSettingsPage
+     * @param parent
+     */
+    GtpyAbstractSettingsPage(QWidget* parent = NULL);
+
+    /**
+     * @brief ~GtpyAbstractSettingsPage
+     */
+    virtual ~GtpyAbstractSettingsPage();
+
+    /**
      * @brief In this pure virtual function the user defined settings must
      * be passed to the given pointer pref.
      * @param pref Pointer to the object containing all editor settings.
@@ -39,13 +50,6 @@ public:
      * settings.
      */
     virtual void loadSettings(GtpyEditorSettings* pref) = 0;
-
-protected:
-    /**
-     * @brief GtpyAbstractSettingsPage
-     * @param parent
-     */
-    explicit GtpyAbstractSettingsPage(QWidget* parent = NULL);
 
     /**
      * @brief Sets the title of the page to the given id.

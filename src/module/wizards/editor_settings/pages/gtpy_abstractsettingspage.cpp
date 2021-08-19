@@ -30,6 +30,11 @@ GtpyAbstractSettingsPage::GtpyAbstractSettingsPage(QWidget* parent) : QWidget(
     setLayout(m_layout);
 }
 
+GtpyAbstractSettingsPage::~GtpyAbstractSettingsPage()
+{
+
+}
+
 void
 GtpyAbstractSettingsPage::setTitle(const QString& id)
 {
