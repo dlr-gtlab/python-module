@@ -29,7 +29,6 @@ GtpyCollectionWidget::GtpyCollectionWidget(GtLocalCollectionWidget*
     QHBoxLayout* mainLayout = new QHBoxLayout;
 
     ///Editor layout
-    //    QHBoxLayout* editorLayout = new QHBoxLayout;
     m_editor = new GtpyScriptEditor(GtpyContextManager::CollectionContext,
                                     this);
     QTextOption defaultOps = m_editor->document()->defaultTextOption();
@@ -37,7 +36,6 @@ GtpyCollectionWidget::GtpyCollectionWidget(GtLocalCollectionWidget*
                             QTextOption::ShowLineAndParagraphSeparators*/);
 
     m_editor->document()->setDefaultTextOption(defaultOps);
-    //    m_editor->setStyleSheet("QPlainTextEdit {  border: 0px; }");
     m_editor->setReadOnly(true);
 
     GtPyHighlighter* highlighter = new GtPyHighlighter(m_editor->document());
@@ -68,11 +66,6 @@ void
 GtpyCollectionWidget::setItems(const QList<GtCollectionItem>& items)
 {
     m_defaultLocalWidget->setItems(items);
-
-    //    foreach (GtCollectionItem item, items)
-    //    {
-    //        GtpyContextManager::instance()->addModulePath(item.localPath());
-    //    }
 }
 
 void

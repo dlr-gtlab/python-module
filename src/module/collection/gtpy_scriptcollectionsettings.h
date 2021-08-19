@@ -36,9 +36,30 @@ public:
      * @param editor
      * @param items
      */
-    virtual void setLocalCollectionData(QWidget* widget,
-                                        QList<GtCollectionItem> items)
-    Q_DECL_OVERRIDE;
+    virtual void setLocalCollectionData(
+        QWidget* widget,
+        QList<GtCollectionItem> items) Q_DECL_OVERRIDE;
+
+    /**
+     * @brief browseCollectionWidget
+     * @param parent
+     */
+    virtual GtAbstractBrowserWidget* browserWidget(
+        QWidget* parent) Q_DECL_OVERRIDE;
+
+    /**
+     * @brief setBrowserWidgetData
+     * @param widget
+     * @param installedItems
+     * @param availableItems
+     * @param updataAvailableItems
+     */
+    virtual void setBrowserWidgetData(
+        GtAbstractBrowserWidget* widget,
+        QList<GtCollectionNetworkItem> installedItems,
+        QList<GtCollectionNetworkItem> availableItems,
+        QList<GtCollectionNetworkItem> updataAvailableItems) Q_DECL_OVERRIDE;
+
 };
 
 #endif // GTPYSCRIPTCOLLECTIONSETTINGS_H

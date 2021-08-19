@@ -11,6 +11,7 @@
 #include "gt_localcollectionwidget.h"
 
 #include "gtpy_collectionwidget.h"
+#include "gtpy_collectionbrowser.h"
 
 #include "gtpy_scriptcollectionsettings.h"
 
@@ -47,4 +48,27 @@ GtpyScriptCollectionSettings::setLocalCollectionData(QWidget* widget,
     }
 
     localWidget->setItems(items);
+}
+
+GtAbstractBrowserWidget*
+GtpyScriptCollectionSettings::browserWidget(QWidget* parent)
+{
+    return new GtpyCollectionBrowser(parent);
+}
+
+void
+GtpyScriptCollectionSettings::setBrowserWidgetData(
+    GtAbstractBrowserWidget* widget,
+    QList<GtCollectionNetworkItem> installedItems,
+    QList<GtCollectionNetworkItem> availableItems,
+    QList<GtCollectionNetworkItem> updataAvailableItems)
+{
+    GtpyCollectionBrowser* wid = qobject_cast<GtpyCollectionBrowser*>(widget);
+
+    if (wid == Q_NULLPTR)
+    {
+        return;
+    }
+
+    wid->setItems(installedItems, availableItems, updataAvailableItems);
 }

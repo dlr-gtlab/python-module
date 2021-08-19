@@ -10,7 +10,6 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QFont>
-#include <QDebug>
 
 #include "gtpy_abstractsettingspage.h"
 
