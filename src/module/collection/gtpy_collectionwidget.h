@@ -17,11 +17,19 @@ class GtCollectionItem;
 
 class GtpyScriptEditor;
 
+/**
+ * @brief The GtpyCollectionWidget class
+ */
 class GtpyCollectionWidget : public QWidget
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief GtpyCollectionWidget
+     * @param defaultLocalWidget Pointer to default local widget.
+     * @param parent Parent widget.
+     */
     GtpyCollectionWidget(GtLocalCollectionWidget* defaultLocalWidget,
                          QWidget* parent = Q_NULLPTR);
 

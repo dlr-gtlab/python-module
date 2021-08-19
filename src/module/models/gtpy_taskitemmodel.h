@@ -35,7 +35,7 @@ public:
      * @return Column count.
      */
     virtual int columnCount(
-            const QModelIndex& /*parent*/) const Q_DECL_OVERRIDE;
+        const QModelIndex& /*parent*/) const Q_DECL_OVERRIDE;
 
     /**
      * @brief Returns row count.
@@ -43,7 +43,7 @@ public:
      * @return Row count.
      */
     virtual int rowCount(
-            const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
+        const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
 
     /**
      * @brief index Returns index of current row and column.
@@ -52,8 +52,8 @@ public:
      * @param parent Parent object.
      * @return Index of current row and column
      */
-    virtual QModelIndex index(int row, int col,
-                const QModelIndex& parent =QModelIndex()) const Q_DECL_OVERRIDE;
+    virtual QModelIndex index(int row, int col, const QModelIndex& parent =
+                                  QModelIndex()) const Q_DECL_OVERRIDE;
 
     /**
      * @brief Returns parent index of given index.
@@ -69,7 +69,7 @@ public:
      * @return Data of given index.
      */
     virtual QVariant data(const QModelIndex& index,
-                          int role = Qt::DisplayRole ) const Q_DECL_OVERRIDE;
+                          int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
     /**
      * @brief Returns object from index.
@@ -92,9 +92,9 @@ public:
     * @param Data role
     * @return Returns true if successful; otherwise returns false.
     */
-   virtual bool setData(const QModelIndex& index,
-                        const QVariant& value,
-                        int role = Qt::EditRole) Q_DECL_OVERRIDE;
+    virtual bool setData(const QModelIndex& index,
+                         const QVariant& value,
+                         int role = Qt::EditRole) Q_DECL_OVERRIDE;
 
     /**
      * @brief Returns list of mime types.
@@ -113,27 +113,27 @@ public:
     /**
     * @brief Updates view.
     */
-   void updateView();
+    void updateView();
 
 protected:
-   /**
-    * @brief Returns the drop actions supported by this model.
-    * @return Supported drop actions
-    */
-   Qt::DropActions supportedDropActions() const Q_DECL_OVERRIDE;
+    /**
+     * @brief Returns the drop actions supported by this model.
+     * @return Supported drop actions
+     */
+    Qt::DropActions supportedDropActions() const Q_DECL_OVERRIDE;
 
-   /**
-    * @brief Returns the actions supported by the data in this model.
-    * @return Supported drag actions
-    */
-   Qt::DropActions supportedDragActions() const Q_DECL_OVERRIDE;
+    /**
+     * @brief Returns the actions supported by the data in this model.
+     * @return Supported drag actions
+     */
+    Qt::DropActions supportedDragActions() const Q_DECL_OVERRIDE;
 
-   /**
-    * @brief Returns the item flags for the given index.
-    * @param Model index
-    * @return Item Flags
-    */
-   Qt::ItemFlags flags(const QModelIndex& index) const Q_DECL_OVERRIDE;
+    /**
+     * @brief Returns the item flags for the given index.
+     * @param Model index
+     * @return Item Flags
+     */
+    Qt::ItemFlags flags(const QModelIndex& index) const Q_DECL_OVERRIDE;
 
 private:
     /// Root object.

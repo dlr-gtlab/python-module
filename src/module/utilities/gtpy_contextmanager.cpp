@@ -956,7 +956,7 @@ GtpyContextManager::initExtensionModule(QString moduleName,
 {
     GTPY_GIL_SCOPE
 
-    QByteArray name = moduleName.toUtf8();;
+    QByteArray name = moduleName.toUtf8();
     PyObject* myMod = Q_NULLPTR;
 
     myMod = Py_InitModule(name.constData(), methods);
@@ -1471,8 +1471,7 @@ GtpyContextManager::lineOutOfMessage(const QString& message)
 }
 
 void
-GtpyContextManager::setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData
-        metaData)
+GtpyContextManager::setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData mData)
 {
     GTPY_GIL_SCOPE
 
@@ -1486,19 +1485,37 @@ GtpyContextManager::setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData
     Py_INCREF(threadDict);
 
     PyObject* key = PyString_FromString(QSTRING_TO_CHAR_PTR(
-                                            metaData.contextName));
+                                            mData.contextName));
 
     PyDict_SetItemString(threadDict, GtpyGlobals::CONTEXT_KEY, key);
 
     Py_DECREF(key);
 
-    PyObject* outputVal = PyLong_FromLong(metaData.output ? 1 : 0);
+    PyObject* outputVal = Q_NULLPTR;
+
+    if (mData.output)
+    {
+        outputVal = PyLong_FromLong(1);
+    }
+    else
+    {
+        outputVal = PyLong_FromLong(0);
+    }
 
     PyDict_SetItemString(threadDict, GtpyGlobals::OUTPUT_KEY, outputVal);
 
     Py_DECREF(outputVal);
 
-    PyObject* errorVal = PyLong_FromLong(metaData.error ? 1 : 0);
+    PyObject* errorVal = Q_NULLPTR;
+
+    if (mData.error)
+    {
+        errorVal = PyLong_FromLong(1);
+    }
+    else
+    {
+        errorVal = PyLong_FromLong(0);
+    }
 
     PyDict_SetItemString(threadDict, GtpyGlobals::ERROR_KEY, errorVal);
 

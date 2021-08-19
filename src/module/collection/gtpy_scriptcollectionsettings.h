@@ -12,11 +12,17 @@
 
 #include "gt_collectionsettings.h"
 
+/**
+ * @brief The GtpyScriptCollectionSettings class
+ */
 class GtpyScriptCollectionSettings : public GtCollectionSettings
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief GtpyScriptCollectionSettings
+     */
     Q_INVOKABLE GtpyScriptCollectionSettings();
 
     /**
@@ -31,7 +37,8 @@ public:
      * @param items
      */
     virtual void setLocalCollectionData(QWidget* widget,
-                                        QList<GtCollectionItem> items) Q_DECL_OVERRIDE;
+                                        QList<GtCollectionItem> items)
+    Q_DECL_OVERRIDE;
 };
 
 #endif // GTPYSCRIPTCOLLECTIONSETTINGS_H

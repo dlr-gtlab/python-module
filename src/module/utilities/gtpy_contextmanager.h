@@ -268,7 +268,7 @@ public:
      * @brief Sets some meta data to the thread dict.
      * @param metaData
      */
-    void setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData metaData);
+    void setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData mData);
 
     /**
      * @brief Adds a list of paths to the sys.path list.

@@ -15,11 +15,18 @@
 
 #include "gtpy_task.h"
 
+/**
+ * @brief The GtpyTaskStyleModel class
+ */
 class GtpyTaskStyleModel: public QIdentityProxyModel
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief GtpyTaskStyleModel
+     * @param parent Parent object.
+     */
     explicit GtpyTaskStyleModel(QObject* parent = Q_NULLPTR);
 
     /**
