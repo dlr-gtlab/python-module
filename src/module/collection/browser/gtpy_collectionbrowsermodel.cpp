@@ -12,12 +12,22 @@
 
 #include "gt_application.h"
 
+#include "gtpy_collectionitem.h"
+#include "gtpy_collectioncollapsibleitem.h"
+
 #include "gtpy_collectionbrowsermodel.h"
 
 GtpyCollectionBrowserModel::GtpyCollectionBrowserModel(QObject* parent) :
     QAbstractItemModel(parent)
 {
 
+}
+
+GtpyCollectionBrowserModel::~GtpyCollectionBrowserModel()
+{
+    qDeleteAll(m_installedItems);
+    qDeleteAll(m_updateAvailableItems);
+    qDeleteAll(m_availableItems);
 }
 
 int
@@ -130,17 +140,16 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
 
                 if (col == 0)
                 {
-                    return m_updateAvailableItems[row].item().ident();
+                    return m_updateAvailableItems[row]->ident();
                 }
                 else if (col == 2)
                 {
-                    return QString::number(
-                               m_updateAvailableItems[row].item().version());
+                    return m_updateAvailableItems[row]->version();
                 }
                 else if (col == 3)
                 {
-                    return QString::number(
-                               m_updateAvailableItems[row].item().installedVersion());
+                    return
+                        m_updateAvailableItems[row]->installedVersion();
                 }
             }
             else if (role == Qt::DecorationRole)
@@ -163,7 +172,7 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                     return QVariant();
                 }
 
-                if (m_updateAvailableItems[row].isSelected())
+                if (m_updateAvailableItems[row]->isSelected())
                 {
                     return Qt::Checked;
                 }
@@ -189,11 +198,11 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
 
                 if (col == 0)
                 {
-                    return m_availableItems[row].item().ident();
+                    return m_availableItems[row]->ident();
                 }
                 else if (col == 2)
                 {
-                    return QString::number(m_availableItems[row].item().version());
+                    return m_availableItems[row]->version();
                 }
             }
             else if (role == Qt::DecorationRole)
@@ -216,7 +225,7 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                     return QVariant();
                 }
 
-                if (m_availableItems[row].isSelected())
+                if (m_availableItems[row]->isSelected())
                 {
                     return Qt::Checked;
                 }
@@ -242,16 +251,15 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
 
                 if (col == 0)
                 {
-                    return m_installedItems[row].item().ident();
+                    return m_installedItems[row]->ident();
                 }
                 else if (col == 2)
                 {
-                    return QString::number(m_installedItems[row].item().version());
+                    return m_installedItems[row]->version();
                 }
                 else if (col == 3)
                 {
-                    return QString::number(
-                               m_installedItems[row].item().installedVersion());
+                    return m_installedItems[row]->installedVersion();
                 }
             }
             else if (role == Qt::DecorationRole)
@@ -310,11 +318,11 @@ GtpyCollectionBrowserModel::setData(const QModelIndex& index,
 
                 if (state == Qt::Checked)
                 {
-                    m_updateAvailableItems[row].setSelected(true);
+                    m_updateAvailableItems[row]->setSelected(true);
                 }
                 else
                 {
-                    m_updateAvailableItems[row].setSelected(false);
+                    m_updateAvailableItems[row]->setSelected(false);
                 }
 
                 emit dataChanged(index, index);
@@ -340,11 +348,11 @@ GtpyCollectionBrowserModel::setData(const QModelIndex& index,
 
                 if (state == Qt::Checked)
                 {
-                    m_availableItems[row].setSelected(true);
+                    m_availableItems[row]->setSelected(true);
                 }
                 else
                 {
-                    m_availableItems[row].setSelected(false);
+                    m_availableItems[row]->setSelected(false);
                 }
 
                 emit dataChanged(index, index);
@@ -410,17 +418,17 @@ GtpyCollectionBrowserModel::setCollectionData(const
 
     foreach (GtCollectionNetworkItem item, installedItems)
     {
-        m_installedItems << GtpyCollectionBrowserModelItem(item);
+        m_installedItems << new GtpyCollectionItem(item);
     }
 
     foreach (GtCollectionNetworkItem item, availableItems)
     {
-        m_availableItems << GtpyCollectionBrowserModelItem(item);
+        m_availableItems << new GtpyCollectionItem(item);
     }
 
     foreach (GtCollectionNetworkItem item, updataAvailableItems)
     {
-        m_updateAvailableItems << GtpyCollectionBrowserModelItem(item);
+        m_updateAvailableItems << new GtpyCollectionItem(item);
     }
 
     endResetModel();
@@ -560,7 +568,7 @@ GtpyCollectionBrowserModel::itemFromIndex(const QModelIndex& index)
                 return GtCollectionItem();
             }
 
-            return m_updateAvailableItems[row].item();
+            return m_updateAvailableItems[row]->item();
         }
 
         case AvailableItem:
@@ -570,7 +578,7 @@ GtpyCollectionBrowserModel::itemFromIndex(const QModelIndex& index)
                 return GtCollectionItem();
             }
 
-            return m_availableItems[row].item();
+            return m_availableItems[row]->item();
         }
 
         case InstalledItem:
@@ -580,7 +588,7 @@ GtpyCollectionBrowserModel::itemFromIndex(const QModelIndex& index)
                 return GtCollectionItem();
             }
 
-            return m_installedItems[row].item();
+            return m_installedItems[row]->item();
         }
     }
 
@@ -592,19 +600,19 @@ GtpyCollectionBrowserModel::selectedItems()
 {
     QList<GtCollectionNetworkItem> retval;
 
-    foreach (GtpyCollectionBrowserModelItem modelItem, m_updateAvailableItems)
+    foreach (GtpyAbstractCollectionItem* modelItem, m_updateAvailableItems)
     {
-        if (modelItem.isSelected())
+        if (modelItem->isSelected())
         {
-            retval << modelItem.item();
+            retval << modelItem->item();
         }
     }
 
-    foreach (GtpyCollectionBrowserModelItem modelItem, m_availableItems)
+    foreach (GtpyAbstractCollectionItem* modelItem, m_availableItems)
     {
-        if (modelItem.isSelected())
+        if (modelItem->isSelected())
         {
-            retval << modelItem.item();
+            retval << modelItem->item();
         }
     }
 
@@ -616,9 +624,9 @@ GtpyCollectionBrowserModel::itemsToUpdate()
 {
     QList<GtCollectionNetworkItem> retval;
 
-    foreach (GtpyCollectionBrowserModelItem modelItem, m_updateAvailableItems)
+    foreach (GtpyAbstractCollectionItem* modelItem, m_updateAvailableItems)
     {
-        retval << modelItem.item();
+        retval << modelItem->item();
     }
 
     return retval;
@@ -631,12 +639,12 @@ GtpyCollectionBrowserModel::selectAll()
 
     for (int i = 0; i < m_updateAvailableItems.size(); i++)
     {
-        m_updateAvailableItems[i].setSelected(true);
+        m_updateAvailableItems[i]->setSelected(true);
     }
 
     for (int i = 0; i < m_availableItems.size(); i++)
     {
-        m_availableItems[i].setSelected(true);
+        m_availableItems[i]->setSelected(true);
     }
 
     endResetModel();
@@ -649,12 +657,12 @@ GtpyCollectionBrowserModel::unselectAll()
 
     for (int i = 0; i < m_updateAvailableItems.size(); i++)
     {
-        m_updateAvailableItems[i].setSelected(false);
+        m_updateAvailableItems[i]->setSelected(false);
     }
 
     for (int i = 0; i < m_availableItems.size(); i++)
     {
-        m_availableItems[i].setSelected(false);
+        m_availableItems[i]->setSelected(false);
     }
 
     endResetModel();

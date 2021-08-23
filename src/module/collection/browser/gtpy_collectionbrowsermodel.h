@@ -12,7 +12,7 @@
 
 #include <QAbstractItemModel>
 
-#include "gtpy_collectionbrowsermodelitem.h"
+#include "gtpy_abstractcollectionitem.h"
 
 class GtpyCollectionBrowserModel : public QAbstractItemModel
 {
@@ -30,6 +30,8 @@ public:
     };
 
     GtpyCollectionBrowserModel(QObject* parent = Q_NULLPTR);
+
+    ~GtpyCollectionBrowserModel();
 
     /**
      * @brief rowCount
@@ -138,13 +140,13 @@ public:
 
 private:
     // Installed collection items.
-    QList<GtpyCollectionBrowserModelItem> m_installedItems;
+    QList<GtpyAbstractCollectionItem*> m_installedItems;
 
     // Collection items available for installation.
-    QList<GtpyCollectionBrowserModelItem> m_availableItems;
+    QList<GtpyAbstractCollectionItem*> m_availableItems;
 
     // Collection items with update available.
-    QList<GtpyCollectionBrowserModelItem> m_updateAvailableItems;
+    QList<GtpyAbstractCollectionItem*> m_updateAvailableItems;
 
     /**
      * @brief groupTypes
