@@ -16,7 +16,7 @@ GtpyAbstractCollectionItem::GtpyAbstractCollectionItem()
 
 GtpyAbstractCollectionItem::~GtpyAbstractCollectionItem()
 {
-
+    qDeleteAll(m_childItems);
 }
 
 QString
@@ -35,6 +35,23 @@ GtCollectionNetworkItem
 GtpyAbstractCollectionItem::item() const
 {
     return GtCollectionNetworkItem();
+}
+
+int
+GtpyAbstractCollectionItem::childCount() const
+{
+    return m_childItems.count();
+}
+
+GtpyAbstractCollectionItem*
+GtpyAbstractCollectionItem::child(int row)
+{
+    if (row < 0 || row >= m_childItems.size())
+    {
+        return Q_NULLPTR;
+    }
+
+    return m_childItems.at(row);
 }
 
 bool

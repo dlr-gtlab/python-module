@@ -18,9 +18,13 @@
 #include "gtpy_collectionbrowsermodel.h"
 
 GtpyCollectionBrowserModel::GtpyCollectionBrowserModel(QObject* parent) :
-    QAbstractItemModel(parent)
+    QAbstractItemModel(parent), m_installed(Q_NULLPTR), m_available(Q_NULLPTR),
+    m_updateAvailable(Q_NULLPTR)
 {
-
+    //    m_installed = new GtpyCollectionCollapsibleItem(tr("Installed"));
+    //    m_available = new GtpyCollectionCollapsibleItem(tr("Available"));
+    //    m_updateAvailable = new GtpyCollectionCollapsibleItem(
+    //        tr("Update available!"));
 }
 
 GtpyCollectionBrowserModel::~GtpyCollectionBrowserModel()
@@ -28,6 +32,21 @@ GtpyCollectionBrowserModel::~GtpyCollectionBrowserModel()
     qDeleteAll(m_installedItems);
     qDeleteAll(m_updateAvailableItems);
     qDeleteAll(m_availableItems);
+
+    if (m_installed)
+    {
+        delete m_installed;
+    }
+
+    if (m_available)
+    {
+        delete m_available;
+    }
+
+    if (m_updateAvailable)
+    {
+        delete m_updateAvailable;
+    }
 }
 
 int
@@ -416,9 +435,21 @@ GtpyCollectionBrowserModel::setCollectionData(const
     m_availableItems.clear();
     m_updateAvailableItems.clear();
 
+    if (m_installed != Q_NULLPTR)
+    {
+        delete m_installed;
+
+    }
+
+    m_installed = new GtpyCollectionCollapsibleItem(tr("Installed"));
+
     foreach (GtCollectionNetworkItem item, installedItems)
     {
         m_installedItems << new GtpyCollectionItem(item);
+
+        QString cat = item.property("category").toString();
+        m_installed->appendChild(new GtpyCollectionItem(item), QStringList() <<
+                                 cat);
     }
 
     foreach (GtCollectionNetworkItem item, availableItems)
@@ -432,6 +463,8 @@ GtpyCollectionBrowserModel::setCollectionData(const
     }
 
     endResetModel();
+
+    qDebug() << "m_installed == " << m_installed->childCount();
 
     emit selectionChanged();
 }

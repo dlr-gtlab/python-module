@@ -21,6 +21,12 @@ public:
 
     virtual QString ident() const override;
 
+    GtpyCollectionCollapsibleItem* collapsibleChild(const QString& ident);
+
+    void appendChild(GtpyAbstractCollectionItem* item);
+
+    void appendChild(GtpyAbstractCollectionItem* item, QStringList hierarchy);
+
 private:
     QString m_ident;
 };

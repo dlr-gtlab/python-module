@@ -10,6 +10,7 @@
 #ifndef GTPYABSTRACTCOLLECTIONITEM_H
 #define GTPYABSTRACTCOLLECTIONITEM_H
 
+#include <QVector>
 #include <QString>
 
 #include "gt_collectionnetworkitem.h"
@@ -31,6 +32,10 @@ public:
 
     virtual GtCollectionNetworkItem item() const;
 
+    int childCount() const;
+
+    GtpyAbstractCollectionItem* child(int row);
+
     /**
      * @brief isSelected
      * @return
@@ -43,9 +48,14 @@ public:
      */
     void setSelected(bool selected);
 
+protected:
+    QVector<GtpyAbstractCollectionItem*> m_childItems;
+
 private:
     /// Item selected indicator
     bool m_selected;
+
+
 };
 
 #endif // GTPYABSTRACTCOLLECTIONITEM_H

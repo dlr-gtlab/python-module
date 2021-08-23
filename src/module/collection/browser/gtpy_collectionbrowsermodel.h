@@ -13,6 +13,7 @@
 #include <QAbstractItemModel>
 
 #include "gtpy_abstractcollectionitem.h"
+#include "gtpy_collectioncollapsibleitem.h"
 
 class GtpyCollectionBrowserModel : public QAbstractItemModel
 {
@@ -142,11 +143,17 @@ private:
     // Installed collection items.
     QList<GtpyAbstractCollectionItem*> m_installedItems;
 
+    GtpyCollectionCollapsibleItem* m_installed;
+
     // Collection items available for installation.
     QList<GtpyAbstractCollectionItem*> m_availableItems;
 
+    GtpyCollectionCollapsibleItem* m_available;
+
     // Collection items with update available.
     QList<GtpyAbstractCollectionItem*> m_updateAvailableItems;
+
+    GtpyCollectionCollapsibleItem* m_updateAvailable;
 
     /**
      * @brief groupTypes
