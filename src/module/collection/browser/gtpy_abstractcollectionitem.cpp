@@ -9,7 +9,8 @@
 
 #include "gtpy_abstractcollectionitem.h"
 
-GtpyAbstractCollectionItem::GtpyAbstractCollectionItem()
+GtpyAbstractCollectionItem::GtpyAbstractCollectionItem() : m_parentItem(
+        Q_NULLPTR)
 {
 
 }
@@ -17,6 +18,30 @@ GtpyAbstractCollectionItem::GtpyAbstractCollectionItem()
 GtpyAbstractCollectionItem::~GtpyAbstractCollectionItem()
 {
     qDeleteAll(m_childItems);
+}
+
+void
+GtpyAbstractCollectionItem::selectAllChildren()
+{
+    return;
+}
+
+void
+GtpyAbstractCollectionItem::unselectAllChildren()
+{
+    return;
+}
+
+QList<GtCollectionNetworkItem>
+GtpyAbstractCollectionItem::uncollapsibleChilren()
+{
+    return QList<GtCollectionNetworkItem>();
+}
+
+QList<GtCollectionNetworkItem>
+GtpyAbstractCollectionItem::selectedItems()
+{
+    return QList<GtCollectionNetworkItem>();
 }
 
 QString
@@ -54,6 +79,18 @@ GtpyAbstractCollectionItem::child(int row)
     return m_childItems.at(row);
 }
 
+int
+GtpyAbstractCollectionItem::row() const
+{
+    if (m_parentItem)
+    {
+        return m_parentItem->m_childItems.indexOf(
+                   const_cast<GtpyAbstractCollectionItem*>(this));
+    }
+
+    return 0;
+}
+
 bool
 GtpyAbstractCollectionItem::isSelected() const
 {
@@ -64,4 +101,28 @@ void
 GtpyAbstractCollectionItem::setSelected(bool selected)
 {
     m_selected = selected;
+}
+
+GtpyAbstractCollectionItem*
+GtpyAbstractCollectionItem::parentItem() const
+{
+    return m_parentItem;
+}
+
+void
+GtpyAbstractCollectionItem::setParentItem(GtpyAbstractCollectionItem* parent)
+{
+    m_parentItem = parent;
+}
+
+void
+GtpyAbstractCollectionItem::setType(int type)
+{
+    m_type = type;
+}
+
+int
+GtpyAbstractCollectionItem::type() const
+{
+    return m_type;
 }

@@ -65,6 +65,7 @@ HEADERS += \
     collection/browser/gtpy_collectionbrowsermodel.h \
     collection/browser/gtpy_collectioncollapsibleitem.h \
     collection/browser/gtpy_collectionitem.h \
+    collection/browser/gtpy_collectionrootitem.h \
     gt_python.h \
     calculators/gtpy_scriptcalculator.h \
     collection/gtpy_scriptcollectionsettings.h \
@@ -117,6 +118,7 @@ SOURCES += \
     collection/browser/gtpy_collectionbrowsermodel.cpp \
     collection/browser/gtpy_collectioncollapsibleitem.cpp \
     collection/browser/gtpy_collectionitem.cpp \
+    collection/browser/gtpy_collectionrootitem.cpp \
     gt_python.cpp \
     calculators/gtpy_scriptcalculator.cpp \
     collection/gtpy_scriptcollectionsettings.cpp \

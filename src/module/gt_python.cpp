@@ -260,6 +260,7 @@ GtPythonModule::collectionStructure() const
     QMap<QString, QMetaType::Type> retval;
 
     retval.insert(QStringLiteral("category"), QMetaType::QString);
+    retval.insert(QStringLiteral("subcategory"), QMetaType::QString);
 
     return retval;
 }

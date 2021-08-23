@@ -26,6 +26,14 @@ public:
 
     virtual QString ident() const = 0;
 
+    virtual void selectAllChildren();
+
+    virtual void unselectAllChildren();
+
+    virtual QList<GtCollectionNetworkItem> uncollapsibleChilren();
+
+    virtual QList<GtCollectionNetworkItem> selectedItems();
+
     virtual QString version() const;
 
     virtual QString installedVersion() const;
@@ -35,6 +43,8 @@ public:
     int childCount() const;
 
     GtpyAbstractCollectionItem* child(int row);
+
+    int row() const;
 
     /**
      * @brief isSelected
@@ -48,6 +58,14 @@ public:
      */
     void setSelected(bool selected);
 
+    GtpyAbstractCollectionItem* parentItem() const;
+
+    void setParentItem(GtpyAbstractCollectionItem* parent);
+
+    void setType(int type);
+
+    int type() const;
+
 protected:
     QVector<GtpyAbstractCollectionItem*> m_childItems;
 
@@ -55,7 +73,9 @@ private:
     /// Item selected indicator
     bool m_selected;
 
+    GtpyAbstractCollectionItem* m_parentItem;
 
+    int m_type;
 };
 
 #endif // GTPYABSTRACTCOLLECTIONITEM_H

@@ -21,6 +21,14 @@ public:
 
     virtual QString ident() const override;
 
+    virtual void selectAllChildren() override;
+
+    virtual void unselectAllChildren() override;
+
+    virtual QList<GtCollectionNetworkItem> uncollapsibleChilren() override;
+
+    virtual QList<GtCollectionNetworkItem> selectedItems() override;
+
     GtpyCollectionCollapsibleItem* collapsibleChild(const QString& ident);
 
     void appendChild(GtpyAbstractCollectionItem* item);

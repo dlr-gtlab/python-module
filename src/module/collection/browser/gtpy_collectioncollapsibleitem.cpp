@@ -27,6 +27,82 @@ GtpyCollectionCollapsibleItem::ident() const
     return m_ident;
 }
 
+void
+GtpyCollectionCollapsibleItem::selectAllChildren()
+{
+    foreach (GtpyAbstractCollectionItem* item, m_childItems)
+    {
+        if (item->isCollapsible())
+        {
+            item->selectAllChildren();
+        }
+        else
+        {
+            item->setSelected(true);
+        }
+    }
+}
+
+void
+GtpyCollectionCollapsibleItem::unselectAllChildren()
+{
+    foreach (GtpyAbstractCollectionItem* item, m_childItems)
+    {
+        if (item->isCollapsible())
+        {
+            item->unselectAllChildren();
+        }
+        else
+        {
+            item->setSelected(false);
+        }
+    }
+}
+#include <QDebug>
+QList<GtCollectionNetworkItem>
+GtpyCollectionCollapsibleItem::uncollapsibleChilren()
+{
+    QList<GtCollectionNetworkItem> retval;
+
+    foreach (GtpyAbstractCollectionItem* item, m_childItems)
+    {
+        if (item->isCollapsible())
+        {
+            retval.append(item->uncollapsibleChilren());
+        }
+        else
+        {
+            qDebug() << "uncoll == " << item->ident();
+            retval.append(item->item());
+        }
+    }
+
+    return retval;
+}
+
+QList<GtCollectionNetworkItem>
+GtpyCollectionCollapsibleItem::selectedItems()
+{
+    QList<GtCollectionNetworkItem> retval;
+
+    foreach (GtpyAbstractCollectionItem* item, m_childItems)
+    {
+        if (item->isCollapsible())
+        {
+            retval.append(item->selectedItems());
+        }
+        else
+        {
+            if (item->isSelected())
+            {
+                retval.append(item->item());
+            }
+        }
+    }
+
+    return retval;
+}
+
 GtpyCollectionCollapsibleItem*
 GtpyCollectionCollapsibleItem::collapsibleChild(const QString& ident)
 {
@@ -44,6 +120,7 @@ GtpyCollectionCollapsibleItem::collapsibleChild(const QString& ident)
 void
 GtpyCollectionCollapsibleItem::appendChild(GtpyAbstractCollectionItem* item)
 {
+    item->setParentItem(this);
     m_childItems.append(item);
 }
 
@@ -61,13 +138,13 @@ GtpyCollectionCollapsibleItem::appendChild(GtpyAbstractCollectionItem* item,
         if (child == Q_NULLPTR)
         {
             child = new GtpyCollectionCollapsibleItem(itemName);
+            child->setType(type());
             level->appendChild(child);
         }
 
         level = child;
     }
 
+    item->setType(type());
     level->appendChild(item);
 }
-
-

@@ -14,65 +14,50 @@
 
 #include "gtpy_collectionitem.h"
 #include "gtpy_collectioncollapsibleitem.h"
+#include "gtpy_collectionrootitem.h"
 
 #include "gtpy_collectionbrowsermodel.h"
 
 GtpyCollectionBrowserModel::GtpyCollectionBrowserModel(QObject* parent) :
-    QAbstractItemModel(parent), m_installed(Q_NULLPTR), m_available(Q_NULLPTR),
-    m_updateAvailable(Q_NULLPTR)
+    QAbstractItemModel(parent)
 {
-    //    m_installed = new GtpyCollectionCollapsibleItem(tr("Installed"));
-    //    m_available = new GtpyCollectionCollapsibleItem(tr("Available"));
-    //    m_updateAvailable = new GtpyCollectionCollapsibleItem(
-    //        tr("Update available!"));
+    m_rootItem = new GtpyCollectionRootItem();
 }
 
 GtpyCollectionBrowserModel::~GtpyCollectionBrowserModel()
 {
-    qDeleteAll(m_installedItems);
-    qDeleteAll(m_updateAvailableItems);
-    qDeleteAll(m_availableItems);
-
-    if (m_installed)
+    if (m_rootItem)
     {
-        delete m_installed;
-    }
-
-    if (m_available)
-    {
-        delete m_available;
-    }
-
-    if (m_updateAvailable)
-    {
-        delete m_updateAvailable;
+        delete m_rootItem;
     }
 }
 
 int
 GtpyCollectionBrowserModel::rowCount(const QModelIndex& parent) const
 {
+    if (m_rootItem == Q_NULLPTR)
+    {
+        return 0;
+    }
+
+    GtpyAbstractCollectionItem* parentItem;
+
+    if (parent.column() > 0)
+    {
+        return 0;
+    }
+
     if (!parent.isValid())
     {
-        return groupTypes().size();
+        parentItem = m_rootItem;
     }
-
-    const CollectionItemType itemType = static_cast<CollectionItemType>
-                                        (parent.internalId());
-
-    switch (itemType)
+    else
     {
-        case UpdateAvailableItemGroup:
-            return m_updateAvailableItems.size();
-
-        case AvailableItemGroup:
-            return m_availableItems.size();
-
-        case InstalledItemGroup:
-            return m_installedItems.size();
+        parentItem =
+            static_cast<GtpyAbstractCollectionItem*>(parent.internalPointer());
     }
 
-    return 0;
+    return parentItem->childCount();
 }
 
 int
@@ -84,6 +69,11 @@ GtpyCollectionBrowserModel::columnCount(const QModelIndex& /*parent*/) const
 QVariant
 GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
 {
+    if (m_rootItem == Q_NULLPTR)
+    {
+        return QVariant();
+    }
+
     if (!index.isValid())
     {
         return QVariant();
@@ -91,18 +81,23 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
 
     const int col = index.column();
 
-    const CollectionItemType itemType = static_cast<CollectionItemType>
-                                        (index.internalId());
+    GtpyAbstractCollectionItem* item = static_cast<GtpyAbstractCollectionItem*>
+                                       (index.internalPointer());
 
-    switch (itemType)
+    if (!item)
     {
-        case UpdateAvailableItemGroup:
+        return QVariant();
+    }
+
+    if (item->isCollapsible())
+    {
+        if (role == Qt::DisplayRole && col == 0)
         {
-            if (role == Qt::DisplayRole && col == 0)
-            {
-                return tr("Update available!");
-            }
-            else if (role == Qt::DecorationRole && col == 0)
+            return item->ident();
+        }
+        else if (item == m_rootItem->updateAvailable())
+        {
+            if (role == Qt::DecorationRole && col == 0)
             {
                 return gtApp->icon(QStringLiteral("updateIcon_16.png"));
             }
@@ -110,31 +105,17 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
             {
                 return QColor(180, 229, 190);
             }
-
-            break;
         }
-
-        case AvailableItemGroup:
+        else if (item == m_rootItem->available())
         {
-            if (role == Qt::DisplayRole && col == 0)
-            {
-                return tr("Available");
-            }
-            else if (role == Qt::DecorationRole && col == 0)
+            if (role == Qt::DecorationRole && col == 0)
             {
                 return gtApp->icon(QStringLiteral("stackIcon.png"));
             }
-
-            break;
         }
-
-        case InstalledItemGroup:
+        else if (item == m_rootItem->installed())
         {
-            if (role == Qt::DisplayRole && col == 0)
-            {
-                return tr("Installed");
-            }
-            else if (role == Qt::DecorationRole && col == 0)
+            if (role == Qt::DecorationRole && col == 0)
             {
                 return gtApp->icon(QStringLiteral("collectionIcon_16.png"));
             }
@@ -142,162 +123,142 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
             {
                 return QColor(240, 240, 240);
             }
-
-            break;
         }
+    }
+    else
+    {
+        GtpyCollectionItemType type = static_cast<GtpyCollectionItemType>(
+                                          item->type());
 
-        case UpdateAvailableItem:
+        switch (type)
         {
-            if (role == Qt::DisplayRole)
+            case MyUpdateAvailableItem:
             {
-                const int row = index.row();
-
-                if (row < 0 || row >= m_updateAvailableItems.size())
+                if (role == Qt::DisplayRole)
                 {
-                    return QVariant();
+                    if (col == 0)
+                    {
+                        return item->ident();
+                    }
+                    else if (col == 2)
+                    {
+                        return item->version();
+                    }
+                    else if (col == 3)
+                    {
+                        return item->installedVersion();
+                    }
+                }
+                else if (role == Qt::DecorationRole)
+                {
+                    if (col == 0)
+                    {
+                        return gtApp->icon(
+                                   QStringLiteral("pluginIcon_16.png"));
+                    }
+                    else if (col == 1)
+                    {
+                        return gtApp->icon(
+                                   QStringLiteral("infoBlueIcon_16.png"));
+                    }
+                }
+                else if (role == Qt::CheckStateRole && col == 0)
+                {
+                    if (item->isSelected())
+                    {
+                        return Qt::Checked;
+                    }
+                    else
+                    {
+                        return Qt::Unchecked;
+                    }
                 }
 
-                if (col == 0)
-                {
-                    return m_updateAvailableItems[row]->ident();
-                }
-                else if (col == 2)
-                {
-                    return m_updateAvailableItems[row]->version();
-                }
-                else if (col == 3)
-                {
-                    return
-                        m_updateAvailableItems[row]->installedVersion();
-                }
-            }
-            else if (role == Qt::DecorationRole)
-            {
-                if (col == 0)
-                {
-                    return gtApp->icon(QStringLiteral("pluginIcon_16.png"));
-                }
-                else if (col == 1)
-                {
-                    return gtApp->icon(QStringLiteral("infoBlueIcon_16.png"));
-                }
-            }
-            else if (role == Qt::CheckStateRole && col == 0)
-            {
-                const int row = index.row();
-
-                if (row < 0 || row >= m_updateAvailableItems.size())
-                {
-                    return QVariant();
-                }
-
-                if (m_updateAvailableItems[row]->isSelected())
-                {
-                    return Qt::Checked;
-                }
-                else
-                {
-                    return Qt::Unchecked;
-                }
+                break;
             }
 
-            break;
-        }
-
-        case AvailableItem:
-        {
-            if (role == Qt::DisplayRole)
+            case MyAvailableItem:
             {
-                const int row = index.row();
+                if (role == Qt::DisplayRole)
+                {
+                    if (col == 0)
+                    {
+                        return item->ident();
+                    }
+                    else if (col == 2)
+                    {
+                        return item->version();
+                    }
+                }
+                else if (role == Qt::DecorationRole)
+                {
+                    if (col == 0)
+                    {
+                        return gtApp->icon(
+                                   QStringLiteral("pluginIcon_16.png"));
+                    }
+                    else if (col == 1)
+                    {
+                        return gtApp->icon(
+                                   QStringLiteral("infoBlueIcon_16.png"));
+                    }
+                }
+                else if (role == Qt::CheckStateRole && col == 0)
+                {
 
-                if (row < 0 || row >= m_availableItems.size())
-                {
-                    return QVariant();
+                    if (item->isSelected())
+                    {
+                        return Qt::Checked;
+                    }
+                    else
+                    {
+                        return Qt::Unchecked;
+                    }
                 }
 
-                if (col == 0)
-                {
-                    return m_availableItems[row]->ident();
-                }
-                else if (col == 2)
-                {
-                    return m_availableItems[row]->version();
-                }
-            }
-            else if (role == Qt::DecorationRole)
-            {
-                if (col == 0)
-                {
-                    return gtApp->icon(QStringLiteral("pluginIcon_16.png"));
-                }
-                else if (col == 1)
-                {
-                    return gtApp->icon(QStringLiteral("infoBlueIcon_16.png"));
-                }
-            }
-            else if (role == Qt::CheckStateRole && col == 0)
-            {
-                const int row = index.row();
-
-                if (row < 0 || row >= m_availableItems.size())
-                {
-                    return QVariant();
-                }
-
-                if (m_availableItems[row]->isSelected())
-                {
-                    return Qt::Checked;
-                }
-                else
-                {
-                    return Qt::Unchecked;
-                }
+                break;
             }
 
-            break;
-        }
-
-        case InstalledItem:
-        {
-            if (role == Qt::DisplayRole)
+            case MyInstalledItem:
             {
-                const int row = index.row();
-
-                if (row < 0 || row >= m_installedItems.size())
+                if (role == Qt::DisplayRole)
                 {
-                    return QVariant();
+                    if (col == 0)
+                    {
+                        return item->ident();
+                    }
+                    else if (col == 2)
+                    {
+                        return item->version();
+                    }
+                    else if (col == 3)
+                    {
+                        return item->installedVersion();
+                    }
+                }
+                else if (role == Qt::DecorationRole)
+                {
+                    if (col == 0)
+                    {
+                        return gtApp->icon(
+                                   QStringLiteral("pluginIcon_16.png"));
+                    }
+                    else if (col == 1)
+                    {
+                        return gtApp->icon(
+                                   QStringLiteral("infoBlueIcon_16.png"));
+                    }
+                }
+                else if (role == Qt::ForegroundRole)
+                {
+                    return QColor(Qt::darkGray);
                 }
 
-                if (col == 0)
-                {
-                    return m_installedItems[row]->ident();
-                }
-                else if (col == 2)
-                {
-                    return m_installedItems[row]->version();
-                }
-                else if (col == 3)
-                {
-                    return m_installedItems[row]->installedVersion();
-                }
-            }
-            else if (role == Qt::DecorationRole)
-            {
-                if (col == 0)
-                {
-                    return gtApp->icon(QStringLiteral("pluginIcon_16.png"));
-                }
-                else if (col == 1)
-                {
-                    return gtApp->icon(QStringLiteral("infoBlueIcon_16.png"));
-                }
-            }
-            else if (role == Qt::ForegroundRole)
-            {
-                return QColor(Qt::darkGray);
+                break;
             }
 
-            break;
+            default:
+                break;
         }
     }
 
@@ -315,70 +276,65 @@ GtpyCollectionBrowserModel::setData(const QModelIndex& index,
 
     const int col = index.column();
 
-    const CollectionItemType itemType = static_cast<CollectionItemType>
-                                        (index.internalId());
+    GtpyAbstractCollectionItem* item = static_cast<GtpyAbstractCollectionItem*>
+                                       (index.internalPointer());
 
-    switch (itemType)
+    if (!item->isCollapsible())
     {
+        GtpyCollectionItemType type = static_cast<GtpyCollectionItemType>(
+                                          item->type());
 
-        case UpdateAvailableItem:
+        switch (type)
         {
-            if (role == Qt::CheckStateRole && col == 0)
+            case MyUpdateAvailableItem:
             {
-                const int row = index.row();
-
-                if (row < 0 || row >= m_updateAvailableItems.size())
+                if (role == Qt::CheckStateRole && col == 0)
                 {
-                    return QAbstractItemModel::setData(index, value, role);
+
+                    Qt::CheckState state =
+                        static_cast<Qt::CheckState>(value.toInt());
+
+                    if (state == Qt::Checked)
+                    {
+                        item->setSelected(true);
+                    }
+                    else
+                    {
+                        item->setSelected(false);
+                    }
+
+                    emit dataChanged(index, index);
+                    emit selectionChanged();
                 }
 
-                Qt::CheckState state =
-                    static_cast<Qt::CheckState>(value.toInt());
-
-                if (state == Qt::Checked)
-                {
-                    m_updateAvailableItems[row]->setSelected(true);
-                }
-                else
-                {
-                    m_updateAvailableItems[row]->setSelected(false);
-                }
-
-                emit dataChanged(index, index);
-                emit selectionChanged();
+                break;
             }
 
-            break;
-        }
-
-        case AvailableItem:
-        {
-            if (role == Qt::CheckStateRole && col == 0)
+            case MyAvailableItem:
             {
-                const int row = index.row();
-
-                if (row < 0 || row >= m_availableItems.size())
+                if (role == Qt::CheckStateRole && col == 0)
                 {
-                    return QAbstractItemModel::setData(index, value, role);
+                    Qt::CheckState state =
+                        static_cast<Qt::CheckState>(value.toInt());
+
+                    if (state == Qt::Checked)
+                    {
+                        item->setSelected(true);
+                    }
+                    else
+                    {
+                        item->setSelected(false);
+                    }
+
+                    emit dataChanged(index, index);
+                    emit selectionChanged();
                 }
 
-                Qt::CheckState state =
-                    static_cast<Qt::CheckState>(value.toInt());
-
-                if (state == Qt::Checked)
-                {
-                    m_availableItems[row]->setSelected(true);
-                }
-                else
-                {
-                    m_availableItems[row]->setSelected(false);
-                }
-
-                emit dataChanged(index, index);
-                emit selectionChanged();
+                break;
             }
 
-            break;
+            default:
+                break;
         }
     }
 
@@ -431,40 +387,43 @@ GtpyCollectionBrowserModel::setCollectionData(const
 {
     beginResetModel();
 
-    m_installedItems.clear();
-    m_availableItems.clear();
-    m_updateAvailableItems.clear();
-
-    if (m_installed != Q_NULLPTR)
-    {
-        delete m_installed;
-
-    }
-
-    m_installed = new GtpyCollectionCollapsibleItem(tr("Installed"));
+    m_rootItem->reinit();
+    m_rootItem->installed()->setType(MyInstalledItem);
+    m_rootItem->available()->setType(MyAvailableItem);
+    m_rootItem->updateAvailable()->setType(MyUpdateAvailableItem);
 
     foreach (GtCollectionNetworkItem item, installedItems)
     {
-        m_installedItems << new GtpyCollectionItem(item);
+        QStringList hierarchy;
+        hierarchy << item.property("category").toString();
+        hierarchy << item.property("subcategory").toString();
 
-        QString cat = item.property("category").toString();
-        m_installed->appendChild(new GtpyCollectionItem(item), QStringList() <<
-                                 cat);
+        m_rootItem->installed()->appendChild(new GtpyCollectionItem(item),
+                                             hierarchy);
     }
 
     foreach (GtCollectionNetworkItem item, availableItems)
     {
-        m_availableItems << new GtpyCollectionItem(item);
+        QStringList hierarchy;
+        hierarchy << item.property("category").toString();
+        hierarchy << item.property("subcategory").toString();
+
+        m_rootItem->available()->appendChild(new GtpyCollectionItem(item),
+                                             hierarchy);
     }
 
     foreach (GtCollectionNetworkItem item, updataAvailableItems)
     {
-        m_updateAvailableItems << new GtpyCollectionItem(item);
+
+        QStringList hierarchy;
+        hierarchy << item.property("category").toString();
+        hierarchy << item.property("subcategory").toString();
+
+        m_rootItem->updateAvailable()->appendChild(new GtpyCollectionItem(item),
+                hierarchy);
     }
 
     endResetModel();
-
-    qDebug() << "m_installed == " << m_installed->childCount();
 
     emit selectionChanged();
 }
@@ -473,43 +432,35 @@ QModelIndex
 GtpyCollectionBrowserModel::index(int row, int column,
                                   const QModelIndex& parent) const
 {
+    if (m_rootItem == Q_NULLPTR)
+    {
+        return QModelIndex();
+    }
+
     if (!hasIndex(row, column, parent))
     {
         return QModelIndex();
     }
 
+    GtpyAbstractCollectionItem* parentItem;
+
     if (!parent.isValid())
     {
-        QList<GtpyCollectionBrowserModel::CollectionItemType> groups =
-            groupTypes();
-
-        if (row < 0 || row >= groups.size())
-        {
-            return QModelIndex();
-        }
-
-        return createIndex(row, column, groups[row]);
+        parentItem = m_rootItem;
     }
     else
     {
-        const CollectionItemType itemType =
-            static_cast<CollectionItemType>(parent.internalId());
+        parentItem = static_cast<GtpyAbstractCollectionItem*>(
+                         parent.internalPointer());
+    }
 
-        if (itemType == UpdateAvailableItemGroup)
+    GtpyAbstractCollectionItem* childItem = parentItem->child(row);
+
+    if (childItem)
+    {
+        if (childItem->childCount() > 0 || !childItem->isCollapsible())
         {
-            return createIndex(row, column, UpdateAvailableItem);
-        }
-        else if (itemType == AvailableItemGroup)
-        {
-            return createIndex(row, column, AvailableItem);
-        }
-        else if (itemType == InstalledItemGroup)
-        {
-            return createIndex(row, column, InstalledItem);
-        }
-        else
-        {
-            return QModelIndex();
+            return createIndex(row, column, childItem);
         }
     }
 
@@ -519,28 +470,27 @@ GtpyCollectionBrowserModel::index(int row, int column,
 QModelIndex
 GtpyCollectionBrowserModel::parent(const QModelIndex& index) const
 {
-    const CollectionItemType itemType = static_cast<CollectionItemType>
-                                        (index.internalId());
-
-    switch (itemType)
+    if (m_rootItem == Q_NULLPTR)
     {
-        case UpdateAvailableItemGroup:
-        case AvailableItemGroup:
-        case InstalledItemGroup:
-        default:
-            return QModelIndex();
-
-        case UpdateAvailableItem:
-            return createIndex(0, 0, UpdateAvailableItemGroup);
-
-        case AvailableItem:
-            return createIndex(1, 0, AvailableItemGroup);
-
-        case InstalledItem:
-            return createIndex(1, 0, InstalledItemGroup);
+        return QModelIndex();
     }
 
-    return QModelIndex();
+    if (!index.isValid())
+    {
+        return QModelIndex();
+    }
+
+    GtpyAbstractCollectionItem* childItem =
+        static_cast<GtpyAbstractCollectionItem*>(index.internalPointer());
+
+    GtpyAbstractCollectionItem* parentItem = childItem->parentItem();
+
+    if (parentItem == m_rootItem)
+    {
+        return QModelIndex();
+    }
+
+    return createIndex(parentItem->row(), 0, parentItem);
 }
 
 Qt::ItemFlags
@@ -550,17 +500,27 @@ GtpyCollectionBrowserModel::flags(const QModelIndex& index) const
 
     if (index.isValid() && index.parent().isValid() && index.column() == 0)
     {
-        const CollectionItemType itemType = static_cast<CollectionItemType>
-                                            (index.internalId());
+        GtpyAbstractCollectionItem* item =
+            static_cast<GtpyAbstractCollectionItem*>(index.internalPointer());
 
-        switch (itemType)
+        bool collapsible = item->isCollapsible();
+        GtpyCollectionItemType type = static_cast<GtpyCollectionItemType>(
+                                          item->type());
+
+        if (!collapsible)
         {
-            case UpdateAvailableItem:
-            case AvailableItem:
+            switch (type)
             {
-                flags = flags | Qt::ItemIsUserCheckable;
-            }
+                case MyUpdateAvailableItem:
+                case MyAvailableItem:
+                {
+                    flags = flags | Qt::ItemIsUserCheckable;
+                    break;
+                }
 
+                default:
+                    break;
+            }
         }
     }
 
@@ -587,45 +547,20 @@ GtpyCollectionBrowserModel::itemFromIndex(const QModelIndex& index)
         return GtCollectionItem();
     }
 
-    const int row = index.row();
+    GtpyAbstractCollectionItem* item = static_cast<GtpyAbstractCollectionItem*>
+                                       (index.internalPointer());
 
-    const CollectionItemType itemType = static_cast<CollectionItemType>
-                                        (index.internalId());
-
-    switch (itemType)
+    if (!item)
     {
-        case UpdateAvailableItem:
-        {
-            if (row < 0 || row >= m_updateAvailableItems.size())
-            {
-                return GtCollectionItem();
-            }
-
-            return m_updateAvailableItems[row]->item();
-        }
-
-        case AvailableItem:
-        {
-            if (row < 0 || row >= m_availableItems.size())
-            {
-                return GtCollectionItem();
-            }
-
-            return m_availableItems[row]->item();
-        }
-
-        case InstalledItem:
-        {
-            if (row < 0 || row >= m_installedItems.size())
-            {
-                return GtCollectionItem();
-            }
-
-            return m_installedItems[row]->item();
-        }
+        return GtCollectionItem();
     }
 
-    return GtCollectionItem();
+    if (item->isCollapsible())
+    {
+        return GtCollectionItem();
+    }
+
+    return item->item();
 }
 
 QList<GtCollectionNetworkItem>
@@ -633,21 +568,8 @@ GtpyCollectionBrowserModel::selectedItems()
 {
     QList<GtCollectionNetworkItem> retval;
 
-    foreach (GtpyAbstractCollectionItem* modelItem, m_updateAvailableItems)
-    {
-        if (modelItem->isSelected())
-        {
-            retval << modelItem->item();
-        }
-    }
-
-    foreach (GtpyAbstractCollectionItem* modelItem, m_availableItems)
-    {
-        if (modelItem->isSelected())
-        {
-            retval << modelItem->item();
-        }
-    }
+    retval.append(m_rootItem->updateAvailable()->selectedItems());
+    retval.append(m_rootItem->available()->selectedItems());
 
     return retval;
 }
@@ -657,10 +579,8 @@ GtpyCollectionBrowserModel::itemsToUpdate()
 {
     QList<GtCollectionNetworkItem> retval;
 
-    foreach (GtpyAbstractCollectionItem* modelItem, m_updateAvailableItems)
-    {
-        retval << modelItem->item();
-    }
+    retval.append(m_rootItem->updateAvailable()->uncollapsibleChilren());
+
 
     return retval;
 }
@@ -670,15 +590,8 @@ GtpyCollectionBrowserModel::selectAll()
 {
     beginResetModel();
 
-    for (int i = 0; i < m_updateAvailableItems.size(); i++)
-    {
-        m_updateAvailableItems[i]->setSelected(true);
-    }
-
-    for (int i = 0; i < m_availableItems.size(); i++)
-    {
-        m_availableItems[i]->setSelected(true);
-    }
+    m_rootItem->updateAvailable()->selectAllChildren();
+    m_rootItem->available()->selectAllChildren();
 
     endResetModel();
 }
@@ -688,15 +601,8 @@ GtpyCollectionBrowserModel::unselectAll()
 {
     beginResetModel();
 
-    for (int i = 0; i < m_updateAvailableItems.size(); i++)
-    {
-        m_updateAvailableItems[i]->setSelected(false);
-    }
-
-    for (int i = 0; i < m_availableItems.size(); i++)
-    {
-        m_availableItems[i]->setSelected(false);
-    }
+    m_rootItem->updateAvailable()->unselectAllChildren();
+    m_rootItem->available()->unselectAllChildren();
 
     endResetModel();
 }
@@ -706,17 +612,22 @@ GtpyCollectionBrowserModel::groupTypes() const
 {
     QList<GtpyCollectionBrowserModel::CollectionItemType> retval;
 
-    if (!m_updateAvailableItems.isEmpty())
+    if (m_rootItem == Q_NULLPTR)
+    {
+        return retval;
+    }
+
+    if (m_rootItem->updateAvailable()->childCount() > 0)
     {
         retval << UpdateAvailableItemGroup;
     }
 
-    if (!m_availableItems.isEmpty())
+    if (m_rootItem->available()->childCount() > 0)
     {
         retval << AvailableItemGroup;
     }
 
-    if (!m_installedItems.isEmpty())
+    if (m_rootItem->installed()->childCount() > 0)
     {
         retval << InstalledItemGroup;
     }

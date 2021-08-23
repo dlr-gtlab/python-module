@@ -30,6 +30,7 @@ public:
     virtual QString installedVersion() const override;
 
     virtual GtCollectionNetworkItem item() const override;
+
 private:
     /// Collection network item.
     GtCollectionNetworkItem m_item;
