@@ -28,7 +28,7 @@ public:
      * @brief GtpyCollectionBrowser
      * @param parent
      */
-    GtpyCollectionBrowser(QWidget* parent = Q_NULLPTR);
+    Q_INVOKABLE GtpyCollectionBrowser(QWidget* parent = Q_NULLPTR);
 
     /**
      * @brief setItems

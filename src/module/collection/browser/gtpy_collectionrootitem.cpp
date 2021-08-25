@@ -7,16 +7,13 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include <QTranslator>
-
 #include "gtpy_collectioncollapsibleitem.h"
 
 #include "gtpy_collectionrootitem.h"
 
-GtpyCollectionRootItem::GtpyCollectionRootItem() : GtpyAbstractCollectionItem(),
-    m_installed(Q_NULLPTR), m_available(Q_NULLPTR), m_updateAvailable(Q_NULLPTR)
+GtpyCollectionRootItem::GtpyCollectionRootItem() : GtpyAbstractCollectionItem()
 {
-    reinit();
+
 }
 
 GtpyCollectionRootItem::~GtpyCollectionRootItem()
@@ -36,65 +33,49 @@ GtpyCollectionRootItem::ident() const
     return "Root";
 }
 
-void
-GtpyCollectionRootItem::reinit()
+GtpyCollectionCollapsibleItem*
+GtpyCollectionRootItem::createChild(int typeId, const QString& ident)
 {
-    clearRoot();
+    GtpyCollectionCollapsibleItem* item = Q_NULLPTR;
 
-    m_installed = new GtpyCollectionCollapsibleItem(
-        QTranslator::tr("Installed"));
-    m_installed->setParentItem(this);
-    m_childItems.append(m_installed);
+    if (!m_itemTypes.contains(typeId))
+    {
+        item = new GtpyCollectionCollapsibleItem(
+            ident);
+        item->setParentItem(this);
+        item->setTypeId(typeId);
+        m_childItems.append(item);
 
-    m_available = new GtpyCollectionCollapsibleItem(
-        QTranslator::tr("Available"));
-    m_available->setParentItem(this);
-    m_childItems.append(m_available);
+        m_itemTypes.append(typeId);
+    }
 
-    m_updateAvailable = new GtpyCollectionCollapsibleItem(
-        QTranslator::tr("Update available!"));
-    m_updateAvailable->setParentItem(this);
-    m_childItems.append(m_updateAvailable);
+    return item;
 }
 
 GtpyCollectionCollapsibleItem*
-GtpyCollectionRootItem::installed() const
+GtpyCollectionRootItem::child(int typeId)
 {
-    return m_installed;
-}
+    GtpyCollectionCollapsibleItem* item = Q_NULLPTR;
 
-GtpyCollectionCollapsibleItem*
-GtpyCollectionRootItem::available() const
-{
-    return m_available;
-}
+    if (m_itemTypes.contains(typeId))
+    {
+        foreach (GtpyAbstractCollectionItem* child, m_childItems)
+        {
+            if (child->typeId() == typeId)
+            {
+                item = dynamic_cast<GtpyCollectionCollapsibleItem*>(child);
+                break;
+            }
+        }
+    }
 
-GtpyCollectionCollapsibleItem*
-GtpyCollectionRootItem::updateAvailable() const
-{
-    return m_updateAvailable;
+    return item;
 }
 
 void
 GtpyCollectionRootItem::clearRoot()
 {
-    if (m_installed)
-    {
-        delete m_installed;
-        m_installed = Q_NULLPTR;
-    }
-
-    if (m_available)
-    {
-        delete m_available;
-        m_available = Q_NULLPTR;
-    }
-
-    if (m_updateAvailable)
-    {
-        delete m_updateAvailable;
-        m_updateAvailable = Q_NULLPTR;
-    }
-
+    m_itemTypes.clear();
+    qDeleteAll(m_childItems);
     m_childItems.clear();
 }

@@ -8,10 +8,10 @@
  */
 
 #include <QIcon>
-#include <QDebug>
 
 #include "gt_application.h"
 
+#include "gtpy_globals.h"
 #include "gtpy_collectionitem.h"
 #include "gtpy_collectioncollapsibleitem.h"
 #include "gtpy_collectionrootitem.h"
@@ -95,7 +95,7 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
         {
             return item->ident();
         }
-        else if (item == m_rootItem->updateAvailable())
+        else if (item == m_rootItem->child(MyUpdateAvailableItem))
         {
             if (role == Qt::DecorationRole && col == 0)
             {
@@ -106,14 +106,14 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 return QColor(180, 229, 190);
             }
         }
-        else if (item == m_rootItem->available())
+        else if (item == m_rootItem->child(MyAvailableItem))
         {
             if (role == Qt::DecorationRole && col == 0)
             {
                 return gtApp->icon(QStringLiteral("stackIcon.png"));
             }
         }
-        else if (item == m_rootItem->installed())
+        else if (item == m_rootItem->child(MyInstalledItem))
         {
             if (role == Qt::DecorationRole && col == 0)
             {
@@ -128,7 +128,7 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
     else
     {
         GtpyCollectionItemType type = static_cast<GtpyCollectionItemType>(
-                                          item->type());
+                                          item->typeId());
 
         switch (type)
         {
@@ -282,7 +282,7 @@ GtpyCollectionBrowserModel::setData(const QModelIndex& index,
     if (!item->isCollapsible())
     {
         GtpyCollectionItemType type = static_cast<GtpyCollectionItemType>(
-                                          item->type());
+                                          item->typeId());
 
         switch (type)
         {
@@ -387,40 +387,36 @@ GtpyCollectionBrowserModel::setCollectionData(const
 {
     beginResetModel();
 
-    m_rootItem->reinit();
-    m_rootItem->installed()->setType(MyInstalledItem);
-    m_rootItem->available()->setType(MyAvailableItem);
-    m_rootItem->updateAvailable()->setType(MyUpdateAvailableItem);
+    m_rootItem->clearRoot();
+
+    if (!installedItems.isEmpty())
+    {
+        m_rootItem->createChild(MyInstalledItem, tr("Installed"));
+    }
+
+    if (!availableItems.isEmpty())
+    {
+        m_rootItem->createChild(MyAvailableItem, tr("Available"));
+    }
+
+    if (!updataAvailableItems.isEmpty())
+    {
+        m_rootItem->createChild(MyUpdateAvailableItem, tr("Update available!"));
+    }
 
     foreach (GtCollectionNetworkItem item, installedItems)
     {
-        QStringList hierarchy;
-        hierarchy << item.property("category").toString();
-        hierarchy << item.property("subcategory").toString();
-
-        m_rootItem->installed()->appendChild(new GtpyCollectionItem(item),
-                                             hierarchy);
+        appendItemTo(item, m_rootItem->child(MyInstalledItem));
     }
 
     foreach (GtCollectionNetworkItem item, availableItems)
     {
-        QStringList hierarchy;
-        hierarchy << item.property("category").toString();
-        hierarchy << item.property("subcategory").toString();
-
-        m_rootItem->available()->appendChild(new GtpyCollectionItem(item),
-                                             hierarchy);
+        appendItemTo(item, m_rootItem->child(MyAvailableItem));
     }
 
     foreach (GtCollectionNetworkItem item, updataAvailableItems)
     {
-
-        QStringList hierarchy;
-        hierarchy << item.property("category").toString();
-        hierarchy << item.property("subcategory").toString();
-
-        m_rootItem->updateAvailable()->appendChild(new GtpyCollectionItem(item),
-                hierarchy);
+        appendItemTo(item, m_rootItem->child(MyUpdateAvailableItem));
     }
 
     endResetModel();
@@ -505,7 +501,7 @@ GtpyCollectionBrowserModel::flags(const QModelIndex& index) const
 
         bool collapsible = item->isCollapsible();
         GtpyCollectionItemType type = static_cast<GtpyCollectionItemType>(
-                                          item->type());
+                                          item->typeId());
 
         if (!collapsible)
         {
@@ -568,8 +564,20 @@ GtpyCollectionBrowserModel::selectedItems()
 {
     QList<GtCollectionNetworkItem> retval;
 
-    retval.append(m_rootItem->updateAvailable()->selectedItems());
-    retval.append(m_rootItem->available()->selectedItems());
+    GtpyCollectionCollapsibleItem* item = m_rootItem->child(
+            MyUpdateAvailableItem);
+
+    if (item)
+    {
+        retval.append(item->selectedItems());
+    }
+
+    item = m_rootItem->child(MyAvailableItem);
+
+    if (item)
+    {
+        retval.append(item->selectedItems());
+    }
 
     return retval;
 }
@@ -579,8 +587,13 @@ GtpyCollectionBrowserModel::itemsToUpdate()
 {
     QList<GtCollectionNetworkItem> retval;
 
-    retval.append(m_rootItem->updateAvailable()->uncollapsibleChilren());
+    GtpyCollectionCollapsibleItem* item = m_rootItem->child(
+            MyUpdateAvailableItem);
 
+    if (item)
+    {
+        retval.append(item->uncollapsibleChilren());
+    }
 
     return retval;
 }
@@ -590,10 +603,24 @@ GtpyCollectionBrowserModel::selectAll()
 {
     beginResetModel();
 
-    m_rootItem->updateAvailable()->selectAllChildren();
-    m_rootItem->available()->selectAllChildren();
+    GtpyCollectionCollapsibleItem* item = m_rootItem->child(
+            MyUpdateAvailableItem);
+
+    if (item)
+    {
+        item->selectAllChildren();
+    }
+
+    item = m_rootItem->child(MyAvailableItem);
+
+    if (item)
+    {
+        item->selectAllChildren();
+    }
 
     endResetModel();
+
+    emit selectionChanged();
 }
 
 void
@@ -601,37 +628,43 @@ GtpyCollectionBrowserModel::unselectAll()
 {
     beginResetModel();
 
-    m_rootItem->updateAvailable()->unselectAllChildren();
-    m_rootItem->available()->unselectAllChildren();
+    GtpyCollectionCollapsibleItem* item = m_rootItem->child(
+            MyUpdateAvailableItem);
+
+    if (item)
+    {
+        item->unselectAllChildren();
+    }
+
+    item = m_rootItem->child(MyAvailableItem);
+
+    if (item)
+    {
+        item->unselectAllChildren();
+    }
 
     endResetModel();
 }
 
-QList<GtpyCollectionBrowserModel::CollectionItemType>
-GtpyCollectionBrowserModel::groupTypes() const
+void
+GtpyCollectionBrowserModel::appendItemTo(GtCollectionNetworkItem item,
+        GtpyCollectionCollapsibleItem* to)
 {
-    QList<GtpyCollectionBrowserModel::CollectionItemType> retval;
+    QStringList hierarchy;
 
-    if (m_rootItem == Q_NULLPTR)
+    QString cat = item.property(GtpyGlobals::COLLECTION_cat).toString();
+
+    if (!cat.isEmpty())
     {
-        return retval;
+        hierarchy << cat;
+
+        cat = item.property(GtpyGlobals::COLLECTION_subcat).toString();
+
+        if (!cat.isEmpty())
+        {
+            hierarchy << cat;
+        }
     }
 
-    if (m_rootItem->updateAvailable()->childCount() > 0)
-    {
-        retval << UpdateAvailableItemGroup;
-    }
-
-    if (m_rootItem->available()->childCount() > 0)
-    {
-        retval << AvailableItemGroup;
-    }
-
-    if (m_rootItem->installed()->childCount() > 0)
-    {
-        retval << InstalledItemGroup;
-    }
-
-    return retval;
+    to->appendChild(new GtpyCollectionItem(item), hierarchy);
 }
-

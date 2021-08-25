@@ -39,5 +39,7 @@ const char* ERROR_KEY   = "ERROR_TO_CONSOLE";
 
 
 ///Collection
-const QString COLLECTION_ID   = "Python Script Collection";
+const QString COLLECTION_ID     = "Python Script Collection";
+const QString COLLECTION_cat    = "category";
+const QString COLLECTION_subcat = "subcategory";
 }

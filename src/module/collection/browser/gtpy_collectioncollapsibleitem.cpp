@@ -10,7 +10,7 @@
 #include "gtpy_collectioncollapsibleitem.h"
 
 GtpyCollectionCollapsibleItem::GtpyCollectionCollapsibleItem(QString ident) :
-    m_ident(ident)
+    GtpyAbstractCollectionItem(), m_ident(ident)
 {
     setSelected(false);
 }
@@ -58,7 +58,7 @@ GtpyCollectionCollapsibleItem::unselectAllChildren()
         }
     }
 }
-#include <QDebug>
+
 QList<GtCollectionNetworkItem>
 GtpyCollectionCollapsibleItem::uncollapsibleChilren()
 {
@@ -72,7 +72,6 @@ GtpyCollectionCollapsibleItem::uncollapsibleChilren()
         }
         else
         {
-            qDebug() << "uncoll == " << item->ident();
             retval.append(item->item());
         }
     }
@@ -138,13 +137,13 @@ GtpyCollectionCollapsibleItem::appendChild(GtpyAbstractCollectionItem* item,
         if (child == Q_NULLPTR)
         {
             child = new GtpyCollectionCollapsibleItem(itemName);
-            child->setType(type());
+            child->setTypeId(typeId());
             level->appendChild(child);
         }
 
         level = child;
     }
 
-    item->setType(type());
+    item->setTypeId(typeId());
     level->appendChild(item);
 }

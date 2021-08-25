@@ -10,7 +10,7 @@
 #include "gtpy_collectionitem.h"
 
 GtpyCollectionItem::GtpyCollectionItem(const GtCollectionNetworkItem& item) :
-    m_item(item)
+    GtpyAbstractCollectionItem(), m_item(item)
 {
     setSelected(false);
 }

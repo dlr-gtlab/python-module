@@ -15,22 +15,13 @@
 #include "gtpy_abstractcollectionitem.h"
 
 class GtpyCollectionRootItem;
+class GtpyCollectionCollapsibleItem;
 
 class GtpyCollectionBrowserModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    enum CollectionItemType
-    {
-        InstalledItem = 1,
-        AvailableItem = 2,
-        UpdateAvailableItem = 3,
-        InstalledItemGroup = 4,
-        AvailableItemGroup = 5,
-        UpdateAvailableItemGroup = 6
-    };
-
     enum GtpyCollectionItemType
     {
         MyInstalledItem = 1,
@@ -38,7 +29,7 @@ public:
         MyUpdateAvailableItem = 3
     };
 
-    GtpyCollectionBrowserModel(QObject* parent = Q_NULLPTR);
+    Q_INVOKABLE GtpyCollectionBrowserModel(QObject* parent = Q_NULLPTR);
 
     ~GtpyCollectionBrowserModel();
 
@@ -148,28 +139,10 @@ public:
     void unselectAll();
 
 private:
-    // Installed collection items.
-    //    QList<GtpyAbstractCollectionItem*> m_installedItems;
-
-    //    GtpyCollectionCollapsibleItem* m_installed;
-
-    // Collection items available for installation.
-    QList<GtpyAbstractCollectionItem*> m_availableItems;
-
-    //    GtpyCollectionCollapsibleItem* m_available;
-
-    // Collection items with update available.
-    QList<GtpyAbstractCollectionItem*> m_updateAvailableItems;
-
-    //    GtpyCollectionCollapsibleItem* m_updateAvailable;
+    void appendItemTo(GtCollectionNetworkItem item ,
+                      GtpyCollectionCollapsibleItem* to);
 
     GtpyCollectionRootItem* m_rootItem;
-
-    /**
-     * @brief groupTypes
-     * @return
-     */
-    QList<CollectionItemType> groupTypes() const;
 
 signals:
     /**

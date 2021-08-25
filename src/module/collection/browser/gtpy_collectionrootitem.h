@@ -25,22 +25,33 @@ public:
 
     virtual QString ident() const;
 
-    void reinit();
+    GtpyCollectionCollapsibleItem* createChild(int typeId, const QString& ident);
 
-    GtpyCollectionCollapsibleItem* installed() const;
+    GtpyCollectionCollapsibleItem* child(int typeId);
 
-    GtpyCollectionCollapsibleItem* available() const;
+    //    GtpyCollectionCollapsibleItem* createInstalled(int typeId);
 
-    GtpyCollectionCollapsibleItem* updateAvailable() const;
+    //    GtpyCollectionCollapsibleItem* installed() const;
 
-private:
+    //    GtpyCollectionCollapsibleItem* createAvailable(int typeId);
+
+    //    GtpyCollectionCollapsibleItem* available() const;
+
+    //    GtpyCollectionCollapsibleItem* createUpdateAvailable(int typeId);
+
+    //    GtpyCollectionCollapsibleItem* updateAvailable() const;
+
     void clearRoot();
+private:
+    //    void clearRoot();
 
-    GtpyCollectionCollapsibleItem* m_installed;
+    //    GtpyCollectionCollapsibleItem* m_installed;
 
-    GtpyCollectionCollapsibleItem* m_available;
+    //    GtpyCollectionCollapsibleItem* m_available;
 
-    GtpyCollectionCollapsibleItem* m_updateAvailable;
+    //    GtpyCollectionCollapsibleItem* m_updateAvailable;
+
+    QList<int> m_itemTypes;
 };
 
 #endif // GTPYCOLLECTIONROOTITEM_H

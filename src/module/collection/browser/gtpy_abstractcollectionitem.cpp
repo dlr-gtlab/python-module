@@ -10,7 +10,7 @@
 #include "gtpy_abstractcollectionitem.h"
 
 GtpyAbstractCollectionItem::GtpyAbstractCollectionItem() : m_parentItem(
-        Q_NULLPTR)
+        Q_NULLPTR), m_typeId(-1)
 {
 
 }
@@ -116,13 +116,13 @@ GtpyAbstractCollectionItem::setParentItem(GtpyAbstractCollectionItem* parent)
 }
 
 void
-GtpyAbstractCollectionItem::setType(int type)
+GtpyAbstractCollectionItem::setTypeId(int typeId)
 {
-    m_type = type;
+    m_typeId = typeId;
 }
 
 int
-GtpyAbstractCollectionItem::type() const
+GtpyAbstractCollectionItem::typeId() const
 {
-    return m_type;
+    return m_typeId;
 }

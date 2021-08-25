@@ -62,9 +62,9 @@ public:
 
     void setParentItem(GtpyAbstractCollectionItem* parent);
 
-    void setType(int type);
+    void setTypeId(int typeId);
 
-    int type() const;
+    int typeId() const;
 
 protected:
     QVector<GtpyAbstractCollectionItem*> m_childItems;
@@ -75,7 +75,7 @@ private:
 
     GtpyAbstractCollectionItem* m_parentItem;
 
-    int m_type;
+    int m_typeId;
 };
 
 #endif // GTPYABSTRACTCOLLECTIONITEM_H
