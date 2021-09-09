@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_collectionbrowsermodelitem.h
+ * Source File: gtpy_browseritem.h
  * copyright 2009-2019 by DLR
  *
  *  Created on: 19.08.2021
@@ -7,19 +7,18 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPYCOLLECTIONITEM_H
-#define GTPYCOLLECTIONITEM_H
+#ifndef GTPYBROWSERITEM_H
+#define GTPYBROWSERITEM_H
 
 #include "gt_collectionnetworkitem.h"
 
-#include "gtpy_abstractcollectionitem.h"
+#include "gtpy_abstractbrowseritem.h"
 
-class GtpyCollectionItem : public GtpyAbstractCollectionItem
+class GtpyBrowserItem : public GtpyAbstractBrowserItem
 {
 public:
-    GtpyCollectionItem(const GtCollectionNetworkItem& item);
 
-    virtual ~GtpyCollectionItem();
+    GtpyBrowserItem(const GtCollectionNetworkItem& item);
 
     virtual bool isCollapsible() const override;
 
@@ -29,11 +28,13 @@ public:
 
     virtual QString installedVersion() const override;
 
-    virtual GtCollectionNetworkItem item() const override;
+    virtual QString description() const override;
+
+    GtCollectionNetworkItem item() const;
 
 private:
     /// Collection network item.
     GtCollectionNetworkItem m_item;
 };
 
-#endif // GTPYCOLLECTIONITEM_H
+#endif // GTPYBROWSERITEM_H

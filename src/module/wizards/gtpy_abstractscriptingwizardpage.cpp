@@ -858,6 +858,7 @@ GtpyAbstractScriptingWizardPage::setWizardNonModal()
                         wiz->setWindowModality(Qt::NonModal);
                         wiz->setParent(mainWin);
                         wiz->setWindowFlags(Qt::Dialog);
+                        break;
                     }
                 }
             }
