@@ -12,10 +12,10 @@
 
 #include <QAbstractItemModel>
 
-#include "gtpy_abstractbrowseritem.h"
+#include "gtpy_abstractcollectionitem.h"
 
-class GtpyRootBrowserItem;
-class GtpyCollapsibleBrowserItem;
+class GtpyCollectionRootItem;
+class GtpyCollectionCollapsibleItem;
 
 class GtpyCollectionBrowserModel : public QAbstractItemModel
 {
@@ -24,9 +24,9 @@ class GtpyCollectionBrowserModel : public QAbstractItemModel
 public:
     enum GtpyCollectionItemType
     {
-        InstalledItem = 1,
-        AvailableItem = 2,
-        UpdateAvailableItem = 3
+        MyInstalledItem = 1,
+        MyAvailableItem = 2,
+        MyUpdateAvailableItem = 3
     };
 
     Q_INVOKABLE GtpyCollectionBrowserModel(QObject* parent = Q_NULLPTR);
@@ -140,9 +140,9 @@ public:
 
 private:
     void appendItemTo(GtCollectionNetworkItem item ,
-                      GtpyCollapsibleBrowserItem* to);
+                      GtpyCollectionCollapsibleItem* to);
 
-    GtpyRootBrowserItem* m_rootItem;
+    GtpyCollectionRootItem* m_rootItem;
 
 signals:
     /**

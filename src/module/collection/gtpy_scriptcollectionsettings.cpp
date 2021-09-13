@@ -23,8 +23,14 @@ GtpyScriptCollectionSettings::GtpyScriptCollectionSettings()
 QWidget*
 GtpyScriptCollectionSettings::localCollectionWidget(QWidget* parent)
 {
+    QWidget* defaultWidget = GtCollectionSettings::localCollectionWidget(
+                                 parent);
 
-    GtpyCollectionWidget* widget = new GtpyCollectionWidget(parent);
+    GtLocalCollectionWidget* defaultLocalWidget =
+        dynamic_cast<GtLocalCollectionWidget*>(defaultWidget);
+
+    GtpyCollectionWidget* widget = new GtpyCollectionWidget(defaultLocalWidget,
+            parent);
 
     return widget;
 }

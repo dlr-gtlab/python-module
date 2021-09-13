@@ -13,17 +13,18 @@
 #include <QSplitter>
 
 #include "gt_collectionitem.h"
+#include "gt_localcollectionwidget.h"
 #include "gt_pyhighlighter.h"
 
 #include "gtpy_editorsettings.h"
 #include "gtpy_scripteditor.h"
 #include "gtpy_contextmanager.h"
-#include "gtpy_collectionlocalwidget.h"
 
 #include "gtpy_collectionwidget.h"
 
-GtpyCollectionWidget::GtpyCollectionWidget(QWidget* parent) : QWidget(parent),
-    m_editor(Q_NULLPTR)
+GtpyCollectionWidget::GtpyCollectionWidget(GtLocalCollectionWidget*
+        defaultLocalWidget, QWidget* parent) : QWidget(parent),
+    m_defaultLocalWidget(defaultLocalWidget), m_editor(Q_NULLPTR)
 {
     QHBoxLayout* mainLayout = new QHBoxLayout;
 
@@ -42,8 +43,6 @@ GtpyCollectionWidget::GtpyCollectionWidget(QWidget* parent) : QWidget(parent),
     m_editor->setVisible(false);
 
     Q_UNUSED(highlighter)
-
-    m_defaultLocalWidget = new GtpyCollectionLocalWidget(this);
 
     ///Splitter
     QSplitter* splitter = new QSplitter(this);
