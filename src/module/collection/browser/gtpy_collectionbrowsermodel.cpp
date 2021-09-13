@@ -82,7 +82,7 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
     const int col = index.column();
 
     GtpyAbstractBrowserItem* item = static_cast<GtpyAbstractBrowserItem*>
-                                       (index.internalPointer());
+                                    (index.internalPointer());
 
     if (!item)
     {
@@ -95,7 +95,7 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
         {
             return item->ident();
         }
-        else if (item == m_rootItem->child(MyUpdateAvailableItem))
+        else if (item == m_rootItem->child(UpdateAvailableItem))
         {
             if (role == Qt::DecorationRole && col == 0)
             {
@@ -106,14 +106,14 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 return QColor(180, 229, 190);
             }
         }
-        else if (item == m_rootItem->child(MyAvailableItem))
+        else if (item == m_rootItem->child(AvailableItem))
         {
             if (role == Qt::DecorationRole && col == 0)
             {
                 return gtApp->icon(QStringLiteral("stackIcon.png"));
             }
         }
-        else if (item == m_rootItem->child(MyInstalledItem))
+        else if (item == m_rootItem->child(InstalledItem))
         {
             if (role == Qt::DecorationRole && col == 0)
             {
@@ -124,6 +124,34 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 return QColor(240, 240, 240);
             }
         }
+        else if (item->parentItem() == m_rootItem->child(UpdateAvailableItem))
+        {
+            if (role == Qt::BackgroundRole)
+            {
+                return QColor(245, 245, 245);
+            }
+        }
+        else if (item->parentItem() == m_rootItem->child(AvailableItem))
+        {
+            if (role == Qt::BackgroundRole)
+            {
+                return QColor(245, 245, 245);
+            }
+        }
+        else if (item->parentItem() == m_rootItem->child(InstalledItem))
+        {
+            if (role == Qt::BackgroundRole)
+            {
+                return QColor(245, 245, 245);
+            }
+        }
+        else
+        {
+            if (role == Qt::BackgroundRole)
+            {
+                return QColor(250, 250, 250);
+            }
+        }
     }
     else
     {
@@ -132,7 +160,7 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
 
         switch (type)
         {
-            case MyUpdateAvailableItem:
+            case UpdateAvailableItem:
             {
                 if (role == Qt::DisplayRole)
                 {
@@ -177,7 +205,7 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 break;
             }
 
-            case MyAvailableItem:
+            case AvailableItem:
             {
                 if (role == Qt::DisplayRole)
                 {
@@ -219,7 +247,7 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 break;
             }
 
-            case MyInstalledItem:
+            case InstalledItem:
             {
                 if (role == Qt::DisplayRole)
                 {
@@ -277,7 +305,7 @@ GtpyCollectionBrowserModel::setData(const QModelIndex& index,
     const int col = index.column();
 
     GtpyAbstractBrowserItem* item = static_cast<GtpyAbstractBrowserItem*>
-                                       (index.internalPointer());
+                                    (index.internalPointer());
 
     if (!item->isCollapsible())
     {
@@ -286,7 +314,7 @@ GtpyCollectionBrowserModel::setData(const QModelIndex& index,
 
         switch (type)
         {
-            case MyUpdateAvailableItem:
+            case UpdateAvailableItem:
             {
                 if (role == Qt::CheckStateRole && col == 0)
                 {
@@ -310,7 +338,7 @@ GtpyCollectionBrowserModel::setData(const QModelIndex& index,
                 break;
             }
 
-            case MyAvailableItem:
+            case AvailableItem:
             {
                 if (role == Qt::CheckStateRole && col == 0)
                 {
@@ -391,32 +419,32 @@ GtpyCollectionBrowserModel::setCollectionData(const
 
     if (!installedItems.isEmpty())
     {
-        m_rootItem->createChild(MyInstalledItem, tr("Installed"));
+        m_rootItem->createChild(InstalledItem, tr("Installed"));
     }
 
     if (!availableItems.isEmpty())
     {
-        m_rootItem->createChild(MyAvailableItem, tr("Available"));
+        m_rootItem->createChild(AvailableItem, tr("Available"));
     }
 
     if (!updataAvailableItems.isEmpty())
     {
-        m_rootItem->createChild(MyUpdateAvailableItem, tr("Update available!"));
+        m_rootItem->createChild(UpdateAvailableItem, tr("Update available!"));
     }
 
     foreach (GtCollectionNetworkItem item, installedItems)
     {
-        appendItemTo(item, m_rootItem->child(MyInstalledItem));
+        appendItemTo(item, m_rootItem->child(InstalledItem));
     }
 
     foreach (GtCollectionNetworkItem item, availableItems)
     {
-        appendItemTo(item, m_rootItem->child(MyAvailableItem));
+        appendItemTo(item, m_rootItem->child(AvailableItem));
     }
 
     foreach (GtCollectionNetworkItem item, updataAvailableItems)
     {
-        appendItemTo(item, m_rootItem->child(MyUpdateAvailableItem));
+        appendItemTo(item, m_rootItem->child(UpdateAvailableItem));
     }
 
     endResetModel();
@@ -507,8 +535,8 @@ GtpyCollectionBrowserModel::flags(const QModelIndex& index) const
         {
             switch (type)
             {
-                case MyUpdateAvailableItem:
-                case MyAvailableItem:
+                case UpdateAvailableItem:
+                case AvailableItem:
                 {
                     flags = flags | Qt::ItemIsUserCheckable;
                     break;
@@ -544,7 +572,7 @@ GtpyCollectionBrowserModel::itemFromIndex(const QModelIndex& index)
     }
 
     GtpyAbstractBrowserItem* item = static_cast<GtpyAbstractBrowserItem*>
-                                       (index.internalPointer());
+                                    (index.internalPointer());
 
     if (!item)
     {
@@ -565,14 +593,14 @@ GtpyCollectionBrowserModel::selectedItems()
     QList<GtCollectionNetworkItem> retval;
 
     GtpyCollapsibleBrowserItem* item = m_rootItem->child(
-            MyUpdateAvailableItem);
+                                           UpdateAvailableItem);
 
     if (item)
     {
         retval.append(item->selectedItems());
     }
 
-    item = m_rootItem->child(MyAvailableItem);
+    item = m_rootItem->child(AvailableItem);
 
     if (item)
     {
@@ -588,7 +616,7 @@ GtpyCollectionBrowserModel::itemsToUpdate()
     QList<GtCollectionNetworkItem> retval;
 
     GtpyCollapsibleBrowserItem* item = m_rootItem->child(
-            MyUpdateAvailableItem);
+                                           UpdateAvailableItem);
 
     if (item)
     {
@@ -604,14 +632,14 @@ GtpyCollectionBrowserModel::selectAll()
     beginResetModel();
 
     GtpyCollapsibleBrowserItem* item = m_rootItem->child(
-            MyUpdateAvailableItem);
+                                           UpdateAvailableItem);
 
     if (item)
     {
         item->selectAllChildren();
     }
 
-    item = m_rootItem->child(MyAvailableItem);
+    item = m_rootItem->child(AvailableItem);
 
     if (item)
     {
@@ -629,14 +657,14 @@ GtpyCollectionBrowserModel::unselectAll()
     beginResetModel();
 
     GtpyCollapsibleBrowserItem* item = m_rootItem->child(
-            MyUpdateAvailableItem);
+                                           UpdateAvailableItem);
 
     if (item)
     {
         item->unselectAllChildren();
     }
 
-    item = m_rootItem->child(MyAvailableItem);
+    item = m_rootItem->child(AvailableItem);
 
     if (item)
     {

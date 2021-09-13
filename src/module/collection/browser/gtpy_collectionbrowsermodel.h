@@ -24,9 +24,9 @@ class GtpyCollectionBrowserModel : public QAbstractItemModel
 public:
     enum GtpyCollectionItemType
     {
-        MyInstalledItem = 1,
-        MyAvailableItem = 2,
-        MyUpdateAvailableItem = 3
+        InstalledItem = 1,
+        AvailableItem = 2,
+        UpdateAvailableItem = 3
     };
 
     Q_INVOKABLE GtpyCollectionBrowserModel(QObject* parent = Q_NULLPTR);

@@ -38,7 +38,11 @@ public:
 
     virtual QString installedVersion() const;
 
+    virtual QString description() const;
+
     virtual GtCollectionNetworkItem item() const;
+
+    void deleteChildren();
 
     int childCount() const;
 

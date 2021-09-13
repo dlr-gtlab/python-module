@@ -101,8 +101,6 @@ GtpyCollectionBrowser::onItemClicked(const QModelIndex& index)
         return;
     }
 
-    gtDebug() << "item clicked!";
-
     //    GtCollectionItemWidget* widget = new GtCollectionItemWidget(item);
 
     //    widget->show();

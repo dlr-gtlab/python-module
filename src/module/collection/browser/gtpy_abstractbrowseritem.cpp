@@ -56,10 +56,23 @@ GtpyAbstractBrowserItem::installedVersion() const
     return QString();
 }
 
+QString
+GtpyAbstractBrowserItem::description() const
+{
+    return QString();
+}
+
 GtCollectionNetworkItem
 GtpyAbstractBrowserItem::item() const
 {
     return GtCollectionNetworkItem();
+}
+
+void
+GtpyAbstractBrowserItem::deleteChildren()
+{
+    qDeleteAll(m_childItems);
+    m_childItems.clear();
 }
 
 int
