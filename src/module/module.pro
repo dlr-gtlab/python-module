@@ -45,8 +45,6 @@ INCLUDEPATH += .\
     calculators \
     collection \
     collection/browser \
-    collection/itemwidget \
-    collection/localwidget \
     tasks \
     post \
     utilities \
@@ -62,22 +60,16 @@ INCLUDEPATH += .\
 DESTDIR = $${BUILD_DEST}
 
 HEADERS += \
-    collection/browser/gtpy_abstractbrowseritem.h \
-    collection/browser/gtpy_browseritem.h \
-    collection/browser/gtpy_collapsiblebrowseritem.h \
+    collection/browser/gtpy_abstractcollectionitem.h \
     collection/browser/gtpy_collectionbrowser.h \
     collection/browser/gtpy_collectionbrowsermodel.h \
-    collection/browser/gtpy_rootbrowseritem.h \
-    collection/itemwidget/gtpy_collectionitemwidget.h \
-    collection/localwidget/gtpy_abstractlocalitem.h \
-    collection/localwidget/gtpy_collapsiblelocalitem.h \
-    collection/localwidget/gtpy_collectionlocalwidget.h \
-    collection/localwidget/gtpy_collectionwidgetmodel.h \
-    collection/localwidget/gtpy_collectionwidget.h \
-    collection/localwidget/gtpy_localitem.h \
+    collection/browser/gtpy_collectioncollapsibleitem.h \
+    collection/browser/gtpy_collectionitem.h \
+    collection/browser/gtpy_collectionrootitem.h \
     gt_python.h \
     calculators/gtpy_scriptcalculator.h \
     collection/gtpy_scriptcollectionsettings.h \
+    collection/gtpy_collectionwidget.h \
     post/gtpy_pythonplotconfigdialog.h \
     post/gtpy_pythonplotdata.h \
     post/gtpy_pythonplotitem.h \
@@ -121,22 +113,16 @@ HEADERS += \
     wizards/editor_settings/pages/gtpy_generalpage.h
 
 SOURCES += \
-    collection/browser/gtpy_abstractbrowseritem.cpp \
-    collection/browser/gtpy_browseritem.cpp \
-    collection/browser/gtpy_collapsiblebrowseritem.cpp \
+    collection/browser/gtpy_abstractcollectionitem.cpp \
     collection/browser/gtpy_collectionbrowser.cpp \
     collection/browser/gtpy_collectionbrowsermodel.cpp \
-    collection/browser/gtpy_rootbrowseritem.cpp \
-    collection/itemwidget/gtpy_collectionitemwidget.cpp \
-    collection/localwidget/gtpy_abstractlocalitem.cpp \
-    collection/localwidget/gtpy_collapsiblelocalitem.cpp \
-    collection/localwidget/gtpy_collectionlocalwidget.cpp \
-    collection/localwidget/gtpy_collectionwidgetmodel.cpp \
-    collection/localwidget/gtpy_localitem.cpp \
-    collection/localwidget/gtpy_collectionwidget.cpp \
+    collection/browser/gtpy_collectioncollapsibleitem.cpp \
+    collection/browser/gtpy_collectionitem.cpp \
+    collection/browser/gtpy_collectionrootitem.cpp \
     gt_python.cpp \
     calculators/gtpy_scriptcalculator.cpp \
     collection/gtpy_scriptcollectionsettings.cpp \
+    collection/gtpy_collectionwidget.cpp \
     post/gtpy_pythonplotconfigdialog.cpp \
     post/gtpy_pythonplotdata.cpp \
     post/gtpy_pythonplotitem.cpp \

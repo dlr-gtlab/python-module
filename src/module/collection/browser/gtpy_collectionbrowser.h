@@ -40,7 +40,6 @@ public:
                   const QList<GtCollectionNetworkItem>& availableItems,
                   const QList<GtCollectionNetworkItem>& updateAvailableItems);
 
-
     /**
      * @brief itemsToDownload
      * @return

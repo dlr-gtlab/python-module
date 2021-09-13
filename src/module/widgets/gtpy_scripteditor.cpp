@@ -1242,6 +1242,8 @@ GtpyScriptEditor::indentSelectedLines(bool direction)
         return false;
     }
 
+    qDebug() << "indent Selected Line ";
+
     QTextCursor cursor = this->textCursor();
 
     QString selection = cursor.selectedText();

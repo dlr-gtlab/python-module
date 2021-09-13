@@ -15,7 +15,6 @@
 #include "gt_logging.h"
 
 #include "gtpy_collectionbrowsermodel.h"
-#include "gtpy_collectionitemwidget.h"
 
 #include "gtpy_collectionbrowser.h"
 
@@ -102,9 +101,11 @@ GtpyCollectionBrowser::onItemClicked(const QModelIndex& index)
         return;
     }
 
-    GtpyCollectionItemWidget* widget = new GtpyCollectionItemWidget(item);
+    gtDebug() << "item clicked!";
 
-    widget->show();
+    //    GtCollectionItemWidget* widget = new GtCollectionItemWidget(item);
+
+    //    widget->show();
 }
 
 void
