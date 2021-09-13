@@ -60,12 +60,12 @@ INCLUDEPATH += .\
 DESTDIR = $${BUILD_DEST}
 
 HEADERS += \
-    collection/browser/gtpy_abstractcollectionitem.h \
+    collection/browser/gtpy_abstractbrowseritem.h \
+    collection/browser/gtpy_browseritem.h \
+    collection/browser/gtpy_collapsiblebrowseritem.h \
     collection/browser/gtpy_collectionbrowser.h \
     collection/browser/gtpy_collectionbrowsermodel.h \
-    collection/browser/gtpy_collectioncollapsibleitem.h \
-    collection/browser/gtpy_collectionitem.h \
-    collection/browser/gtpy_collectionrootitem.h \
+    collection/browser/gtpy_rootbrowseritem.h \
     gt_python.h \
     calculators/gtpy_scriptcalculator.h \
     collection/gtpy_scriptcollectionsettings.h \
@@ -113,12 +113,12 @@ HEADERS += \
     wizards/editor_settings/pages/gtpy_generalpage.h
 
 SOURCES += \
-    collection/browser/gtpy_abstractcollectionitem.cpp \
+    collection/browser/gtpy_abstractbrowseritem.cpp \
+    collection/browser/gtpy_browseritem.cpp \
+    collection/browser/gtpy_collapsiblebrowseritem.cpp \
     collection/browser/gtpy_collectionbrowser.cpp \
     collection/browser/gtpy_collectionbrowsermodel.cpp \
-    collection/browser/gtpy_collectioncollapsibleitem.cpp \
-    collection/browser/gtpy_collectionitem.cpp \
-    collection/browser/gtpy_collectionrootitem.cpp \
+    collection/browser/gtpy_rootbrowseritem.cpp \
     gt_python.cpp \
     calculators/gtpy_scriptcalculator.cpp \
     collection/gtpy_scriptcollectionsettings.cpp \

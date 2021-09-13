@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_collectioncollapsibleitem.h
+ * Source File: gtpy_collapsiblebrowseritem.h
  * copyright 2009-2019 by DLR
  *
  *  Created on: 22.08.2021
@@ -7,15 +7,15 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPYCOLLECTIONCOLLAPSIBLEITEM_H
-#define GTPYCOLLECTIONCOLLAPSIBLEITEM_H
+#ifndef GTPYCOLLAPSIBLEBROWSERITEM_H
+#define GTPYCOLLAPSIBLEBROWSERITEM_H
 
-#include "gtpy_abstractcollectionitem.h"
+#include "gtpy_abstractbrowseritem.h"
 
-class GtpyCollectionCollapsibleItem : public GtpyAbstractCollectionItem
+class GtpyCollapsibleBrowserItem : public GtpyAbstractBrowserItem
 {
 public:
-    GtpyCollectionCollapsibleItem(QString ident);
+    GtpyCollapsibleBrowserItem(QString ident);
 
     virtual bool isCollapsible() const override;
 
@@ -29,14 +29,14 @@ public:
 
     virtual QList<GtCollectionNetworkItem> selectedItems() override;
 
-    GtpyCollectionCollapsibleItem* collapsibleChild(const QString& ident);
+    GtpyCollapsibleBrowserItem* collapsibleChild(const QString& ident);
 
-    void appendChild(GtpyAbstractCollectionItem* item);
+    void appendChild(GtpyAbstractBrowserItem* item);
 
-    void appendChild(GtpyAbstractCollectionItem* item, QStringList hierarchy);
+    void appendChild(GtpyAbstractBrowserItem* item, QStringList hierarchy);
 
 private:
     QString m_ident;
 };
 
-#endif // GTPYCOLLECTIONCOLLAPSIBLEITEM_H
+#endif // GTPYCOLLAPSIBLEBROWSERITEM_H

@@ -12,10 +12,10 @@
 
 #include <QAbstractItemModel>
 
-#include "gtpy_abstractcollectionitem.h"
+#include "gtpy_abstractbrowseritem.h"
 
-class GtpyCollectionRootItem;
-class GtpyCollectionCollapsibleItem;
+class GtpyRootBrowserItem;
+class GtpyCollapsibleBrowserItem;
 
 class GtpyCollectionBrowserModel : public QAbstractItemModel
 {
@@ -140,9 +140,9 @@ public:
 
 private:
     void appendItemTo(GtCollectionNetworkItem item ,
-                      GtpyCollectionCollapsibleItem* to);
+                      GtpyCollapsibleBrowserItem* to);
 
-    GtpyCollectionRootItem* m_rootItem;
+    GtpyRootBrowserItem* m_rootItem;
 
 signals:
     /**

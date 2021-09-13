@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_collectionbrowserrootitem.h
+ * Source File: gtpy_rootbrowseritem.h
  * copyright 2009-2019 by DLR
  *
  *  Created on: 23.08.2021
@@ -7,27 +7,27 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPYCOLLECTIONROOTITEM_H
-#define GTPYCOLLECTIONROOTITEM_H
+#ifndef GTPYROOTBROWSERITEM_H
+#define GTPYROOTBROWSERITEM_H
 
-#include "gtpy_abstractcollectionitem.h"
+#include "gtpy_abstractbrowseritem.h"
 
-class GtpyCollectionCollapsibleItem;
+class GtpyCollapsibleBrowserItem;
 
-class GtpyCollectionRootItem : public GtpyAbstractCollectionItem
+class GtpyRootBrowserItem : public GtpyAbstractBrowserItem
 {
 public:
-    GtpyCollectionRootItem();
+    GtpyRootBrowserItem();
 
-    virtual ~GtpyCollectionRootItem();
+    virtual ~GtpyRootBrowserItem();
 
     virtual bool isCollapsible() const;
 
     virtual QString ident() const;
 
-    GtpyCollectionCollapsibleItem* createChild(int typeId, const QString& ident);
+    GtpyCollapsibleBrowserItem* createChild(int typeId, const QString& ident);
 
-    GtpyCollectionCollapsibleItem* child(int typeId);
+    GtpyCollapsibleBrowserItem* child(int typeId);
 
     //    GtpyCollectionCollapsibleItem* createInstalled(int typeId);
 
@@ -54,4 +54,4 @@ private:
     QList<int> m_itemTypes;
 };
 
-#endif // GTPYCOLLECTIONROOTITEM_H
+#endif // GTPYROOTBROWSERITEM_H

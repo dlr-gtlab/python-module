@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_abstractcollectionitem.h
+ * Source File: gtpy_abstractbrowseritem.h
  * copyright 2009-2019 by DLR
  *
  *  Created on: 22.08.2021
@@ -7,20 +7,20 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPYABSTRACTCOLLECTIONITEM_H
-#define GTPYABSTRACTCOLLECTIONITEM_H
+#ifndef GTPYABSTRACTBROWSERITEM_H
+#define GTPYABSTRACTBROWSERITEM_H
 
 #include <QVector>
 #include <QString>
 
 #include "gt_collectionnetworkitem.h"
 
-class GtpyAbstractCollectionItem
+class GtpyAbstractBrowserItem
 {
 public:
-    GtpyAbstractCollectionItem();
+    GtpyAbstractBrowserItem();
 
-    virtual ~GtpyAbstractCollectionItem();
+    virtual ~GtpyAbstractBrowserItem();
 
     virtual bool isCollapsible() const = 0;
 
@@ -42,7 +42,7 @@ public:
 
     int childCount() const;
 
-    GtpyAbstractCollectionItem* child(int row);
+    GtpyAbstractBrowserItem* child(int row);
 
     int row() const;
 
@@ -58,24 +58,24 @@ public:
      */
     void setSelected(bool selected);
 
-    GtpyAbstractCollectionItem* parentItem() const;
+    GtpyAbstractBrowserItem* parentItem() const;
 
-    void setParentItem(GtpyAbstractCollectionItem* parent);
+    void setParentItem(GtpyAbstractBrowserItem* parent);
 
     void setTypeId(int typeId);
 
     int typeId() const;
 
 protected:
-    QVector<GtpyAbstractCollectionItem*> m_childItems;
+    QVector<GtpyAbstractBrowserItem*> m_childItems;
 
 private:
     /// Item selected indicator
     bool m_selected;
 
-    GtpyAbstractCollectionItem* m_parentItem;
+    GtpyAbstractBrowserItem* m_parentItem;
 
     int m_typeId;
 };
 
-#endif // GTPYABSTRACTCOLLECTIONITEM_H
+#endif // GTPYABSTRACTBROWSERITEM_H

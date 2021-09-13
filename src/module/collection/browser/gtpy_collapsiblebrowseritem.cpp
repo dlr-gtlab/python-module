@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_collectioncollapsibleitem.cpp
+ * Source File: gtpy_collapsiblebrowseritem.cpp
  * copyright 2009-2019 by DLR
  *
  *  Created on: 22.08.2021
@@ -7,30 +7,30 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include "gtpy_collectioncollapsibleitem.h"
+#include "gtpy_collapsiblebrowseritem.h"
 
-GtpyCollectionCollapsibleItem::GtpyCollectionCollapsibleItem(QString ident) :
-    GtpyAbstractCollectionItem(), m_ident(ident)
+GtpyCollapsibleBrowserItem::GtpyCollapsibleBrowserItem(QString ident) :
+    GtpyAbstractBrowserItem(), m_ident(ident)
 {
     setSelected(false);
 }
 
 bool
-GtpyCollectionCollapsibleItem::isCollapsible() const
+GtpyCollapsibleBrowserItem::isCollapsible() const
 {
     return true;
 }
 
 QString
-GtpyCollectionCollapsibleItem::ident() const
+GtpyCollapsibleBrowserItem::ident() const
 {
     return m_ident;
 }
 
 void
-GtpyCollectionCollapsibleItem::selectAllChildren()
+GtpyCollapsibleBrowserItem::selectAllChildren()
 {
-    foreach (GtpyAbstractCollectionItem* item, m_childItems)
+    foreach (GtpyAbstractBrowserItem* item, m_childItems)
     {
         if (item->isCollapsible())
         {
@@ -44,9 +44,9 @@ GtpyCollectionCollapsibleItem::selectAllChildren()
 }
 
 void
-GtpyCollectionCollapsibleItem::unselectAllChildren()
+GtpyCollapsibleBrowserItem::unselectAllChildren()
 {
-    foreach (GtpyAbstractCollectionItem* item, m_childItems)
+    foreach (GtpyAbstractBrowserItem* item, m_childItems)
     {
         if (item->isCollapsible())
         {
@@ -60,11 +60,11 @@ GtpyCollectionCollapsibleItem::unselectAllChildren()
 }
 
 QList<GtCollectionNetworkItem>
-GtpyCollectionCollapsibleItem::uncollapsibleChilren()
+GtpyCollapsibleBrowserItem::uncollapsibleChilren()
 {
     QList<GtCollectionNetworkItem> retval;
 
-    foreach (GtpyAbstractCollectionItem* item, m_childItems)
+    foreach (GtpyAbstractBrowserItem* item, m_childItems)
     {
         if (item->isCollapsible())
         {
@@ -80,11 +80,11 @@ GtpyCollectionCollapsibleItem::uncollapsibleChilren()
 }
 
 QList<GtCollectionNetworkItem>
-GtpyCollectionCollapsibleItem::selectedItems()
+GtpyCollapsibleBrowserItem::selectedItems()
 {
     QList<GtCollectionNetworkItem> retval;
 
-    foreach (GtpyAbstractCollectionItem* item, m_childItems)
+    foreach (GtpyAbstractBrowserItem* item, m_childItems)
     {
         if (item->isCollapsible())
         {
@@ -102,14 +102,14 @@ GtpyCollectionCollapsibleItem::selectedItems()
     return retval;
 }
 
-GtpyCollectionCollapsibleItem*
-GtpyCollectionCollapsibleItem::collapsibleChild(const QString& ident)
+GtpyCollapsibleBrowserItem*
+GtpyCollapsibleBrowserItem::collapsibleChild(const QString& ident)
 {
-    foreach (GtpyAbstractCollectionItem* item, m_childItems)
+    foreach (GtpyAbstractBrowserItem* item, m_childItems)
     {
         if (item->ident() == ident && item->isCollapsible())
         {
-            return dynamic_cast<GtpyCollectionCollapsibleItem*>(item);
+            return dynamic_cast<GtpyCollapsibleBrowserItem*>(item);
         }
     }
 
@@ -117,26 +117,26 @@ GtpyCollectionCollapsibleItem::collapsibleChild(const QString& ident)
 }
 
 void
-GtpyCollectionCollapsibleItem::appendChild(GtpyAbstractCollectionItem* item)
+GtpyCollapsibleBrowserItem::appendChild(GtpyAbstractBrowserItem* item)
 {
     item->setParentItem(this);
     m_childItems.append(item);
 }
 
 void
-GtpyCollectionCollapsibleItem::appendChild(GtpyAbstractCollectionItem* item,
-        QStringList hierarchy)
+GtpyCollapsibleBrowserItem::appendChild(GtpyAbstractBrowserItem* item,
+                                        QStringList hierarchy)
 {
-    GtpyCollectionCollapsibleItem* level = this;
+    GtpyCollapsibleBrowserItem* level = this;
 
     foreach (QString itemName, hierarchy)
     {
-        GtpyCollectionCollapsibleItem* child =
+        GtpyCollapsibleBrowserItem* child =
             level->collapsibleChild(itemName);
 
         if (child == Q_NULLPTR)
         {
-            child = new GtpyCollectionCollapsibleItem(itemName);
+            child = new GtpyCollapsibleBrowserItem(itemName);
             child->setTypeId(typeId());
             level->appendChild(child);
         }
