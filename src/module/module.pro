@@ -69,6 +69,7 @@ HEADERS += \
     collection/browser/gtpy_collectionbrowsermodel.h \
     collection/browser/items/gtpy_rootbrowseritem.h \
     collection/itemwidget/gtpy_collectionitemwidget.h \
+    collection/localwidget/items/gtpy_abstractlocalitem.h \
     gt_python.h \
     calculators/gtpy_scriptcalculator.h \
     collection/gtpy_scriptcollectionsettings.h \
@@ -123,6 +124,7 @@ SOURCES += \
     collection/browser/gtpy_collectionbrowsermodel.cpp \
     collection/browser/items/gtpy_rootbrowseritem.cpp \
     collection/itemwidget/gtpy_collectionitemwidget.cpp \
+    collection/localwidget/items/gtpy_abstractlocalitem.cpp \
     gt_python.cpp \
     calculators/gtpy_scriptcalculator.cpp \
     collection/gtpy_scriptcollectionsettings.cpp \

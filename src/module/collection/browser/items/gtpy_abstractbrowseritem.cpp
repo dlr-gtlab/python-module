@@ -17,7 +17,7 @@ GtpyAbstractBrowserItem::GtpyAbstractBrowserItem() : m_parentItem(
 
 GtpyAbstractBrowserItem::~GtpyAbstractBrowserItem()
 {
-    qDeleteAll(m_childItems);
+    deleteChildren();
 }
 
 QString
