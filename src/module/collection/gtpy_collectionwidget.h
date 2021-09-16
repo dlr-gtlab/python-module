@@ -12,7 +12,7 @@
 
 #include <QWidget>
 
-class GtLocalCollectionWidget;
+class GtpyCollectionLocalWidget;
 class GtCollectionItem;
 
 class GtpyScriptEditor;
@@ -30,8 +30,7 @@ public:
      * @param defaultLocalWidget Pointer to default local widget.
      * @param parent Parent widget.
      */
-    GtpyCollectionWidget(GtLocalCollectionWidget* defaultLocalWidget,
-                         QWidget* parent = Q_NULLPTR);
+    Q_INVOKABLE GtpyCollectionWidget(QWidget* parent = Q_NULLPTR);
 
     /**
      * @brief Sets collection items list.
@@ -40,7 +39,7 @@ public:
     void setItems(const QList<GtCollectionItem>& items);
 private:
     ///default local widget
-    GtLocalCollectionWidget* m_defaultLocalWidget;
+    GtpyCollectionLocalWidget* m_defaultLocalWidget;
 
     /// Python Editor
     GtpyScriptEditor* m_editor;

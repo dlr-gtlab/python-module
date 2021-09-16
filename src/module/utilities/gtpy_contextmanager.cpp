@@ -2380,6 +2380,7 @@ GtpyContextManager::collectionChanged(const QString& collectionPath)
         QString nativePath = QDir::toNativeSeparators(dir.absolutePath());
         nativePath = nativePath + QDir::separator() + subdir;
 
+        qDebug() << "collection changed path == " << nativePath;
         addModulePath(nativePath);
     }
 }

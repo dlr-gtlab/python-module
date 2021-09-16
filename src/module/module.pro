@@ -47,6 +47,7 @@ INCLUDEPATH += .\
     collection/browser \
     collection/browser/items \
     collection/itemwidget \
+    collection/localwidget \
     collection/localwidget/items \
     tasks \
     post \
@@ -71,6 +72,7 @@ HEADERS += \
     collection/browser/items/gtpy_rootbrowseritem.h \
     collection/itemwidget/gtpy_collectionitemwidget.h \
     collection/localwidget/gtpy_collectionlocalmodel.h \
+    collection/localwidget/gtpy_collectionlocalwidget.h \
     collection/localwidget/items/gtpy_abstractlocalitem.h \
     collection/localwidget/items/gtpy_collapsiblelocalitem.h \
     collection/localwidget/items/gtpy_localitem.h \
@@ -129,6 +131,7 @@ SOURCES += \
     collection/browser/items/gtpy_rootbrowseritem.cpp \
     collection/itemwidget/gtpy_collectionitemwidget.cpp \
     collection/localwidget/gtpy_collectionlocalmodel.cpp \
+    collection/localwidget/gtpy_collectionlocalwidget.cpp \
     collection/localwidget/items/gtpy_abstractlocalitem.cpp \
     collection/localwidget/items/gtpy_collapsiblelocalitem.cpp \
     collection/localwidget/items/gtpy_localitem.cpp \

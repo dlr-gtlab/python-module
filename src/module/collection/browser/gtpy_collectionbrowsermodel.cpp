@@ -355,11 +355,6 @@ GtpyCollectionBrowserModel::setCollectionData(const
 
     m_rootItem->clearRoot();
 
-    if (!installedItems.isEmpty())
-    {
-        m_rootItem->createChild(InstalledItem, tr("Installed"));
-    }
-
     if (!availableItems.isEmpty())
     {
         m_rootItem->createChild(AvailableItem, tr("Available"));
@@ -370,9 +365,9 @@ GtpyCollectionBrowserModel::setCollectionData(const
         m_rootItem->createChild(UpdateAvailableItem, tr("Update available!"));
     }
 
-    foreach (GtCollectionNetworkItem item, installedItems)
+    if (!installedItems.isEmpty())
     {
-        appendItemTo(item, m_rootItem->child(InstalledItem));
+        m_rootItem->createChild(InstalledItem, tr("Installed"));
     }
 
     foreach (GtCollectionNetworkItem item, availableItems)
@@ -383,6 +378,11 @@ GtpyCollectionBrowserModel::setCollectionData(const
     foreach (GtCollectionNetworkItem item, updataAvailableItems)
     {
         appendItemTo(item, m_rootItem->child(UpdateAvailableItem));
+    }
+
+    foreach (GtCollectionNetworkItem item, installedItems)
+    {
+        appendItemTo(item, m_rootItem->child(InstalledItem));
     }
 
     endResetModel();
