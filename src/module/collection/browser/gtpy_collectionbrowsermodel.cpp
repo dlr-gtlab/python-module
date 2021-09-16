@@ -91,193 +91,152 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
 
     if (item->isCollapsible())
     {
-        if (role == Qt::DisplayRole && col == 0)
+        switch (role)
         {
-            return item->ident();
-        }
-        else if (item == m_rootItem->child(UpdateAvailableItem))
-        {
-            if (role == Qt::DecorationRole && col == 0)
+            case Qt::DisplayRole:
             {
-                return gtApp->icon(QStringLiteral("updateIcon_16.png"));
+                if (col == 0)
+                {
+                    return item->ident();
+                }
+
+                break;
             }
-            else if (role == Qt::BackgroundRole)
+
+            case Qt::DecorationRole:
             {
-                return QColor(180, 229, 190);
+                if (col == 0)
+                {
+                    if (item == m_rootItem->child(UpdateAvailableItem))
+                    {
+                        return gtApp->icon(QStringLiteral("updateIcon_16.png"));
+                    }
+                    else if (item == m_rootItem->child(AvailableItem))
+                    {
+                        return gtApp->icon(QStringLiteral("stackIcon.png"));
+                    }
+                    else if (item == m_rootItem->child(InstalledItem))
+                    {
+                        return gtApp->icon(
+                                   QStringLiteral("collectionIcon_16.png"));
+                    }
+                }
+
+                break;
             }
-        }
-        else if (item == m_rootItem->child(AvailableItem))
-        {
-            if (role == Qt::DecorationRole && col == 0)
+
+            case Qt::BackgroundRole:
             {
-                return gtApp->icon(QStringLiteral("stackIcon.png"));
+                if (item == m_rootItem->child(UpdateAvailableItem))
+                {
+                    return QColor(180, 229, 190);
+                }
+                else if (item == m_rootItem->child(AvailableItem))
+                {
+                    return QColor(255, 255, 255);
+                }
+                else if (item == m_rootItem->child(InstalledItem))
+                {
+                    return QColor(240, 240, 240);
+                }
+                else if (item->parentItem() ==
+                         m_rootItem->child(UpdateAvailableItem))
+                {
+                    return QColor(245, 245, 245);
+                }
+                else if (item->parentItem() == m_rootItem->child(AvailableItem))
+                {
+                    return QColor(245, 245, 245);
+                }
+                else if (item->parentItem() == m_rootItem->child(InstalledItem))
+                {
+                    return QColor(245, 245, 245);
+                }
+                else
+                {
+                    return QColor(250, 250, 250);
+                }
+
+                break;
             }
-        }
-        else if (item == m_rootItem->child(InstalledItem))
-        {
-            if (role == Qt::DecorationRole && col == 0)
-            {
-                return gtApp->icon(QStringLiteral("collectionIcon_16.png"));
-            }
-            else if (role == Qt::BackgroundRole)
-            {
-                return QColor(240, 240, 240);
-            }
-        }
-        else if (item->parentItem() == m_rootItem->child(UpdateAvailableItem))
-        {
-            if (role == Qt::BackgroundRole)
-            {
-                return QColor(245, 245, 245);
-            }
-        }
-        else if (item->parentItem() == m_rootItem->child(AvailableItem))
-        {
-            if (role == Qt::BackgroundRole)
-            {
-                return QColor(245, 245, 245);
-            }
-        }
-        else if (item->parentItem() == m_rootItem->child(InstalledItem))
-        {
-            if (role == Qt::BackgroundRole)
-            {
-                return QColor(245, 245, 245);
-            }
-        }
-        else
-        {
-            if (role == Qt::BackgroundRole)
-            {
-                return QColor(250, 250, 250);
-            }
+
+            default:
+                break;
         }
     }
     else
     {
-        GtpyCollectionItemType type = static_cast<GtpyCollectionItemType>(
-                                          item->typeId());
-
-        switch (type)
+        switch (role)
         {
-            case UpdateAvailableItem:
+            case Qt::DisplayRole:
             {
-                if (role == Qt::DisplayRole)
+                if (col == 0)
                 {
-                    if (col == 0)
-                    {
-                        return item->ident();
-                    }
-                    else if (col == 2)
-                    {
-                        return item->version();
-                    }
-                    else if (col == 3)
+                    return item->ident();
+                }
+                else if (col == 2)
+                {
+                    return item->version();
+                }
+                else if (col == 3)
+                {
+                    GtpyCollectionItemType type =
+                        static_cast<GtpyCollectionItemType>(item->typeId());
+
+                    if (type == UpdateAvailableItem || type == InstalledItem)
                     {
                         return item->installedVersion();
-                    }
-                }
-                else if (role == Qt::DecorationRole)
-                {
-                    if (col == 0)
-                    {
-                        return gtApp->icon(
-                                   QStringLiteral("pluginIcon_16.png"));
-                    }
-                    else if (col == 1)
-                    {
-                        return gtApp->icon(
-                                   QStringLiteral("infoBlueIcon_16.png"));
-                    }
-                }
-                else if (role == Qt::CheckStateRole && col == 0)
-                {
-                    if (item->isSelected())
-                    {
-                        return Qt::Checked;
-                    }
-                    else
-                    {
-                        return Qt::Unchecked;
                     }
                 }
 
                 break;
             }
 
-            case AvailableItem:
+            case Qt::DecorationRole:
             {
-                if (role == Qt::DisplayRole)
+                if (col == 0)
                 {
-                    if (col == 0)
-                    {
-                        return item->ident();
-                    }
-                    else if (col == 2)
-                    {
-                        return item->version();
-                    }
+                    return gtApp->icon(
+                               QStringLiteral("pluginIcon_16.png"));
                 }
-                else if (role == Qt::DecorationRole)
+                else if (col == 1)
                 {
-                    if (col == 0)
-                    {
-                        return gtApp->icon(
-                                   QStringLiteral("pluginIcon_16.png"));
-                    }
-                    else if (col == 1)
-                    {
-                        return gtApp->icon(
-                                   QStringLiteral("infoBlueIcon_16.png"));
-                    }
+                    return gtApp->icon(
+                               QStringLiteral("infoBlueIcon_16.png"));
                 }
-                else if (role == Qt::CheckStateRole && col == 0)
-                {
 
-                    if (item->isSelected())
+                break;
+            }
+
+            case Qt::CheckStateRole:
+            {
+                if (col == 0)
+                {
+                    GtpyCollectionItemType type =
+                        static_cast<GtpyCollectionItemType>(item->typeId());
+
+                    if (type == UpdateAvailableItem || type == AvailableItem)
                     {
-                        return Qt::Checked;
-                    }
-                    else
-                    {
-                        return Qt::Unchecked;
+                        if (item->isSelected())
+                        {
+                            return Qt::Checked;
+                        }
+                        else
+                        {
+                            return Qt::Unchecked;
+                        }
                     }
                 }
 
                 break;
             }
 
-            case InstalledItem:
+            case Qt::ForegroundRole:
             {
-                if (role == Qt::DisplayRole)
-                {
-                    if (col == 0)
-                    {
-                        return item->ident();
-                    }
-                    else if (col == 2)
-                    {
-                        return item->version();
-                    }
-                    else if (col == 3)
-                    {
-                        return item->installedVersion();
-                    }
-                }
-                else if (role == Qt::DecorationRole)
-                {
-                    if (col == 0)
-                    {
-                        return gtApp->icon(
-                                   QStringLiteral("pluginIcon_16.png"));
-                    }
-                    else if (col == 1)
-                    {
-                        return gtApp->icon(
-                                   QStringLiteral("infoBlueIcon_16.png"));
-                    }
-                }
-                else if (role == Qt::ForegroundRole)
+                GtpyCollectionItemType type =
+                    static_cast<GtpyCollectionItemType>(item->typeId());
+
+                if (type == InstalledItem)
                 {
                     return QColor(Qt::darkGray);
                 }
