@@ -60,6 +60,19 @@ GtpyAbstractLocalItem::child(int row)
     return m_childItems.at(row);
 }
 
+bool
+GtpyAbstractLocalItem::deleteChild(int row)
+{
+    if (row < 0 || row >= m_childItems.size())
+    {
+        return false;
+    }
+
+    delete m_childItems.takeAt(row);
+
+    return true;
+}
+
 void
 GtpyAbstractLocalItem::deleteChildren()
 {

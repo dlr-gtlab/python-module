@@ -38,6 +38,8 @@ public:
 
     GtpyAbstractLocalItem* child(int row);
 
+    bool deleteChild(int row);
+
     void deleteChildren();
 
     int row() const;

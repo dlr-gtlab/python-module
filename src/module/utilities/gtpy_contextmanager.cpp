@@ -151,6 +151,24 @@ GtpyContextManager::~GtpyContextManager()
     PythonQt::cleanup();
 }
 
+QString
+GtpyContextManager::collectionPath()
+{
+    QString retval;
+
+    QDir dir(qApp->applicationDirPath());
+
+    if (dir.cdUp())
+    {
+        dir.setPath(dir.absolutePath() + QDir::separator() + "Collections" +
+                    QDir::separator() + GtpyGlobals::COLLECTION_ID);
+
+        retval = dir.absolutePath();
+    }
+
+    return retval;
+}
+
 void
 GtpyContextManager::setEnvironmentPaths() const
 {
@@ -1313,31 +1331,28 @@ GtpyContextManager::initWrapperModule()
 void
 GtpyContextManager::addCollectionPaths()
 {
-    QDir dir(qApp->applicationDirPath());
+    QString path = collectionPath();
 
-    if (dir.cdUp())
+    QDir collectionDir(path);
+
+    m_watcher.addPath(collectionDir.absolutePath());
+    connect(&m_watcher, SIGNAL(directoryChanged(QString)), this,
+            SLOT(collectionChanged(QString)));
+
+    if (collectionDir.exists())
     {
-        dir.setPath(dir.absolutePath() + QDir::separator() + "Collections" +
-                    QDir::separator() + GtpyGlobals::COLLECTION_ID);
+        collectionDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot |
+                                QDir::NoSymLinks);
 
-        m_watcher.addPath(dir.absolutePath());
-        connect(&m_watcher, SIGNAL(directoryChanged(QString)), this,
-                SLOT(collectionChanged(QString)));
+        QStringList subdirs = collectionDir.entryList();
 
-        if (dir.exists())
+        foreach (QString subdir, subdirs)
         {
-            dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+            QString nativePath = QDir::toNativeSeparators(
+                                     collectionDir.absolutePath());
+            nativePath = nativePath + QDir::separator() + subdir;
 
-            QStringList subdirs = dir.entryList();
-
-            foreach (QString subdir, subdirs)
-            {
-                QString nativePath = QDir::toNativeSeparators(
-                                         dir.absolutePath());
-                nativePath = nativePath + QDir::separator() + subdir;
-
-                addModulePath(nativePath);
-            }
+            addModulePath(nativePath);
         }
     }
 }
@@ -2380,7 +2395,6 @@ GtpyContextManager::collectionChanged(const QString& collectionPath)
         QString nativePath = QDir::toNativeSeparators(dir.absolutePath());
         nativePath = nativePath + QDir::separator() + subdir;
 
-        qDebug() << "collection changed path == " << nativePath;
         addModulePath(nativePath);
     }
 }

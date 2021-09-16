@@ -88,6 +88,8 @@ public:
 
     ~GtpyContextManager();
 
+    static QString collectionPath();
+
     /**
      * @brief Initialize the Python extensions written in C++.
      */

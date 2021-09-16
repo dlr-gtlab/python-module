@@ -8,14 +8,16 @@
  */
 
 #include <QIcon>
+#include <QDir>
 
 #include "gt_application.h"
 
-#include "gtpy_collectionlocalmodel.h"
-
+#include "gtpy_contextmanager.h"
 #include "gtpy_globals.h"
 #include "gtpy_collapsiblelocalitem.h"
 #include "gtpy_localitem.h"
+
+#include "gtpy_collectionlocalmodel.h"
 
 GtpyCollectionLocalModel::GtpyCollectionLocalModel(QObject* parent) :
     QAbstractItemModel(parent), m_showInfoColumns(true)
@@ -325,12 +327,83 @@ GtpyCollectionLocalModel::itemFromIndex(const QModelIndex& index)
 bool
 GtpyCollectionLocalModel::uninstallItem(const QModelIndex& index)
 {
-    return false;
+    if (!index.isValid())
+    {
+        return false;
+    }
+
+    if (index.model() != this)
+    {
+        return false;
+    }
+
+    const QModelIndex parent = index.parent();
+
+    GtpyAbstractLocalItem* parentItem =
+        static_cast<GtpyAbstractLocalItem*>(parent.internalPointer());
+
+    if (!parentItem)
+    {
+        return false;
+    }
+
+    GtpyLocalItem* item =
+        static_cast<GtpyLocalItem*>(index.internalPointer());
+
+    if (!item)
+    {
+        return false;
+    }
+
+    const int row = index.row();
+
+    if (row < 0 || row >= parentItem->childCount())
+    {
+        return false;
+    }
+
+    beginRemoveRows(parent, row, row);
+
+    if (!parentItem->deleteChild(row))
+    {
+        return false;
+    }
+
+    QString collectionPath = GtpyContextManager::collectionPath();
+
+    if (!collectionPath.isEmpty())
+    {
+        QString uuid = item->item().uuid();
+
+        if (!uuid.isEmpty())
+        {
+            QDir dir(collectionPath + QDir::separator() + uuid);
+
+            if (dir.exists())
+            {
+                if (!dir.removeRecursively())
+                {
+                    return false;
+                }
+            }
+        }
+    }
+
+    endRemoveRows();
+
+    return true;
 }
 
 void
 GtpyCollectionLocalModel::setShowInfoColumns(bool val)
 {
+    if (m_showInfoColumns == val)
+    {
+        return;
+    }
 
+    beginResetModel();
+    m_showInfoColumns = val;
+    endResetModel();
 }
 
