@@ -369,6 +369,8 @@ GtpyCollectionLocalModel::uninstallItem(const QModelIndex& index)
         return false;
     }
 
+    bool retval = false;
+
     QString collectionPath = GtpyContextManager::collectionPath();
 
     if (!collectionPath.isEmpty())
@@ -381,17 +383,14 @@ GtpyCollectionLocalModel::uninstallItem(const QModelIndex& index)
 
             if (dir.exists())
             {
-                if (!dir.removeRecursively())
-                {
-                    return false;
-                }
+                retval = dir.removeRecursively();
             }
         }
     }
 
     endRemoveRows();
 
-    return true;
+    return retval;
 }
 
 void
