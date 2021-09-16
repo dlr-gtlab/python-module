@@ -20,30 +20,6 @@ GtpyAbstractBrowserItem::~GtpyAbstractBrowserItem()
     qDeleteAll(m_childItems);
 }
 
-void
-GtpyAbstractBrowserItem::selectAllChildren()
-{
-    return;
-}
-
-void
-GtpyAbstractBrowserItem::unselectAllChildren()
-{
-    return;
-}
-
-QList<GtCollectionNetworkItem>
-GtpyAbstractBrowserItem::uncollapsibleChilren()
-{
-    return QList<GtCollectionNetworkItem>();
-}
-
-QList<GtCollectionNetworkItem>
-GtpyAbstractBrowserItem::selectedItems()
-{
-    return QList<GtCollectionNetworkItem>();
-}
-
 QString
 GtpyAbstractBrowserItem::version() const
 {
@@ -69,10 +45,27 @@ GtpyAbstractBrowserItem::item() const
 }
 
 void
-GtpyAbstractBrowserItem::deleteChildren()
+GtpyAbstractBrowserItem::selectAllChildren()
 {
-    qDeleteAll(m_childItems);
-    m_childItems.clear();
+    return;
+}
+
+void
+GtpyAbstractBrowserItem::unselectAllChildren()
+{
+    return;
+}
+
+QList<GtCollectionNetworkItem>
+GtpyAbstractBrowserItem::selectedItems()
+{
+    return QList<GtCollectionNetworkItem>();
+}
+
+QList<GtCollectionNetworkItem>
+GtpyAbstractBrowserItem::uncollapsibleChilren()
+{
+    return QList<GtCollectionNetworkItem>();
 }
 
 int
@@ -92,6 +85,13 @@ GtpyAbstractBrowserItem::child(int row)
     return m_childItems.at(row);
 }
 
+void
+GtpyAbstractBrowserItem::deleteChildren()
+{
+    qDeleteAll(m_childItems);
+    m_childItems.clear();
+}
+
 int
 GtpyAbstractBrowserItem::row() const
 {
@@ -104,18 +104,6 @@ GtpyAbstractBrowserItem::row() const
     return 0;
 }
 
-bool
-GtpyAbstractBrowserItem::isSelected() const
-{
-    return m_selected;
-}
-
-void
-GtpyAbstractBrowserItem::setSelected(bool selected)
-{
-    m_selected = selected;
-}
-
 GtpyAbstractBrowserItem*
 GtpyAbstractBrowserItem::parentItem() const
 {
@@ -126,6 +114,18 @@ void
 GtpyAbstractBrowserItem::setParentItem(GtpyAbstractBrowserItem* parent)
 {
     m_parentItem = parent;
+}
+
+bool
+GtpyAbstractBrowserItem::isSelected() const
+{
+    return m_selected;
+}
+
+void
+GtpyAbstractBrowserItem::setSelected(bool selected)
+{
+    m_selected = selected;
 }
 
 void

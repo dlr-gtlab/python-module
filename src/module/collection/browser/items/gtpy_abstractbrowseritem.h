@@ -26,14 +26,6 @@ public:
 
     virtual QString ident() const = 0;
 
-    virtual void selectAllChildren();
-
-    virtual void unselectAllChildren();
-
-    virtual QList<GtCollectionNetworkItem> uncollapsibleChilren();
-
-    virtual QList<GtCollectionNetworkItem> selectedItems();
-
     virtual QString version() const;
 
     virtual QString installedVersion() const;
@@ -42,13 +34,25 @@ public:
 
     virtual GtCollectionNetworkItem item() const;
 
-    void deleteChildren();
+    virtual void selectAllChildren();
+
+    virtual void unselectAllChildren();
+
+    virtual QList<GtCollectionNetworkItem> selectedItems();
+
+    virtual QList<GtCollectionNetworkItem> uncollapsibleChilren();
 
     int childCount() const;
 
     GtpyAbstractBrowserItem* child(int row);
 
+    void deleteChildren();
+
     int row() const;
+
+    GtpyAbstractBrowserItem* parentItem() const;
+
+    void setParentItem(GtpyAbstractBrowserItem* parent);
 
     /**
      * @brief isSelected
@@ -62,10 +66,6 @@ public:
      */
     void setSelected(bool selected);
 
-    GtpyAbstractBrowserItem* parentItem() const;
-
-    void setParentItem(GtpyAbstractBrowserItem* parent);
-
     void setTypeId(int typeId);
 
     int typeId() const;
@@ -74,10 +74,10 @@ protected:
     QVector<GtpyAbstractBrowserItem*> m_childItems;
 
 private:
+    GtpyAbstractBrowserItem* m_parentItem;
+
     /// Item selected indicator
     bool m_selected;
-
-    GtpyAbstractBrowserItem* m_parentItem;
 
     int m_typeId;
 };
