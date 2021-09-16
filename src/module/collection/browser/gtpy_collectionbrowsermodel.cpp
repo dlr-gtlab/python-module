@@ -268,60 +268,39 @@ GtpyCollectionBrowserModel::setData(const QModelIndex& index,
 
     if (!item->isCollapsible())
     {
-        GtpyCollectionItemType type = static_cast<GtpyCollectionItemType>(
-                                          item->typeId());
-
-        switch (type)
+        if (col == 0)
         {
-            case UpdateAvailableItem:
+            switch (role)
             {
-                if (role == Qt::CheckStateRole && col == 0)
+                case Qt::CheckStateRole:
                 {
+                    GtpyCollectionItemType type =
+                        static_cast<GtpyCollectionItemType>(item->typeId());
 
-                    Qt::CheckState state =
-                        static_cast<Qt::CheckState>(value.toInt());
-
-                    if (state == Qt::Checked)
+                    if (type == UpdateAvailableItem || type == AvailableItem)
                     {
-                        item->setSelected(true);
-                    }
-                    else
-                    {
-                        item->setSelected(false);
+                        Qt::CheckState state =
+                            static_cast<Qt::CheckState>(value.toInt());
+
+                        if (state == Qt::Checked)
+                        {
+                            item->setSelected(true);
+                        }
+                        else
+                        {
+                            item->setSelected(false);
+                        }
+
+                        emit dataChanged(index, index);
+                        emit selectionChanged();
                     }
 
-                    emit dataChanged(index, index);
-                    emit selectionChanged();
+                    break;
                 }
 
-                break;
+                default:
+                    break;
             }
-
-            case AvailableItem:
-            {
-                if (role == Qt::CheckStateRole && col == 0)
-                {
-                    Qt::CheckState state =
-                        static_cast<Qt::CheckState>(value.toInt());
-
-                    if (state == Qt::Checked)
-                    {
-                        item->setSelected(true);
-                    }
-                    else
-                    {
-                        item->setSelected(false);
-                    }
-
-                    emit dataChanged(index, index);
-                    emit selectionChanged();
-                }
-
-                break;
-            }
-
-            default:
-                break;
         }
     }
 
