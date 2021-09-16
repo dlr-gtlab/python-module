@@ -45,6 +45,7 @@ INCLUDEPATH += .\
     calculators \
     collection \
     collection/browser \
+    collection/itemwidget \
     tasks \
     post \
     utilities \
@@ -66,6 +67,7 @@ HEADERS += \
     collection/browser/gtpy_collectionbrowser.h \
     collection/browser/gtpy_collectionbrowsermodel.h \
     collection/browser/gtpy_rootbrowseritem.h \
+    collection/itemwidget/gtpy_collectionitemwidget.h \
     gt_python.h \
     calculators/gtpy_scriptcalculator.h \
     collection/gtpy_scriptcollectionsettings.h \
@@ -119,6 +121,7 @@ SOURCES += \
     collection/browser/gtpy_collectionbrowser.cpp \
     collection/browser/gtpy_collectionbrowsermodel.cpp \
     collection/browser/gtpy_rootbrowseritem.cpp \
+    collection/itemwidget/gtpy_collectionitemwidget.cpp \
     gt_python.cpp \
     calculators/gtpy_scriptcalculator.cpp \
     collection/gtpy_scriptcollectionsettings.cpp \
