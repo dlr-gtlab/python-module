@@ -29,27 +29,8 @@ public:
 
     GtpyCollapsibleBrowserItem* child(int typeId);
 
-    //    GtpyCollectionCollapsibleItem* createInstalled(int typeId);
-
-    //    GtpyCollectionCollapsibleItem* installed() const;
-
-    //    GtpyCollectionCollapsibleItem* createAvailable(int typeId);
-
-    //    GtpyCollectionCollapsibleItem* available() const;
-
-    //    GtpyCollectionCollapsibleItem* createUpdateAvailable(int typeId);
-
-    //    GtpyCollectionCollapsibleItem* updateAvailable() const;
-
     void clearRoot();
 private:
-    //    void clearRoot();
-
-    //    GtpyCollectionCollapsibleItem* m_installed;
-
-    //    GtpyCollectionCollapsibleItem* m_available;
-
-    //    GtpyCollectionCollapsibleItem* m_updateAvailable;
 
     QList<int> m_itemTypes;
 };

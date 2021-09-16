@@ -103,7 +103,6 @@ GtpyCollectionBrowser::onItemClicked(const QModelIndex& index)
     }
 
     GtpyCollectionItemWidget* widget = new GtpyCollectionItemWidget(item);
-    //    GtCollectionItemWidget* widget = new GtCollectionItemWidget(item);
 
     widget->show();
 }

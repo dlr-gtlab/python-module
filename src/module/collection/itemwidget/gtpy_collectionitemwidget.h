@@ -23,8 +23,6 @@ class GtpyCollectionItemWidget: public QWidget
 public:
     Q_INVOKABLE GtpyCollectionItemWidget(const GtCollectionItem& collectionItem,
                                          QWidget* parent = Q_NULLPTR);
-
-    virtual ~GtpyCollectionItemWidget();
 private:
     /// Filter string.
     QString m_filter;
