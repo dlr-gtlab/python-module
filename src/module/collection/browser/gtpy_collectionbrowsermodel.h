@@ -31,7 +31,7 @@ public:
 
     Q_INVOKABLE GtpyCollectionBrowserModel(QObject* parent = Q_NULLPTR);
 
-    ~GtpyCollectionBrowserModel();
+    virtual ~GtpyCollectionBrowserModel();
 
     /**
      * @brief rowCount

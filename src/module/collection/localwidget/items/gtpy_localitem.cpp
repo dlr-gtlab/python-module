@@ -7,7 +7,7 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include "gtpylocalitem.h"
+#include "gtpy_localitem.h"
 
 GtpyLocalItem::GtpyLocalItem(const GtCollectionItem& item) :
     m_item(item)
