@@ -42,13 +42,13 @@ public:
      * @brief Returns the version of the item.
      * @return The version of the item.
      */
-    virtual QString version() const;
+    virtual QString version() const override;
 
     /**
      * @brief Returns the installed version of the item.
      * @return The installed version of the item.
      */
-    virtual QString installedVersion() const;
+    virtual QString installedVersion() const override;
 
     /**
      * @brief Returns the collection item.

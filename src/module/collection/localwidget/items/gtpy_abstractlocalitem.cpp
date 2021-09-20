@@ -73,6 +73,8 @@ GtpyAbstractLocalItem::deleteChild(int row)
     delete child;
     child = Q_NULLPTR;
 
+    Q_UNUSED(child);
+
     return true;
 }
 

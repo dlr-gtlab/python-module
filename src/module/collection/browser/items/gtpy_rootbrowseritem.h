@@ -34,13 +34,13 @@ public:
      * @brief Returns whether the item is collapsible or not.
      * @return Whether the item is collapsible or not.
      */
-    virtual bool isCollapsible() const;
+    virtual bool isCollapsible() const override;
 
     /**
      * @brief Returns the identification ot the item.
      * @return The identification of the item.
      */
-    virtual QString ident() const;
+    virtual QString ident() const override;
 
     /**
      * @brief Creates a new collapsible child item with the given type id and
