@@ -15,11 +15,6 @@ GtpyLocalItem::GtpyLocalItem(const GtCollectionItem& item) :
 
 }
 
-GtpyLocalItem::~GtpyLocalItem()
-{
-
-}
-
 bool GtpyLocalItem::isCollapsible() const
 {
     return false;

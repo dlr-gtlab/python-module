@@ -15,11 +15,6 @@ GtpyCollapsibleLocalItem::GtpyCollapsibleLocalItem(QString ident) :
 
 }
 
-GtpyCollapsibleLocalItem::~GtpyCollapsibleLocalItem()
-{
-
-}
-
 bool
 GtpyCollapsibleLocalItem::isCollapsible() const
 {
