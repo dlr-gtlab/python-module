@@ -26,7 +26,7 @@ public:
      * @brief GtpyCollectionBrowserSortModel
      * @param parent Parent object.
      */
-    GtpyCollectionBrowserSortModel(QObject* parent = Q_NULLPTR);
+    explicit GtpyCollectionBrowserSortModel(QObject* parent = Q_NULLPTR);
 
 protected:
     /**

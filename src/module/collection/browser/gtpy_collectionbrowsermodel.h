@@ -36,7 +36,7 @@ public:
      * @brief GtpyCollectionBrowserModel
      * @param parent Parent object.
      */
-    GtpyCollectionBrowserModel(QObject* parent = Q_NULLPTR);
+    explicit GtpyCollectionBrowserModel(QObject* parent = Q_NULLPTR);
 
     /**
      * @brief ~GtpyCollectionBrowserModel

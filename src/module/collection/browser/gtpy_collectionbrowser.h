@@ -30,7 +30,7 @@ public:
      * @brief GtpyCollectionBrowser
      * @param parent Parent widget.
      */
-    GtpyCollectionBrowser(QWidget* parent = Q_NULLPTR);
+    explicit GtpyCollectionBrowser(QWidget* parent = Q_NULLPTR);
 
     /**
      * @brief Appends the given list of items as children of the root
