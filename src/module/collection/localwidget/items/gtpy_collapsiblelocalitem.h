@@ -17,6 +17,8 @@ class GtpyCollapsibleLocalItem : public GtpyAbstractLocalItem
 public:
     GtpyCollapsibleLocalItem(QString ident);
 
+    virtual ~GtpyCollapsibleLocalItem();
+
     virtual bool isCollapsible() const override;
 
     virtual QString ident() const override;

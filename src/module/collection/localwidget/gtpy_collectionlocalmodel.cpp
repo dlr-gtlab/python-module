@@ -337,20 +337,18 @@ GtpyCollectionLocalModel::uninstallItem(const QModelIndex& index)
         return false;
     }
 
-    const QModelIndex parent = index.parent();
-
-    GtpyAbstractLocalItem* parentItem =
-        static_cast<GtpyAbstractLocalItem*>(parent.internalPointer());
-
-    if (!parentItem)
-    {
-        return false;
-    }
-
     GtpyLocalItem* item =
         static_cast<GtpyLocalItem*>(index.internalPointer());
 
     if (!item)
+    {
+        return false;
+    }
+
+    GtpyCollapsibleLocalItem* parentItem =
+        static_cast<GtpyCollapsibleLocalItem*>(item->parentItem());
+
+    if (!parentItem)
     {
         return false;
     }
@@ -362,35 +360,74 @@ GtpyCollectionLocalModel::uninstallItem(const QModelIndex& index)
         return false;
     }
 
-    beginRemoveRows(parent, row, row);
+    QModelIndex parentIndex = index.parent();
 
-    if (!parentItem->deleteChild(row))
+    beginRemoveRows(parentIndex, row, row);
+
+    QString uuid = item->item().uuid();
+
+    bool success = false;
+
+    if (parentItem->deleteChild(row))
     {
-        return false;
-    }
+        item = Q_NULLPTR;
+        QString collectionPath = GtpyContextManager::collectionPath();
 
-    bool retval = false;
-
-    QString collectionPath = GtpyContextManager::collectionPath();
-
-    if (!collectionPath.isEmpty())
-    {
-        QString uuid = item->item().uuid();
-
-        if (!uuid.isEmpty())
+        if (!collectionPath.isEmpty())
         {
-            QDir dir(collectionPath + QDir::separator() + uuid);
-
-            if (dir.exists())
+            if (!uuid.isEmpty())
             {
-                retval = dir.removeRecursively();
+                QDir dir(collectionPath + QDir::separator() + uuid);
+
+                if (dir.exists())
+                {
+                    success = dir.removeRecursively();
+                }
             }
         }
     }
 
     endRemoveRows();
 
-    return retval;
+    if (success)
+    {
+        int childCount = parentItem->childCount();
+
+        while (childCount == 0)
+        {
+            int parentRow = parentItem->row();
+
+            parentItem = static_cast<GtpyCollapsibleLocalItem*>(
+                             parentItem->parentItem());
+
+            if (parentItem)
+            {
+                parentIndex = parentIndex.parent();
+
+                beginRemoveRows(parentIndex, parentRow, parentRow);
+
+                parentItem->deleteChild(parentRow);
+
+                if (parentItem == m_rootItem)
+                {
+                    childCount = -1;
+                }
+                else
+                {
+                    childCount = parentItem->childCount();
+                }
+
+                endRemoveRows();
+            }
+            else
+            {
+                childCount = -1;
+            }
+
+        }
+    }
+
+    return success;
 }
 
 void

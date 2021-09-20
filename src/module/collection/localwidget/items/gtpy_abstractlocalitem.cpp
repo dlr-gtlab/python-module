@@ -68,7 +68,10 @@ GtpyAbstractLocalItem::deleteChild(int row)
         return false;
     }
 
-    delete m_childItems.takeAt(row);
+    GtpyAbstractLocalItem* child = m_childItems.takeAt(row);
+
+    delete child;
+    child = Q_NULLPTR;
 
     return true;
 }
