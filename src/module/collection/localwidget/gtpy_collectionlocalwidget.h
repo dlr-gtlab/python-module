@@ -11,7 +11,10 @@
 #define GTPYCOLLECTIONLOCALWIDGET_H
 
 #include <QWidget>
-#include <QTreeView>
+#include <QModelIndex>
+
+class QTreeView;
+class QSortFilterProxyModel;
 
 class GtCollectionItem;
 class GtpyCollectionLocalModel;
@@ -49,12 +52,15 @@ public:
     void setShowItemInfo(bool val);
 
 private:
+    QModelIndex mapToSource(const QModelIndex& index) const;
+
     /// Tree view.
     QTreeView* m_view;
 
     /// Local collection model.
     GtpyCollectionLocalModel* m_model;
 
+    QSortFilterProxyModel* m_sortModel;
     /// Enables custom context menu
     bool m_contextMenuEnabled;
 

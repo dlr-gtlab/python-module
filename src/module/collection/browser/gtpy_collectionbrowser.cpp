@@ -17,6 +17,8 @@
 #include "gtpy_collectionbrowsermodel.h"
 #include "gtpy_collectionitemwidget.h"
 
+#include "gtpy_collectionbrowsersortmodel.h"
+
 #include "gtpy_collectionbrowser.h"
 
 GtpyCollectionBrowser::GtpyCollectionBrowser(QWidget* parent) :
@@ -28,7 +30,12 @@ GtpyCollectionBrowser::GtpyCollectionBrowser(QWidget* parent) :
     m_view = new QTreeView;
 
     m_model = new GtpyCollectionBrowserModel(this);
-    m_view->setModel(m_model);
+    m_sortModel = new GtpyCollectionBrowserSortModel(this);
+
+    m_sortModel->sort(0, Qt::AscendingOrder);
+    m_sortModel->setSourceModel(m_model);
+
+    m_view->setModel(m_sortModel);
 
     m_view->setColumnWidth(0, 300);
     m_view->setColumnWidth(1, 25);
@@ -82,6 +89,19 @@ GtpyCollectionBrowser::unselectAllItems()
     m_view->expandAll();
 }
 
+QModelIndex
+GtpyCollectionBrowser::mapToSource(const QModelIndex& index) const
+{
+    QModelIndex retval;
+
+    if (m_sortModel)
+    {
+        retval = m_sortModel->mapToSource(index);
+    }
+
+    return retval;
+}
+
 void
 GtpyCollectionBrowser::onItemClicked(const QModelIndex& index)
 {
@@ -95,7 +115,7 @@ GtpyCollectionBrowser::onItemClicked(const QModelIndex& index)
         return;
     }
 
-    GtCollectionItem item = m_model->itemFromIndex(index);
+    GtCollectionItem item = m_model->itemFromIndex(mapToSource(index));
 
     if (!item.isValid())
     {

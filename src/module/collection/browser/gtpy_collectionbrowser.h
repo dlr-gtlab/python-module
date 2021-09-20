@@ -14,7 +14,9 @@
 #include "gt_collectionnetworkitem.h"
 
 class QTreeView;
+
 class GtpyCollectionBrowserModel;
+class GtpyCollectionBrowserSortModel;
 
 /**
  * @brief The GtpyCollectionBrowser class
@@ -63,8 +65,12 @@ public:
     void unselectAllItems() Q_DECL_OVERRIDE;
 
 private:
+    QModelIndex mapToSource(const QModelIndex& index) const;
+
     /// collection browser model.
     GtpyCollectionBrowserModel* m_model;
+
+    GtpyCollectionBrowserSortModel* m_sortModel;
 
     /// Tree view
     QTreeView* m_view;

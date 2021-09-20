@@ -64,6 +64,7 @@ INCLUDEPATH += .\
 DESTDIR = $${BUILD_DEST}
 
 HEADERS += \
+    collection/browser/gtpy_collectionbrowsersortmodel.h \
     collection/browser/items/gtpy_abstractbrowseritem.h \
     collection/browser/items/gtpy_browseritem.h \
     collection/browser/items/gtpy_collapsiblebrowseritem.h \
@@ -123,6 +124,7 @@ HEADERS += \
     wizards/editor_settings/pages/gtpy_generalpage.h
 
 SOURCES += \
+    collection/browser/gtpy_collectionbrowsersortmodel.cpp \
     collection/browser/items/gtpy_abstractbrowseritem.cpp \
     collection/browser/items/gtpy_browseritem.cpp \
     collection/browser/items/gtpy_collapsiblebrowseritem.cpp \

@@ -9,6 +9,8 @@
 
 #include <QVBoxLayout>
 #include <QMenu>
+#include <QSortFilterProxyModel>
+#include <QTreeView>
 
 #include "gt_application.h"
 #include "gt_logging.h"
@@ -25,9 +27,13 @@ GtpyCollectionLocalWidget::GtpyCollectionLocalWidget(QWidget* parent) :
     lay->setContentsMargins(0, 0, 0, 0);
 
     m_view = new QTreeView;
-
     m_model = new GtpyCollectionLocalModel(this);
-    m_view->setModel(m_model);
+    m_sortModel = new QSortFilterProxyModel(this);
+
+    m_sortModel->sort(0, Qt::AscendingOrder);
+    m_sortModel->setSourceModel(m_model);
+
+    m_view->setModel(m_sortModel);
 
     m_view->setColumnWidth(0, 300);
     m_view->setColumnWidth(1, 25);
@@ -61,7 +67,7 @@ GtpyCollectionLocalWidget::setItems(const QList<GtCollectionItem>& items)
 GtCollectionItem
 GtpyCollectionLocalWidget::getItem(const QModelIndex& index)
 {
-    return m_model->itemFromIndex(index);
+    return m_model->itemFromIndex(mapToSource(index));
 }
 
 void
@@ -91,6 +97,19 @@ GtpyCollectionLocalWidget::setShowItemInfo(bool val)
     }
 }
 
+QModelIndex
+GtpyCollectionLocalWidget::mapToSource(const QModelIndex& index) const
+{
+    QModelIndex retval;
+
+    if (m_sortModel)
+    {
+        retval = m_sortModel->mapToSource(index);
+    }
+
+    return retval;
+}
+
 void
 GtpyCollectionLocalWidget::onItemClicked(const QModelIndex& index)
 {
@@ -105,7 +124,7 @@ GtpyCollectionLocalWidget::onItemClicked(const QModelIndex& index)
         return;
     }
 
-    GtCollectionItem item = m_model->itemFromIndex(index);
+    GtCollectionItem item = m_model->itemFromIndex(mapToSource(index));
 
     if (!item.isValid())
     {
@@ -126,6 +145,7 @@ GtpyCollectionLocalWidget::onCustomContextMenuRequested(const QPoint& /*pos*/)
     }
 
     QModelIndex index = m_view->currentIndex();
+    index = mapToSource(index);
 
     if (!index.isValid())
     {
