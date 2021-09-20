@@ -19,39 +19,52 @@ class QSortFilterProxyModel;
 class GtCollectionItem;
 class GtpyCollectionLocalModel;
 
+/**
+ * @brief The GtpyCollectionLocalWidget class
+ */
 class GtpyCollectionLocalWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    Q_INVOKABLE GtpyCollectionLocalWidget(QWidget* parent = Q_NULLPTR);
+    /**
+     * @brief GtpyCollectionLocalWidget
+     * @param parent Parent widget.
+     */
+    GtpyCollectionLocalWidget(QWidget* parent = Q_NULLPTR);
 
     /**
-       * @brief setItems
-       * @param items
+       * @brief Passes the given list of items to the model.
+       * @param items List of items.
        */
     void setItems(const QList<GtCollectionItem>& items);
 
     /**
-     * @brief getItem
-     * @param index
-     * @return
+     * @brief Retruns the item at the given index.
+     * @param index Index of the item.
+     * @return The item at the given index.
      */
     GtCollectionItem getItem(const QModelIndex& index);
 
     /**
-     * @brief setCustomContextMenuEnabled
-     * @param val
+     * @brief Enables or disables the context menu.
+     * @param val True enalbes the context menu, false disables it.
      */
     void setCustomContextMenuEnabled(bool val);
 
     /**
-     * @brief setShowItemInfo
-     * @param val
+     * @brief Enables or disables the item infos.
+     * @param val True enalbes the item infos, false disables it.
      */
     void setShowItemInfo(bool val);
 
 private:
+    /**
+     * @brief Returns the source model index corresponding to the given index
+     * from the sorting model.
+     * @param index Index of the sorting model.
+     * @return The source model index corresponding to the given index.
+     */
     QModelIndex mapToSource(const QModelIndex& index) const;
 
     /// Tree view.
@@ -60,27 +73,31 @@ private:
     /// Local collection model.
     GtpyCollectionLocalModel* m_model;
 
+    /// Sorting model
     QSortFilterProxyModel* m_sortModel;
+
     /// Enables custom context menu
     bool m_contextMenuEnabled;
 
 private slots:
     /**
-     * @brief onItemClicked
-     * @param index
+     * @brief It opens the script corresponding to the given index and displays
+     * it on the left side of the local collection view. If the column with the
+     * given index is equal to 1, the info widget will be opened additionally.
+     * @param index Index of the local collection model.
      */
     void onItemClicked(const QModelIndex& index);
 
     /**
-     * @brief onCustomContextMenuRequested
-     * @param pos
+     * @brief Opens a context menu that provides the uninstall functionality.
+     * @param pos Current cursor position.
      */
     void onCustomContextMenuRequested(const QPoint& pos);
 
     /**
-     * @brief onCurrentChanged
-     * @param current
-     * @param previous
+     * @brief Emits the itemSelected signal.
+     * @param current Current selected item.
+     * @param previous Previous selected item.
      */
     void onCurrentChanged(const QModelIndex& current,
                           const QModelIndex& previous = QModelIndex());
@@ -93,8 +110,9 @@ signals:
     void itemSelected(const QModelIndex& index);
 
     /**
-     * @brief itemDoubleClicked
-     * @param index
+     * @brief Emitted after item was double clicked. Returns double clicked
+     * item.
+     * @param index Double clicked item.
      */
     void itemDoubleClicked(const QModelIndex& index);
 

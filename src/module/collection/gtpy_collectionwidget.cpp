@@ -13,7 +13,6 @@
 #include <QSplitter>
 
 #include "gt_collectionitem.h"
-//#include "gt_localcollectionwidget.h"
 #include "gt_pyhighlighter.h"
 
 #include "gtpy_editorsettings.h"

@@ -21,7 +21,8 @@
 #include "gtpy_collectionlocalwidget.h"
 
 GtpyCollectionLocalWidget::GtpyCollectionLocalWidget(QWidget* parent) :
-    QWidget(parent), m_contextMenuEnabled(true)
+    QWidget(parent), m_contextMenuEnabled(true), m_view(Q_NULLPTR),
+    m_model(Q_NULLPTR), m_sortModel(Q_NULLPTR)
 {
     QVBoxLayout* lay = new QVBoxLayout;
     lay->setContentsMargins(0, 0, 0, 0);

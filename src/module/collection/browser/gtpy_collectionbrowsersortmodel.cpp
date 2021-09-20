@@ -7,8 +7,6 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include <QDebug>
-
 #include "gtpy_collectionbrowsersortmodel.h"
 
 GtpyCollectionBrowserSortModel::GtpyCollectionBrowserSortModel(

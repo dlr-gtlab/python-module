@@ -20,7 +20,7 @@
 #include "gtpy_collectionlocalmodel.h"
 
 GtpyCollectionLocalModel::GtpyCollectionLocalModel(QObject* parent) :
-    QAbstractItemModel(parent), m_showInfoColumns(true)
+    QAbstractItemModel(parent), m_showInfoColumns(true), m_rootItem(Q_NULLPTR)
 {
     m_rootItem = new GtpyCollapsibleLocalItem("Root");
 }

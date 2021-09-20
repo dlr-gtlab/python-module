@@ -27,8 +27,7 @@ class GtpyCollectionWidget : public QWidget
 public:
     /**
      * @brief GtpyCollectionWidget
-     * @param defaultLocalWidget Pointer to default local widget.
-     * @param parent Parent widget.
+     * @param parentParent widget.
      */
     Q_INVOKABLE GtpyCollectionWidget(QWidget* parent = Q_NULLPTR);
 
