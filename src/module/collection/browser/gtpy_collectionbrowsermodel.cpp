@@ -165,7 +165,6 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
         switch (role)
         {
             case Qt::DisplayRole:
-            {
                 if (col == 0)
                 {
                     return item->ident();
@@ -186,10 +185,9 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 }
 
                 break;
-            }
+
 
             case Qt::DecorationRole:
-            {
                 if (col == 0)
                 {
                     return gtApp->icon(
@@ -202,10 +200,9 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 }
 
                 break;
-            }
+
 
             case Qt::CheckStateRole:
-            {
                 if (col == 0)
                 {
                     GtpyCollectionItemType type =
@@ -225,10 +222,9 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 }
 
                 break;
-            }
+
 
             case Qt::ForegroundRole:
-            {
                 GtpyCollectionItemType type =
                     static_cast<GtpyCollectionItemType>(item->typeId());
 
@@ -238,7 +234,7 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 }
 
                 break;
-            }
+
 
             default:
                 break;
