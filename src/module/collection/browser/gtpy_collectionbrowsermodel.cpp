@@ -94,17 +94,15 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
         switch (role)
         {
             case Qt::DisplayRole:
-            {
                 if (col == 0)
                 {
                     return item->ident();
                 }
 
                 break;
-            }
+
 
             case Qt::DecorationRole:
-            {
                 if (col == 0)
                 {
                     if (item == m_rootItem->child(UpdateAvailableItem))
@@ -123,10 +121,9 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 }
 
                 break;
-            }
+
 
             case Qt::BackgroundRole:
-            {
                 if (item == m_rootItem->child(UpdateAvailableItem))
                 {
                     return QColor(180, 229, 190);
@@ -158,7 +155,6 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 }
 
                 break;
-            }
 
             default:
                 break;
