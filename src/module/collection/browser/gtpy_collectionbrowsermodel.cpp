@@ -19,7 +19,7 @@
 #include "gtpy_collectionbrowsermodel.h"
 
 GtpyCollectionBrowserModel::GtpyCollectionBrowserModel(QObject* parent) :
-    QAbstractItemModel(parent)
+    QAbstractItemModel(parent), m_rootItem(Q_NULLPTR)
 {
     m_rootItem = new GtpyRootBrowserItem();
 }

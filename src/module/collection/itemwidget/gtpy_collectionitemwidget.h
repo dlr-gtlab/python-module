@@ -16,49 +16,57 @@
 class QFrame;
 class GtCollectionItem;
 
-class GtpyCollectionItemWidget: public QWidget
+/**
+ * @brief The GtpyCollectionItemWidget class
+ */
+class GtpyCollectionItemWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    Q_INVOKABLE GtpyCollectionItemWidget(const GtCollectionItem& collectionItem,
-                                         QWidget* parent = Q_NULLPTR);
+    /**
+     * @brief GtpyCollectionItemWidget
+     * @param collectionItem Collection item.
+     * @param parent Parent widget.
+     */
+    GtpyCollectionItemWidget(const GtCollectionItem& collectionItem,
+                             QWidget* parent = Q_NULLPTR);
 private:
     /// Filter string.
     QString m_filter;
 
     /**
-     * @brief filterString
+     * @brief Returns the filter string.
      * @param str
-     * @return
+     * @return The filter string.
      */
     QString filterString(const QString& str);
 
     /**
-     * @brief newFrame
-     * @return
+     * @brief Creates a new frame and returns it.
+     * @return A new frame.
      */
     QFrame* newFrame();
 
     /**
-     * @brief newBox
-     * @param title
-     * @param val
-     * @return
+     * @brief Creates a new box with the given title and the given content.
+     * @param title Title of the new box.
+     * @param content Content of the new box.
+     * @return A new box.
      */
     QFrame* newBox(const QString& title, const QString& content);
 
     /**
-     * @brief newFileBox
-     * @param fileNames
-     * @return
+     * @brief Creates a new file box.
+     * @param fileNames Name of the files.
+     * @return A new file box.
      */
     QFrame* newFileBox(const QStringList& fileNames);
 
     /**
-     * @brief newFileLayout
-     * @param filename
-     * @return
+     * @brief Creates a new file layout.
+     * @param filename Name of the file.
+     * @return A new file layout.
      */
     QLayout* newFileLayout(const QString& filename);
 };
