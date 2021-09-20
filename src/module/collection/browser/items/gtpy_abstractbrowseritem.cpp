@@ -10,7 +10,7 @@
 #include "gtpy_abstractbrowseritem.h"
 
 GtpyAbstractBrowserItem::GtpyAbstractBrowserItem() : m_parentItem(
-        Q_NULLPTR), m_typeId(-1)
+        Q_NULLPTR), m_selected(false), m_typeId(-1)
 {
 
 }

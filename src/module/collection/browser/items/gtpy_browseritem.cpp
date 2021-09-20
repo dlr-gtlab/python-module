@@ -15,11 +15,6 @@ GtpyBrowserItem::GtpyBrowserItem(const GtCollectionNetworkItem& item) :
     setSelected(false);
 }
 
-GtpyBrowserItem::~GtpyBrowserItem()
-{
-
-}
-
 bool
 GtpyBrowserItem::isCollapsible() const
 {
