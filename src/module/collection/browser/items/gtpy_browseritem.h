@@ -24,7 +24,7 @@ public:
      * @brief GtpyBrowserItem
      * @param item Wrapped item.
      */
-    GtpyBrowserItem(const GtCollectionNetworkItem& item);
+    explicit GtpyBrowserItem(const GtCollectionNetworkItem& item);
 
     /**
      * @brief Returns whether the item is collapsible or not.

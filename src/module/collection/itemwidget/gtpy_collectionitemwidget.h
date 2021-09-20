@@ -29,8 +29,8 @@ public:
      * @param collectionItem Collection item.
      * @param parent Parent widget.
      */
-    GtpyCollectionItemWidget(const GtCollectionItem& collectionItem,
-                             QWidget* parent = Q_NULLPTR);
+    explicit GtpyCollectionItemWidget(const GtCollectionItem& collectionItem,
+                                      QWidget* parent = Q_NULLPTR);
 private:
     /// Filter string.
     QString m_filter;

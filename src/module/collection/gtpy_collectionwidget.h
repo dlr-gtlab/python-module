@@ -29,7 +29,7 @@ public:
      * @brief GtpyCollectionWidget
      * @param parentParent widget.
      */
-    Q_INVOKABLE GtpyCollectionWidget(QWidget* parent = Q_NULLPTR);
+    explicit GtpyCollectionWidget(QWidget* parent = Q_NULLPTR);
 
     /**
      * @brief Sets collection items list.

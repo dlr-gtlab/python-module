@@ -22,7 +22,7 @@ public:
      * @brief GtpyCollapsibleLocalItem
      * @param ident Identification of the item.
      */
-    GtpyCollapsibleLocalItem(QString ident);
+    explicit GtpyCollapsibleLocalItem(QString ident);
 
     /**
      * @brief Returns whether the item is collapsible or not.

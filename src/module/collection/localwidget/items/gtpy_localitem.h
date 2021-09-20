@@ -24,7 +24,7 @@ public:
      * @brief GtpyLocalItem
      * @param item Collection item.
      */
-    GtpyLocalItem(const GtCollectionItem& item);
+    explicit GtpyLocalItem(const GtCollectionItem& item);
 
     /**
      * @brief Returns whether the item is collapsible or not.

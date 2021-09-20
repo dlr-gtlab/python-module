@@ -22,7 +22,7 @@ public:
      * @brief GtpyCollapsibleBrowserItem
      * @param ident
      */
-    GtpyCollapsibleBrowserItem(QString ident);
+    explicit GtpyCollapsibleBrowserItem(QString ident);
 
     /**
      * @brief Returns whether the item is collapsible or not.

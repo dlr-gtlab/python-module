@@ -28,7 +28,7 @@ public:
      * @brief GtpyCollectionLocalModel
      * @param parent Parent object.
      */
-    GtpyCollectionLocalModel(QObject* parent = Q_NULLPTR);
+    explicit GtpyCollectionLocalModel(QObject* parent = Q_NULLPTR);
 
     /**
      * @brief ~GtpyCollectionLocalModel

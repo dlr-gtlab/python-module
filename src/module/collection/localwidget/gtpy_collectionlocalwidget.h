@@ -31,7 +31,7 @@ public:
      * @brief GtpyCollectionLocalWidget
      * @param parent Parent widget.
      */
-    GtpyCollectionLocalWidget(QWidget* parent = Q_NULLPTR);
+    explicit GtpyCollectionLocalWidget(QWidget* parent = Q_NULLPTR);
 
     /**
        * @brief Passes the given list of items to the model.
