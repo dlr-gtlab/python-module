@@ -43,6 +43,12 @@ CONFIG(debug, debug|release){
 
 INCLUDEPATH += .\
     calculators \
+    collection \
+    collection/browser \
+    collection/browser/items \
+    collection/itemwidget \
+    collection/localwidget \
+    collection/localwidget/items \
     tasks \
     post \
     utilities \
@@ -58,8 +64,23 @@ INCLUDEPATH += .\
 DESTDIR = $${BUILD_DEST}
 
 HEADERS += \
+    collection/browser/gtpy_collectionbrowsersortmodel.h \
+    collection/browser/items/gtpy_abstractbrowseritem.h \
+    collection/browser/items/gtpy_browseritem.h \
+    collection/browser/items/gtpy_collapsiblebrowseritem.h \
+    collection/browser/gtpy_collectionbrowser.h \
+    collection/browser/gtpy_collectionbrowsermodel.h \
+    collection/browser/items/gtpy_rootbrowseritem.h \
+    collection/itemwidget/gtpy_collectionitemwidget.h \
+    collection/localwidget/gtpy_collectionlocalmodel.h \
+    collection/localwidget/gtpy_collectionlocalwidget.h \
+    collection/localwidget/items/gtpy_abstractlocalitem.h \
+    collection/localwidget/items/gtpy_collapsiblelocalitem.h \
+    collection/localwidget/items/gtpy_localitem.h \
     gt_python.h \
     calculators/gtpy_scriptcalculator.h \
+    collection/gtpy_scriptcollectionsettings.h \
+    collection/gtpy_collectionwidget.h \
     post/gtpy_pythonplotconfigdialog.h \
     post/gtpy_pythonplotdata.h \
     post/gtpy_pythonplotitem.h \
@@ -103,8 +124,23 @@ HEADERS += \
     wizards/editor_settings/pages/gtpy_generalpage.h
 
 SOURCES += \
+    collection/browser/gtpy_collectionbrowsersortmodel.cpp \
+    collection/browser/items/gtpy_abstractbrowseritem.cpp \
+    collection/browser/items/gtpy_browseritem.cpp \
+    collection/browser/items/gtpy_collapsiblebrowseritem.cpp \
+    collection/browser/gtpy_collectionbrowser.cpp \
+    collection/browser/gtpy_collectionbrowsermodel.cpp \
+    collection/browser/items/gtpy_rootbrowseritem.cpp \
+    collection/itemwidget/gtpy_collectionitemwidget.cpp \
+    collection/localwidget/gtpy_collectionlocalmodel.cpp \
+    collection/localwidget/gtpy_collectionlocalwidget.cpp \
+    collection/localwidget/items/gtpy_abstractlocalitem.cpp \
+    collection/localwidget/items/gtpy_collapsiblelocalitem.cpp \
+    collection/localwidget/items/gtpy_localitem.cpp \
     gt_python.cpp \
     calculators/gtpy_scriptcalculator.cpp \
+    collection/gtpy_scriptcollectionsettings.cpp \
+    collection/gtpy_collectionwidget.cpp \
     post/gtpy_pythonplotconfigdialog.cpp \
     post/gtpy_pythonplotdata.cpp \
     post/gtpy_pythonplotitem.cpp \
@@ -151,7 +187,7 @@ SOURCES += \
 CONFIG(debug, debug|release){
     # GTLAB CORE
     LIBS += -lGTlabLogging-d -lGTlabDatamodel-d -lGTlabCalculators-d
-    LIBS += -lGTlabCore-d -lGTlabMdi-d
+    LIBS += -lGTlabCore-d -lGTlabMdi-d -lGTlabNetwork-d
 
     # GTLAB MODULES
 
@@ -168,7 +204,7 @@ CONFIG(debug, debug|release){
 } else {
     # GTLAB CORE
     LIBS += -lGTlabLogging -lGTlabDatamodel -lGTlabCalculators
-    LIBS += -lGTlabCore -lGTlabMdi
+    LIBS += -lGTlabCore -lGTlabMdi -lGTlabNetwork
 
     # GTLAB MODULES
 

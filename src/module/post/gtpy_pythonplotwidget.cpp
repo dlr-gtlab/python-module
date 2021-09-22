@@ -30,7 +30,7 @@
 #include "gtpy_pythonplotwidget.h"
 
 GtpyPythonPlotWidget::GtpyPythonPlotWidget(GtpyPythonPlotItem* dm,
-                                           QWidget* parent) :
+        QWidget* parent) :
     GtAbstractPostWidget(parent), m_dm(dm)
 {
     setAcceptDrops(true);
@@ -85,8 +85,8 @@ GtpyPythonPlotWidget::plotToPdf()
 
 void
 GtpyPythonPlotWidget::printEmbedded(QPrinter* /*printer*/,
-                                   QPainter* /*painter*/,
-                                   QRectF /*rect*/)
+                                    QPainter* /*painter*/,
+                                    QRectF /*rect*/)
 {
 
 }
@@ -148,12 +148,12 @@ GtpyPythonPlotWidget::createSvgPlot()
 
         m_svgWid->load(figPath);
 
-//        QSvgRenderer* renderer = m_svgWid->renderer();
+        //        QSvgRenderer* renderer = m_svgWid->renderer();
 
-//        gtDebug() << "default size = " << renderer->defaultSize();
-//        gtDebug() << "view box = " << renderer->viewBox();
+        //        gtDebug() << "default size = " << renderer->defaultSize();
+        //        gtDebug() << "view box = " << renderer->viewBox();
 
-//        renderer->setViewBox(QRect(200,150, 200, 100));
+        //        renderer->setViewBox(QRect(200,150, 200, 100));
     }
 }
 

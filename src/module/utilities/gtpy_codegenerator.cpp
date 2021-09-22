@@ -333,8 +333,9 @@ GtpyCodeGenerator::helperPyCode(GtObject* obj, const QString& pyObjName)
                     helperObjName = childClassName;
                 }
 
-                QList<GtObject*> sameNamedChildren = obj->findDirectChildren <
-                                                     GtObject* > (helperObjName);
+                QList<GtObject*> sameNamedChildren =
+                    obj->findDirectChildren<GtObject*>(helperObjName);
+
                 int count = 1;
 
                 foreach (GtObject* sameNamedChild, sameNamedChildren)

@@ -31,6 +31,9 @@ public:
      */
     Q_INVOKABLE GtpyTask();
 
+    /**
+     * @brief ~GtpyTask
+     */
     virtual ~GtpyTask();
 
     /**

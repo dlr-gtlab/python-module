@@ -13,6 +13,7 @@
 #include <dlfcn.h>
 #endif
 
+#include "QApplication"
 #include <QMetaObject>
 #include <QMetaMethod>
 #include <QMetaEnum>
@@ -148,6 +149,24 @@ GtpyContextManager::~GtpyContextManager()
     }
 
     PythonQt::cleanup();
+}
+
+QString
+GtpyContextManager::collectionPath()
+{
+    QString retval;
+
+    QDir dir(qApp->applicationDirPath());
+
+    if (dir.cdUp())
+    {
+        dir.setPath(dir.absolutePath() + QDir::separator() + "Collections" +
+                    QDir::separator() + GtpyGlobals::COLLECTION_ID);
+
+        retval = dir.absolutePath();
+    }
+
+    return retval;
 }
 
 void
@@ -610,6 +629,8 @@ GtpyContextManager::initContexts()
 
     initImportBehaviour();
 
+    addCollectionPaths();
+
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
                              metaObj.indexOfEnumerator("Context"));
@@ -953,7 +974,7 @@ GtpyContextManager::initExtensionModule(QString moduleName,
 {
     GTPY_GIL_SCOPE
 
-    QByteArray name = moduleName.toUtf8();;
+    QByteArray name = moduleName.toUtf8();
     PyObject* myMod = Q_NULLPTR;
 
     myMod = Py_InitModule(name.constData(), methods);
@@ -1308,6 +1329,35 @@ GtpyContextManager::initWrapperModule()
 }
 
 void
+GtpyContextManager::addCollectionPaths()
+{
+    QString path = collectionPath();
+
+    QDir collectionDir(path);
+
+    m_watcher.addPath(collectionDir.absolutePath());
+    connect(&m_watcher, SIGNAL(directoryChanged(QString)), this,
+            SLOT(collectionChanged(QString)));
+
+    if (collectionDir.exists())
+    {
+        collectionDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot |
+                                QDir::NoSymLinks);
+
+        QStringList subdirs = collectionDir.entryList();
+
+        foreach (QString subdir, subdirs)
+        {
+            QString nativePath = QDir::toNativeSeparators(
+                                     collectionDir.absolutePath());
+            nativePath = nativePath + QDir::separator() + subdir;
+
+            addModulePath(nativePath);
+        }
+    }
+}
+
+void
 GtpyContextManager::enableOutputToAppConsole(int contextId)
 {
     PythonQtObjectPtr con = context(contextId);
@@ -1436,8 +1486,7 @@ GtpyContextManager::lineOutOfMessage(const QString& message)
 }
 
 void
-GtpyContextManager::setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData
-        metaData)
+GtpyContextManager::setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData mData)
 {
     GTPY_GIL_SCOPE
 
@@ -1451,25 +1500,85 @@ GtpyContextManager::setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData
     Py_INCREF(threadDict);
 
     PyObject* key = PyString_FromString(QSTRING_TO_CHAR_PTR(
-                                            metaData.contextName));
+                                            mData.contextName));
 
     PyDict_SetItemString(threadDict, GtpyGlobals::CONTEXT_KEY, key);
 
     Py_DECREF(key);
 
-    PyObject* outputVal = PyLong_FromLong(metaData.output ? 1 : 0);
+    PyObject* outputVal = Q_NULLPTR;
+
+    if (mData.output)
+    {
+        outputVal = PyLong_FromLong(1);
+    }
+    else
+    {
+        outputVal = PyLong_FromLong(0);
+    }
 
     PyDict_SetItemString(threadDict, GtpyGlobals::OUTPUT_KEY, outputVal);
 
     Py_DECREF(outputVal);
 
-    PyObject* errorVal = PyLong_FromLong(metaData.error ? 1 : 0);
+    PyObject* errorVal = Q_NULLPTR;
+
+    if (mData.error)
+    {
+        errorVal = PyLong_FromLong(1);
+    }
+    else
+    {
+        errorVal = PyLong_FromLong(0);
+    }
 
     PyDict_SetItemString(threadDict, GtpyGlobals::ERROR_KEY, errorVal);
 
     Py_DECREF(errorVal);
 
     Py_DECREF(threadDict);
+}
+
+void
+GtpyContextManager::addModulePaths(const QStringList& paths)
+{
+    foreach (QString path, paths)
+    {
+        addModulePath(path);
+    }
+}
+
+void
+GtpyContextManager::addModulePath(const QString& path)
+{
+    GTPY_GIL_SCOPE
+
+    PyObject* pyPath = PySys_GetObject("path");
+
+    if (pyPath)
+    {
+        Py_INCREF(pyPath);
+
+        PyObject* pathObj = PythonQtConv::QStringToPyObject(path);
+        bool equal = false;
+
+        for (int i = 0; !equal && i < Py_SIZE(pyPath); i++)
+        {
+            PyObject* item = PyList_GetItem(pyPath, i);
+
+            Py_INCREF(item);
+            equal = PyObject_RichCompareBool(item, pathObj, Py_EQ);
+            Py_DECREF(item);
+        }
+
+        if (!equal)
+        {
+            PyList_Append(pyPath, pathObj);
+        }
+
+        Py_DECREF(pathObj);
+        Py_DECREF(pyPath);
+    }
 }
 
 void
@@ -2270,6 +2379,23 @@ GtpyContextManager::deleteRunnable()
                    this, &GtpyContextManager::deleteRunnable);
 
         delete runnable;
+    }
+}
+
+void
+GtpyContextManager::collectionChanged(const QString& collectionPath)
+{
+    QDir dir(collectionPath);
+    dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+
+    QStringList subdirs = dir.entryList();
+
+    foreach (QString subdir, subdirs)
+    {
+        QString nativePath = QDir::toNativeSeparators(dir.absolutePath());
+        nativePath = nativePath + QDir::separator() + subdir;
+
+        addModulePath(nativePath);
     }
 }
 

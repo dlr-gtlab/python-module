@@ -46,7 +46,7 @@ GtpyTaskItemModel::rowCount(const QModelIndex& parent) const
 
 QModelIndex
 GtpyTaskItemModel::index(int row, int col,
-                                const QModelIndex& parent) const
+                         const QModelIndex& parent) const
 {
     if (m_objectModel == Q_NULLPTR)
     {
@@ -101,8 +101,8 @@ GtpyTaskItemModel::indexFromObject(GtObject* obj) const
 }
 
 bool
-GtpyTaskItemModel::setData(const QModelIndex& index,
-                                  const QVariant& value, int role)
+GtpyTaskItemModel::setData(const QModelIndex& index, const QVariant& value,
+                           int role)
 {
     // check index
     if (!index.isValid())
@@ -200,7 +200,7 @@ GtpyTaskItemModel::updateView()
 Qt::DropActions
 GtpyTaskItemModel::supportedDropActions() const
 {
-     return Qt::CopyAction | Qt::MoveAction;
+    return Qt::CopyAction | Qt::MoveAction;
 }
 
 Qt::DropActions

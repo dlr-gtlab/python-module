@@ -10,7 +10,6 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QFont>
-#include <QDebug>
 
 #include "gtpy_abstractsettingspage.h"
 
@@ -28,6 +27,11 @@ GtpyAbstractSettingsPage::GtpyAbstractSettingsPage(QWidget* parent) : QWidget(
     m_layout->addSpacing(20);
 
     setLayout(m_layout);
+}
+
+GtpyAbstractSettingsPage::~GtpyAbstractSettingsPage()
+{
+
 }
 
 void

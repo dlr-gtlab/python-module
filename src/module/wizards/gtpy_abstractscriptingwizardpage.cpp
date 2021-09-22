@@ -64,8 +64,6 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 {
     setTitle(tr("Python Script Editor"));
 
-
-
     m_contextId = GtpyContextManager::instance()->createNewContext(type);
 
     QVBoxLayout* layout = new QVBoxLayout;
@@ -860,6 +858,7 @@ GtpyAbstractScriptingWizardPage::setWizardNonModal()
                         wiz->setWindowModality(Qt::NonModal);
                         wiz->setParent(mainWin);
                         wiz->setWindowFlags(Qt::Dialog);
+                        break;
                     }
                 }
             }

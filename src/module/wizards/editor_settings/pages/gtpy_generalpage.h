@@ -32,13 +32,13 @@ public:
      * @brief Passes the user defined settings to the given pointer pref.
      * @param pref Pointer to the object containing all editor settings.
      */
-    virtual void saveSettings(GtpyEditorSettings* pref) Q_DECL_OVERRIDE;
+    virtual void saveSettings(GtpyEditorSettings* pref) override;
 
     /**
      * @brief Reads the current settings from the given pointer pref and
      * loads them into the user interface.
      */
-    virtual void loadSettings(GtpyEditorSettings* pref) Q_DECL_OVERRIDE;
+    virtual void loadSettings(GtpyEditorSettings* pref) override;
 
 private:
     /// Tab Size

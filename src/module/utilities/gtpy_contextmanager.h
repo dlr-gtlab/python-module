@@ -14,6 +14,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QFileSystemWatcher>
 
 #include "PythonQtObjectPtr.h"
 #include "PythonQtConversion.h"
@@ -60,7 +61,8 @@ public:
         ScriptEditorContext,
         CalculatorRunContext,
         TaskEditorContext,
-        TaskRunContext
+        TaskRunContext,
+        CollectionContext
     };
 
     /**
@@ -85,6 +87,8 @@ public:
     static GtpyContextManager* instance();
 
     ~GtpyContextManager();
+
+    static QString collectionPath();
 
     /**
      * @brief Initialize the Python extensions written in C++.
@@ -266,7 +270,19 @@ public:
      * @brief Sets some meta data to the thread dict.
      * @param metaData
      */
-    void setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData metaData);
+    void setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData mData);
+
+    /**
+     * @brief Adds a list of paths to the sys.path list.
+     * @param paths Paths to add.
+     */
+    void addModulePaths(const QStringList& paths);
+
+    /**
+     * @brief Adds a path to the sys.path list.
+     * @param path Path to add.
+     */
+    void addModulePath(const QString& path);
 
 protected:
     /**
@@ -411,6 +427,11 @@ private:
      * @brief Initializes the wrapper module for GtObjects.
      */
     void initWrapperModule();
+
+    /**
+     * @brief Adds the paths of the script collection to the sys.path list.
+     */
+    void addCollectionPaths();
 
     /**
      * @brief Enables to send output to the application console.
@@ -588,6 +609,9 @@ private:
 
     QMutex m_evalMutex;
 
+    /// File system watcher
+    QFileSystemWatcher m_watcher;
+
 private slots:
     /**
     * @brief Emits errorMessage signal.
@@ -606,6 +630,13 @@ private slots:
      * with this function by using the autoDeleteRunnable() of this class.
      */
     void deleteRunnable();
+
+    /**
+     * @brief Adds new collection paths to the sys.path list after updating the
+     * script collection.
+     * @param collectionPath Path to script collection.
+     */
+    void collectionChanged(const QString& collectionPath);
 
 signals:
     /**

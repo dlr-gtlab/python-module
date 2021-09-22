@@ -14,6 +14,8 @@
 #include "gt_processinterface.h"
 #include "gt_mdiinterface.h"
 #include "gt_initmoduleinterface.h"
+#include "gt_collectioninterface.h"
+#include "gt_networkinterface.h"
 #include "gt_application.h"
 
 #if GT_VERSION >= 0x010700
@@ -24,8 +26,9 @@
  * @brief The GtPythonModule class
  */
 class GtPythonModule: public QObject, public GtModuleInterface,
-        public GtProcessInterface, public GtMdiInterface,
-        public GtInitModuleInterface
+    public GtProcessInterface, public GtMdiInterface,
+    public GtInitModuleInterface, public GtCollectionInterface,
+    public GtNetworkInterface
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "de.dlr.gtlab.GtModuleInterface/0.1"
@@ -35,6 +38,8 @@ class GtPythonModule: public QObject, public GtModuleInterface,
     Q_INTERFACES(GtProcessInterface)
     Q_INTERFACES(GtMdiInterface)
     Q_INTERFACES(GtInitModuleInterface)
+    Q_INTERFACES(GtCollectionInterface)
+    Q_INTERFACES(GtNetworkInterface)
 
 public:
     /**
@@ -105,6 +110,43 @@ public:
      * @return
      */
     QList<QMetaObject> postPlots() Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Returns collection specific icon.
+     * @return Collection spezific icon.
+     */
+    QIcon collectionIcon() const Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Returns identification string of collection. Same id
+     * is used to generate access point data within the netowrk interface.
+     * @return Identification string of collection.
+     */
+    QString collectionId() const Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Returns meta object of GtAbstractCollectionSettings class.
+     * @return Meta object of GtAbstractCollectionSettings class.
+     */
+    QMetaObject collectionSettings() const Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Returns structure of collection items.
+     * @return Sturcture of collection items.
+     */
+    QMap<QString, QMetaType::Type> collectionStructure() const Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Returns identification string of access point.
+     * @return Identification string of access point.
+     */
+    QString accessId() Q_DECL_OVERRIDE;
+
+    /**
+     * @brief Returns meta object of GtAbstractAccessDataConnection class.
+     * @return Meta object of GtAbstractAccessDataConnection class.
+     */
+    QMetaObject accessConnection() Q_DECL_OVERRIDE;
 
 private:
     /**

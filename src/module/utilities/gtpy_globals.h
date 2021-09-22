@@ -52,5 +52,9 @@ struct StdOutMetaData
     bool error = false;
 };
 
+/// Collection
+extern const QString COLLECTION_ID;
+extern const QString COLLECTION_cat;
+extern const QString COLLECTION_subcat;
 }
 #endif // GTPYGLOBALS_H

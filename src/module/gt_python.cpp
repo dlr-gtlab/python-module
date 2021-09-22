@@ -42,6 +42,11 @@
 #include "gtpy_pythonplotitem.h"
 #include "gtpy_pythonplotdata.h"
 
+// network
+#include "gt_accessdataconnection.h"
+
+#include "gtpy_scriptcollectionsettings.h"
+
 #include "gt_python.h"
 
 #if GT_VERSION >= 0x010700
@@ -229,6 +234,47 @@ GtPythonModule::postPlots()
     retval.append(GT_METADATA(GtpyPythonPlotItem));
 
     return retval;
+}
+
+QIcon
+GtPythonModule::collectionIcon() const
+{
+    return gtApp->icon(QStringLiteral("pythonIcon_16.png"));
+}
+
+QString
+GtPythonModule::collectionId() const
+{
+    return GtpyGlobals::COLLECTION_ID;
+}
+
+QMetaObject
+GtPythonModule::collectionSettings() const
+{
+    return GtpyScriptCollectionSettings::staticMetaObject;
+}
+
+QMap<QString, QMetaType::Type>
+GtPythonModule::collectionStructure() const
+{
+    QMap<QString, QMetaType::Type> retval;
+
+    retval.insert(GtpyGlobals::COLLECTION_cat, QMetaType::QString);
+    retval.insert(GtpyGlobals::COLLECTION_subcat, QMetaType::QString);
+
+    return retval;
+}
+
+QString
+GtPythonModule::accessId()
+{
+    return collectionId();
+}
+
+QMetaObject
+GtPythonModule::accessConnection()
+{
+    return GT_METADATA(GtAccessDataConnection);
 }
 
 QWidget*
