@@ -51,7 +51,7 @@ testStepTagsExceptBranches:
   tags:
     - Win10
   except:
-    - branches
+    - /^137-.*/
   only:
     - tags
     
