@@ -60,7 +60,7 @@ testStepTagsExceptMaster:
   tags:
     - Win10
   only:
-    - tags,137-pipeline-experiments
+    - 137-pipeline-experiments
 
 .devtoolsUpdateWindows:
   stage: update
