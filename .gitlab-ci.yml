@@ -59,10 +59,8 @@ testStepTagsExceptMaster:
     - echo in testStepTagsExceptMaster
   tags:
     - Win10
-  except:
-    - master
   only:
-    - tags
+    - tags, 137-pipeline-experiments 
 
 .devtoolsUpdateWindows:
   stage: update
