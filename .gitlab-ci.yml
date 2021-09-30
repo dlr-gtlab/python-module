@@ -50,10 +50,10 @@ testStepTagsExceptBranches:
     - echo in testStepTagsExceptBranches
   tags:
     - Win10
-  except:
-    - /^137-.*/
   only:
     - tags
+  except:
+    - /^137-pipeline-experiments$/
     
 testStepTagsExceptMaster:
   stage: build
