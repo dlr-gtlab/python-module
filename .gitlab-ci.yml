@@ -53,7 +53,7 @@ testStepTagsExceptBranches:
   only:
     - tags
   except:
-    - /^137-pipeline-experiments$/
+    - 137-pipeline-experiments
     
 testStepTagsExceptMaster:
   stage: build
