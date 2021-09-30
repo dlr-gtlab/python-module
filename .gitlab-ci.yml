@@ -51,7 +51,7 @@ testStepTagsExceptBranches:
   tags:
     - Win10
   only:
-    - tags, master
+    - tags && master
     
 testStepTagsExceptMaster:
   stage: build
@@ -60,7 +60,7 @@ testStepTagsExceptMaster:
   tags:
     - Win10
   only:
-    - 137-pipeline-experiments, tags
+    - 137-pipeline-experiments && tags
 
 .devtoolsUpdateWindows:
   stage: update
