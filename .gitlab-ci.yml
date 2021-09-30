@@ -50,10 +50,10 @@ testStepTagsExceptBranches:
     - echo in testStepTagsExceptBranches
   tags:
     - Win10
-  only:
-    - tags
   except:
     - branches
+  only:
+    - tags
     
 testStepTagsExceptMaster:
   stage: build
@@ -61,10 +61,10 @@ testStepTagsExceptMaster:
     - echo in testStepTagsExceptMaster
   tags:
     - Win10
-  only:
-    - tags
   except:
     - master
+  only:
+    - tags
 
 .devtoolsUpdateWindows:
   stage: update
