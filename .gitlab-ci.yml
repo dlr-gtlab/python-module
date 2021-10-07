@@ -26,43 +26,8 @@ stages:
   - copy
   - codequality
   - badges
-  
-  
-testStepAlways:
-  stage: build
-  script:
-    - echo in testStepAlways
-  tags:
-    - Win10
 
-testStepTags:
-  stage: build
-  script:
-    - echo in testStepTags
-  tags:
-    - Win10
-  only:
-    - tags
-
-testStepTagsExceptBranches:
-  stage: build
-  script:
-    - echo in testStepTagsExceptBranches
-  tags:
-    - Win10
-  only:
-    - tags && master
-    
-testStepTagsExceptMaster:
-  stage: build
-  script:
-    - echo in testStepTagsExceptMaster
-  tags:
-    - Win10
-  only:
-    - 137-pipeline-experiments && tags
-
-.devtoolsUpdateWindows:
+devtoolsUpdateWindows:
   stage: update
   allow_failure: true
   script:
@@ -74,7 +39,7 @@ testStepTagsExceptMaster:
   variables:
     MAINTENANCETOOL: "C:\\devel\\GTlab-DevTools\\Setup GTlab-DevTools.exe"  
 
-.devtoolsUpdateLinux:
+devtoolsUpdateLinux:
   stage: update
   allow_failure: true  
   script:
@@ -88,7 +53,7 @@ testStepTagsExceptMaster:
     MAINTENANCETOOL: "/home/gitlab-runner/GTlab-Devtools/"  
 
 # build on Windows system
-.debugBuildWin512Py37:
+debugBuildWin512Py37:
   stage: build
   script:
     - .\tests\build\build-512.bat 1>buildLog512.txt
@@ -115,7 +80,7 @@ testStepTagsExceptMaster:
     BUILDUNITTESTS: "true"
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-.releaseBuildWin512Py37:
+releaseBuildWin512Py37:
   stage: build
   script:
     - .\tests\build\build-512.bat
@@ -138,7 +103,7 @@ testStepTagsExceptMaster:
     BUILDUNITTESTS: "false"
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-.debugBuildWin512Py37Unstable:
+debugBuildWin512Py37Unstable:
   stage: build
   script:
     - .\tests\build\build-512.bat 1>buildLog512.txt
@@ -165,7 +130,7 @@ testStepTagsExceptMaster:
     BUILDUNITTESTS: "true"
     DEVTOOLS: $DEVTOOLS_Win_Unstable
 
-.releaseBuildWin512Py37Unstable:
+releaseBuildWin512Py37Unstable:
   stage: build
   script:
     - .\tests\build\build-512.bat
@@ -189,7 +154,7 @@ testStepTagsExceptMaster:
     DEVTOOLS: $DEVTOOLS_Win_Unstable
     
 # build on Linux system
-.debugBuildLinux512Py37:
+debugBuildLinux512Py37:
   stage: build
   before_script:
     - chmod a+rwx ./tests/build/build-512.sh
@@ -212,7 +177,7 @@ testStepTagsExceptMaster:
     BUILDUNITTESTS: "true"
     DEVTOOLS: $DEVTOOLS_Linux_Stable
 
-.releaseBuildLinuxPy37:
+releaseBuildLinuxPy37:
   stage: build
   before_script:
     - chmod a+rwx ./tests/build/build-512.sh
@@ -235,7 +200,7 @@ testStepTagsExceptMaster:
     BUILDUNITTESTS: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Stable
 
-.debugBuildLinux512Py37Unstable:
+debugBuildLinux512Py37Unstable:
   stage: build
   before_script:
     - chmod a+rwx ./tests/build/build-512.sh
@@ -258,7 +223,7 @@ testStepTagsExceptMaster:
     BUILDUNITTESTS: "true"
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
 
-.releaseBuildLinuxPy37Unstable:
+releaseBuildLinuxPy37Unstable:
   stage: build
   before_script:
     - chmod a+rwx ./tests/build/build-512.sh
@@ -282,7 +247,7 @@ testStepTagsExceptMaster:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
     
 # run tests using the binary built before
-.testWin512Py37:
+testWin512Py37:
   needs: ["debugBuildWin512Py37"]
   stage: test
   script:
@@ -304,7 +269,7 @@ testStepTagsExceptMaster:
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-.testWin512Py37Unstable:
+testWin512Py37Unstable:
   needs: ["debugBuildWin512Py37Unstable"]
   stage: test
   script:
@@ -326,7 +291,7 @@ testStepTagsExceptMaster:
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Unstable
 
-.testLinux512Py37:
+testLinux512Py37:
   needs: ["debugBuildLinux512Py37"]
   stage: test
   before_script:
@@ -345,7 +310,7 @@ testStepTagsExceptMaster:
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Stable
 
-.testLinux512Py37Unstable:
+testLinux512Py37Unstable:
   needs: ["debugBuildLinux512Py37Unstable"]
   stage: test
   before_script:
@@ -365,7 +330,7 @@ testStepTagsExceptMaster:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
 
 # copy files to servers
-.copyToNightlyBuildWin:
+copyToNightlyBuildWin:
   stage: copy
   script:
     - .\tests\build\copyHeaders-nightlybuild.bat
@@ -379,7 +344,7 @@ testStepTagsExceptMaster:
   variables:
     NIGHTLYBUILD: "G:\\AT-TW\\GTlab\\Nightly_Builds_512"
 
-.copyForDeploymentWin:
+copyForDeploymentWin:
   stage: copy
   script:
     - .\tests\build\copyHeaders-deployment.bat
@@ -394,7 +359,7 @@ testStepTagsExceptMaster:
     PLATFORMNAME:  windows
     RELEASESTATUS: stable
 
-.copyForDeploymentWinUnstable:
+copyForDeploymentWinUnstable:
   stage: copy
   script:
     - .\tests\build\copyHeaders-deployment.bat
@@ -409,7 +374,7 @@ testStepTagsExceptMaster:
     PLATFORMNAME:  windows
     RELEASESTATUS: unstable
 
-.copyForDeploymentLinux:
+copyForDeploymentLinux:
   stage: copy
   script:
     - .\tests\build\copyHeaders-deployment.bat
@@ -424,7 +389,7 @@ testStepTagsExceptMaster:
     PLATFORMNAME:  linux
     RELEASESTATUS: stable
 
-.copyForDeploymentLinuxUnstable:
+copyForDeploymentLinuxUnstable:
   stage: copy
   script:
     - .\tests\build\copyHeaders-deployment.bat
@@ -440,7 +405,7 @@ testStepTagsExceptMaster:
     RELEASESTATUS: unstable
 
 # code quality
-.codingstyle:
+codingstyle:
   needs: []
   stage: codequality
   allow_failure: true
@@ -459,7 +424,7 @@ testStepTagsExceptMaster:
   variables:
     CODINGSTYLETOOL: "C:\\Program Files\\nsiqcppstyle_0.2.2.3\\nsiqcppstyle\\nsiqcppstyle"
 
-.cppcheck:
+cppcheck:
   needs: []
   stage: codequality
   allow_failure: true
@@ -476,7 +441,7 @@ testStepTagsExceptMaster:
     reports:
       codequality: codequality.json
 
-.pages:
+pages:
   needs: []
   dependencies:
   stage: badges
@@ -494,7 +459,7 @@ testStepTagsExceptMaster:
        - public/
 
 # badges
-.badges:
+badges:
   stage: badges
   script:
     - $CommitNumber = git rev-list --count HEAD
