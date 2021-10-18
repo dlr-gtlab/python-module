@@ -9,6 +9,7 @@
 # Environment variables to use in the pipeline globally
 variables:
   PIPELINEVERSION: "1.4.3"
+  PYTHONEXEPATH: C:\ProgramData\Miniconda3\python.exe
 
 #  PROFILENAME: gtlab_python.pro
 #  TARGETDIRNAME: python37
@@ -25,6 +26,7 @@ stages:
   - regressionTest
   - copy
   - codequality
+  - package
   - badges
 
 devtoolsUpdateWindows:
@@ -457,6 +459,33 @@ pages:
   artifacts:
      paths:
        - public/
+
+.packageTemplate:
+  tags:
+    - Win10
+  script:
+    - .\tests\package\packageGen.bat
+  artifacts:  
+    paths:
+      - components/
+    when: always
+  variables:
+    PACKAGETEMPLATE: .\features\package_template.xml
+    PYPACKAGEGEN: .\tests\package\packageGen.py
+  parallel:
+    matrix:
+      - RELEASESTATUS: stable
+        FRAMEWORK_MAJOR: "1"
+        FRAMEWORK_MINOR: "7"
+      - RELEASESTATUS: unstable
+        FRAMEWORK_MAJOR: "2"
+        FRAMEWORK_MINOR: "0"
+
+package:
+  stage: package
+  extends: .packageTemplate
+  only:
+    - tags
 
 # badges
 badges:

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <Source>gtlab-python-module</Source>
+    <Destination>03_core_modules</Destination>
+    <Name>de.dlr.gtlab.dev.{RELEASESTATUS}.{FRAMEWORK_MAJOR}.{FRAMEWORK_MINOR}.modules.python37</Name>
+    <DisplayName>GTlab Python Module Libraries for Python 3.7</DisplayName>
+    <Description>Libraries for Python GTlab module (Python 3.7).</Description>
+    <ReleaseDate>{RELEASEDATE}</ReleaseDate>
+    <Version>{TAGNAME}</Version>
+    <SortingPriority>201</SortingPriority>
+    <Default>false</Default>
+    <Dependencies>de.dlr.gtlab.dev.{RELEASESTATUS}.{FRAMEWORK_MAJOR}.{FRAMEWORK_MINOR}.core, de.dlr.gtlab.dev.{RELEASESTATUS}.{FRAMEWORK_MAJOR}.{FRAMEWORK_MINOR}.logging, de.dlr.gtlab.dev.{RELEASESTATUS}.{FRAMEWORK_MAJOR}.{FRAMEWORK_MINOR}.thirdpartylibs.python37, de.dlr.gtlab.dev.{RELEASESTATUS}.{FRAMEWORK_MAJOR}.{FRAMEWORK_MINOR}.thirdpartylibs.pythonqt37</Dependencies>
+</Package>
