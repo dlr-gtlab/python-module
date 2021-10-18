@@ -3,13 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-    
 
-## [Unreleased]
+## [Unreleased]    
+
+## [1.0.7] - 2021-10-18
 ### Fixed
  - Bug Fix: The correct indentation is used in the automatically generated Python code. #142
- 
-### Changed
+
+### Added
  - The objects name of the Python process components are used as wizard title. #140
  - The wizards provide a settings dialog. #141
  - It is possible to define the tab size and to replace tabs with spaces. #141
