@@ -1,24 +1,35 @@
 ########################################################
-###############GTlab Pipeline Version 1.4.3 ############
+###############GTlab Pipeline Version 1.5.1 ############
 ########################################################
 # This is a slight changed version
 # - PYVERSION variable to support the build using different Python versions
 # - the Python version is appended to the build and test job names
 # - debug build is not possible because PythonQt is not available as debug build
 
-# Environment variables to use in the pipeline globally
-variables:
-  PIPELINEVERSION: "1.4.3"
-  PYTHONEXEPATH: C:\ProgramData\Miniconda3\python.exe
 
+# These variables are defined in the CI project settings:
+#  CATEGORY: 03_core_modules
 #  PROFILENAME: gtlab_python.pro
 #  TARGETDIRNAME: python37
 #  TARGETNAME: GTlabPython37
 #  UNITTESTSNAME: GTlabUnitTest
-  
-#  DEVTOOLS_Win: "C:\\devel\\GTlab-DevTools\\stable\\1_6"
-#  DEVTOOLS_Linux: "/home/gitlab-runner/GTlab-Devtools/stable/1_6"
-  
+
+# These variables are defined in the AT-TWK group settings:
+#   DEVTOOLS_Linux_Stable
+#   DEVTOOLS_Linux_Unstable
+#   DEVTOOLS_Win_Stable 
+#   DEVTOOLS_Win_Unstable
+
+# Environment variables to use in the pipeline globally
+variables:
+  PIPELINEVERSION: "1.5.1"
+  GIT_SUBMODULE_STRATEGY: none
+
+# inlcude some templates from this file
+include:
+  - project: 'at-twk/gitlab-templates'
+    file: '/ci-templates/.ci-templates.yml'
+
 stages:
   - update
   - build
@@ -29,46 +40,31 @@ stages:
   - package
   - badges
 
+# DevTools update
 devtoolsUpdateWindows:
   stage: update
-  allow_failure: true
-  script:
-    - '& $env:MAINTENANCETOOL up --confirm-command'
+  extends: .devToolsUpdateWindows
   only:
-    - master  
-  tags:
-    - Win10
-  variables:
-    MAINTENANCETOOL: "C:\\devel\\GTlab-DevTools\\Setup GTlab-DevTools.exe"  
+    - master 
 
 devtoolsUpdateLinux:
   stage: update
-  allow_failure: true  
-  script:
-    - cd /home/gitlab-runner/GTlab-Devtools/
-    - ./Setup\ GTlab-DevTools up --confirm-command
+  extends: .devToolsUpdateLinux
   only:
-    - master  
-  tags:
-    - Linux
-  variables:
-    MAINTENANCETOOL: "/home/gitlab-runner/GTlab-Devtools/"  
+    - master
 
 # build on Windows system
-debugBuildWin512Py37:
+windowsBuildDebugPy37:
   stage: build
-  script:
-    - .\tests\build\build-512.bat 1>buildLog512.txt
+  extends: 
+    - .buildWinSub
   tags:
     - Win10
   artifacts:
     paths:
-      #- lib\$TARGETDIRNAME\$TARGETNAME-d.dll
-      #- lib\$TARGETDIRNAME\$TARGETNAME-d.lib
-      #- lib\$TARGETDIRNAME\$TARGETNAME-d.pdb
-      - lib\$TARGETDIRNAME\$TARGETNAME.dll
-      - lib\$TARGETDIRNAME\$TARGETNAME.lib
-      - lib\$TARGETDIRNAME\$TARGETNAME.pdb
+      - lib\$TARGETDIRNAME\$TARGETNAME-d.dll
+      - lib\$TARGETDIRNAME\$TARGETNAME-d.lib
+      - lib\$TARGETDIRNAME\$TARGETNAME-d.pdb
       - include\$TARGETDIRNAME\*.h
       - build\$UNITTESTSNAME.exe
       - build\$UNITTESTSNAME.pdb
@@ -80,12 +76,14 @@ debugBuildWin512Py37:
     BUILDBATCH: "true"
     BUILDMODE: release
     BUILDUNITTESTS: "true"
-    DEVTOOLS: $DEVTOOLS_Win_Stable
+  parallel:
+    matrix: 
+      - DEVTOOLS: [$DEVTOOLS_Win_Stable, $DEVTOOLS_Win_Unstable]
 
-releaseBuildWin512Py37:
+windowsBuildReleasePy37:
   stage: build
-  script:
-    - .\tests\build\build-512.bat
+  extends: 
+    - .buildWinSub
   tags:
     - Win10
   only:
@@ -103,70 +101,20 @@ releaseBuildWin512Py37:
     BUILDBATCH: "false"
     BUILDMODE: release
     BUILDUNITTESTS: "false"
-    DEVTOOLS: $DEVTOOLS_Win_Stable
-
-debugBuildWin512Py37Unstable:
-  stage: build
-  script:
-    - .\tests\build\build-512.bat 1>buildLog512.txt
-  tags:
-    - Win10
-  artifacts:
-    paths:
-      #- lib\$TARGETDIRNAME\$TARGETNAME-d.dll
-      #- lib\$TARGETDIRNAME\$TARGETNAME-d.lib
-      #- lib\$TARGETDIRNAME\$TARGETNAME-d.pdb
-      - lib\$TARGETDIRNAME\$TARGETNAME.dll
-      - lib\$TARGETDIRNAME\$TARGETNAME.lib
-      - lib\$TARGETDIRNAME\$TARGETNAME.pdb
-      - include\$TARGETDIRNAME\*.h
-      - build\$UNITTESTSNAME.exe
-      - build\$UNITTESTSNAME.pdb
-      - buildLog512.txt
-    expire_in: 1 week
-    when: always
-  variables:
-    PYVERSION: "37"
-    BUILDBATCH: "true"
-    BUILDMODE: release
-    BUILDUNITTESTS: "true"
-    DEVTOOLS: $DEVTOOLS_Win_Unstable
-
-releaseBuildWin512Py37Unstable:
-  stage: build
-  script:
-    - .\tests\build\build-512.bat
-  tags:
-    - Win10
-  only:
-    - master
-    - tags
-  artifacts:
-    paths:
-      - lib\$TARGETDIRNAME\$TARGETNAME.dll
-      - lib\$TARGETDIRNAME\$TARGETNAME.lib
-      - include\$TARGETDIRNAME\*.h
-    expire_in: 1 week
-    when: always
-  variables:
-    PYVERSION: "37"
-    BUILDBATCH: "false"
-    BUILDMODE: release
-    BUILDUNITTESTS: "false"
-    DEVTOOLS: $DEVTOOLS_Win_Unstable
+  parallel:
+    matrix: 
+      - DEVTOOLS: [$DEVTOOLS_Win_Stable, $DEVTOOLS_Win_Unstable]  
     
 # build on Linux system
-debugBuildLinux512Py37:
+linuxBuildDebugPy37:
   stage: build
-  before_script:
-    - chmod a+rwx ./tests/build/build-512.sh
-  script:
-    - ./tests/build/build-512.sh |& tee linuxBuild.txt
+  extends: 
+    - .buildLinux
   tags:
     - Linux
   artifacts:
     paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so*
+      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so
       - include/$TARGETDIRNAME/*.h
       - build/$UNITTESTSNAME
       - linuxBuild.txt
@@ -177,14 +125,14 @@ debugBuildLinux512Py37:
     BUILDBATCH: "false"
     BUILDMODE: release
     BUILDUNITTESTS: "true"
-    DEVTOOLS: $DEVTOOLS_Linux_Stable
+  parallel:
+    matrix: 
+      - DEVTOOLS: [$DEVTOOLS_Linux_Stable, $DEVTOOLS_Linux_Unstable] 
 
-releaseBuildLinuxPy37:
+linuxBuildReleasePy37:
   stage: build
-  before_script:
-    - chmod a+rwx ./tests/build/build-512.sh
-  script:
-    - ./tests/build/build-512.sh
+  extends: 
+    - .buildLinux
   tags:
     - Linux
   only:
@@ -200,323 +148,123 @@ releaseBuildLinuxPy37:
     BUILDBATCH: "false"
     BUILDMODE: release
     BUILDUNITTESTS: "false"
-    DEVTOOLS: $DEVTOOLS_Linux_Stable
-
-debugBuildLinux512Py37Unstable:
-  stage: build
-  before_script:
-    - chmod a+rwx ./tests/build/build-512.sh
-  script:
-    - ./tests/build/build-512.sh |& tee linuxBuild.txt
-  tags:
-    - Linux
-  artifacts:
-    paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so*
-      - include/$TARGETDIRNAME/*.h
-      - build/$UNITTESTSNAME
-      - linuxBuild.txt
-    when: always
-    expire_in: 1 week
-  variables:
-    PYVERSION: 37
-    BUILDBATCH: "false"
-    BUILDMODE: release
-    BUILDUNITTESTS: "true"
-    DEVTOOLS: $DEVTOOLS_Linux_Unstable
-
-releaseBuildLinuxPy37Unstable:
-  stage: build
-  before_script:
-    - chmod a+rwx ./tests/build/build-512.sh
-  script:
-    - ./tests/build/build-512.sh
-  tags:
-    - Linux
-  only:
-    - master
-    - tags
-  artifacts:
-    paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME.so*
-      - include/$TARGETDIRNAME/*.h
-    expire_in: 1 week
-  variables:
-    PYVERSION: 37
-    BUILDBATCH: "false"
-    BUILDMODE: release
-    BUILDUNITTESTS: "false"
-    DEVTOOLS: $DEVTOOLS_Linux_Unstable
+  parallel:
+    matrix: 
+      - DEVTOOLS: [$DEVTOOLS_Linux_Stable, $DEVTOOLS_Linux_Unstable]   
     
 # run tests using the binary built before
 testWin512Py37:
-  needs: ["debugBuildWin512Py37"]
-  stage: test
+  extends: .winTestTemplateSub
   script:
     - .\tests\unittests\runUnittestsQt512.bat
     - get-content CoverageReport*\index.html
-  dependencies:
-    - debugBuildWin512Py37
-  tags:
-    - Win10
-  artifacts:
-    paths:
-      - "unittests.xml"
-      - ${UNITTESTSNAME}Coverage.xml
-      - CoverageReport* 
-    reports:
-      junit: unittests.xml
-      cobertura: ${UNITTESTSNAME}Coverage.xml
-    expire_in: 1 week
+  needs: ["windowsBuildDebugPy37: [$DEVTOOLS_Win_Stable]"]
+  dependencies: ["windowsBuildDebugPy37: [$DEVTOOLS_Win_Stable]"]
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-testWin512Py37Unstable:
-  needs: ["debugBuildWin512Py37Unstable"]
-  stage: test
+testWin512UnstablePy37:
+  extends: .winTestTemplateSub
   script:
     - .\tests\unittests\runUnittestsQt512.bat
     - get-content CoverageReport*\index.html
-  dependencies:
-    - debugBuildWin512Py37Unstable
-  tags:
-    - Win10
-  artifacts:
-    paths:
-      - "unittests.xml"
-      - ${UNITTESTSNAME}Coverage.xml
-      - CoverageReport* 
-    reports:
-      junit: unittests.xml
-      cobertura: ${UNITTESTSNAME}Coverage.xml
-    expire_in: 1 week
+
+  needs: ["windowsBuildDebugPy37: [$DEVTOOLS_Win_Unstable]"]
+  dependencies: ["windowsBuildDebugPy37: [$DEVTOOLS_Win_Unstable]"]
   variables:
-    DEVTOOLS: $DEVTOOLS_Win_Unstable
+    DEVTOOLS: $DEVTOOLS_Win_Unstable  
 
 testLinux512Py37:
-  needs: ["debugBuildLinux512Py37"]
-  stage: test
-  before_script:
-    - chmod +x ./tests/unittests/runUnittests.sh
-  script:
-    - ./tests/unittests/runUnittests.sh
+  extends: .linuxTestTemplateSub
+  needs: ["linuxBuildDebugPy37: [$DEVTOOLS_Linux_Stable]"]
   dependencies:
-    - debugBuildLinux512Py37
-  tags:
-    - Linux
-  artifacts:
-    paths:
-      - "unittests.xml"
-    reports:
-      junit: unittests.xml
+    - "linuxBuildDebugPy37: [$DEVTOOLS_Linux_Stable]"
   variables:
-    DEVTOOLS: $DEVTOOLS_Linux_Stable
+    DEVTOOLS: $DEVTOOLS_Linux_Stable    
 
-testLinux512Py37Unstable:
-  needs: ["debugBuildLinux512Py37Unstable"]
-  stage: test
-  before_script:
-    - chmod +x ./tests/unittests/runUnittests.sh
-  script:
-    - ./tests/unittests/runUnittests.sh
+testLinux512UnstablePy37:
+  extends: .linuxTestTemplateSub
+  needs: ["linuxBuildDebugPy37: [$DEVTOOLS_Linux_Unstable]"]
   dependencies:
-    - debugBuildLinux512Py37Unstable
-  tags:
-    - Linux
-  artifacts:
-    paths:
-      - "unittests.xml"
-    reports:
-      junit: unittests.xml
+    - "linuxBuildDebugPy37: [$DEVTOOLS_Linux_Unstable]"
   variables:
-    DEVTOOLS: $DEVTOOLS_Linux_Unstable
+    DEVTOOLS: $DEVTOOLS_Linux_Unstable   
 
 # copy files to servers
 copyToNightlyBuildWin:
-  stage: copy
-  script:
-    - .\tests\build\copyHeaders-nightlybuild.bat
-  dependencies:
-    - releaseBuildWin512Py37
-  tags:
-    - Win10
-  only:
-    - master
+  extends: .copyNightlyTemplateSub
+  dependencies: ["windowsBuildReleasePy37: [$DEVTOOLS_Win_Stable]"]
   allow_failure: true
-  variables:
-    NIGHTLYBUILD: "G:\\AT-TW\\GTlab\\Nightly_Builds_512"
 
 copyForDeploymentWin:
-  stage: copy
-  script:
-    - .\tests\build\copyHeaders-deployment.bat
+  extends: .copyDeployTemplateSub
   dependencies:
-    - debugBuildWin512Py37
-    - releaseBuildWin512Py37
-  tags:
-    - Win10
-  only:
-    - tags
+    - "windowsBuildDebugPy37: [$DEVTOOLS_Win_Stable]"
+    - "windowsBuildReleasePy37: [$DEVTOOLS_Win_Stable]"
   variables:
     PLATFORMNAME:  windows
-    RELEASESTATUS: stable
+    RELEASESTATUS: stable 
 
 copyForDeploymentWinUnstable:
-  stage: copy
-  script:
-    - .\tests\build\copyHeaders-deployment.bat
-  dependencies:
-    - debugBuildWin512Py37Unstable
-    - releaseBuildWin512Py37Unstable
-  tags:
-    - Win10
-  only:
-    - tags
+  extends: .copyDeployTemplateSub
+  dependencies: 
+    - "windowsBuildDebugPy37: [$DEVTOOLS_Win_Unstable]"
+    - "windowsBuildReleasePy37: [$DEVTOOLS_Win_Unstable]"
   variables:
     PLATFORMNAME:  windows
     RELEASESTATUS: unstable
-
+ 
 copyForDeploymentLinux:
-  stage: copy
-  script:
-    - .\tests\build\copyHeaders-deployment.bat
+  extends: .copyDeployTemplateSub
   dependencies:
-    - debugBuildLinux512Py37
-    - releaseBuildLinuxPy37
-  tags:
-    - Win10
-  only:
-    - tags
+    - "linuxBuildDebugPy37: [$DEVTOOLS_Linux_Stable]"
+    - "linuxBuildReleasePy37: [$DEVTOOLS_Linux_Stable]"
   variables:
     PLATFORMNAME:  linux
     RELEASESTATUS: stable
 
 copyForDeploymentLinuxUnstable:
-  stage: copy
-  script:
-    - .\tests\build\copyHeaders-deployment.bat
+  extends: .copyDeployTemplateSub
   dependencies:
-    - debugBuildLinux512Py37Unstable
-    - releaseBuildLinuxPy37Unstable
-  tags:
-    - Win10
-  only:
-    - tags
+    - "linuxBuildDebugPy37: [$DEVTOOLS_Linux_Unstable]"
+    - "linuxBuildReleasePy37: [$DEVTOOLS_Linux_Unstable]"
   variables:
     PLATFORMNAME:  linux
     RELEASESTATUS: unstable
 
 # code quality
 codingstyle:
-  needs: []
   stage: codequality
-  allow_failure: true
-  script:
-    - '& $env:CODINGSTYLETOOL --ci --output=xml -o .\ -f  .\features\filefilter.txt .\src 1>codingStyleLog.txt'
-  tags:
-    - Win10
+  extends: .codingStyleTemplate 
   except:
     - tags
-  dependencies:
-  artifacts:
-    paths:
-      - "nsiqcppstyle_report.xml"
-      - codingStyleLog.txt   
-    expire_in: 1 week
-  variables:
-    CODINGSTYLETOOL: "C:\\Program Files\\nsiqcppstyle_0.2.2.3\\nsiqcppstyle\\nsiqcppstyle"
-
+ 
 cppcheck:
-  needs: []
   stage: codequality
-  allow_failure: true
-  tags:
-    - Linux
-  before_script:
-    - python3 -m venv env
-    - source env/bin/activate
-    - python3 -m pip install cppcheck-codequality
-  script:
-    - cppcheck --xml --suppress=unusedFunction --enable=all src/ 2> cppcheck_out.xml
-    - cppcheck-codequality --input-file=cppcheck_out.xml --output-file=codequality.json
-  artifacts:
-    reports:
-      codequality: codequality.json
-
+  extends: .cppCheckTemplate 
+   
 pages:
-  needs: []
-  dependencies:
   stage: badges
-  tags:
-    - Linux
-  script:
-    - doxygen features/doxygenConfig
-    - mkdir public
-    - mv doc/html/* public/
+  extends: .pageTemplate 
   only:
     - master
     - tag
-  artifacts:
-     paths:
-       - public/
-
-.packageTemplate:
-  tags:
-    - Win10
-  script:
-    - .\tests\package\packageGen.bat
-  artifacts:  
-    paths:
-      - components/
-    when: always
-  variables:
-    PACKAGETEMPLATE: .\features\package_template.xml
-    PYPACKAGEGEN: .\tests\package\packageGen.py
-  parallel:
-    matrix:
-      - RELEASESTATUS: stable
-        FRAMEWORK_MAJOR: "1"
-        FRAMEWORK_MINOR: "7"
-      - RELEASESTATUS: unstable
-        FRAMEWORK_MAJOR: "2"
-        FRAMEWORK_MINOR: "0"
 
 package:
   stage: package
-  extends: .packageTemplate
+  extends: .packageTemplateSub
   only:
     - tags
 
 # badges
 badges:
   stage: badges
-  script:
-    - $CommitNumber = git rev-list --count HEAD
-    - $statistics = git diff --shortstat 4b825dc642cb6eb9a060e54bf8d69288fbee4904
-    - $filesRaw,$linesRaw = $statistics.split(',')
-    - $fileNumber = $filesRaw.split(' ')[1]
-    - $linenumber = $linesRaw.split(' ')[1]
-    - '& $env:BADGEGENERATOR --run files $fileNumber'
-    - '& $env:BADGEGENERATOR --run commits $CommitNumber'
-    - '& $env:BADGEGENERATOR --bw .\buildLog512.txt .'
-    - '& $env:BADGEGENERATOR --bw .\linuxBuild.txt .'
-    - '& $env:BADGEGENERATOR --cs .\codingStyleLog.txt .'
-    - '& $env:BADGEGENERATOR --cc .\${UNITTESTSNAME}Coverage.xml .'
-    - '& $env:BADGEGENERATOR --cl .\${UNITTESTSNAME}Coverage.xml .'
-    - '& $env:BADGEGENERATOR --dp "Pipeline-Version" ${PIPELINEVERSION} .'
+  extends: .badgeTemplate 
   dependencies:
-    - debugBuildWin512Py37
-    - debugBuildLinux512Py37
+    - "windowsBuildDebugPy37: [$DEVTOOLS_Win_Unstable]"
+    - "linuxBuildDebugPy37: [$DEVTOOLS_Linux_Stable]"
     - testWin512Py37
     - testLinux512Py37
     - codingstyle
-  tags:
-    - Win10
   except:
     - tags
-  artifacts:
-    paths:
-      - "New_*.svg"
-    expire_in: 52 week
-  variables:
-    BADGEGENERATOR: C:\devel\BadgeBuilder\BadgeGenerator.exe
