@@ -49,7 +49,18 @@ mergeRequestPipelineJob:
     - echo ${CI_PIPELINE_SOURCE}
     - echo "Merge Request Pipeline"
   only:
-    - merge_request 
+    - merge_request
+
+# Test update
+branchPipelineJob:
+  stage: update
+  tags:
+    - Win10
+  script:
+    - echo ${CI_PIPELINE_SOURCE}
+    - echo "Merge Request Pipeline"
+#  only:
+#    - master
 
 # DevTools update
 devtoolsUpdateWindows:
