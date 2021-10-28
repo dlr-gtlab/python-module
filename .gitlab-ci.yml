@@ -40,6 +40,17 @@ stages:
   - package
   - badges
 
+# Test update
+mergeRequestPipelineJob:
+  stage: update
+  tags:
+    - Win10
+  script:
+    - echo ${CI_PIPELINE_SOURCE}
+    - echo "Merge Request Pipeline"
+  only:
+    - merge_request 
+
 # DevTools update
 devtoolsUpdateWindows:
   stage: update
