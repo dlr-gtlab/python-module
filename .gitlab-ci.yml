@@ -52,7 +52,7 @@ mergeRequestPipelineJob:
     - echo "Merge Request Pipeline"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_PIPELINE_SOURCE =~ $STABE_MAINS'
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH =~ $STABE_MAINS'
 
 # Test update
 branchPipelineJob:
