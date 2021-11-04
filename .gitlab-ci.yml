@@ -22,208 +22,249 @@
 
 # Environment variables to use in the pipeline globally
 variables:
-  PIPELINEVERSION: "1.5.1"
+  PIPELINEVERSION: "2.0.0"
   GIT_SUBMODULE_STRATEGY: none
+  
+  # Regulare expression pattern
+  # enclose the branch name with ^ and $
+  # separete severl branch names with |
+  # e.g. /^main_1_0$|^main_1_1$/
+  STABLE_BRANCHES: /^master$/
+  
+  # Name of the unstable branch (if it exists)
+  # UNSTABLE_BRANCH: unstable_master
 
 # inlcude some templates from this file
 include:
-  - project: 'at-twk/gitlab-templates'
-    file: '/ci-templates/.ci-templates.yml'
+  - local: '/ci-templates/.ci-templates.yml'
+#include:
+#  - project: 'at-twk/gitlab-templates'
+#    file: '/ci-templates/.ci-templates.yml'
 
 stages:
   - update
   - build
   - test
   - regressionTest
+  - unstableBuild
+  - unstableTest
   - copy
   - codequality
   - package
   - badges
-
+   
 # DevTools update
 devtoolsUpdateWindows:
   stage: update
-  extends: .devToolsUpdateWindows
-  only:
-    - master 
+  extends: .devToolsUpdateWindowsRules
 
 devtoolsUpdateLinux:
   stage: update
-  extends: .devToolsUpdateLinux
-  only:
-    - master
+  extends: .devToolsUpdateLinuxRules
 
 # build on Windows system
 windowsBuildDebugPy37:
   stage: build
   extends: 
-    - .buildWinSub
-  tags:
-    - Win10
-  artifacts:
-    paths:
-      - lib\$TARGETDIRNAME\$TARGETNAME-d.dll
-      - lib\$TARGETDIRNAME\$TARGETNAME-d.lib
-      - lib\$TARGETDIRNAME\$TARGETNAME-d.pdb
-      - include\$TARGETDIRNAME\*.h
-      - build\$UNITTESTSNAME.exe
-      - build\$UNITTESTSNAME.pdb
-      - buildLog512.txt
-    expire_in: 1 week
-    when: always
+    - .buildWinDebugSub
+    - .stable-debug
+  needs:
+    - job: devtoolsUpdateWindows
+      optional: true
   variables:
     PYVERSION: "37"
     BUILDBATCH: "true"
     BUILDMODE: release
-    BUILDUNITTESTS: "true"
-  parallel:
-    matrix: 
-      - DEVTOOLS: [$DEVTOOLS_Win_Stable, $DEVTOOLS_Win_Unstable]
+    DEVTOOLS: $DEVTOOLS_Win_Stable
+
+windowsBuildDebugPy37Unstable:
+  stage: unstableBuild
+  extends: 
+    - .buildWinDebugSub
+    - .unstable-debug
+  needs:
+    - job: devtoolsUpdateWindows
+      optional: true
+  variables:
+    PYVERSION: "37"
+    BUILDBATCH: "true"
+    BUILDMODE: release
+    DEVTOOLS: $DEVTOOLS_Win_Unstable
 
 windowsBuildReleasePy37:
   stage: build
   extends: 
-    - .buildWinSub
-  tags:
-    - Win10
-  only:
-    - master
-    - tags
-  artifacts:
-    paths:
-      - lib\$TARGETDIRNAME\$TARGETNAME.dll
-      - lib\$TARGETDIRNAME\$TARGETNAME.lib
-      - include\$TARGETDIRNAME\*.h
-    expire_in: 1 week
-    when: always
+    - .buildWinReleaseSub
+    - .stable-release
+  needs:
+    - job: devtoolsUpdateWindows
+      optional: true
   variables:
     PYVERSION: "37"
     BUILDBATCH: "false"
-    BUILDMODE: release
-    BUILDUNITTESTS: "false"
-  parallel:
-    matrix: 
-      - DEVTOOLS: [$DEVTOOLS_Win_Stable, $DEVTOOLS_Win_Unstable]  
+    DEVTOOLS: $DEVTOOLS_Win_Stable
+
+windowsBuildReleasePy37Unstable:
+  stage: unstableBuild
+  extends: 
+    - .buildWinReleaseSub
+    - .unstable-release
+  needs:
+    - job: devtoolsUpdateWindows
+      optional: true
+  variables:
+    PYVERSION: "37"
+    BUILDBATCH: "false"
+    DEVTOOLS: $DEVTOOLS_Win_Unstable
     
 # build on Linux system
 linuxBuildDebugPy37:
   stage: build
   extends: 
-    - .buildLinux
-  tags:
-    - Linux
-  artifacts:
-    paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so
-      - include/$TARGETDIRNAME/*.h
-      - build/$UNITTESTSNAME
-      - linuxBuild.txt
-    when: always
-    expire_in: 1 week
+    - .buildLinuxDebug
+    - .stable-debug
+  needs:
+    - job: devtoolsUpdateLinux
+      optional: true
   variables:
     PYVERSION: 37
     BUILDBATCH: "false"
     BUILDMODE: release
-    BUILDUNITTESTS: "true"
-  parallel:
-    matrix: 
-      - DEVTOOLS: [$DEVTOOLS_Linux_Stable, $DEVTOOLS_Linux_Unstable] 
+    DEVTOOLS: $DEVTOOLS_Linux_Stable
 
+linuxBuildDebugPy37Unstable:
+  stage: unstableBuild
+  extends: 
+    - .buildLinuxDebug 
+    - .unstable-debug
+  needs:
+    - job: devtoolsUpdateLinux
+      optional: true
+  variables:
+    PYVERSION: 37
+    BUILDBATCH: "false"
+    BUILDMODE: release
+    DEVTOOLS: $DEVTOOLS_Linux_Unstable
+ 
 linuxBuildReleasePy37:
   stage: build
   extends: 
-    - .buildLinux
-  tags:
-    - Linux
-  only:
-    - master
-    - tags
-  artifacts:
-    paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME.so*
-      - include/$TARGETDIRNAME/*.h
-    expire_in: 1 week
+    - .buildLinuxRelease 
+    - .stable-release
+  needs:
+    - job: devtoolsUpdateLinux
+      optional: true
   variables:
     PYVERSION: 37
     BUILDBATCH: "false"
-    BUILDMODE: release
-    BUILDUNITTESTS: "false"
-  parallel:
-    matrix: 
-      - DEVTOOLS: [$DEVTOOLS_Linux_Stable, $DEVTOOLS_Linux_Unstable]   
-    
+    DEVTOOLS: $DEVTOOLS_Linux_Stable
+
+linuxBuildReleasePy37Unstable:
+  stage: unstableBuild
+  extends: 
+    - .buildLinuxRelease 
+    - .unstable-release
+  needs:
+    - job: devtoolsUpdateLinux
+      optional: true
+  variables:
+    PYVERSION: 37
+    BUILDBATCH: "false"
+    DEVTOOLS: $DEVTOOLS_Linux_Unstable
+
 # run tests using the binary built before
 testWin512Py37:
-  extends: .winTestTemplateSub
+  stage: test
+  extends: 
+    - .winTestTemplateSub
+    - .stable-debug
   script:
     - .\tests\unittests\runUnittestsQt512.bat
     - get-content CoverageReport*\index.html
-  needs: ["windowsBuildDebugPy37: [$DEVTOOLS_Win_Stable]"]
-  dependencies: ["windowsBuildDebugPy37: [$DEVTOOLS_Win_Stable]"]
+  needs: 
+    - windowsBuildDebugPy37
+  dependencies: 
+    - windowsBuildDebugPy37
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
 testWin512UnstablePy37:
-  extends: .winTestTemplateSub
+  stage: unstableTest
+  extends: 
+    - .winTestTemplateSub
+    - .unstable-debug
   script:
     - .\tests\unittests\runUnittestsQt512.bat
     - get-content CoverageReport*\index.html
-
-  needs: ["windowsBuildDebugPy37: [$DEVTOOLS_Win_Unstable]"]
-  dependencies: ["windowsBuildDebugPy37: [$DEVTOOLS_Win_Unstable]"]
+  needs: 
+    - windowsBuildDebugPy37Unstable
+  dependencies: 
+    - windowsBuildDebugPy37Unstable
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Unstable  
 
 testLinux512Py37:
-  extends: .linuxTestTemplateSub
-  needs: ["linuxBuildDebugPy37: [$DEVTOOLS_Linux_Stable]"]
+  stage: test
+  extends: 
+    - .linuxTestTemplateSub
+    - .stable-debug
+  needs: 
+    - linuxBuildDebugPy37
   dependencies:
-    - "linuxBuildDebugPy37: [$DEVTOOLS_Linux_Stable]"
+    - linuxBuildDebugPy37
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Stable    
 
 testLinux512UnstablePy37:
-  extends: .linuxTestTemplateSub
-  needs: ["linuxBuildDebugPy37: [$DEVTOOLS_Linux_Unstable]"]
+  stage: unstableTest
+  extends: 
+    - .linuxTestTemplateSub
+    - .unstable-debug
+  needs: 
+    - linuxBuildDebugPy37Unstable
   dependencies:
-    - "linuxBuildDebugPy37: [$DEVTOOLS_Linux_Unstable]"
+    - linuxBuildDebugPy37Unstable
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable   
 
 # copy files to servers
-copyToNightlyBuildWin:
+.copyToNightlyBuildWin:
   extends: .copyNightlyTemplateSub
   dependencies: ["windowsBuildReleasePy37: [$DEVTOOLS_Win_Stable]"]
   allow_failure: true
 
-copyForDeploymentWin:
+.deployWinStable:
   extends: .copyDeployTemplateSub
+  rules:
+    - if: $CI_COMMIT_TAG != null
   dependencies:
-    - "windowsBuildDebugPy37: [$DEVTOOLS_Win_Stable]"
-    - "windowsBuildReleasePy37: [$DEVTOOLS_Win_Stable]"
+    - windowsBuildDebugPy37
+    - windowsBuildReleasePy37
   variables:
     PLATFORMNAME:  windows
     RELEASESTATUS: stable 
 
-copyForDeploymentWinUnstable:
+.deployWinUnstable:
   extends: .copyDeployTemplateSub
+  rules:
+    - if: $CI_COMMIT_TAG != null && 
   dependencies: 
-    - "windowsBuildDebugPy37: [$DEVTOOLS_Win_Unstable]"
-    - "windowsBuildReleasePy37: [$DEVTOOLS_Win_Unstable]"
+    - windowsBuildDebugPy37Unstable
+    - windowsBuildReleasePy37Unstable
   variables:
     PLATFORMNAME:  windows
     RELEASESTATUS: unstable
  
-copyForDeploymentLinux:
+.copyForDeploymentLinux:
   extends: .copyDeployTemplateSub
   dependencies:
-    - "linuxBuildDebugPy37: [$DEVTOOLS_Linux_Stable]"
-    - "linuxBuildReleasePy37: [$DEVTOOLS_Linux_Stable]"
+    - "linuxBuildDebugPy37"
+    - "linuxBuildReleasePy37"
   variables:
     PLATFORMNAME:  linux
     RELEASESTATUS: stable
 
-copyForDeploymentLinuxUnstable:
+.copyForDeploymentLinuxUnstable:
   extends: .copyDeployTemplateSub
   dependencies:
     - "linuxBuildDebugPy37: [$DEVTOOLS_Linux_Unstable]"
@@ -235,36 +276,27 @@ copyForDeploymentLinuxUnstable:
 # code quality
 codingstyle:
   stage: codequality
-  extends: .codingStyleTemplate 
-  except:
-    - tags
+  extends: .codingStyleTemplateRules 
  
 cppcheck:
   stage: codequality
-  extends: .cppCheckTemplate 
-   
+  extends: .cppCheckTemplateRules
+
 pages:
   stage: badges
-  extends: .pageTemplate 
-  only:
-    - master
-    - tag
+  extends: .pageTemplateRules 
 
-package:
+.package:
   stage: package
   extends: .packageTemplateSub
-  only:
-    - tags
 
 # badges
 badges:
   stage: badges
-  extends: .badgeTemplate 
+  extends: .badgeTemplateRules 
   dependencies:
-    - "windowsBuildDebugPy37: [$DEVTOOLS_Win_Unstable]"
-    - "linuxBuildDebugPy37: [$DEVTOOLS_Linux_Stable]"
+    - windowsBuildDebugPy37
+    - linuxBuildDebugPy37
     - testWin512Py37
     - testLinux512Py37
     - codingstyle
-  except:
-    - tags
