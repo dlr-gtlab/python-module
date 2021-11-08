@@ -64,8 +64,8 @@ testStepOneB:
     - git for-each-ref
     - git for-each-ref | Select-String $CI_COMMIT_SHA | Select-String /remotes/origin/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "^master$|^master_1_8$|^146-deployment-jobs$" | % {$_.Line}
     - echo $CI_COMMIT_SHA
-variables:
-  GIT_STRATEGY: clone
+  variables:
+    GIT_STRATEGY: clone
   
 
 # DevTools update
