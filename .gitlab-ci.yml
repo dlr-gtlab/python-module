@@ -57,6 +57,7 @@ testStepOneB:
   stage: .pre
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
     - if: $CI_COMMIT_TAG != null
   tags:
     - Win10
