@@ -68,7 +68,7 @@ testStepOneB:
   stage: update
   extends: .devToolsUpdateWindowsRules
 
-.devtoolsUpdateLinux:
+devtoolsUpdateLinux:
   stage: update
   extends: .devToolsUpdateLinuxRules
 
@@ -128,7 +128,7 @@ testStepOneB:
     DEVTOOLS: $DEVTOOLS_Win_Unstable
     
 # build on Linux system
-.linuxBuildDebugPy37:
+linuxBuildDebugPy37:
   stage: build
   extends: 
     - .buildLinuxDebug
