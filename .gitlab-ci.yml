@@ -62,6 +62,8 @@ testStepOneB:
     - Win10
   script:
     - git for-each-ref
+    - git for-each-ref | Select-String $CI_COMMIT_SHA | Select-String /remotes/origin/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "^master$|^master_1_8$" | % {$_.Line}
+    - echo $CI_COMMIT_SHA
 
 # DevTools update
 .devtoolsUpdateWindows:
