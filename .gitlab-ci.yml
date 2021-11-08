@@ -67,6 +67,7 @@ testStepOneB:
     - echo $CI_COMMIT_SHA
   variables:
     GIT_STRATEGY: clone
+    GIT_CHECKOUT: "true"
   
 
 # DevTools update
