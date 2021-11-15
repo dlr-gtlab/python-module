@@ -86,6 +86,17 @@ testStepTwo:
     - echo $COMMIT_BRANCH
   dependencies:
     - testStepOne
+
+testStepThree:
+  stage: mytest
+  rules:
+   - if: $COMMIT_BRANCH != null && $COMMIT_BRANCH =~ $STABLE_BRANCHES
+  tags:
+    - Win10
+  script:
+    - echo $COMMIT_BRANCH
+  dependencies:
+    - testStepOne
       
 # DevTools update
 .devtoolsUpdateWindows:
