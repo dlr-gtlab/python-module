@@ -281,9 +281,6 @@
 # Copy binaries jobs
 .copyDeployTemplateSub:
   stage: copy
-  before_script:
-    - git submodule sync
-    - git submodule update --init
   script:
     - .\tests\pipeline-scripts\build\copyHeaders-deployment.bat
   tags:
