@@ -257,6 +257,8 @@ linuxBuildDebugPy37:
 deployWinStable:
   stage: copy
   rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
     - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
     - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_TAG != null
       allow_failure: true
@@ -270,8 +272,7 @@ deployWinStable:
   tags:
     - Win10  
   script:
-     if [ "$COMMIT_BRANCH" == "146-deployment-jobs" ]; then echo "demo1"; else echo "demo2"; fi
-    - echo $COMMIT_BRANCH
+    - .\tests\scripts\copyHeaders-deployment.bat  
   variables:
     PLATFORMNAME:  windows
     RELEASESTATUS: stable
