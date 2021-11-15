@@ -62,15 +62,8 @@ testStepOneB:
   tags:
     - Win10
   script:
-    - git ls-remote --heads
-    - git ls-remote --heads | Select-String $CI_COMMIT_SHA
-    - git for-each-ref
-    - git for-each-ref | Select-String $CI_COMMIT_SHA | Select-String /remotes/origin/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "^master$|^master_1_8$|^146-deployment-jobs$" | % {$_.Line}
-    - echo $CI_COMMIT_SHA
-  variables:
-    GIT_STRATEGY: clone
-    GIT_CHECKOUT: "true"
-  
+    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "^master$|^master_1_8$|^146-deployment-jobs$" | % {$_.Line}
+    - echo $CI_COMMIT_SHA  
 
 # DevTools update
 .devtoolsUpdateWindows:
