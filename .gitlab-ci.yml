@@ -30,7 +30,6 @@ variables:
   # separete severl branch names with |
   # e.g. /^main_1_0$|^main_1_1$/
   STABLE_BRANCHES: /^master$|^master_1_8$|^146-deployment-jobs$/
-  STABLE_BRANCHES_TEST: ^master$|^master_1_8$|^146-deployment-jobs$
   
   # Name of the unstable branch (if it exists)
   # UNSTABLE_BRANCH: unstable_master
@@ -66,10 +65,9 @@ testStepOneB:
     - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
     - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
     - echo $TEMP_REGEXP
-    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$STABLE_BRANCHES_TEST" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
+    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
     - echo $COMMIT_BRANCH
     - echo $CI_COMMIT_SHA
-    - echo /$STABLE_BRANCHES_TEST/
 
 # DevTools update
 .devtoolsUpdateWindows:
