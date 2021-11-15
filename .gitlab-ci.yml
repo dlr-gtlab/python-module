@@ -42,6 +42,7 @@ include:
 #    file: '/ci-templates/.ci-templates.yml'
 
 stages:
+  - mytest
   - update
   - build
   - test
@@ -53,7 +54,7 @@ stages:
   - package
   - badges
 
-testStepOneB:
+testStepOne:
   stage: .pre
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
@@ -68,7 +69,24 @@ testStepOneB:
     - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
   script:
     - echo $COMMIT_BRANCH
+    - echo "COMMIT_BRANCH=$COMMIT_BRANCH" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
 
+testStepTwo:
+  stage: mytest
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_TAG != null
+  tags:
+    - Win10
+  script:
+    - echo $COMMIT_BRANCH
+  dependencies:
+    - testStepOne
+      
 # DevTools update
 .devtoolsUpdateWindows:
   stage: update

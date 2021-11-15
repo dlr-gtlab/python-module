@@ -285,8 +285,7 @@
     - git submodule sync
     - git submodule update --init
   script:
-#    - .\tests\pipeline-scripts\build\copyHeaders-deployment.bat
-    - echo "deploy"    
+    - .\tests\pipeline-scripts\build\copyHeaders-deployment.bat
   tags:
     - Win10  
 
