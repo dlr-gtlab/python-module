@@ -287,7 +287,17 @@
   script:
     - .\tests\pipeline-scripts\build\copyHeaders-deployment.bat
   tags:
-    - Win10  
+    - Win10
+
+.copyDeployTemplateSubNew:
+  stage: copy
+  before_script:
+    - git submodule sync
+    - git submodule update --init
+  script:
+    - .\tests\pipeline-scripts\build\copyHeaders-deployment-new.bat
+  tags:
+    - Win10
 
 .copyNightlyTemplateSub:
   stage: copy
