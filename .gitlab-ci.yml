@@ -63,7 +63,10 @@ testStepOneB:
   tags:
     - Win10
   script:
-    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$STABLE_BRANCHES_TEST" | % {$_.Line} -outvariable COMMIT_BRANCH
+    - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
+    - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
+    - echo $TEMP_REGEXP
+    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$STABLE_BRANCHES_TEST" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
     - echo $COMMIT_BRANCH
     - echo $CI_COMMIT_SHA
     - echo /$STABLE_BRANCHES_TEST/
