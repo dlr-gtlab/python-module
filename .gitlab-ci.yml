@@ -62,7 +62,8 @@ testStepOneB:
   tags:
     - Win10
   script:
-    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "^master$|^master_1_8$|^146-deployment-jobs$" | % {$_.Line}
+    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "^master$|^master_1_8$|^146-deployment-jobs$" | % {$_.Line} -outvariable COMMIT_BRANCH
+    - echo $COMMIT_BRANCH
     - echo $CI_COMMIT_SHA  
 
 # DevTools update
