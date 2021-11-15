@@ -69,7 +69,7 @@ testStepOne:
     - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
   script:
     - echo $COMMIT_BRANCH
-    - echo "COMMIT_BRANCH=$COMMIT_BRANCH" >> build.env
+    - Add-Content -Path build.env -Value "COMMIT_BRANCH=$COMMIT_BRANCH"
   artifacts:
     reports:
       dotenv: build.env
