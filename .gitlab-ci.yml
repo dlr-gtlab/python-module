@@ -30,6 +30,7 @@ variables:
   # separete severl branch names with |
   # e.g. /^main_1_0$|^main_1_1$/
   STABLE_BRANCHES: /^master$|^master_1_8$|^146-deployment-jobs$/
+  STABLE_BRANCHES_TEST: ^master$|^master_1_8$|^146-deployment-jobs$
   
   # Name of the unstable branch (if it exists)
   # UNSTABLE_BRANCH: unstable_master
@@ -56,15 +57,16 @@ stages:
 testStepOneB:
   stage: .pre
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
-    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /$STABLE_BRANCHES_TEST/
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ /$STABLE_BRANCHES_TEST/
     - if: $CI_COMMIT_TAG != null
   tags:
     - Win10
   script:
-    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "^master$|^master_1_8$|^146-deployment-jobs$" | % {$_.Line} -outvariable COMMIT_BRANCH
+    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$STABLE_BRANCHES_TEST" | % {$_.Line} -outvariable COMMIT_BRANCH
     - echo $COMMIT_BRANCH
-    - echo $CI_COMMIT_SHA  
+    - echo $CI_COMMIT_SHA
+    - echo /$STABLE_BRANCHES_TEST/
 
 # DevTools update
 .devtoolsUpdateWindows:
