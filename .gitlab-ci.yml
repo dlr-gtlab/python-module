@@ -32,7 +32,7 @@ variables:
   STABLE_BRANCHES: /^master$|^master_1_8$|^146-deployment-jobs$/
   
   # Name of the unstable branch (if it exists)
-  # UNSTABLE_BRANCH: unstable_master
+  UNSTABLE_BRANCH: unstable_master
 
 # inlcude some templates from this file
 include:
