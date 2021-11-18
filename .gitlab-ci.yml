@@ -56,8 +56,8 @@ stages:
 
 generateJobs:
   stage: deploy
-  rules:
-    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
+#  rules:
+#    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
   tags:
     - Win10
   before_script:
