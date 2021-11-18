@@ -81,10 +81,8 @@ generateJobs:
     TEMPLATEFILE: .\tests\scripts\deployJob.template
     OUTPUTYAML: .\deploy.yml
 
-.triggerJobs:
+triggerJobs:
   stage: deploy
-  rules:
-    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
   needs:
     - generateJobs
   trigger:
