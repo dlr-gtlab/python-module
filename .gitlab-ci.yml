@@ -63,7 +63,8 @@ testA:
 
 testB:
   stage: update
-  needs: testA
+  needs: 
+     - testA
   script:
     - echo $TEST_VAR
   tags:
