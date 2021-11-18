@@ -29,7 +29,7 @@ variables:
   # enclose the branch name with ^ and $
   # separete severl branch names with |
   # e.g. /^main_1_0$|^main_1_1$/
-  STABLE_BRANCHES: /^master$|^master_1_8$|^146-deployment-jobs$/
+  STABLE_BRANCHES: /^master$|^master_1_8$/
   
   # Name of the unstable branch (if it exists)
   # UNSTABLE_BRANCH: unstable_master
@@ -66,6 +66,7 @@ generateJobs:
     - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
     - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
     - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
+    - echo $COMMIT_BRANCH
   script:
     - if(${COMMIT_BRANCH}){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r JOBNAME deployStableWin } else { echo "COMMIT_BRANCH is no stable branch" }
     - '& $env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r JOBNAME deployUntableWin'
