@@ -9,7 +9,7 @@ deployWinStable:
     - echo "Hello template"
     - echo $PLATFORMNAME
     - echo $RELEASESTATUS
-	- echo $COMMIT_BRANCH
+    - echo $COMMIT_BRANCH
   tags:
     - Win10
   variables:
