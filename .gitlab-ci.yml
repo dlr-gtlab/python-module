@@ -58,10 +58,12 @@ generateDeploymentJobs:
   tags:
     - Win10
   script:
-    - python3 .\tests\scripts\ConfigureDynJobs.py -t .\deployJob.template -o .\deploy.yml -r PLATFORMNAME windows --replace RELEASESTATUS stable
+    - '& $env:PYTHONEXEPATH .\tests\scripts\ConfigureDynJobs.py -t .\deployJob.template -o .\deploy.yml -r PLATFORMNAME windows --replace RELEASESTATUS stable'
   artifacts:
     paths:
       - deploy.yml
+  variables:
+    PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
 
 trigger-tests:
   stage: test
@@ -75,14 +77,14 @@ trigger-tests:
 
 
 # DevTools update
-testA:
+.testA:
   stage: update
   script:
     - $TEST_VAR="Hello World"
   tags:
     - Win10
 
-testB:
+.testB:
   stage: update
   needs: 
      - testA
