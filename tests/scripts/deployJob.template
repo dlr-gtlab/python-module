@@ -10,8 +10,10 @@ ${JOBNAME}:
     - echo $PLATFORMNAME
     - echo $RELEASESTATUS
     - echo $RELEASESTATUS
+	- echo $COMMITREF
   tags:
     - Win10
   variables:
     PLATFORMNAME:  ${PLATFORMNAME}
     RELEASESTATUS: ${RELEASESTATUS}
+	COMMITREF: ${COMMITREF}

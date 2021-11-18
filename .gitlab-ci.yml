@@ -242,16 +242,16 @@ generateJobs:
     - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable STABLE_COMMIT_BRANCH
   script:
     # The tag base is a stable branch and there is no separated unstable branch.
-    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r JOBNAME deployStableWin }
-    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r JOBNAME deployUntableWin }
-    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r JOBNAME deployStableLinux }
-    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r JOBNAME deployUnstableLinux }
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployStableWin }
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployUntableWin }
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployStableLinux }
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployUnstableLinux }
     # The tag base is a stable branch and there is a separated unstable branch.
-    - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r JOBNAME deployStableWin }
-    - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r JOBNAME deployStableLinux }
+    - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployStableWin }
+    - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployStableLinux }
     # The tag base is an unstable branch.
-    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r JOBNAME deployUntableWin }
-    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r JOBNAME deployUntableLinux }
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployUntableWin }
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployUntableLinux }
   artifacts:
     paths:
       - deploy.yml
