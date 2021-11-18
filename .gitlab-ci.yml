@@ -57,9 +57,15 @@ test:
   stage: test
   tags:
     - Win10
+  before_script:
+    - git submodule sync
+    - git submodule update --init
+    - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
+    - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
+    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
   script:
-    - if(${UNSTABLE_BRANCH}){ echo "${UNSTABLE_BRANCH} is a stable branch. Start job generation." } else { echo "UNSTABLE_BRANCH is not a stable branch." }
-
+    - if((${UNSTABLE_BRANCH}) -and (${COMMIT_BRANCH})){ echo "${UNSTABLE_BRANCH} is a stable branch. Start job generation." } else { echo "UNSTABLE_BRANCH is not a stable branch." }
+    - if(${COMMIT_BRANCH}){ echo "${UNSTABLE_BRANCH} is a stable branch. Start job generation." } else { echo "UNSTABLE_BRANCH is not a stable branch." }
     
 generateJobs:
   stage: deploy
