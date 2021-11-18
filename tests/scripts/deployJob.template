@@ -10,8 +10,8 @@ ${JOBNAME}:
     - echo $PLATFORMNAME
     - echo $RELEASESTATUS
   dependencies:
-    - ${DEPENDDEBUG}
-    - ${DEPENDRELEASE}
+    - windowsBuildDebugPy37
+    - windowsBuildReleasePy37
   tags:
     - Win10
   variables:
