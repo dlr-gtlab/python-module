@@ -1,4 +1,4 @@
-deployWinStable:
+${JOBNAME}:
   stage: deploy
   before_script:
     - git submodule sync

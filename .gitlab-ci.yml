@@ -60,7 +60,7 @@ generateJobs:
   tags:
     - Win10
   script:
-    - '& $env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows --replace RELEASESTATUS stable'
+    - '& $env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r JOBNAME deployStableWin'
   artifacts:
     paths:
       - deploy.yml
