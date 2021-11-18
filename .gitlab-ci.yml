@@ -53,25 +53,7 @@ stages:
   - package
   - badges
 
-generateJobs:
-  stage: deploy
-  rules:
-    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
-  tags:
-    - Win10
-  script:
-    - '& $env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r JOBNAME deployStableWin'
-    - '& $env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r JOBNAME deployUntableWin'
-    - '& $env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r JOBNAME deployStableLinux'
-    - '& $env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r JOBNAME deployUntableLinux'
-  artifacts:
-    paths:
-      - deploy.yml
-  variables:
-    PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
-    PYCONFIGDYNJOB: .\tests\scripts\ConfigureDynJobs.py
-    TEMPLATEFILE: .\tests\scripts\deployJob.template
-    OUTPUTYAML: .\deploy.yml
+
 
 
 generateJobs:
