@@ -52,7 +52,28 @@ stages:
   - codequality
   - package
   - badges
-   
+
+generateDeploymentJobs:
+  stage: build
+  tags:
+    - Win10
+  script:
+    - python3 .\tests\scripts\ConfigureDynJobs.py -t .\deployJob.template -o .\deploy.yml -r PLATFORMNAME windows --replace RELEASESTATUS stable
+  artifacts:
+    paths:
+      - deploy.yml
+
+trigger-tests:
+  stage: test
+  needs:
+    - generateDeploymentJobs
+  trigger:
+    include:
+      - artifact: deploy.yml
+        job: generateDeploymentJobs
+    strategy: depend
+
+
 # DevTools update
 testA:
   stage: update

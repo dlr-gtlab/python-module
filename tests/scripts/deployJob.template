@@ -1,0 +1,10 @@
+deployWinStable:
+  script:
+    - echo "Hello template"
+    - echo $PLATFORMNAME
+    - echo $RELEASESTATUS
+  tags:
+    - Win10
+  variables:
+    PLATFORMNAME:  ${PLATFORMNAME}
+    RELEASESTATUS: ${RELEASESTATUS}
