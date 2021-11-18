@@ -11,7 +11,7 @@ ${JOBNAME}:
     - echo $RELEASESTATUS
     - echo $RELEASESTATUS
     - echo $CI_COMMIT_REF_NAME
-	- echo $CI_PROJECT_PATH
+    - echo $CI_PROJECT_PATH
   tags:
     - Win10
   variables:
