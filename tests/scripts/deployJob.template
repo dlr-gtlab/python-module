@@ -2,18 +2,12 @@ ${JOBNAME}:
   stage: deploy
   rules:
     - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
-  before_script:
-    - git submodule sync
-    - git submodule update --init
-    - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
-    - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
-    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
   script:
     - echo "Hello template"
     - echo $PLATFORMNAME
     - echo $RELEASESTATUS
     - echo $COMMIT_BRANCH
-    - echo $TESTVARIABLE
+    - echo $COMMIT_BRANCH
   tags:
     - Win10
   variables:
