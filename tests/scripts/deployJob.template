@@ -10,11 +10,11 @@ ${JOBNAME}:
     - echo $PLATFORMNAME
     - echo $RELEASESTATUS
     - echo $RELEASESTATUS
-	- echo $COMMITREF
-	- echo $CI_COMMIT_REF_NAME
+    - echo $COMMITREF
+    - echo $CI_COMMIT_REF_NAME
   tags:
     - Win10
   variables:
     PLATFORMNAME:  ${PLATFORMNAME}
     RELEASESTATUS: ${RELEASESTATUS}
-	COMMITREF: ${COMMITREF}
+    COMMITREF: ${COMMITREF}

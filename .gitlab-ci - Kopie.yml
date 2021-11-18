@@ -29,10 +29,10 @@ variables:
   # enclose the branch name with ^ and $
   # separete severl branch names with |
   # e.g. /^main_1_0$|^main_1_1$/
-  STABLE_BRANCHES: /^master$|^master_1_8$/
+  STABLE_BRANCHES: /^master$|^master_1_8$|^146-deployment-jobs$/
   
   # Name of the unstable branch (if it exists)
-  # UNSTABLE_BRANCH: unstable_master
+  UNSTABLE_BRANCH: unstable_master
 
 # inlcude some templates from this file
 include:
@@ -48,11 +48,11 @@ stages:
   - regressionTest
   - unstableBuild
   - unstableTest
-  - copy
+  - deploy
   - codequality
   - package
   - badges
-   
+
 # DevTools update
 devtoolsUpdateWindows:
   stage: update
@@ -227,64 +227,51 @@ testLinux512UnstablePy37:
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable   
 
-# copy files to servers
-.copyToNightlyBuildWin:
-  extends: .copyNightlyTemplateSub
-  dependencies: ["windowsBuildReleasePy37: [$DEVTOOLS_Win_Stable]"]
-  allow_failure: true
-
-deployWinStable:
-  extends: .deployStableTemplate
-  needs: 
-    - windowsBuildDebugPy37
-    - windowsBuildReleasePy37
-  dependencies:
-    - windowsBuildDebugPy37
-    - windowsBuildReleasePy37
-  variables:
-    PLATFORMNAME:  windows
-    RELEASESTATUS: stable
-
-deployLinuxStable:
-  extends: .deployStableTemplate
-  needs: 
-    - linuxBuildDebugPy37
-    - linuxBuildReleasePy37
-  dependencies:
-    - "linuxBuildDebugPy37"
-    - "linuxBuildReleasePy37"
-  variables:
-    PLATFORMNAME:  linux
-    RELEASESTATUS: stable
-
-.deployWinUnstable:
-  extends: .copyDeployTemplateSub
+# deployment
+generateJobs:
+  stage: deploy
   rules:
-    - if: $CI_COMMIT_TAG != null && 
-  dependencies: 
-    - windowsBuildDebugPy37Unstable
-    - windowsBuildReleasePy37Unstable
+    - if: $CI_COMMIT_TAG != null
+  tags:
+    - Win10
+  before_script:
+    - git submodule sync
+    - git submodule update --init
+    - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
+    - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
+    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable STABLE_COMMIT_BRANCH
+  script:
+    # The tag base is a stable branch and there is no separated unstable branch.
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployStableWin }
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployUntableWin }
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployStableLinux }
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployUnstableLinux }
+    # The tag base is a stable branch and there is a separated unstable branch.
+    - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployStableWin }
+    - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployStableLinux }
+    # The tag base is an unstable branch.
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployUntableWin }
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r COMMITREF ${CI_COMMIT_REF_NAME} -r JOBNAME deployUntableLinux }
+  artifacts:
+    paths:
+      - deploy.yml
   variables:
-    PLATFORMNAME:  windows
-    RELEASESTATUS: unstable
-    
-.deployWinStable:
-  extends: .copyDeployTemplateSub
-  dependencies:
-    - "linuxBuildDebugPy37"
-    - "linuxBuildReleasePy37"
-  variables:
-    PLATFORMNAME:  linux
-    RELEASESTATUS: stable
+    PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
+    PYCONFIGDYNJOB: .\tests\scripts\DynJobConfiguration.py
+    TEMPLATEFILE: .\tests\scripts\deployJob.template
+    OUTPUTYAML: .\deploy.yml
 
-.copyForDeploymentLinuxUnstable:
-  extends: .copyDeployTemplateSub
-  dependencies:
-    - "linuxBuildDebugPy37: [$DEVTOOLS_Linux_Unstable]"
-    - "linuxBuildReleasePy37: [$DEVTOOLS_Linux_Unstable]"
-  variables:
-    PLATFORMNAME:  linux
-    RELEASESTATUS: unstable
+triggerJobs:
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_TAG != null
+  needs:
+    - generateJobs
+  trigger:
+    include:
+      - artifact: deploy.yml
+        job: generateJobs
+    strategy: depend
 
 # code quality
 codingstyle:
