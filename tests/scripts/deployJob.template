@@ -9,6 +9,11 @@ ${JOBNAME}:
     - echo "Hello template"
     - echo $PLATFORMNAME
     - echo $RELEASESTATUS
+  dependencies:
+    - windowsBuildDebugPy37
+    - windowsBuildReleasePy37
+    - linuxBuildDebugPy37
+    - linuxBuildReleasePy37
   tags:
     - Win10
   variables:

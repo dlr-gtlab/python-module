@@ -29,7 +29,7 @@ variables:
   # enclose the branch name with ^ and $
   # separete severl branch names with |
   # e.g. /^main_1_0$|^main_1_1$/
-  STABLE_BRANCHES: /^master$|^master_1_8$|^146-deployment-jobs$/
+  STABLE_BRANCHES: /^master$|^master_1_8$/
   
   # Name of the unstable branch (if it exists)
   # UNSTABLE_BRANCH: unstable_master
@@ -52,7 +52,6 @@ stages:
   - codequality
   - package
   - badges
-
 
 # DevTools update
 devtoolsUpdateWindows:
@@ -231,7 +230,6 @@ testLinux512UnstablePy37:
 # deployment
 generateJobs:
   stage: deploy
-  needs: []
   rules:
     - if: $CI_COMMIT_TAG != null
   tags:
@@ -269,10 +267,6 @@ triggerJobs:
     - if: $CI_COMMIT_TAG != null
   needs:
     - generateJobs
-    - windowsBuildDebugPy37
-    - windowsBuildReleasePy37
-    - linuxBuildDebugPy37
-    - linuxBuildReleasePy37
   trigger:
     include:
       - artifact: deploy.yml
