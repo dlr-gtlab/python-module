@@ -68,7 +68,7 @@ generateJobs:
     - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
     - echo $COMMIT_BRANCH
   script:
-    - if(${COMMIT_BRANCH}){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r JOBNAME deployStableWin } else { echo "COMMIT_BRANCH is not a stable branch" }
+    - if(${COMMIT_BRANCH}){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r JOBNAME deployStableWin } else { exit 1 }
     - if(${COMMIT_BRANCH}){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r JOBNAME deployUntableWin } else { echo "COMMIT_BRANCH is not a stable branch" }
     - if(${COMMIT_BRANCH}){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r JOBNAME deployStableLinux } else { echo "COMMIT_BRANCH is not a stable branch" }
     - if(${COMMIT_BRANCH}){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r JOBNAME deployUntableLinux } else { echo "COMMIT_BRANCH is not a stable branch" }
