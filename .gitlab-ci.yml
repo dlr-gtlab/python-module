@@ -76,7 +76,7 @@ generateJobs:
     - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r JOBNAME deployStableLinux }
     # The tag base is an unstable branch.
     - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r JOBNAME deployUntableWin }
-    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r JOBNAME deployStableLinux }
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r JOBNAME deployUntableLinux }
   artifacts:
     paths:
       - deploy.yml
@@ -97,8 +97,6 @@ triggerJobs:
       - artifact: deploy.yml
         job: generateJobs
     strategy: depend
-  variables:
-    TESTVARIABLE: "Hello World!"
 
 # DevTools update
 testA:
