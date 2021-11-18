@@ -48,7 +48,6 @@ stages:
   - regressionTest
   - unstableBuild
   - unstableTest
-  - config
   - deploy
   - codequality
   - package
@@ -76,6 +75,8 @@ generateDeployJobs:
 
 triggerDeployJobs:
   stage: deploy
+  rules:
+    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
   needs:
     - generateDeployJobs
   trigger:
@@ -85,7 +86,7 @@ triggerDeployJobs:
     strategy: depend
 
 # DevTools update
-.testA:
+testA:
   stage: update
   script:
     - $TEST_VAR="Hello World"
