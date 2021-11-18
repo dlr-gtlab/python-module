@@ -53,12 +53,17 @@ stages:
   - package
   - badges
 
-generateDeploymentJobs:
+generateDeployJobs:
   stage: deploy
+  rules:
+    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
   tags:
     - Win10
   script:
     - '& $env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows --replace RELEASESTATUS stable'
+    - '& $env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows --replace RELEASESTATUS unstable'
+    - '& $env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux --replace RELEASESTATUS stable'
+    - '& $env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux --replace RELEASESTATUS unstable'
   artifacts:
     paths:
       - deploy.yml
@@ -68,16 +73,15 @@ generateDeploymentJobs:
     TEMPLATEFILE: .\tests\scripts\deployJob.template
     OUTPUTYAML: .\deploy.yml
 
-trigger-tests:
+triggerDeployJobs:
   stage: deploy
   needs:
-    - generateDeploymentJobs
+    - generateDeployJobs
   trigger:
     include:
       - artifact: deploy.yml
-        job: generateDeploymentJobs
+        job: generateDeployJobs
     strategy: depend
-
 
 # DevTools update
 .testA:
