@@ -11,6 +11,7 @@ ${JOBNAME}:
     - echo $RELEASESTATUS
     - echo $RELEASESTATUS
 	- echo $COMMITREF
+	- echo $CI_COMMIT_REF_NAME
   tags:
     - Win10
   variables:
