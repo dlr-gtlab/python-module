@@ -69,8 +69,9 @@ generateJobs:
     - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
     - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
   script:
+    - echo "$env:PYTHONEXEPATH" 
     - if($COMMIT_BRANCH){echo $COMMIT_BRANCH}else{ echo Commit branch is empty }
-    - ${PYTHONEXEPATH} $PYCONFIGDYNJOB -t $TEMPLATEFILE -o $OUTPUTYAML -r PLATFORMNAME windows -r RELEASESTATUS stable -r JOBNAME deployStableWin
+    - "$env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r JOBNAME deployStableWin"
   artifacts:
     paths:
       - deploy.yml
@@ -95,7 +96,7 @@ generateJobs:
     TESTVARIABLE: "Hello World!"
 
 # DevTools update
-.testA:
+testA:
   stage: update
   script:
     - $TEST_VAR="Hello World"
