@@ -57,7 +57,6 @@ stages:
 devtoolsUpdateWindows:
   stage: copy
   script:
-    - $COMMIT_BRANCH="master"
     - if($COMMIT_BRANCH){echo "commit branch is not empty"} else {echo "is empty"}
   tags:
     - Win10
