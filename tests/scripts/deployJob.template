@@ -13,7 +13,7 @@ ${JOBNAME}:
     - echo $PLATFORMNAME
     - echo $RELEASESTATUS
     - echo $COMMIT_BRANCH
-	- echo $TESTVARIABLE
+    - echo $TESTVARIABLE
   tags:
     - Win10
   variables:
