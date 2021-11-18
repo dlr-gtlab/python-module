@@ -48,7 +48,7 @@ stages:
   - regressionTest
   - unstableBuild
   - unstableTest
-  - copy
+  - deploy
   - codequality
   - package
   - badges
