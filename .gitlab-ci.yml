@@ -48,13 +48,14 @@ stages:
   - regressionTest
   - unstableBuild
   - unstableTest
+  - config
   - deploy
   - codequality
   - package
   - badges
 
 generateDeployJobs:
-  stage: deploy
+  stage: config
   rules:
     - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
   tags:
