@@ -32,7 +32,7 @@ variables:
   STABLE_BRANCHES: /^master$|^master_1_8$|^146-deployment-jobs$/
   
   # Name of the unstable branch (if it exists)
-  UNSTABLE_BRANCH: unstable_master
+  # UNSTABLE_BRANCH: unstable_master
 
 # inlcude some templates from this file
 include:
@@ -82,7 +82,7 @@ generateJobs:
       - deploy.yml
   variables:
     PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
-    PYCONFIGDYNJOB: .\tests\scripts\ConfigureDynJobs.py
+    PYCONFIGDYNJOB: .\tests\scripts\DynJobConfiguration.py
     TEMPLATEFILE: .\tests\scripts\deployJob.template
     OUTPUTYAML: .\deploy.yml
 
