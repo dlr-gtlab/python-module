@@ -58,12 +58,15 @@ generateDeploymentJobs:
   tags:
     - Win10
   script:
-    - '& $env:PYTHONEXEPATH .\tests\scripts\ConfigureDynJobs.py -t .\tests\scripts\deployJob.template -o .\deploy.yml -r PLATFORMNAME windows --replace RELEASESTATUS stable'
+    - '& $env:PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows --replace RELEASESTATUS stable'
   artifacts:
     paths:
       - deploy.yml
   variables:
     PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
+    PYCONFIGDYNJOB: .\tests\scripts\ConfigureDynJobs.py
+    TEMPLATEFILE: .\tests\scripts\deployJob.template
+    OUTPUTYAML: .\deploy.yml
 
 trigger-tests:
   stage: test
