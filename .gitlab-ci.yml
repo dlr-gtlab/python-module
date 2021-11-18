@@ -58,8 +58,8 @@ stages:
 
 generateJobs:
   stage: deploy
-  rules:
-    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
+#  rules:
+#    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
   tags:
     - Win10
   before_script:
@@ -70,7 +70,7 @@ generateJobs:
     - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
   script:
     - if($COMMIT_BRANCH){echo $COMMIT_BRANCH}else{ echo Commit branch is empty }
-    - ${PYTHONEXEPATH} ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r JOBNAME deployStableWin
+    - ${PYTHONEXEPATH} $PYCONFIGDYNJOB -t $TEMPLATEFILE -o $OUTPUTYAML -r PLATFORMNAME windows -r RELEASESTATUS stable -r JOBNAME deployStableWin
   artifacts:
     paths:
       - deploy.yml
@@ -80,7 +80,7 @@ generateJobs:
     TEMPLATEFILE: .\tests\scripts\deployJob.template
     OUTPUTYAML: .\deploy.yml
 
-triggerJobs:
+.triggerJobs:
   stage: deploy
   rules:
     - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
@@ -95,7 +95,7 @@ triggerJobs:
     TESTVARIABLE: "Hello World!"
 
 # DevTools update
-testA:
+.testA:
   stage: update
   script:
     - $TEST_VAR="Hello World"
