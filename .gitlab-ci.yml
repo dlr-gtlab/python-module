@@ -229,7 +229,7 @@ testLinux512UnstablePy37:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable   
 
 # deployment
-generateJobs:
+deploymentJobs:
   stage: jobGeneration
   rules:
     - if: $CI_COMMIT_TAG != null
@@ -270,15 +270,17 @@ generateJobs:
     LinDeStableJob: linuxBuildDebugPy37
     LinDeUnstableJob: linuxBuildDebugPy37Unstable
 
-triggerJobs:
+triggerDeploymentJobs:
   stage: deploy
   rules:
     - if: $CI_COMMIT_TAG != null
   trigger:
     include:
       - artifact: deploy.yml
-        job: generateJobs
+        job: deploymentJobs
     strategy: depend
+  variables:
+    PARENT_PIPELINE_ID: $CI_PIPELINE_ID
 
 
 # code quality
