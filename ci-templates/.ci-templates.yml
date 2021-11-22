@@ -3,6 +3,13 @@
 # Win10    -  for the windows os
 # Liunx    -  for the linux os
 
+variables:
+  PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
+  STABLE_MAJOR: "1"
+  STABLE_MINOR: "7"
+  UNSTABLE_MAJOR: "2"
+  UNSTABLE_MINOR: "0"
+  
 # template rules
 .stable-debug:
   rules:
@@ -279,16 +286,18 @@
       junit: unittests.xml
 
 # Copy binaries jobs
-
-.createJobsTemplate:
-  tags:
-    - Win10
+.findCommitBranch:
   before_script:
     - git submodule sync
     - git submodule update --init
     - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
     - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
     - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable STABLE_COMMIT_BRANCH
+
+.createJobsTemplate:
+  tags:
+    - Win10
+  extends: .findCommitBranch
   script:
     # The tag base is a stable branch and there is no separated unstable branch.
     - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r DEPENDDEBUG  ${WinDeStableJob} -r DEPENDRELEASE ${WinReStableJob} -r JOBNAME deployStableWin }
@@ -299,71 +308,15 @@
     - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r DEPENDDEBUG  ${WinDeStableJob} -r DEPENDRELEASE ${WinReStableJob} -r JOBNAME deployStableWin }
     - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r DEPENDDEBUG ${LinDeStableJob} -r DEPENDRELEASE ${LinReStableJob} -r JOBNAME deployStableLinux }
     # The tag base is an unstable branch.
-    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r DEPENDDEBUG ${WinDeUnstableJob} -r DEPENDRELEASE ${WinReUnstableJob} -r JOBNAME deployUntableWin }
-    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r DEPENDDEBUG ${LinDeUnstableJob} -r DEPENDRELEASE ${LinReUnstableJob} -r JOBNAME deployUnstableLinux }
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})) { & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r DEPENDDEBUG ${WinDeUnstableJob} -r DEPENDRELEASE ${WinReUnstableJob} -r JOBNAME deployUntableWin }
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})) { & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r DEPENDDEBUG ${LinDeUnstableJob} -r DEPENDRELEASE ${LinReUnstableJob} -r JOBNAME deployUnstableLinux }
   artifacts:
     paths:
       - deploy.yml
   variables:
-    PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
     PYCONFIGDYNJOB: .\tests\pipeline-scripts\deploy\DynJobConfiguration.py
     TEMPLATEFILE: .\tests\pipeline-scripts\deploy\deployJob.template
     OUTPUTYAML: .\deploy.yml
-
-.copyDeployTemplateSub:
-  stage: copy
-  script:
-    - .\tests\pipeline-scripts\build\copyHeaders-deployment.bat
-  tags:
-    - Win10
-
-.deployStableTemplate:
-  stage: copy
-  rules:
-    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
-    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_TAG != null
-      allow_failure: true
-  before_script:
-    - git submodule sync
-    - git submodule update --init
-    - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
-    - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
-    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
-  script:
-    - .\tests\pipeline-scripts\build\copyHeaders-deployment-new.bat
-  tags:
-    - Win10
-
-.deployUnstableTemplate:
-  stage: copy
-  rules:
-    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
-  before_script:
-    - git submodule sync
-    - git submodule update --init
-    - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
-    - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
-    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
-  script:
-    - .\tests\pipeline-scripts\build\copyHeaders-deployment-new.bat
-  tags:
-    - Win10
-    
-.deployUnstableTemplate:
-  stage: copy
-  rules:
-    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_TAG != null
-      allow_failure: true
-  before_script:
-    - git submodule sync
-    - git submodule update --init
-    - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
-    - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
-    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String $UNSTABLE_BRANCH | % {$_.Line} | echo -outvariable COMMIT_BRANCH
-  script:
-    - .\tests\pipeline-scripts\build\copyHeaders-deployment-new.bat
-  tags:
-    - Win10
 
 .copyNightlyTemplateSub:
   stage: copy
@@ -384,29 +337,25 @@
 .packageTemplateSub:
   tags:
     - Win10
+  extends: .findCommitBranch
+  needs: []
   rules:
     - if: $CI_COMMIT_TAG != null
-  before_script:
-    - git submodule sync
-    - git submodule update --init
   script:
-     - '& $env:PYTHONEXEPATH ${PYPACKAGEGEN} ${PACKAGETEMPLATE} ${RELEASESTATUS} ${FRAMEWORK_MAJOR} ${FRAMEWORK_MINOR} ${CI_COMMIT_TAG}'
+    # The tag base is a stable branch and there is no separated unstable branch.
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYPACKAGEGEN} ${PACKAGETEMPLATE} stable ${STABLE_MAJOR} ${STABLE_MINOR} ${CI_COMMIT_TAG} }
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYPACKAGEGEN} ${PACKAGETEMPLATE} unstable ${UNSTABLE_MAJOR} ${UNSTABLE_MINOR} ${CI_COMMIT_TAG} }
+    # The tag base is a stable branch and there is a separated unstable branch.
+    - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})) { & $PYTHONEXEPATH ${PYPACKAGEGEN} ${PACKAGETEMPLATE} stable ${STABLE_MAJOR} ${STABLE_MINOR} ${CI_COMMIT_TAG} }
+    # The tag base is an unstable branch.
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})) { & $PYTHONEXEPATH ${PYPACKAGEGEN} ${PACKAGETEMPLATE} unstable ${UNSTABLE_MAJOR} ${UNSTABLE_MINOR} ${CI_COMMIT_TAG} }
   artifacts:  
     paths:
       - components/
     when: always
   variables:
-    PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
     PYPACKAGEGEN: .\tests\pipeline-scripts\package\packageGen.py
     PACKAGETEMPLATE: .\features\package_template.xml
-  parallel:
-    matrix:
-      - RELEASESTATUS: stable
-        FRAMEWORK_MAJOR: "1"
-        FRAMEWORK_MINOR: "7"
-      - RELEASESTATUS: unstable
-        FRAMEWORK_MAJOR: "2"
-        FRAMEWORK_MINOR: "0"
 
 # New templates using rules
 
