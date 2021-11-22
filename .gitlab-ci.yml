@@ -48,6 +48,7 @@ stages:
   - regressionTest
   - unstableBuild
   - unstableTest
+  - jobGeneration
   - deploy
   - codequality
   - package
@@ -229,7 +230,7 @@ testLinux512UnstablePy37:
 
 # deployment
 generateJobs:
-  stage: deploy
+  stage: jobGeneration
   rules:
     - if: $CI_COMMIT_TAG != null
   tags:
@@ -273,8 +274,6 @@ triggerJobs:
   stage: deploy
   rules:
     - if: $CI_COMMIT_TAG != null
-  needs:
-    - generateJobs
   trigger:
     include:
       - artifact: deploy.yml
