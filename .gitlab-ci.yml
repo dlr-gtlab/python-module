@@ -1,5 +1,5 @@
 ########################################################
-###############GTlab Pipeline Version 1.5.1 ############
+###############GTlab Pipeline Version 2.0.0 ############
 ########################################################
 # This is a slight changed version
 # - PYVERSION variable to support the build using different Python versions
@@ -48,11 +48,11 @@ stages:
   - regressionTest
   - unstableBuild
   - unstableTest
-  - copy
+  - deploy
   - codequality
   - package
   - badges
-   
+
 # DevTools update
 devtoolsUpdateWindows:
   stage: update
@@ -227,51 +227,37 @@ testLinux512UnstablePy37:
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable   
 
-# copy files to servers
-.copyToNightlyBuildWin:
-  extends: .copyNightlyTemplateSub
-  dependencies: ["windowsBuildReleasePy37: [$DEVTOOLS_Win_Stable]"]
-  allow_failure: true
-
-.deployWinStable:
-  extends: .copyDeployTemplateSub
+# deployment
+createJobs:
+  stage: deploy
+  extends: 
+    - .createJobsTemplate
   rules:
     - if: $CI_COMMIT_TAG != null
-  dependencies:
-    - windowsBuildDebugPy37
-    - windowsBuildReleasePy37
+  dependencies: []
   variables:
-    PLATFORMNAME:  windows
-    RELEASESTATUS: stable 
+    WinReStableJob: windowsBuildReleasePy37
+    WinReUnstableJob: windowsBuildReleasePy37Unstable
+    WinDeStableJob: windowsBuildDebugPy37
+    WinDeUnstableJob: windowsBuildDebugPy37Unstable
+    LinReStableJob: linuxBuildReleasePy37
+    LinReUnstableJob: linuxBuildReleasePy37Unstable
+    LinDeStableJob: linuxBuildDebugPy37
+    LinDeUnstableJob: linuxBuildDebugPy37Unstable
 
-.deployWinUnstable:
-  extends: .copyDeployTemplateSub
+triggerJobs:
+  stage: deploy
   rules:
-    - if: $CI_COMMIT_TAG != null && 
-  dependencies: 
-    - windowsBuildDebugPy37Unstable
-    - windowsBuildReleasePy37Unstable
+    - if: $CI_COMMIT_TAG != null
+  needs:
+    - createJobs
+  trigger:
+    include:
+      - artifact: deploy.yml
+        job: createJobs
+    strategy: depend
   variables:
-    PLATFORMNAME:  windows
-    RELEASESTATUS: unstable
- 
-.copyForDeploymentLinux:
-  extends: .copyDeployTemplateSub
-  dependencies:
-    - "linuxBuildDebugPy37"
-    - "linuxBuildReleasePy37"
-  variables:
-    PLATFORMNAME:  linux
-    RELEASESTATUS: stable
-
-.copyForDeploymentLinuxUnstable:
-  extends: .copyDeployTemplateSub
-  dependencies:
-    - "linuxBuildDebugPy37: [$DEVTOOLS_Linux_Unstable]"
-    - "linuxBuildReleasePy37: [$DEVTOOLS_Linux_Unstable]"
-  variables:
-    PLATFORMNAME:  linux
-    RELEASESTATUS: unstable
+    PARENT_PIPELINE_ID: $CI_PIPELINE_ID
 
 # code quality
 codingstyle:
@@ -286,7 +272,7 @@ pages:
   stage: badges
   extends: .pageTemplateRules 
 
-.package:
+package:
   stage: package
   extends: .packageTemplateSub
 
