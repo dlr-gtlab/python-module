@@ -3,6 +3,9 @@
 # Win10    -  for the windows os
 # Liunx    -  for the linux os
 
+variables:
+  TEMPLATEVAR: "Template Variable"
+  
 # template rules
 .stable-debug:
   rules:
@@ -204,6 +207,7 @@
     - git submodule sync
     - git submodule update --init
   script:
+    - echo $TEMPLATEVAR
     - .\tests\pipeline-scripts\build\build-512.bat 1>buildLog512.txt
   tags:
     - Win10
@@ -279,7 +283,6 @@
       junit: unittests.xml
 
 # Copy binaries jobs
-
 .createJobsTemplate:
   tags:
     - Win10
@@ -309,61 +312,6 @@
     PYCONFIGDYNJOB: .\tests\pipeline-scripts\deploy\DynJobConfiguration.py
     TEMPLATEFILE: .\tests\pipeline-scripts\deploy\deployJob.template
     OUTPUTYAML: .\deploy.yml
-
-.copyDeployTemplateSub:
-  stage: copy
-  script:
-    - .\tests\pipeline-scripts\build\copyHeaders-deployment.bat
-  tags:
-    - Win10
-
-.deployStableTemplate:
-  stage: copy
-  rules:
-    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
-    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_TAG != null
-      allow_failure: true
-  before_script:
-    - git submodule sync
-    - git submodule update --init
-    - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
-    - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
-    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
-  script:
-    - .\tests\pipeline-scripts\build\copyHeaders-deployment-new.bat
-  tags:
-    - Win10
-
-.deployUnstableTemplate:
-  stage: copy
-  rules:
-    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
-  before_script:
-    - git submodule sync
-    - git submodule update --init
-    - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
-    - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
-    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String -Pattern "$TEMP_REGEXP" | % {$_.Line} | echo -outvariable COMMIT_BRANCH
-  script:
-    - .\tests\pipeline-scripts\build\copyHeaders-deployment-new.bat
-  tags:
-    - Win10
-    
-.deployUnstableTemplate:
-  stage: copy
-  rules:
-    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_TAG != null
-      allow_failure: true
-  before_script:
-    - git submodule sync
-    - git submodule update --init
-    - $TEMP_REGEXP=$STABLE_BRANCHES.TrimStart('/')
-    - $TEMP_REGEXP=$TEMP_REGEXP.TrimEnd('/')
-    - git ls-remote origin | Select-String $CI_COMMIT_SHA | Select-String refs/heads/ | % {$_ -replace ".*\/", ""} | Select-String $UNSTABLE_BRANCH | % {$_.Line} | echo -outvariable COMMIT_BRANCH
-  script:
-    - .\tests\pipeline-scripts\build\copyHeaders-deployment-new.bat
-  tags:
-    - Win10
 
 .copyNightlyTemplateSub:
   stage: copy
