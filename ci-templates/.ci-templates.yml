@@ -308,8 +308,8 @@ variables:
     - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r DEPENDDEBUG  ${WinDeStableJob} -r DEPENDRELEASE ${WinReStableJob} -r JOBNAME deployStableWin }
     - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r DEPENDDEBUG ${LinDeStableJob} -r DEPENDRELEASE ${LinReStableJob} -r JOBNAME deployStableLinux }
     # The tag base is an unstable branch.
-    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r DEPENDDEBUG ${WinDeUnstableJob} -r DEPENDRELEASE ${WinReUnstableJob} -r JOBNAME deployUntableWin }
-    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r DEPENDDEBUG ${LinDeUnstableJob} -r DEPENDRELEASE ${LinReUnstableJob} -r JOBNAME deployUnstableLinux }
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})) { & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r DEPENDDEBUG ${WinDeUnstableJob} -r DEPENDRELEASE ${WinReUnstableJob} -r JOBNAME deployUntableWin }
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})) { & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r DEPENDDEBUG ${LinDeUnstableJob} -r DEPENDRELEASE ${LinReUnstableJob} -r JOBNAME deployUnstableLinux }
   artifacts:
     paths:
       - deploy.yml
@@ -338,6 +338,7 @@ variables:
   tags:
     - Win10
   extends: .findCommitBranch
+  needs: []
   rules:
     - if: $CI_COMMIT_TAG != null
   script:
@@ -345,9 +346,9 @@ variables:
     - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYPACKAGEGEN} ${PACKAGETEMPLATE} stable ${STABLE_MAJOR} ${STABLE_MINOR} ${CI_COMMIT_TAG} }
     - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYPACKAGEGEN} ${PACKAGETEMPLATE} unstable ${UNSTABLE_MAJOR} ${UNSTABLE_MINOR} ${CI_COMMIT_TAG} }
     # The tag base is a stable branch and there is a separated unstable branch.
-    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYPACKAGEGEN} ${PACKAGETEMPLATE} stable ${STABLE_MAJOR} ${STABLE_MINOR} ${CI_COMMIT_TAG} }
+    - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})) { & $PYTHONEXEPATH ${PYPACKAGEGEN} ${PACKAGETEMPLATE} stable ${STABLE_MAJOR} ${STABLE_MINOR} ${CI_COMMIT_TAG} }
     # The tag base is an unstable branch.
-    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYPACKAGEGEN} ${PACKAGETEMPLATE} unstable ${UNSTABLE_MAJOR} ${UNSTABLE_MINOR} ${CI_COMMIT_TAG} }
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})) { & $PYTHONEXEPATH ${PYPACKAGEGEN} ${PACKAGETEMPLATE} unstable ${UNSTABLE_MAJOR} ${UNSTABLE_MINOR} ${CI_COMMIT_TAG} }
   artifacts:  
     paths:
       - components/
