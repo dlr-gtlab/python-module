@@ -48,7 +48,7 @@ stages:
   - regressionTest
   - unstableBuild
   - unstableTest
-  - jobGeneration
+  - jobCreation
   - deploy
   - codequality
   - package
@@ -229,10 +229,11 @@ testLinux512UnstablePy37:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable   
 
 # deployment
-deploymentJobs:
-  stage: jobGeneration
+createJobs:
+  stage: deploy
   rules:
     - if: $CI_COMMIT_TAG != null
+  dependencies: []
   tags:
     - Win10
   before_script:
@@ -270,14 +271,16 @@ deploymentJobs:
     LinDeStableJob: linuxBuildDebugPy37
     LinDeUnstableJob: linuxBuildDebugPy37Unstable
 
-triggerDeploymentJobs:
+triggerJobs:
   stage: deploy
   rules:
     - if: $CI_COMMIT_TAG != null
+  needs:
+    - createJobs
   trigger:
     include:
       - artifact: deploy.yml
-        job: deploymentJobs
+        job: createJobs
     strategy: depend
   variables:
     PARENT_PIPELINE_ID: $CI_PIPELINE_ID
