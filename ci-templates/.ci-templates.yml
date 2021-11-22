@@ -4,7 +4,11 @@
 # Liunx    -  for the linux os
 
 variables:
-  TEMPLATEVAR: "Template Variable"
+  PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
+  STABLE_MAJOR: "1"
+  STABLE_MINOR: "7"
+  UNSTABLE_MAJOR: "2"
+  UNSTABLE_MINOR: "0"
   
 # template rules
 .stable-debug:
@@ -207,7 +211,6 @@ variables:
     - git submodule sync
     - git submodule update --init
   script:
-    - echo $TEMPLATEVAR
     - .\tests\pipeline-scripts\build\build-512.bat 1>buildLog512.txt
   tags:
     - Win10
@@ -298,6 +301,7 @@ variables:
     - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r DEPENDDEBUG ${WinDeUnstableJob} -r DEPENDRELEASE ${WinReUnstableJob} -r JOBNAME deployUntableWin }
     - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r DEPENDDEBUG ${LinDeStableJob} -r DEPENDRELEASE ${LinReStableJob} -r JOBNAME deployStableLinux }
     - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r DEPENDDEBUG ${LinDeUnstableJob} -r DEPENDRELEASE ${LinReUnstableJob} -r JOBNAME deployUnstableLinux }
+    ### package jobs
     # The tag base is a stable branch and there is a separated unstable branch.
     - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r DEPENDDEBUG  ${WinDeStableJob} -r DEPENDRELEASE ${WinReStableJob} -r JOBNAME deployStableWin }
     - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r DEPENDDEBUG ${LinDeStableJob} -r DEPENDRELEASE ${LinReStableJob} -r JOBNAME deployStableLinux }
@@ -308,7 +312,6 @@ variables:
     paths:
       - deploy.yml
   variables:
-    PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
     PYCONFIGDYNJOB: .\tests\pipeline-scripts\deploy\DynJobConfiguration.py
     TEMPLATEFILE: .\tests\pipeline-scripts\deploy\deployJob.template
     OUTPUTYAML: .\deploy.yml
@@ -344,17 +347,16 @@ variables:
       - components/
     when: always
   variables:
-    PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
     PYPACKAGEGEN: .\tests\pipeline-scripts\package\packageGen.py
     PACKAGETEMPLATE: .\features\package_template.xml
   parallel:
     matrix:
       - RELEASESTATUS: stable
-        FRAMEWORK_MAJOR: "1"
-        FRAMEWORK_MINOR: "7"
+        FRAMEWORK_MAJOR: $STABLE_MAJOR
+        FRAMEWORK_MINOR: $STABLE_MINOR
       - RELEASESTATUS: unstable
-        FRAMEWORK_MAJOR: "2"
-        FRAMEWORK_MINOR: "0"
+        FRAMEWORK_MAJOR: $UNSTABLE_MAJOR
+        FRAMEWORK_MINOR: $UNSTABLE_MINOR
 
 # New templates using rules
 
