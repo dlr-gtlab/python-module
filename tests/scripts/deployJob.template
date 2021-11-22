@@ -14,10 +14,10 @@ ${JOBNAME}:
   needs:
     - pipeline: $PARENT_PIPELINE_ID
       job: ${DEPENDDEBUG}
-	  artifacts: true
+      artifacts: true
     - pipeline: $PARENT_PIPELINE_ID
       job: ${DEPENDRELEASE}
-	  artifacts: true
+      artifacts: true
   tags:
     - Win10
   variables:
