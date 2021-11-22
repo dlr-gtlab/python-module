@@ -9,7 +9,6 @@ ${JOBNAME}:
     - echo "Hello template"
     - echo $PLATFORMNAME
     - echo $RELEASESTATUS
-    - echo $RELEASESTATUS
     - echo $CI_COMMIT_REF_NAME
     - echo $CI_PROJECT_PATH
   needs:
