@@ -29,10 +29,10 @@ variables:
   # enclose the branch name with ^ and $
   # separete severl branch names with |
   # e.g. /^main_1_0$|^main_1_1$/
-  STABLE_BRANCHES: /^master$|^master_1_8$/
+  STABLE_BRANCHES: /^master$/
   
   # Name of the unstable branch (if it exists)
-  # UNSTABLE_BRANCH: unstable_master
+  UNSTABLE_BRANCH: unstable_master
 
 # inlcude some templates from this file
 include:
