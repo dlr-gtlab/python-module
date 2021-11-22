@@ -12,14 +12,8 @@ ${JOBNAME}:
     - echo $CI_COMMIT_REF_NAME
     - echo $CI_PROJECT_PATH
   needs:
-    - project: $CI_PROJECT_PATH
-      job: ${DEPENDDEBUG}
-      ref: $CI_COMMIT_REF_NAME
-      artifacts: true
-    - project: $CI_PROJECT_PATH
-      job: ${DEPENDRELEASE}
-      ref: $CI_COMMIT_REF_NAME
-      artifacts: true
+    - ${DEPENDDEBUG}
+    - ${DEPENDRELEASE}
   tags:
     - Win10
   variables:
