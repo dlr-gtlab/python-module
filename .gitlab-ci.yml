@@ -272,7 +272,7 @@ pages:
   stage: badges
   extends: .pageTemplateRules 
 
-.package:
+package:
   stage: package
   extends: .packageTemplateSub
 

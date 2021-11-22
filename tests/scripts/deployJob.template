@@ -6,11 +6,8 @@ ${JOBNAME}:
     - git submodule sync
     - git submodule update --init
   script:
-    - echo "Hello template"
-    - echo $PLATFORMNAME
-    - echo $RELEASESTATUS
-    - echo $CI_COMMIT_REF_NAME
-    - echo $CI_PROJECT_PATH
+    - echo "Hello child pipeline"
+    - .\tests\pipeline-scripts\build\copyHeaders-deployment.bat
   needs:
     - pipeline: $PARENT_PIPELINE_ID
       job: ${DEPENDDEBUG}

@@ -306,8 +306,8 @@
       - deploy.yml
   variables:
     PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
-    PYCONFIGDYNJOB: .\tests\scripts\DynJobConfiguration.py
-    TEMPLATEFILE: .\tests\scripts\deployJob.template
+    PYCONFIGDYNJOB: .\tests\pipeline-scripts\deploy\DynJobConfiguration.py
+    TEMPLATEFILE: .\tests\pipeline-scripts\deploy\deployJob.template
     OUTPUTYAML: .\deploy.yml
 
 .copyDeployTemplateSub:
