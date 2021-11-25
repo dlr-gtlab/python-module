@@ -1,4 +1,5 @@
 # TEMPLATES FOR JOBS
+# Compatible with pipeline version >= 2.0.0
 # the jobs uses the tags 
 # Win10    -  for the windows os
 # Liunx    -  for the linux os
@@ -6,60 +7,10 @@
 include:
   - local: '/ci-templates/.ci-rules.yml'
 
-# build on linux system
-# Uses the variables PROFILENAME and BUILDMODE
-.buildLinux:
-  before_script:
-    - cp features/gitlab_pipeline_local_settings.pri local_settings.pri
-  script:
-    - /opt/Qt/5.12.5/gcc_64/bin/qmake $PROFILENAME -spec linux-g++ CONFIG+=$BUILDMODE
-    - make clean
-    - make -j 20 |& tee linuxBuild.txt
-
-# Unit test job on windows machine
-.winTestTemplate:
-  stage: test
-  script:
-    - .\tests\unittests\runUnittestsQt512.bat
-    - get-content CoverageReport*\index.html
-  tags:
-    - Win10
-  artifacts:
-    paths:
-      - "unittests.xml"
-      - ${UNITTESTSNAME}Coverage.xml
-      - CoverageReport*
-    reports:
-      junit: unittests.xml
-      cobertura: ${UNITTESTSNAME}Coverage.xml
-    expire_in: 1 week
-
-# Unit test job on linux machine
-.linuxTestTemplate:
-  stage: test
-  before_script:
-    - chmod +x ./tests/unittests/runUnittests.sh
-  script:
-    - ./tests/unittests/runUnittests.sh
-  tags:
-    - Linux
-  artifacts:
-    paths:
-      - "unittests.xml"
-    expire_in: 1 week
-    reports:
-      junit: unittests.xml
-
-.copyDeployTemplate:
-  tags:
-    - Win10
-  only:
-    - tags
-  stage: copy
-  script:
-    - .\tests\build\copyHeaders-deployment.bat  
-
+# DevTools update jobs
 .devToolsUpdateWindows:
+  extends: 
+    - .update-rules
   allow_failure: true
   script:
     - '& $env:MAINTENANCETOOL up --confirm-command'
@@ -69,6 +20,8 @@ include:
     MAINTENANCETOOL: "C:\\devel\\GTlab-DevTools\\Setup GTlab-DevTools.exe"
 
 .devToolsUpdateLinux:
+  extends: 
+    - .update-rules 
   allow_failure: true  
   script:
     - cd /home/gitlab-runner/GTlab-Devtools/
@@ -76,88 +29,10 @@ include:
   tags:
     - Linux
   variables:
-    MAINTENANCETOOL: "/home/gitlab-runner/GTlab-Devtools/"   
- 
-.cppCheckTemplate:
-  needs: []
-  allow_failure: true
-  tags:
-    - Linux
-  before_script:
-    - python3 -m venv env
-    - source env/bin/activate
-    - python3 -m pip install cppcheck-codequality
-  script:
-    - cppcheck --xml --suppress=unusedFunction  --enable=all src/ 2> cppcheck_out.xml
-    - cppcheck-codequality --input-file=cppcheck_out.xml --output-file=codequality.json
-  artifacts:
-    reports:
-      codequality: codequality.json    
+    MAINTENANCETOOL: "/home/gitlab-runner/GTlab-Devtools/" 
 
-.codingStyleTemplate:
-  needs: []
-  allow_failure: true
-  script:
-    - '& $env:CODINGSTYLETOOL --ci --output=xml -o .\ -f  .\features\filefilter.txt .\src 1>codingStyleLog.txt'
-  tags:
-    - Win10
-  dependencies:
-  artifacts:
-    paths:
-      - "nsiqcppstyle_report.xml"
-      - codingStyleLog.txt   
-    expire_in: 1 week
-  variables:
-    CODINGSTYLETOOL: "C:\\Program Files\\nsiqcppstyle_0.2.2.3\\nsiqcppstyle\\nsiqcppstyle"  
-
-.pageTemplate:
-  needs: []
-  dependencies:  
-  tags:
-    - Linux
-  script:
-    - doxygen features/doxygenConfig
-    - mkdir public
-    - mv doc/html/* public/
-  artifacts:
-     paths:
-       - public/
-
-.badgeTemplate:
-  allow_failure: true  
-  script:
-    - $CommitNumber = git rev-list --count HEAD
-    - $statistics = git diff --shortstat 4b825dc642cb6eb9a060e54bf8d69288fbee4904
-    - $filesRaw,$linesRaw = $statistics.split(',')
-    - $fileNumber = $filesRaw.split(' ')[1]
-    - $linenumber = $linesRaw.split(' ')[1]
-    - '& $env:BADGEGENERATOR --run files $fileNumber'
-    - '& $env:BADGEGENERATOR --run commits $CommitNumber'
-    - '& $env:BADGEGENERATOR --bw .\buildLog512.txt .'
-    - '& $env:BADGEGENERATOR --bw .\linuxBuild.txt .'
-    - '& $env:BADGEGENERATOR --cs .\codingStyleLog.txt .'
-    - '& $env:BADGEGENERATOR --cc .\${UNITTESTSNAME}Coverage.xml .'
-    - '& $env:BADGEGENERATOR --cl .\${UNITTESTSNAME}Coverage.xml .'
-    - '& $env:BADGEGENERATOR --dp "Pipeline-Version" ${PIPELINEVERSION} .'
-  dependencies:
-    - "windowsBuildDebug: [$DEVTOOLS_Win_Unstable]"
-    - "linuxBuildDebug: [$DEVTOOLS_Linux_Stable]"
-    - testWin512
-    - testLinux512
-    - codingstyle
-  tags:
-    - Win10
-  artifacts:
-    paths:
-      - "New_*.svg"
-    expire_in: 4 week
-  variables:
-    BADGEGENERATOR: C:\devel\BadgeBuilder\BadgeGenerator.exe
-
-
-### Jobs that use the submodule GitLab-Pipeline-Scripts
-# build on windows system
-.buildWinDebugSub:
+# Build on windows system
+.buildWinDebug:
   before_script:
     - git submodule sync
     - git submodule update --init
@@ -180,7 +55,7 @@ include:
     BUILDMODE: debug
     BUILDUNITTESTS: "true"
 
-.buildWinReleaseSub:
+.buildWinRelease:
   before_script:
     - git submodule sync
     - git submodule update --init
@@ -199,8 +74,41 @@ include:
     BUILDMODE: release
     BUILDUNITTESTS: "false"
 
+# Build on linux system
+
+.buildLinuxDebug:
+  extends: 
+    - .buildLinux
+  tags:
+    - Linux
+  artifacts:
+    paths:
+      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so
+      - include/$TARGETDIRNAME/*.h
+      - build/$UNITTESTSNAME
+      - linuxBuild.txt
+    when: always
+    expire_in: 1 week
+  variables:
+    BUILDMODE: debug
+    BUILDUNITTESTS: "true"
+
+.buildLinuxRelease:
+  extends: 
+    - .buildLinux
+  tags:
+    - Linux
+  artifacts:
+    paths:
+      - lib/$TARGETDIRNAME/lib$TARGETNAME.so*
+      - include/$TARGETDIRNAME/*.h
+    expire_in: 1 week
+  variables:
+    BUILDMODE: release
+    BUILDUNITTESTS: "false"
+
 # Unit test job on windows machine
-.winTestTemplateSub:
+.winTestTemplate:
   before_script:
     - git submodule sync
     - git submodule update --init
@@ -220,7 +128,7 @@ include:
     expire_in: 1 week
 
 # Unit test job on linux machine
-.linuxTestTemplateSub:
+.linuxTestTemplate:
   before_script:
     - git submodule sync
     - git submodule update --init
@@ -236,7 +144,7 @@ include:
     reports:
       junit: unittests.xml
 
-# Copy binaries jobs
+# Deployment jobs
 .findCommitBranch:
   before_script:
     - git submodule sync
@@ -287,7 +195,7 @@ include:
     NIGHTLYBUILD: "G:\\AT-TW\\GTlab\\Nightly_Builds_512"
 
 # Automated package.xml generation
-.packageTemplateSub:
+.packageTemplate:
   tags:
     - Win10
   extends: 
@@ -310,63 +218,8 @@ include:
     PYPACKAGEGEN: .\tests\pipeline-scripts\package\packageGen.py
     PACKAGETEMPLATE: .\features\package_template.xml
 
-# New templates using rules
-
-.devToolsUpdateWindowsRules:
-  extends: 
-    - .update-rules
-  allow_failure: true
-  script:
-    - '& $env:MAINTENANCETOOL up --confirm-command'
-  tags:
-    - Win10
-  variables:
-    MAINTENANCETOOL: "C:\\devel\\GTlab-DevTools\\Setup GTlab-DevTools.exe"
-
-.devToolsUpdateLinuxRules:
-  extends: 
-    - .update-rules 
-  allow_failure: true  
-  script:
-    - cd /home/gitlab-runner/GTlab-Devtools/
-    - ./Setup\ GTlab-DevTools up --confirm-command
-  tags:
-    - Linux
-  variables:
-    MAINTENANCETOOL: "/home/gitlab-runner/GTlab-Devtools/" 
-
-.buildLinuxDebug:
-  extends: 
-    - .buildLinux
-  tags:
-    - Linux
-  artifacts:
-    paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so
-      - include/$TARGETDIRNAME/*.h
-      - build/$UNITTESTSNAME
-      - linuxBuild.txt
-    when: always
-    expire_in: 1 week
-  variables:
-    BUILDMODE: debug
-    BUILDUNITTESTS: "true"
-
-.buildLinuxRelease:
-  extends: 
-    - .buildLinux
-  tags:
-    - Linux
-  artifacts:
-    paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME.so*
-      - include/$TARGETDIRNAME/*.h
-    expire_in: 1 week
-  variables:
-    BUILDMODE: release
-    BUILDUNITTESTS: "false"
-
-.codingStyleTemplateRules:
+# Code quality jobs
+.codingStyleTemplate:
   needs: []
   extends: 
     - .except-tags
@@ -384,7 +237,7 @@ include:
   variables:
     CODINGSTYLETOOL: "C:\\Program Files\\nsiqcppstyle_0.2.2.3\\nsiqcppstyle\\nsiqcppstyle"
 
-.cppCheckTemplateRules:
+.cppCheckTemplate:
   needs: []
   extends:
     - .stable-debug  
@@ -402,7 +255,8 @@ include:
     reports:
       codequality: codequality.json
 
-.pageTemplateRules:
+# Page job
+.pageTemplate:
   needs: []
   extends:
     - .masters-and-tags
@@ -417,7 +271,8 @@ include:
      paths:
        - public/
 
-.badgeTemplateRules:
+# Badge creation job
+.badgeTemplate:
   extends:
     - .except-tags
   allow_failure: true  

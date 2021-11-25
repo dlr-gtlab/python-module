@@ -70,7 +70,7 @@ devtoolsUpdateLinux:
 windowsBuildDebugPy37:
   stage: build
   extends: 
-    - .buildWinDebugSub
+    - .buildWinDebug
     - .stable-debug
   needs:
     - job: devtoolsUpdateWindows
@@ -84,7 +84,7 @@ windowsBuildDebugPy37:
 windowsBuildDebugPy37Unstable:
   stage: unstableBuild
   extends: 
-    - .buildWinDebugSub
+    - .buildWinDebug
     - .unstable-debug
   needs:
     - job: devtoolsUpdateWindows
@@ -98,7 +98,7 @@ windowsBuildDebugPy37Unstable:
 windowsBuildReleasePy37:
   stage: build
   extends: 
-    - .buildWinReleaseSub
+    - .buildWinRelease
     - .stable-release
   needs:
     - job: devtoolsUpdateWindows
@@ -111,7 +111,7 @@ windowsBuildReleasePy37:
 windowsBuildReleasePy37Unstable:
   stage: unstableBuild
   extends: 
-    - .buildWinReleaseSub
+    - .buildWinRelease
     - .unstable-release
   needs:
     - job: devtoolsUpdateWindows
@@ -180,7 +180,7 @@ linuxBuildReleasePy37Unstable:
 testWin512Py37:
   stage: test
   extends: 
-    - .winTestTemplateSub
+    - .winTestTemplate
     - .stable-debug
   script:
     - .\tests\unittests\runUnittestsQt512.bat
@@ -195,7 +195,7 @@ testWin512Py37:
 testWin512UnstablePy37:
   stage: unstableTest
   extends: 
-    - .winTestTemplateSub
+    - .winTestTemplate
     - .unstable-debug
   script:
     - .\tests\unittests\runUnittestsQt512.bat
@@ -210,7 +210,7 @@ testWin512UnstablePy37:
 testLinux512Py37:
   stage: test
   extends: 
-    - .linuxTestTemplateSub
+    - .linuxTestTemplate
     - .stable-debug
   needs: 
     - linuxBuildDebugPy37
@@ -222,7 +222,7 @@ testLinux512Py37:
 testLinux512UnstablePy37:
   stage: unstableTest
   extends: 
-    - .linuxTestTemplateSub
+    - .linuxTestTemplate
     - .unstable-debug
   needs: 
     - linuxBuildDebugPy37Unstable
@@ -276,7 +276,7 @@ pages:
 
 package:
   stage: package
-  extends: .packageTemplateSub
+  extends: .packageTemplate
 
 # badges
 badges:
