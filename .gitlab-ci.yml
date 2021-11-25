@@ -68,8 +68,8 @@ devtoolsUpdateLinux:
 windowsBuildDebugPy37:
   stage: build
   extends: 
-    - .buildWinDebug
     - .stable-debug
+    - .buildWinDebug
   needs:
     - job: devtoolsUpdateWindows
       optional: true
@@ -79,11 +79,11 @@ windowsBuildDebugPy37:
     BUILDMODE: release
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-windowsBuildDebugPy37Unstable:
+windowsBuildDebugUnstablePy37:
   stage: unstableBuild
   extends: 
-    - .buildWinDebug
     - .unstable-debug
+    - .buildWinDebug
   needs:
     - job: devtoolsUpdateWindows
       optional: true
@@ -96,8 +96,8 @@ windowsBuildDebugPy37Unstable:
 windowsBuildReleasePy37:
   stage: build
   extends: 
-    - .buildWinRelease
     - .stable-release
+    - .buildWinRelease
   needs:
     - job: devtoolsUpdateWindows
       optional: true
@@ -106,11 +106,11 @@ windowsBuildReleasePy37:
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-windowsBuildReleasePy37Unstable:
+windowsBuildReleaseUnstablePy37:
   stage: unstableBuild
   extends: 
-    - .buildWinRelease
     - .unstable-release
+    - .buildWinRelease
   needs:
     - job: devtoolsUpdateWindows
       optional: true
@@ -123,8 +123,8 @@ windowsBuildReleasePy37Unstable:
 linuxBuildDebugPy37:
   stage: build
   extends: 
-    - .buildLinuxDebug
     - .stable-debug
+    - .buildLinuxDebug
   needs:
     - job: devtoolsUpdateLinux
       optional: true
@@ -134,11 +134,11 @@ linuxBuildDebugPy37:
     BUILDMODE: release
     DEVTOOLS: $DEVTOOLS_Linux_Stable
 
-linuxBuildDebugPy37Unstable:
+linuxBuildDebugUnstablePy37:
   stage: unstableBuild
   extends: 
-    - .buildLinuxDebug 
     - .unstable-debug
+    - .buildLinuxDebug 
   needs:
     - job: devtoolsUpdateLinux
       optional: true
@@ -151,8 +151,8 @@ linuxBuildDebugPy37Unstable:
 linuxBuildReleasePy37:
   stage: build
   extends: 
-    - .buildLinuxRelease 
     - .stable-release
+    - .buildLinuxRelease 
   needs:
     - job: devtoolsUpdateLinux
       optional: true
@@ -161,11 +161,11 @@ linuxBuildReleasePy37:
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Stable
 
-linuxBuildReleasePy37Unstable:
+linuxBuildReleaseUnstablePy37:
   stage: unstableBuild
   extends: 
-    - .buildLinuxRelease 
     - .unstable-release
+    - .buildLinuxRelease 
   needs:
     - job: devtoolsUpdateLinux
       optional: true
@@ -178,8 +178,8 @@ linuxBuildReleasePy37Unstable:
 testWin512Py37:
   stage: test
   extends: 
-    - .winTestTemplate
     - .stable-debug
+    - .winTestTemplate
   script:
     - .\tests\unittests\runUnittestsQt512.bat
     - get-content CoverageReport*\index.html
@@ -192,24 +192,24 @@ testWin512Py37:
 
 testWin512UnstablePy37:
   stage: unstableTest
-  extends: 
+  extends:
+    - .unstable-debug  
     - .winTestTemplate
-    - .unstable-debug
   script:
     - .\tests\unittests\runUnittestsQt512.bat
     - get-content CoverageReport*\index.html
   needs: 
-    - windowsBuildDebugPy37Unstable
+    - windowsBuildDebugUnstablePy37
   dependencies: 
-    - windowsBuildDebugPy37Unstable
+    - windowsBuildDebugUnstablePy37
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Unstable  
 
 testLinux512Py37:
   stage: test
   extends: 
-    - .linuxTestTemplate
     - .stable-debug
+    - .linuxTestTemplate
   needs: 
     - linuxBuildDebugPy37
   dependencies:
@@ -220,12 +220,12 @@ testLinux512Py37:
 testLinux512UnstablePy37:
   stage: unstableTest
   extends: 
-    - .linuxTestTemplate
     - .unstable-debug
+    - .linuxTestTemplate
   needs: 
-    - linuxBuildDebugPy37Unstable
+    - linuxBuildDebugUnstablePy37
   dependencies:
-    - linuxBuildDebugPy37Unstable
+    - linuxBuildDebugUnstablePy37
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable   
 
@@ -237,18 +237,17 @@ createJobs:
   dependencies: []
   variables:
     WinReStableJob: windowsBuildReleasePy37
-    WinReUnstableJob: windowsBuildReleasePy37Unstable
+    WinReUnstableJob: windowsBuildReleaseUnstablePy37
     WinDeStableJob: windowsBuildDebugPy37
-    WinDeUnstableJob: windowsBuildDebugPy37Unstable
+    WinDeUnstableJob: windowsBuildDebugUnstablePy37
     LinReStableJob: linuxBuildReleasePy37
-    LinReUnstableJob: linuxBuildReleasePy37Unstable
+    LinReUnstableJob: linuxBuildReleaseUnstablePy37
     LinDeStableJob: linuxBuildDebugPy37
-    LinDeUnstableJob: linuxBuildDebugPy37Unstable
+    LinDeUnstableJob: linuxBuildDebugUnstablePy37
 
 triggerJobs:
   stage: deploy
-  extends:
-    - .only-tags
+  extends: .only-tags
   needs:
     - createJobs
   trigger:
@@ -279,10 +278,24 @@ package:
 # badges
 badges:
   stage: badges
-  extends: .badgeTemplate
+  extends: 
+    - .stable-except-tags
+    - .badgeTemplate
   dependencies:
     - windowsBuildDebugPy37
     - linuxBuildDebugPy37
     - testWin512Py37
     - testLinux512Py37
+    - codingstyle
+
+badges:
+  stage: badges
+  extends: 
+    - .unstable-except-tags
+    - .badgeTemplate
+  dependencies:
+    - windowsBuildDebugUnstablePy37
+    - linuxBuildDebugUnstablePy37
+    - testWin512UnstablePy37
+    - testLinux512UnstablePy37
     - codingstyle
