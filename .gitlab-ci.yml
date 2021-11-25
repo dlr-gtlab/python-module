@@ -234,10 +234,8 @@ testLinux512UnstablePy37:
 # deployment
 createJobs:
   stage: deploy
-  extends: 
+  extends:
     - .createJobsTemplate
-  rules:
-    - if: $CI_COMMIT_TAG != null
   dependencies: []
   variables:
     WinReStableJob: windowsBuildReleasePy37
@@ -251,8 +249,8 @@ createJobs:
 
 triggerJobs:
   stage: deploy
-  rules:
-    - if: $CI_COMMIT_TAG != null
+  extends:
+    - .only-tags
   needs:
     - createJobs
   trigger:
