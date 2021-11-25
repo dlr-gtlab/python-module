@@ -1,0 +1,54 @@
+# TEMPLATES FOR RULES
+.stable-debug:
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_TAG != null
+
+.stable-release:
+  rules:
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_TAG != null
+
+.unstable-debug:
+  rules:
+    - if: $UNSTABLE_BRANCH == null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
+      allow_failure: true
+    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+      allow_failure: true
+    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
+      allow_failure: true
+    - if: $UNSTABLE_BRANCH != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $UNSTABLE_BRANCH
+    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
+
+.unstable-release:
+  rules:
+    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+      allow_failure: true
+    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null
+      allow_failure: true
+    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
+
+.update-rules:
+  rules:
+  - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+  - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
+  
+.except-tags:
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $UNSTABLE_BRANCH
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
+    - if: $CI_COMMIT_TAG != null
+      when: never
+
+.only-tags:
+  rules:
+    - if: $CI_COMMIT_TAG != null
+
+.masters-and-tags:
+  rules:
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
+    - if: $CI_COMMIT_TAG != null
