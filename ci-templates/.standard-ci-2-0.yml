@@ -1,0 +1,38 @@
+#################################################################
+############### GTlab Standard Pipeline Version 2.0.0 ###########
+#################################################################
+# TO USE THIS PIPELINE SET THESE VAIRABLES:
+# 	CATEGORY        (e.g. 02_core)
+#   PROFILENAME     (e.g. numerics.pro)
+#   TARGETDIRNAME   (e.g  numerics)
+#   TARGETNAME      (e.g  GTlabNumerics)
+#   UNITTESTSNAME   (e.g. GTlabUnitTest)
+
+# THESE VALUES ARE DEFINED FOR THE GROUPS
+#   DEVTOOLS_Linux_Stable
+#   DEVTOOLS_Linux_Unstable
+#   DEVTOOLS_Win_Stable 
+#   DEVTOOLS_Win_Unstable
+#   WIN_PYTHON
+#   STABLE_MAJOR
+#   STABLE_MINOR
+#   UNSTABLE_MAJOR
+#   UNSTABLE_MINOR
+
+# Variables that are defined globally for the pipeline
+variables:
+  PIPELINEVERSION: "2.0.0"
+  GIT_SUBMODULE_STRATEGY: none
+  
+  # Regulare expression pattern
+  # enclose the branch name with ^ and $
+  # separete severl branch names with |
+  # e.g. /^main$|^main_1_0$/
+  STABLE_BRANCHES: /^main$/
+  
+  # Name of the unstable branch (if it exists)
+  # UNSTABLE_BRANCH: unstable_master
+
+include:
+  - project: 'at-twk/gitlab-templates'
+    file: '/ci-templates/.ci-templates-2-0.yml'

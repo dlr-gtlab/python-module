@@ -40,10 +40,8 @@ variables:
 
 # inlcude some templates from this file
 include:
-  - local: '/ci-templates/.ci-templates-2-0.yml'
-#include:
-#  - project: 'at-twk/gitlab-templates'
-#    file: '/ci-templates/.ci-templates.yml'
+  - project: 'at-twk/gitlab-templates'
+    file: '/ci-templates/.ci-templates-2-0.yml'
 
 stages:
   - update

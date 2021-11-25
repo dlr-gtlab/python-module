@@ -5,7 +5,8 @@
 # Liunx    -  for the linux os
 
 include:
-  - local: '/ci-rules/.ci-rules.yml'
+  - project: 'at-twk/gitlab-templates'
+    file: '/ci-rules/.ci-rules.yml'
 
 # DevTools update jobs
 .devToolsUpdateWindows:
