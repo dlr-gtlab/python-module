@@ -5,7 +5,7 @@
 # Liunx    -  for the linux os
 
 include:
-  - local: '/ci-templates/.ci-rules.yml'
+  - local: '/ci-rules/.ci-rules.yml'
 
 # DevTools update jobs
 .devToolsUpdateWindows:

@@ -40,7 +40,7 @@ variables:
 
 # inlcude some templates from this file
 include:
-  - local: '/ci-templates/.ci-templates.yml'
+  - local: '/ci-templates/.ci-templates-2-0.yml'
 #include:
 #  - project: 'at-twk/gitlab-templates'
 #    file: '/ci-templates/.ci-templates.yml'
