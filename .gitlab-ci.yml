@@ -288,7 +288,7 @@ badges:
     - testLinux512Py37
     - codingstyle
 
-badges:
+badgesUnstable:
   stage: badges
   extends: 
     - .unstable-except-tags
