@@ -75,6 +75,13 @@ include:
     BUILDUNITTESTS: "false"
 
 # Build on linux system
+.buildLinux:
+  before_script:
+    - cp features/gitlab_pipeline_local_settings.pri local_settings.pri
+  script:
+    - /opt/Qt/5.12.5/gcc_64/bin/qmake $PROFILENAME -spec linux-g++ CONFIG+=$BUILDMODE
+    - make clean
+    - make -j 20 |& tee linuxBuild.txt
 
 .buildLinuxDebug:
   extends: 
