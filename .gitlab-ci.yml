@@ -60,11 +60,11 @@ stages:
 # DevTools update
 devtoolsUpdateWindows:
   stage: update
-  extends: .devToolsUpdateWindowsRules
+  extends: .devToolsUpdateWindows
 
 devtoolsUpdateLinux:
   stage: update
-  extends: .devToolsUpdateLinuxRules
+  extends: .devToolsUpdateLinux
 
 # build on Windows system
 windowsBuildDebugPy37:
@@ -264,15 +264,15 @@ triggerJobs:
 # code quality
 codingstyle:
   stage: codequality
-  extends: .codingStyleTemplateRules 
+  extends: .codingStyleTemplate
  
 cppcheck:
   stage: codequality
-  extends: .cppCheckTemplateRules
+  extends: .cppCheckTemplate
 
 pages:
   stage: badges
-  extends: .pageTemplateRules 
+  extends: .pageTemplate
 
 package:
   stage: package
@@ -281,7 +281,7 @@ package:
 # badges
 badges:
   stage: badges
-  extends: .badgeTemplateRules 
+  extends: .badgeTemplate
   dependencies:
     - windowsBuildDebugPy37
     - linuxBuildDebugPy37
