@@ -7,7 +7,7 @@
 BUILD_BATCH     =   true
 BUILD_UNITTESTS =   true
 
-PY_VERSION = 373
+PY_VERSION = 37
 
 # path to dev tools
 DEV_TOOLS = PATH/TO/DEVTOOLS
