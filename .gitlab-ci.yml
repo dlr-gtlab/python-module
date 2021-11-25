@@ -6,7 +6,6 @@
 # - the Python version is appended to the build and test job names
 # - debug build is not possible because PythonQt is not available as debug build
 
-
 # These variables are defined in the CI project settings:
 #  CATEGORY: 03_core_modules
 #  PROFILENAME: gtlab_python.pro
@@ -19,6 +18,11 @@
 #   DEVTOOLS_Linux_Unstable
 #   DEVTOOLS_Win_Stable 
 #   DEVTOOLS_Win_Unstable
+#   WIN_PYTHON
+#   STABLE_MAJOR
+#   STABLE_MINOR
+#   UNSTABLE_MAJOR
+#   UNSTABLE_MINOR
 
 # Environment variables to use in the pipeline globally
 variables:

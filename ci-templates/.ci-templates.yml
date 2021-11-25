@@ -3,12 +3,11 @@
 # Win10    -  for the windows os
 # Liunx    -  for the linux os
 
-variables:
-  PYTHONEXEPATH: "C:\\ProgramData\\Miniconda3\\python.exe"
-  STABLE_MAJOR: "1"
-  STABLE_MINOR: "7"
-  UNSTABLE_MAJOR: "2"
-  UNSTABLE_MINOR: "0"
+#variables:
+#  STABLE_MAJOR: "1"
+#  STABLE_MINOR: "7"
+#  UNSTABLE_MAJOR: "2"
+#  UNSTABLE_MINOR: "0"
   
 # template rules
 .stable-debug:
@@ -300,16 +299,16 @@ variables:
   extends: .findCommitBranch
   script:
     # The tag base is a stable branch and there is no separated unstable branch.
-    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r DEPENDDEBUG  ${WinDeStableJob} -r DEPENDRELEASE ${WinReStableJob} -r JOBNAME deployStableWin }
-    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r DEPENDDEBUG ${WinDeUnstableJob} -r DEPENDRELEASE ${WinReUnstableJob} -r JOBNAME deployUntableWin }
-    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r DEPENDDEBUG ${LinDeStableJob} -r DEPENDRELEASE ${LinReStableJob} -r JOBNAME deployStableLinux }
-    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r DEPENDDEBUG ${LinDeUnstableJob} -r DEPENDRELEASE ${LinReUnstableJob} -r JOBNAME deployUnstableLinux }
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $WIN_PYTHON ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r DEPENDDEBUG  ${WinDeStableJob} -r DEPENDRELEASE ${WinReStableJob} -r JOBNAME deployStableWin }
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $WIN_PYTHON ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r DEPENDDEBUG ${WinDeUnstableJob} -r DEPENDRELEASE ${WinReUnstableJob} -r JOBNAME deployUntableWin }
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $WIN_PYTHON ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r DEPENDDEBUG ${LinDeStableJob} -r DEPENDRELEASE ${LinReStableJob} -r JOBNAME deployStableLinux }
+    - if(!(${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $WIN_PYTHON ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r DEPENDDEBUG ${LinDeUnstableJob} -r DEPENDRELEASE ${LinReUnstableJob} -r JOBNAME deployUnstableLinux }
     # The tag base is a stable branch and there is a separated unstable branch.
-    - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r DEPENDDEBUG  ${WinDeStableJob} -r DEPENDRELEASE ${WinReStableJob} -r JOBNAME deployStableWin }
-    - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r DEPENDDEBUG ${LinDeStableJob} -r DEPENDRELEASE ${LinReStableJob} -r JOBNAME deployStableLinux }
+    - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $WIN_PYTHON ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS stable -r DEPENDDEBUG  ${WinDeStableJob} -r DEPENDRELEASE ${WinReStableJob} -r JOBNAME deployStableWin }
+    - if((${UNSTABLE_BRANCH}) -and (${STABLE_COMMIT_BRANCH})){ & $WIN_PYTHON ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS stable -r DEPENDDEBUG ${LinDeStableJob} -r DEPENDRELEASE ${LinReStableJob} -r JOBNAME deployStableLinux }
     # The tag base is an unstable branch.
-    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})) { & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r DEPENDDEBUG ${WinDeUnstableJob} -r DEPENDRELEASE ${WinReUnstableJob} -r JOBNAME deployUntableWin }
-    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})) { & $PYTHONEXEPATH ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r DEPENDDEBUG ${LinDeUnstableJob} -r DEPENDRELEASE ${LinReUnstableJob} -r JOBNAME deployUnstableLinux }
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})) { & $WIN_PYTHON ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME windows -r RELEASESTATUS unstable -r DEPENDDEBUG ${WinDeUnstableJob} -r DEPENDRELEASE ${WinReUnstableJob} -r JOBNAME deployUntableWin }
+    - if((${UNSTABLE_BRANCH}) -and !(${STABLE_COMMIT_BRANCH})) { & $WIN_PYTHON ${PYCONFIGDYNJOB} -t ${TEMPLATEFILE} -o ${OUTPUTYAML} -r PLATFORMNAME linux -r RELEASESTATUS unstable -r DEPENDDEBUG ${LinDeUnstableJob} -r DEPENDRELEASE ${LinReUnstableJob} -r JOBNAME deployUnstableLinux }
   artifacts:
     paths:
       - deploy.yml
