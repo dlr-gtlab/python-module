@@ -177,7 +177,13 @@ GtPythonModule::tasks()
 
     GtExtendedTaskData pythonTask = GT_EXTENDED_TASK_DATA(GtpyTask);
     pythonTask->id = QStringLiteral("Python Task");
+
+#if GT_VERSION >= 0x020000
+    pythonTask->version = GtVersionNumber(0, 1);
+#else
     pythonTask->version = 0.1;
+#endif
+
     pythonTask->author = QStringLiteral("Marvin Nöthen");
     pythonTask->icon = gtApp->icon(QStringLiteral("pythonIcon_16.png"));
     pythonTask->status = GtAbstractProcessData::RELEASE;
