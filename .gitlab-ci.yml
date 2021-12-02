@@ -279,7 +279,7 @@ package:
 badges:
   stage: badges
   extends: 
-    - .stable-except-tags
+    - .stable-only-master
     - .badgeTemplate
   dependencies:
     - windowsBuildDebugPy37
@@ -291,7 +291,7 @@ badges:
 badgesUnstable:
   stage: badges
   extends: 
-    - .unstable-except-tags
+    - .unstable-only-master
     - .badgeTemplate
   dependencies:
     - windowsBuildDebugUnstablePy37
