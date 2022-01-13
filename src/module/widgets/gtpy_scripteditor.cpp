@@ -17,6 +17,7 @@
 
 #include "gt_objectmemento.h"
 #include "gt_objectfactory.h"
+#include "gt_application.h"
 
 #include "gtpy_completer.h"
 
@@ -26,8 +27,16 @@ GtpyScriptEditor::GtpyScriptEditor(int contextId, QWidget* parent) :
     GtCodeEditor(parent), m_searchActivated(false), m_tabSize(4),
     m_replaceTabBySpaces(false)
 {
-    const QFont sysFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    //const QFont sysFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
+    QFont sysFont;
+#ifdef Q_OS_LINUX
+    sysFont.setFamily("Monospace");
+#elif defined(Q_OS_MAC)
+    sysFont.setFamily("Menlo");
+#else
+    sysFont.setFamily("Consolas");
+#endif
     setFont(sysFont);
 
     m_cpl = new GtpyCompleter(contextId, this);
@@ -42,6 +51,7 @@ GtpyScriptEditor::GtpyScriptEditor(int contextId, QWidget* parent) :
     const QColor cHighlight = p.color(QPalette::Active, QPalette::Highlight);
     const QColor cHighlightText = p.color(QPalette::Active,
                                           QPalette::HighlightedText);
+
     p.setColor(QPalette::Inactive, QPalette::Highlight, cHighlight);
     p.setColor(QPalette::Inactive, QPalette::HighlightedText, cHighlightText);
     setPalette(p);
@@ -65,7 +75,8 @@ GtpyScriptEditor::GtpyScriptEditor(int contextId, QWidget* parent) :
             SLOT(lineHighlighting()));
 }
 
-bool GtpyScriptEditor::event(QEvent* event)
+bool
+GtpyScriptEditor::event(QEvent* event)
 {
     if (event->type() == QEvent::ToolTip)
     {
@@ -439,9 +450,23 @@ GtpyScriptEditor::searchHighlighting(const QString& searchText,
         {
             QTextEdit::ExtraSelection selection;
 
-            QColor color = QColor(Qt::green).lighter(160);;
+            bool dark = false;
+#if GT_VERSION >= 0x020000
+            dark = gtApp->inDarkMode();
+#endif
+            if (dark)
+            {
+                QColor color = QColor(Qt::blue).lighter(120);
+                selection.format.setBackground(color);
+            }
+            else
+            {
+                QColor color = QColor(Qt::green).lighter(160);
+                selection.format.setBackground(color);
+            }
 
-            selection.format.setBackground(color);
+
+
             selection.cursor = cursorList.at(i);
             extraSelections.append(selection);
         }
@@ -882,9 +907,23 @@ GtpyScriptEditor::lineHighlighting()
 
         QTextEdit::ExtraSelection selection;
 
-        QColor lineColor = QColor(Qt::yellow).lighter(160);
+        bool dark = false;
+#if GT_VERSION >= 0x020000
+        dark = gtApp->inDarkMode();
+#endif
 
-        selection.format.setBackground(lineColor);
+        if (!dark)
+        {
+            QColor lineColor = QColor(Qt::yellow).lighter(160);
+            selection.format.setBackground(lineColor);
+        }
+        else
+        {
+            QColor lineColor = QColor(Qt::gray).lighter(120);
+            lineColor.setAlpha(200);
+            selection.format.setBackground(lineColor);
+        }
+
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();

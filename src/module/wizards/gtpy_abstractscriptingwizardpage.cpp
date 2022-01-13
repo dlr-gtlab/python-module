@@ -837,7 +837,7 @@ GtpyAbstractScriptingWizardPage::findParentWizard(QObject* obj)
 void
 GtpyAbstractScriptingWizardPage::setWizardNonModal()
 {
-    QWidget* wiz = findParentWizard();
+    QWidget* wiz = wizard();
 
     if (wiz)
     {

@@ -53,8 +53,24 @@ GtpyCollectionItemWidget::GtpyCollectionItemWidget(const
     frame->setAutoFillBackground(true);
     frame->setFrameShape(QFrame::Box);
     frame->setFrameShadow(QFrame::Raised);
-    frame->setStyleSheet(
-        "#frame {border-image: url(:/pixmaps/startup-background.png)}");
+
+    bool dark = false;
+#if GT_VERSION >= 0x020000
+    dark = gtApp->inDarkMode();
+#endif
+
+    if (dark)
+    {
+        frame->setStyleSheet(
+                    "#frame {border-image: "
+                    "url(:/pixmaps/startup-background_dark.png)}");
+    }
+    else
+    {
+        frame->setStyleSheet(
+                    "#frame {border-image: "
+                    "url(:/pixmaps/startup-background.png)}");
+    }
 
     QVBoxLayout* frameLay = new QVBoxLayout;
     frameLay->setContentsMargins(10, 10, 10, 10);
@@ -74,7 +90,7 @@ GtpyCollectionItemWidget::GtpyCollectionItemWidget(const
     scrollArea->setWidgetResizable(true);
 
     QWidget* scrollWidget = new QWidget;
-    scrollWidget->setStyleSheet("background-color:white;");
+    //scrollWidget->setStyleSheet("background-color:white;");
 
     QVBoxLayout* scrollLay = new QVBoxLayout;
     scrollLay->setContentsMargins(0, 0, 0, 0);
@@ -163,7 +179,7 @@ GtpyCollectionItemWidget::newFrame()
 
     frame->setAutoFillBackground(true);
     QPalette p = frame->palette();
-    p.setColor(frame->backgroundRole(), Qt::white);
+    //p.setColor(frame->backgroundRole(), Qt::white);
     frame->setPalette(p);
     frame->setFrameShape(QFrame::Box);
     frame->setFrameShadow(QFrame::Sunken);

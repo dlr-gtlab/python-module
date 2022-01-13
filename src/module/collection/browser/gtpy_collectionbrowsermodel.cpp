@@ -89,6 +89,24 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
         return QVariant();
     }
 
+    QColor main(245, 245, 245);
+    QColor darker(240, 240, 240);
+    QColor bright1(250, 250, 250);
+    QColor bright2(255, 255, 255);
+
+    bool dark = false;
+#if GT_VERSION >= 0x020000
+    dark = gtApp->inDarkMode();
+#endif
+
+    if (dark)
+    {
+        main.setRgb(45, 45, 45);
+        darker.setRgb(40, 40, 40);
+        bright1.setRgb(50, 50, 50);
+        bright2.setRgb(55, 55, 55);
+    }
+
     if (item->isCollapsible())
     {
         switch (role)
@@ -130,31 +148,29 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 }
                 else if (item == m_rootItem->child(AvailableItem))
                 {
-                    return QColor(255, 255, 255);
+                    return bright2;
                 }
                 else if (item == m_rootItem->child(InstalledItem))
                 {
-                    return QColor(240, 240, 240);
+                    return darker;
                 }
                 else if (item->parentItem() ==
                          m_rootItem->child(UpdateAvailableItem))
                 {
-                    return QColor(245, 245, 245);
+                    return main;
                 }
                 else if (item->parentItem() == m_rootItem->child(AvailableItem))
                 {
-                    return QColor(245, 245, 245);
+                    return main;
                 }
                 else if (item->parentItem() == m_rootItem->child(InstalledItem))
                 {
-                    return QColor(245, 245, 245);
+                    return main;
                 }
                 else
                 {
-                    return QColor(250, 250, 250);
+                    return bright1;
                 }
-
-                break;
 
             default:
                 break;
