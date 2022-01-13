@@ -97,6 +97,11 @@ GtpyCollectionLocalModel::data(const QModelIndex& index, int role) const
         return QVariant();
     }
 
+    bool dark = false;
+#if GT_VERSION >= 0x020000
+    dark = gtApp->inDarkMode();
+#endif
+
     if (item->isCollapsible())
     {
         if (role == Qt::DisplayRole && col == 0)
@@ -107,14 +112,28 @@ GtpyCollectionLocalModel::data(const QModelIndex& index, int role) const
         {
             if (role == Qt::BackgroundRole)
             {
-                return QColor(245, 245, 245);
+                if (dark)
+                {
+                     return QColor(45, 45, 45);
+                }
+                else
+                {
+                    return QColor(245, 245, 245);
+                }
             }
         }
         else
         {
             if (role == Qt::BackgroundRole)
             {
-                return QColor(250, 250, 250);
+                if (dark)
+                {
+                     return QColor(50, 50, 50);
+                }
+                else
+                {
+                    return QColor(250, 250, 250);
+                }
             }
         }
     }
