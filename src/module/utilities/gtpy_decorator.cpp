@@ -770,7 +770,7 @@ GtpyDecorator::findParentGtObj(GtObject *obj)
 {
     if (!obj)
     {
-        gtError() << "findParentObj -> Invalid object given!";
+        gtError() << "findParentGtObj -> Invalid object given!";
 
         return nullptr;
     }
