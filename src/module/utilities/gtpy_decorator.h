@@ -251,7 +251,8 @@ public slots:
      * @param childName name of child that should be found
      * @return See GtObject class documentation.
      */
-    FIND_GT_CHILD PyObject* findGtChild(GtObject* obj, const QString& childName);
+    FIND_GT_CHILD PyObject* findGtChild(GtObject* obj,
+                                        const QString& childName);
 
     /**
      * @brief findGtChildren returns the children of type GtObject with the
@@ -264,6 +265,21 @@ public slots:
     FIND_GT_CHILDREN QList<PyObject*> findGtChildren(GtObject* obj,
             const QString& childrenName = QString(),
             const QString& objectClassName = QString());
+
+    /**
+     * @brief find parent object
+     * @param obj : child object
+     * @return parent object
+     */
+    QObject* findParentObj(QObject* obj);
+
+
+    /**
+     * @brief find parent object (GtObject)
+     * @param obj : child object
+     * @return parent object (GtObject)
+     */
+    GtObject* findParentGtObj(GtObject* obj);
 
     /**
      * @brief findGtProperties returns all properties of a GtObject

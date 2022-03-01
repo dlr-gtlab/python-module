@@ -56,8 +56,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Compatibility to GTlab core version 2.0.0 #167
 
 ## [1.0.8] - 2021-11-29
+
+### Added
+- Decorator: implement parent getter function -#160
+
 ### Fixed
  - GtVersionNumber is used to define the version number of the Python Task (framework version >= 2.0.0) 
+
 
 ## [1.0.7] - 2021-10-18
 ### Fixed
