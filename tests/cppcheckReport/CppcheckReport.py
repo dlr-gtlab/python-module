@@ -2,40 +2,51 @@ import sys
 import os
 import json
 
-################# Variables ################## 
-ERROROFFSET  = 9
-OUTPUTOFFSET = 10
+################# Variables ##################
+ERROROFFSET  =  (len(sys.argv[0]) + 10) * ' ' 
+OUTPUTOFFSET =  (len(sys.argv[0]) + 10) * ' ' 
+
+INVALIDFILEERRORMSG = "The input files are invalid! Download the artifacts and check them.\n" + ERROROFFSET + "" \
+                      "NOTE: This error can occur if a new unstable branch was created. In this case, \n" + ERROROFFSET + "" \
+                      "no older cppcheck result file can be found. On the next commit, \n" + ERROROFFSET + "" \
+                      "this error should no longer occur."
+
+INVALIDFILEERRORCODE = 3
 
 ################# Functions ##################
-def exit(msg):
-    sys.exit('[' + sys.argv[0] + ' ERROR] ' + msg)
+def exit(msg, code=1):  
+    print('[' + sys.argv[0] + ' ERROR]  ' + msg)
+    sys.exit(code)
 
 def printToConsole(msg, mark=True):
     if mark:
         print('[' + sys.argv[0] + ' OUTPUT] ' + msg)
     else:
-        whiteSpace = (len(sys.argv[0]) + OUTPUTOFFSET) * ' '
-        print(whiteSpace + msg)
+        #whiteSpace = (len(sys.argv[0]) + OUTPUTOFFSET) * ' '
+        print(OUTPUTOFFSET + msg)
 
 # Reads the given cppcheck json file and returns its contents 
 # in a dictionary.
 def readCppcheckJsonFile(file):
     vulsDict = {} 
-
-    if os.path.isfile(file):
-        f = open(file, 'r')
-        jsonContent = f.read()
-        vulsList = json.loads(jsonContent)
-        for vul in vulsList:
-            # The ID of a vulnerability is the combination of its fingerprint 
-            # and the line and column in which the vulnerability occurs.  
-            line  = vul['location']['positions']['begin']['line']
-            col   = vul['location']['positions']['begin']['column']
-            vulId = str(vul['fingerprint']) + '_' + str(line) + '_' + str(col)
-            
-            vulsDict[vulId] = vul
-    else:
-        exit('Cppcheck JSON file ( ' + file + ' ) not found!')
+    try:
+        if os.path.isfile(file):
+            f = open(file, 'r')
+            jsonContent = f.read()
+            vulsList = json.loads(jsonContent)
+            for vul in vulsList:
+                # The ID of a vulnerability is the combination of its fingerprint 
+                # and the line and column in which the vulnerability occurs.  
+                line  = vul['location']['positions']['begin']['line']
+                col   = vul['location']['positions']['begin']['column']
+                vulId = str(vul['fingerprint']) + '_' + str(line) + '_' + str(col)
+                
+                vulsDict[vulId] = vul
+        else:
+            exit('Cppcheck JSON file ( ' + file + ' ) not found!')
+    except:
+        exit(INVALIDFILEERRORMSG, INVALIDFILEERRORCODE)
+    
     
     return vulsDict
 

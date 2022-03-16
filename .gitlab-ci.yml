@@ -331,11 +331,11 @@ cppcheck:
     - source env/bin/activate
     - python3 -m pip install cppcheck-codequality
   script:
+    - echo $QUALITY_MAIN_URL
     - cppcheck --inline-suppr --xml --suppress=unusedFunction --library=qt.cfg --enable=all src/ 2> cppcheck_out.xml
     - cppcheck-codequality --input-file=cppcheck_out.xml --output-file=codequality.json
     - 'curl --location --header "PRIVATE-TOKEN: $PROJECT_ACCESS_TOKEN" -o $QUALITY_MAIN $QUALITY_MAIN_URL'
     - python3 ./tests/cppcheckReport/CppcheckReport.py -o $QUALITY_MAIN -n $QUALITY
-    - echo $COMPARE_TO
   variables:
     QUALITY_MAIN: codequality_main.json
     QUALITY: codequality.json
@@ -348,7 +348,7 @@ cppcheck:
       - $QUALITY
       - $QUALITY_MAIN
     when: always
-    
+
 pages:
   stage: badges
   extends: .pageTemplate
