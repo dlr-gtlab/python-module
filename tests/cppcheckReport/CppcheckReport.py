@@ -7,9 +7,11 @@ ERROROFFSET  =  (len(sys.argv[0]) + 10) * ' '
 OUTPUTOFFSET =  (len(sys.argv[0]) + 10) * ' ' 
 
 INVALIDFILEERRORMSG = "The input files are invalid! Download the artifacts and check them.\n" + ERROROFFSET + "" \
-                      "NOTE: This error can occur if a new unstable branch was created. In this case, \n" + ERROROFFSET + "" \
-                      "no older cppcheck result file can be found. On the next commit, \n" + ERROROFFSET + "" \
-                      "this error should no longer occur."
+                      "NOTE: This error can occur if a new unstable master branch was\n"+ ERROROFFSET + "" \
+                      "      created. In this case, no older cppcheck result file can\n" + ERROROFFSET + "" \
+                      "      be found. Make sure that the pipeline of the unstable master\n" + ERROROFFSET + "" \
+                      "      branch passes successfully. After that, this error should no\n" + ERROROFFSET + "" \
+                      "      no longer occur."
 
 INVALIDFILEERRORCODE = 3
 

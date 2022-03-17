@@ -322,6 +322,7 @@ cppcheck:
     - if: $UNSTABLE_BRANCH != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $UNSTABLE_BRANCH
       variables:
         COMPARE_TO: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+      allow_failure: true
     - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
       variables:
         COMPARE_TO: $CI_COMMIT_BRANCH
