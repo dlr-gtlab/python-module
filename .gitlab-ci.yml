@@ -36,7 +36,7 @@ variables:
   STABLE_BRANCHES: /^master$/
   
   # Name of the unstable branch (if it exists)
-  UNSTABLE_BRANCH: unstable_master
+  # UNSTABLE_BRANCH: unstable_master
 
 # inlcude some templates from this file
 include:
@@ -303,53 +303,10 @@ triggerJobs:
 codingstyle:
   stage: codequality
   extends: .codingStyleTemplate
- 
-.cppcheck:
-  stage: codequality
-  extends: .cppCheckTemplate
 
 cppcheck:
   stage: codequality
-  needs: []
-  rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
-      variables:
-        COMPARE_TO: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
-    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
-      variables:
-        COMPARE_TO: $CI_COMMIT_BRANCH
-      allow_failure: true
-    - if: $UNSTABLE_BRANCH != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $UNSTABLE_BRANCH
-      variables:
-        COMPARE_TO: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
-      allow_failure: true
-    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
-      variables:
-        COMPARE_TO: $CI_COMMIT_BRANCH
-      allow_failure: true
-  tags:
-    - Linux
-  before_script:
-    - python3 -m venv env
-    - source env/bin/activate
-    - python3 -m pip install cppcheck-codequality
-  script:
-    - cppcheck --inline-suppr --xml --suppress=unusedFunction --library=qt.cfg --enable=all src/ 2> cppcheck_out.xml
-    - cppcheck-codequality --input-file=cppcheck_out.xml --output-file=$QUALITY
-    - 'curl --location --header "PRIVATE-TOKEN: $PROJECT_ACCESS_TOKEN" -o $QUALITY_MAIN $QUALITY_MAIN_URL'
-    - python3 ./tests/cppcheckReport/CppcheckReport.py -o $QUALITY_MAIN -n $QUALITY
-  variables:
-    QUALITY_MAIN: codequality_main.json
-    QUALITY: codequality.json
-    CPPCHECK_JOB: cppcheck
-    QUALITY_MAIN_URL: "https://gitlab.dlr.de/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/$COMPARE_TO/raw/$QUALITY?job=$CPPCHECK_JOB"
-  artifacts:
-    reports:
-      codequality: $QUALITY
-    paths:
-      - $QUALITY
-      - $QUALITY_MAIN
-    when: always
+  extends: .cppCheckReportTemplate
 
 pages:
   stage: badges
