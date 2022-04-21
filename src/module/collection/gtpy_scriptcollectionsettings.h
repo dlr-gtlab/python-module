@@ -11,6 +11,7 @@
 #define GTPYSCRIPTCOLLECTIONSETTINGS_H
 
 #include "gt_collectionsettings.h"
+#include "gt_globals.h"
 
 /**
  * @brief The GtpyScriptCollectionSettings class
@@ -29,23 +30,21 @@ public:
      * @brief localCollectionWidget
      * @param parent
      */
-    virtual QWidget* localCollectionWidget(QWidget* parent) Q_DECL_OVERRIDE;
+    virtual QWidget* localCollectionWidget(QWidget* parent) override;
 
     /**
      * @brief setLocalCollectionData
      * @param editor
      * @param items
      */
-    virtual void setLocalCollectionData(
-        QWidget* widget,
-        QList<GtCollectionItem> items) Q_DECL_OVERRIDE;
+    virtual void setLocalCollectionData(QWidget* widget,
+                                        QList<GtCollectionItem> items) override;
 
     /**
      * @brief browseCollectionWidget
      * @param parent
      */
-    virtual GtAbstractBrowserWidget* browserWidget(
-        QWidget* parent) Q_DECL_OVERRIDE;
+    virtual GtAbstractBrowserWidget* browserWidget(QWidget* parent) override;
 
     /**
      * @brief setBrowserWidgetData
@@ -54,11 +53,21 @@ public:
      * @param availableItems
      * @param updataAvailableItems
      */
+#if GT_VERSION >= 0x020000
+    virtual void setBrowserWidgetData(
+        GtAbstractBrowserWidget* widget,
+        const QList<GtCollectionNetworkItem>& installedItems,
+        const QList<GtCollectionNetworkItem>& availableItems,
+        const QList<GtCollectionNetworkItem>& updataAvailableItems) override;
+#else
     virtual void setBrowserWidgetData(
         GtAbstractBrowserWidget* widget,
         QList<GtCollectionNetworkItem> installedItems,
         QList<GtCollectionNetworkItem> availableItems,
-        QList<GtCollectionNetworkItem> updataAvailableItems) Q_DECL_OVERRIDE;
+        QList<GtCollectionNetworkItem> updataAvailableItems) override;
+#endif
+
+
 
 };
 

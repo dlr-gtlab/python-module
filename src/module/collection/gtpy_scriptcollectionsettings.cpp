@@ -47,12 +47,22 @@ GtpyScriptCollectionSettings::browserWidget(QWidget* parent)
     return new GtpyCollectionBrowser(parent);
 }
 
+
+#if GT_VERSION >= 0x020000
+void
+GtpyScriptCollectionSettings::setBrowserWidgetData(
+    GtAbstractBrowserWidget* widget,
+    const QList<GtCollectionNetworkItem>& installedItems,
+    const QList<GtCollectionNetworkItem>& availableItems,
+    const QList<GtCollectionNetworkItem>& updataAvailableItems)
+#else
 void
 GtpyScriptCollectionSettings::setBrowserWidgetData(
     GtAbstractBrowserWidget* widget,
     QList<GtCollectionNetworkItem> installedItems,
     QList<GtCollectionNetworkItem> availableItems,
     QList<GtCollectionNetworkItem> updataAvailableItems)
+#endif
 {
     GtpyCollectionBrowser* wid = qobject_cast<GtpyCollectionBrowser*>(widget);
 
