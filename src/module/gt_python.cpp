@@ -147,7 +147,7 @@ GtPythonModule::calculators()
 
     // Python Script Runner
     GtExtendedCalculatorData python = GT_EXTENDED_CALC_DATA(
-                                          GtpyScriptCalculator);
+                                          GtpyScriptCalculator)
     python->id = QStringLiteral("Python Script Calculator");
 
 #if GT_VERSION >= 0x010700
@@ -175,7 +175,7 @@ GtPythonModule::tasks()
 {
     QList<GtTaskData> metaData;
 
-    GtExtendedTaskData pythonTask = GT_EXTENDED_TASK_DATA(GtpyTask);
+    GtExtendedTaskData pythonTask = GT_EXTENDED_TASK_DATA(GtpyTask)
     pythonTask->id = QStringLiteral("Python Task");
 
 #if GT_VERSION >= 0x020000

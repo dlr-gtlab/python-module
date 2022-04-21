@@ -58,8 +58,15 @@ LIBS += -L../../$${LIB_BUILD_DEST}
 
 CONFIG(debug, debug|release){
     # GTLAB CORE
-    LIBS += -lGTlabDatamodel-d -lGTlabCalculators-d
-    LIBS += -lGTlabCore-d -lGTlabMdi-d
+    greaterThan(MAJOR_VERSION, 1) {
+        message(GTlab Version 2 or newer)
+        LIBS += -lGTlabCore-d -lGTlabGui-d -lGTlabDataProcessor-d
+    } else {
+        message(GTlab Version older than 2)
+        # GTLAB CORE
+        LIBS += -lGTlabDatamodel-d -lGTlabCalculators-d
+        LIBS += -lGTlabCore-d -lGTlabMdi-d -lGTlabNetwork-d
+    }
 
     # GTLAB MODULES
     LIBS += -lGTlabPython$${PY_VERSION}-d
@@ -67,8 +74,15 @@ CONFIG(debug, debug|release){
     # THIRD PARTY
 } else {
     # GTLAB CORE
-    LIBS += -lGTlabDatamodel -lGTlabCalculators
-    LIBS += -lGTlabCore -lGTlabMdi
+    greaterThan(MAJOR_VERSION, 1) {
+        message(GTlab Version 2 or newer)
+        LIBS += -lGTlabCore -lGTlabGui -lGTlabDataProcessor
+    } else {
+        message(GTlab Version older than 2)
+        # GTLAB CORE
+        LIBS += -lGTlabDatamodel -lGTlabCalculators
+        LIBS += -lGTlabCore -lGTlabMdi -lGTlabNetwork
+    }
 
     # GTLAB MODULES
     LIBS += -lGTlabPython$${PY_VERSION}

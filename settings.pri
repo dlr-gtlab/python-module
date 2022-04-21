@@ -15,6 +15,12 @@ include( deployment.pri )
 TARGET_DIR_NAME = python$${PY_VERSION}
 LIB_BUILD_DEST  = lib/$${TARGET_DIR_NAME}
 
+greaterThan(MAJOR_VERSION, 1) {
+    USE_HDF5 =    true
+} else {
+    USE_HDF5 =    false
+}
+
 #### GTlab
 LIBS        += -L$${GTLAB_CORE_PATH}/lib/core
 DEPENDPATH  += $${GTLAB_CORE_PATH}/lib/core
@@ -64,6 +70,21 @@ equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 12) {
                 LIBS        += -L$${GOOGLE_TEST_PATH}/lib
                 DEPENDPATH  += $${GOOGLE_TEST_PATH}/lib
         }
+}
+
+# GTlab HDF5 Wrapper
+INCLUDEPATH += $${GTLAB_H5_PATH}/include/h5
+LIBS        += -L$${GTLAB_H5_PATH}/lib/h5
+DEPENDPATH  += $${GTLAB_H5_PATH}/lib/h5
+
+## HDF5
+INCLUDEPATH += $${HDF5_PATH}/include
+CONFIG(debug, debug|release) {
+    LIBS        += -L$${HDF5_PATH}/libDebug
+    DEPENDPATH  += $${HDF5_PATH}/libDebug
+} else {
+    LIBS        += -L$${HDF5_PATH}/lib
+    DEPENDPATH  += $${HDF5_PATH}/lib
 }
 
 ######################################################################
