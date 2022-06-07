@@ -36,12 +36,65 @@ variables:
   STABLE_BRANCHES: /^master$/
   
   # Name of the unstable branch (if it exists)
-  # UNSTABLE_BRANCH: unstable_master
+  #UNSTABLE_BRANCH: unstable_master
 
 # inlcude some templates from this file
 include:
   - project: 'at-twk/gitlab-templates'
     file: '/ci-templates/.ci-templates-2-0.yml'
+    
+.stable-debug:
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_TAG != null && $STABLE_BASE != null && $STABLE_BASE == "True"
+  variables:
+    USE_HDF5: "false"
+    MAJOR_VERSION: $STABLE_MAJOR
+
+.stable-release:
+  rules:
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_TAG != null && $STABLE_BASE != null && $STABLE_BASE == "True"
+  variables:
+    USE_HDF5: "false"
+    MAJOR_VERSION: $STABLE_MAJOR
+
+
+.unstable-debug:
+  rules:
+    - if: $UNSTABLE_BRANCH == null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
+      allow_failure: true
+    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+      allow_failure: true
+    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null && $STABLE_BASE != null && $STABLE_BASE == "True"
+    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_TAG != null && $UNSTABLE_BASE != null && $UNSTABLE_BASE == "True"
+    - if: $UNSTABLE_BRANCH != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $UNSTABLE_BRANCH
+    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
+  variables:
+    USE_HDF5: "true"
+    MAJOR_VERSION: $UNSTABLE_MAJOR
+
+.unstable-release:
+  rules:
+    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+      allow_failure: true
+    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null && $STABLE_BASE != null && $STABLE_BASE == "True"
+    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_TAG != null && $UNSTABLE_BASE != null && $UNSTABLE_BASE == "True"
+    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
+  variables:
+    USE_HDF5: "true"
+    MAJOR_VERSION: $UNSTABLE_MAJOR
+
+.only-tags:
+  rules:
+    - if: $CI_COMMIT_TAG != null && $CI_PIPELINE_SOURCE != "parent_pipeline"
+
+.masters-and-tags:
+  rules:
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
+    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
+    - if: $CI_COMMIT_TAG != null && $CI_PIPELINE_SOURCE != "parent_pipeline"
 
 stages:
   - update
@@ -54,6 +107,25 @@ stages:
   - codequality
   - package
   - badges
+
+findCodeBaseStatus:
+  stage: .pre
+  tags:
+    - Win10
+  extends: .findCodeBaseStatusTemplate
+
+triggerDeployment:
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_TAG != null && $CI_PIPELINE_SOURCE != "parent_pipeline"
+  trigger:
+    include: .gitlab-ci.yml
+    forward:
+      pipeline_variables: true
+    strategy: depend
+  variables:
+    STABLE_BASE: $BUILD_STABLE_BASE
+    UNSTABLE_BASE: $BUILD_UNSTABLE_BASE
 
 # DevTools update
 devtoolsUpdateWindows:
@@ -159,7 +231,6 @@ linuxBuildDebugPy37:
       - linuxBuild.txt
     when: always
     expire_in: 1 week
-
   variables:
     PYVERSION: 37
     BUILDBATCH: "false"
@@ -182,7 +253,6 @@ linuxBuildDebugUnstablePy37:
       - linuxBuild.txt
     when: always
     expire_in: 1 week
-
   variables:
     PYVERSION: 37
     BUILDBATCH: "false"
