@@ -26,7 +26,7 @@
 
 # Environment variables to use in the pipeline globally
 variables:
-  PIPELINEVERSION: "2.0.0"
+  PIPELINEVERSION: "2.1.0"
   GIT_SUBMODULE_STRATEGY: none
   
   # Regulare expression pattern
@@ -41,60 +41,7 @@ variables:
 # inlcude some templates from this file
 include:
   - project: 'at-twk/gitlab-templates'
-    file: '/ci-templates/.ci-templates-2-0.yml'
-    
-.stable-debug:
-  rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
-    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
-    - if: $CI_COMMIT_TAG != null && $STABLE_BASE != null && $STABLE_BASE == "True"
-  variables:
-    USE_HDF5: "false"
-    MAJOR_VERSION: $STABLE_MAJOR
-
-.stable-release:
-  rules:
-    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
-    - if: $CI_COMMIT_TAG != null && $STABLE_BASE != null && $STABLE_BASE == "True"
-  variables:
-    USE_HDF5: "false"
-    MAJOR_VERSION: $STABLE_MAJOR
-
-
-.unstable-debug:
-  rules:
-    - if: $UNSTABLE_BRANCH == null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ $STABLE_BRANCHES
-      allow_failure: true
-    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
-      allow_failure: true
-    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null && $STABLE_BASE != null && $STABLE_BASE == "True"
-    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_TAG != null && $UNSTABLE_BASE != null && $UNSTABLE_BASE == "True"
-    - if: $UNSTABLE_BRANCH != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != null && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $UNSTABLE_BRANCH
-    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
-  variables:
-    USE_HDF5: "true"
-    MAJOR_VERSION: $UNSTABLE_MAJOR
-
-.unstable-release:
-  rules:
-    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
-      allow_failure: true
-    - if: $UNSTABLE_BRANCH == null && $CI_COMMIT_TAG != null && $STABLE_BASE != null && $STABLE_BASE == "True"
-    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_TAG != null && $UNSTABLE_BASE != null && $UNSTABLE_BASE == "True"
-    - if: $UNSTABLE_BRANCH != null && $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
-  variables:
-    USE_HDF5: "true"
-    MAJOR_VERSION: $UNSTABLE_MAJOR
-
-.only-tags:
-  rules:
-    - if: $CI_COMMIT_TAG != null && $CI_PIPELINE_SOURCE != "parent_pipeline"
-
-.masters-and-tags:
-  rules:
-    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH =~ $STABLE_BRANCHES
-    - if: $CI_COMMIT_BRANCH != null && $CI_COMMIT_BRANCH == $UNSTABLE_BRANCH
-    - if: $CI_COMMIT_TAG != null && $CI_PIPELINE_SOURCE != "parent_pipeline"
+    file: '/ci-templates/.ci-templates-2-1.yml'
 
 stages:
   - update
@@ -116,8 +63,7 @@ findCodeBaseStatus:
 
 triggerDeployment:
   stage: deploy
-  rules:
-    - if: $CI_COMMIT_TAG != null && $CI_PIPELINE_SOURCE != "parent_pipeline"
+  extends: .only-tags-parent
   trigger:
     include: .gitlab-ci.yml
     forward:
@@ -358,7 +304,7 @@ createJobs:
 
 triggerJobs:
   stage: deploy
-  extends: .only-tags
+  extends: .only-tags-child
   needs:
     - createJobs
   trigger:
