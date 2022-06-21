@@ -36,13 +36,13 @@ variables:
   STABLE_BRANCHES: /^master$/
   
   # Name of the unstable branch (if it exists)
-  UNSTABLE_BRANCH: unstable_master
+  #UNSTABLE_BRANCH: unstable_master
 
 # inlcude some templates from this file
 include:
   - project: 'at-twk/gitlab-templates'
     file: '/ci-templates/.ci-templates-2-1.yml'
-
+    
 stages:
   - update
   - build
@@ -71,7 +71,6 @@ triggerDeployment:
     strategy: depend
   variables:
     STABLE_BASE: $BUILD_STABLE_BASE
-    UNSTABLE_BASE: $BUILD_UNSTABLE_BASE
 
 # DevTools update
 devtoolsUpdateWindows:
