@@ -1221,6 +1221,7 @@ GtpyDecorator::entries(GtDataZone0D* dataZone, bool* ok)
     return retVal;
 }
 
+#if GT_VERSION < 0x020000
 bool
 GtpyDecorator::setValue(GtDataZone0D* dataZone, const QString& paramName,
                         const double& value)
@@ -1266,3 +1267,5 @@ GtpyDecorator::appendData(GtDataZone0D* dataZone, const QString& paramName,
     return dataZone->appendData(paramName, unit, value);
 #endif
 }
+
+#endif

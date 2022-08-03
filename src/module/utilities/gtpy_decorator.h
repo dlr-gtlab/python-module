@@ -15,6 +15,8 @@
 #include <QObject>
 #include <QVariant>
 
+#include "gt_globals.h"
+
 class GtCoreApplication;
 class GtProject;
 class GtTask;
@@ -441,6 +443,8 @@ public slots:
      */
     QMap<QString, double> entries(GtDataZone0D* dataZone, bool* ok = Q_NULLPTR);
 
+
+#if GT_VERSION < 0x020000
     bool setValue(GtDataZone0D* dataZone, const QString& paramName,
                   const double& value);
 
@@ -449,6 +453,8 @@ public slots:
 
     bool appendData(GtDataZone0D* dataZone, const QString& paramName,
                     const QString& unit, double value);
+#endif
+
 
 signals:
     /**
