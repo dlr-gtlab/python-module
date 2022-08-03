@@ -13,7 +13,6 @@
 #include "gt_moduleinterface.h"
 #include "gt_processinterface.h"
 #include "gt_mdiinterface.h"
-#include "gt_initmoduleinterface.h"
 #include "gt_collectioninterface.h"
 #include "gt_networkinterface.h"
 #include "gt_application.h"
@@ -22,13 +21,19 @@
 #include "gt_versionnumber.h"
 #endif
 
+#if GT_VERSION < 0x020000
+#include "gt_initmoduleinterface.h"
+#endif
+
 /**
  * @brief The GtPythonModule class
  */
 class GtPythonModule: public QObject, public GtModuleInterface,
     public GtProcessInterface, public GtMdiInterface,
-    public GtInitModuleInterface, public GtCollectionInterface,
-    public GtNetworkInterface
+    public GtCollectionInterface, public GtNetworkInterface
+#if GT_VERSION < 0x020000
+    , public GtInitModuleInterface
+#endif
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "de.dlr.gtlab.GtModuleInterface/0.1"
@@ -37,9 +42,12 @@ class GtPythonModule: public QObject, public GtModuleInterface,
     Q_INTERFACES(GtModuleInterface)
     Q_INTERFACES(GtProcessInterface)
     Q_INTERFACES(GtMdiInterface)
-    Q_INTERFACES(GtInitModuleInterface)
     Q_INTERFACES(GtCollectionInterface)
     Q_INTERFACES(GtNetworkInterface)
+
+#if GT_VERSION < 0x020000
+    Q_INTERFACES(GtInitModuleInterface)
+#endif
 
 public:
     /**
