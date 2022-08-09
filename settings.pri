@@ -73,9 +73,9 @@ equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 12) {
 }
 
 # GTlab HDF5 Wrapper
-INCLUDEPATH += $${GTLAB_H5_PATH}/include/h5
-LIBS        += -L$${GTLAB_H5_PATH}/lib/h5
-DEPENDPATH  += $${GTLAB_H5_PATH}/lib/h5
+INCLUDEPATH += $${GENH5_PATH}/include/h5
+LIBS        += -L$${GENH5_PATH}/lib/h5
+DEPENDPATH  += $${GENH5_PATH}/lib/h5
 
 ## HDF5
 INCLUDEPATH += $${HDF5_PATH}/include

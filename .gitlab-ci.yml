@@ -1,5 +1,5 @@
 ########################################################
-###############GTlab Pipeline Version 2.0.0 ############
+############# GTlab Pipeline Version 2.1.0 #############
 ########################################################
 # This is a slight changed version
 # - PYVERSION variable to support the build using different Python versions
@@ -57,9 +57,11 @@ stages:
 
 findCodeBaseStatus:
   stage: .pre
+  extends: 
+    - .only-tags-parent
+    - .findCodeBaseStatusTemplate
   tags:
     - Win10
-  extends: .findCodeBaseStatusTemplate
 
 triggerDeployment:
   stage: deploy
@@ -98,15 +100,17 @@ windowsBuildDebugPy37:
       - include\$TARGETDIRNAME\*.h
       - build\$UNITTESTSNAME.exe
       - build\$UNITTESTSNAME.pdb
-      - buildLog512.txt
+      - buildLog.txt
     expire_in: 1 week
     when: always
-
   variables:
     PYVERSION: "37"
     BUILDBATCH: "true"
     BUILDMODE: release
     DEVTOOLS: $DEVTOOLS_Win_Stable
+    JOM_PATH: $JOM_PATH_512
+    QMAKE_PATH: $QMAKE_PATH_512
+    VCvarsall: $VCvarsall_512
 
 windowsBuildDebugUnstablePy37:
   stage: unstableBuild
@@ -118,13 +122,13 @@ windowsBuildDebugUnstablePy37:
       optional: true
   artifacts:
     paths:
-      - lib\$TARGETDIRNAME\$TARGETNAME-d.dll
-      - lib\$TARGETDIRNAME\$TARGETNAME-d.lib
-      - lib\$TARGETDIRNAME\$TARGETNAME-d.pdb
+      - lib\$TARGETDIRNAME\$TARGETNAME.dll
+      - lib\$TARGETDIRNAME\$TARGETNAME.lib
+      - lib\$TARGETDIRNAME\$TARGETNAME.pdb
       - include\$TARGETDIRNAME\*.h
       - build\$UNITTESTSNAME.exe
       - build\$UNITTESTSNAME.pdb
-      - buildLog512.txt
+      - buildLog.txt
     expire_in: 1 week
     when: always
   variables:
@@ -132,6 +136,9 @@ windowsBuildDebugUnstablePy37:
     BUILDBATCH: "true"
     BUILDMODE: release
     DEVTOOLS: $DEVTOOLS_Win_Unstable
+    JOM_PATH: $JOM_PATH_515
+    QMAKE_PATH: $QMAKE_PATH_515
+    VCvarsall: $VCvarsall_515
 
 windowsBuildReleasePy37:
   stage: build
@@ -145,6 +152,9 @@ windowsBuildReleasePy37:
     PYVERSION: "37"
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Win_Stable
+    JOM_PATH: $JOM_PATH_512
+    QMAKE_PATH: $QMAKE_PATH_512
+    VCvarsall: $VCvarsall_512
 
 windowsBuildReleaseUnstablePy37:
   stage: unstableBuild
@@ -158,6 +168,9 @@ windowsBuildReleaseUnstablePy37:
     PYVERSION: "37"
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Win_Unstable
+    JOM_PATH: $JOM_PATH_515
+    QMAKE_PATH: $QMAKE_PATH_515
+    VCvarsall: $VCvarsall_515
     
 # build on Linux system
 linuxBuildDebugPy37:
@@ -181,6 +194,7 @@ linuxBuildDebugPy37:
     BUILDBATCH: "false"
     BUILDMODE: release
     DEVTOOLS: $DEVTOOLS_Linux_Stable
+    QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
 
 linuxBuildDebugUnstablePy37:
   stage: unstableBuild
@@ -203,6 +217,7 @@ linuxBuildDebugUnstablePy37:
     BUILDBATCH: "false"
     BUILDMODE: release
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
+    QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
  
 linuxBuildReleasePy37:
   stage: build
@@ -216,6 +231,7 @@ linuxBuildReleasePy37:
     PYVERSION: 37
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Stable
+    QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
 
 linuxBuildReleaseUnstablePy37:
   stage: unstableBuild
@@ -229,9 +245,10 @@ linuxBuildReleaseUnstablePy37:
     PYVERSION: 37
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
+    QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
 
 # run tests using the binary built before
-testWin512Py37:
+testWinPy37:
   stage: test
   extends: 
     - .stable-debug
@@ -246,13 +263,13 @@ testWin512Py37:
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-testWin512UnstablePy37:
+testWinUnstablePy37:
   stage: unstableTest
   extends:
     - .unstable-debug  
     - .winTestTemplate
   script:
-    - .\tests\unittests\runUnittestsQt512.bat
+    - .\tests\unittests\runUnittestsQt515.bat
     - get-content CoverageReport*\index.html
   needs: 
     - windowsBuildDebugUnstablePy37
@@ -261,7 +278,7 @@ testWin512UnstablePy37:
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Unstable  
 
-testLinux512Py37:
+testLinuxPy37:
   stage: test
   extends: 
     - .stable-debug
@@ -273,7 +290,7 @@ testLinux512Py37:
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Stable    
 
-testLinux512UnstablePy37:
+testLinuxUnstablePy37:
   stage: unstableTest
   extends: 
     - .unstable-debug
@@ -283,7 +300,8 @@ testLinux512UnstablePy37:
   dependencies:
     - linuxBuildDebugUnstablePy37
   variables:
-    DEVTOOLS: $DEVTOOLS_Linux_Unstable   
+    DEVTOOLS: $DEVTOOLS_Linux_Unstable
+    LINUX_QT_DIR: /opt/Qt/5.15.2/gcc_64
 
 # deployment
 createJobs:
@@ -340,8 +358,8 @@ badges:
   dependencies:
     - windowsBuildDebugPy37
     - linuxBuildDebugPy37
-    - testWin512Py37
-    - testLinux512Py37
+    - testWinPy37
+    - testLinuxPy37
     - codingstyle
 
 badgesUnstable:
@@ -352,8 +370,8 @@ badgesUnstable:
   dependencies:
     - windowsBuildDebugUnstablePy37
     - linuxBuildDebugUnstablePy37
-    - testWin512UnstablePy37
-    - testLinux512UnstablePy37
+    - testWinUnstablePy37
+    - testLinuxUnstablePy37
     - codingstyle
     
 

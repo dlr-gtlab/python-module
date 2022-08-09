@@ -1221,7 +1221,6 @@ GtpyDecorator::entries(GtDataZone0D* dataZone, bool* ok)
     return retVal;
 }
 
-#if GT_VERSION < 0x020000
 bool
 GtpyDecorator::setValue(GtDataZone0D* dataZone, const QString& paramName,
                         const double& value)
@@ -1232,7 +1231,8 @@ GtpyDecorator::setValue(GtDataZone0D* dataZone, const QString& paramName,
     }
 
 #if GT_VERSION >= 0x020000
-    return dataZone->fetchData().setValue(paramName, value);
+    auto data = dataZone->fetchData();
+    return data.setValue(paramName, value);
 #else
     return dataZone->setValue(paramName, value);
 #endif
@@ -1247,7 +1247,8 @@ GtpyDecorator::appendData(GtDataZone0D* dataZone, const QString& paramName,
         return false;
     }
 #if GT_VERSION >= 0x020000
-    return dataZone->fetchData().appendData(paramName, value);
+    auto data = dataZone->fetchData();
+    return data.appendData(paramName, value);
 #else
     return dataZone->appendData(paramName, value);
 #endif
@@ -1262,10 +1263,9 @@ GtpyDecorator::appendData(GtDataZone0D* dataZone, const QString& paramName,
         return false;
     }
 #if GT_VERSION >= 0x020000
-    return dataZone->fetchData().appendData(paramName, unit, value);
+    auto data = dataZone->fetchData();
+    return data.appendData(paramName, unit, value);
 #else
     return dataZone->appendData(paramName, unit, value);
 #endif
 }
-
-#endif

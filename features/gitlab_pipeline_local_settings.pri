@@ -7,16 +7,17 @@
 BUILD_BATCH     =   $$(BUILDBATCH)
 BUILD_UNITTESTS =   $$(BUILDUNITTESTS)
 
-PY_VERSION = $$(PYVERSION)
 MAJOR_VERSION =    $$(MAJOR_VERSION)
+PY_VERSION = $$(PYVERSION)
 
 # path to dev tools
 DEV_TOOLS = $$(DEVTOOLS)
+USE_HDF5 =  $$(USE_HDF5)
 
 # path to GTlab Core repository
 GTLAB_CORE_PATH    = $${DEV_TOOLS}
 GTLAB_LOGGING_PATH = $${DEV_TOOLS}
-GTLAB_H5_PATH =      $${DEV_TOOLS}
+GENH5_PATH   = $${DEV_TOOLS}
 
 # Third Party
 PYTHON_PATH 	 = $${DEV_TOOLS}/ThirdPartyLibraries/Python/Python_$${PY_VERSION}
