@@ -13,11 +13,13 @@ MAJOR_VERSION =    2
 
 # path to dev tools
 DEV_TOOLS = PATH/TO/DEVTOOLS
+USE_HDF5 =  false
 
 # path to GTlab Core repository
 GTLAB_CORE_PATH    = $${DEV_TOOLS}
 GTLAB_LOGGING_PATH = $${DEV_TOOLS}
 GTLAB_H5_PATH =      $${DEV_TOOLS}
+GENH5_PATH   = $${DEV_TOOLS}
 
 # Third Party
 PYTHON_PATH      = $${DEV_TOOLS}\ThirdPartyLibraries\Python\Python_$${PY_VERSION}
