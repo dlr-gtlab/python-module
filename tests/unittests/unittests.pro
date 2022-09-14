@@ -19,10 +19,6 @@ QT += xml core sql widgets
 
 TARGET = GTlabUnitTest
 
-CONFIG += silent
-CONFIG += c++11
-CONFIG += console
-
 CONFIG(debug, debug|release){
     DESTDIR = $${MOC_BUILD_DEST}/debug-unittests
     OBJECTS_DIR = $${MOC_BUILD_DEST}/debug-unittests/obj
@@ -36,6 +32,10 @@ CONFIG(debug, debug|release){
     RCC_DIR = $${MOC_BUILD_DEST}/release-unittests/rcc
     UI_DIR = $${MOC_BUILD_DEST}/release-unittests/ui
 }
+
+CONFIG += silent
+CONFIG += c++11
+CONFIG += console
 
 #### INCLUDES
 INCLUDEPATH += $${PWD}/../../src
@@ -52,11 +52,18 @@ DESTDIR = $${BUILD_DEST}
 
 ####################################################
 
+LIBS += -L../../$${LIB_BUILD_DEST}
+
 equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 12) {
     message(Qt Version 5.12 or newer)
 
         CONFIG(debug, debug|release){
+        win32 {
                 LIBS += -lgtestd
+        }
+        unix {
+                LIBS += -lgtest
+        }
         } else {
                 LIBS += -lgtest
         }
@@ -66,8 +73,6 @@ equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 12) {
 
         LIBS += -lgtest
 }
-
-LIBS += -L../../$${LIB_BUILD_DEST}
 
 ####################################################
 

@@ -199,15 +199,16 @@ CONFIG(debug, debug|release){
     }
 
     # THIRD PARTY
-    equals(PY_VERSION, 37) {
-        win32: LIBS += -lPythonQt-Qt5-Python37_d3
-        unix: LIBS += -lPythonQt-Qt5-Python3.7
-        unix: DEFINES += PYTHON_LIBRARY=\\\"libpython3.7m.so.1.0\\\"
-    } else {
+    win32: LIBS += -lPythonQt-Qt5-Python$${PY_VERSION}_d
 
-        win32: LIBS += -lPythonQt-Qt5-Python27_d3
+    unix {
+        LIBS += -lPythonQt-Qt5-Python$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}
+        equals(PY_VERSION, 37) {
+            DEFINES += PYTHON_LIBRARY=\\\"libpython3.7m.so.1.0\\\"
+        } else {
+            DEFINES += PYTHON_LIBRARY=\\\"libpython$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}d.so.1.0\\\"
+        }
     }
-
 } else {
     # GTLAB CORE
     LIBS += -lGTlabLogging
@@ -227,19 +228,14 @@ CONFIG(debug, debug|release){
     # THIRD PARTY
     win32: LIBS += -lPythonQt-Qt5-Python$${PY_VERSION}
     unix {
+        LIBS += -lPythonQt-Qt5-Python$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}
 
         equals(PY_VERSION, 37) {
-            LIBS += -lPythonQt-Qt5-Python3.7
-            DEFINES += PYTHON_LIBRARY=\\\"libpython3.7m.so.1.0\\\"
-        }
 
-        equals(PY_VERSION, 373) {
-            LIBS += -lPythonQt-Qt5-Python3.7
             DEFINES += PYTHON_LIBRARY=\\\"libpython3.7m.so.1.0\\\"
-        }
+        } else {
 
-        equals(PY_VERSION, 273) {
-            LIBS += -lPythonQt-Qt5-Python2.7
+            DEFINES += PYTHON_LIBRARY=\\\"libpython$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}.so.1.0\\\"
         }
    }
 }
