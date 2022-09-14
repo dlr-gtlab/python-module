@@ -12,6 +12,8 @@
 include( local_settings.pri )
 include( deployment.pri )
 
+PY_VERSION = $${PY_MAJOR_VERSION}$${PY_MINOR_VERSION}
+
 TARGET_DIR_NAME = python$${PY_VERSION}
 LIB_BUILD_DEST  = lib/$${TARGET_DIR_NAME}
 
@@ -38,10 +40,6 @@ DEPENDPATH  += $${PYTHON_PATH}
 INCLUDEPATH += $${PYTHON_PATH}/include
 unix: INCLUDEPATH += $${PYTHON_PATH}/include/python3.7m
 
-# PythonQt
-INCLUDEPATH += $${PYTHON_QT_PATH}/include
-LIBS        += -L$${PYTHON_QT_PATH}/lib
-DEPENDPATH  += $${PYTHON_QT_PATH}/lib
 
 #### THIRD PARTY LIBRARIES
 equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 12) {
@@ -55,21 +53,37 @@ equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 12) {
 } else {
     message(Qt Version older than 5.12)
 
-        # Google Test
-        INCLUDEPATH += $${GOOGLE_TEST_PATH}/include
-        win32 {
-                CONFIG(debug, debug|release){
-                        LIBS        += -L$${GOOGLE_TEST_PATH}/libDebug
-                        DEPENDPATH  += $${GOOGLE_TEST_PATH}/libDebug
-                } else {
-                        LIBS        += -L$${GOOGLE_TEST_PATH}/lib
-                        DEPENDPATH  += $${GOOGLE_TEST_PATH}/lib
-                }
-        }
-        unix {
-                LIBS        += -L$${GOOGLE_TEST_PATH}/lib
-                DEPENDPATH  += $${GOOGLE_TEST_PATH}/lib
-        }
+    # Google Test
+    INCLUDEPATH += $${GOOGLE_TEST_PATH}/include
+    win32 {
+            CONFIG(debug, debug|release){
+                    LIBS        += -L$${GOOGLE_TEST_PATH}/libDebug
+                    DEPENDPATH  += $${GOOGLE_TEST_PATH}/libDebug
+            } else {
+                    LIBS        += -L$${GOOGLE_TEST_PATH}/lib
+                    DEPENDPATH  += $${GOOGLE_TEST_PATH}/lib
+            }
+    }
+    unix {
+            LIBS        += -L$${GOOGLE_TEST_PATH}/lib
+            DEPENDPATH  += $${GOOGLE_TEST_PATH}/lib
+    }
+}
+
+# PythonQt
+INCLUDEPATH += $${PYTHON_QT_PATH}/include
+win32 {
+    CONFIG(debug, debug|release){
+            LIBS        += -L$${PYTHON_QT_PATH}/libDebug
+            DEPENDPATH  += $${PYTHON_QT_PATH}/libDebug
+    } else {
+            LIBS        += -L$${PYTHON_QT_PATH}/lib
+            DEPENDPATH  += $${PYTHON_QT_PATH}/lib
+    }
+}
+unix {
+        LIBS        += -L$${PYTHON_QT_PATH}/lib
+        DEPENDPATH  += $${PYTHON_QT_PATH}/lib
 }
 
 # GTlab HDF5 Wrapper

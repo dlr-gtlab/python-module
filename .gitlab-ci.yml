@@ -84,138 +84,162 @@ devtoolsUpdateLinux:
   extends: .devToolsUpdateLinux
 
 # build on Windows system
+.winDebugArtifacts:
+  artifacts:
+    paths:
+      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.dll
+      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.lib
+      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.pdb
+      - include\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\*.h
+      - build\$UNITTESTSNAME.exe
+      - build\$UNITTESTSNAME.pdb
+      - buildLog.txt
+    expire_in: 1 week
+    when: always
+
+.winReleaseArtifacts:
+  artifacts:
+    paths:
+      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION.dll
+      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION.lib
+      - include\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\*.h
+      - build\$UNITTESTSNAME.exe
+      - build\$UNITTESTSNAME.pdb
+      - buildLog.txt
+    expire_in: 1 week
+    when: always
+    
 windowsBuildDebugPy37:
   stage: build
   extends: 
     - .stable-debug
     - .buildWinDebug
+    - .winReleaseArtifacts
   needs:
     - job: devtoolsUpdateWindows
       optional: true
-  artifacts:
-    paths:
-      - lib\$TARGETDIRNAME\$TARGETNAME.dll
-      - lib\$TARGETDIRNAME\$TARGETNAME.lib
-      - lib\$TARGETDIRNAME\$TARGETNAME.pdb
-      - include\$TARGETDIRNAME\*.h
-      - build\$UNITTESTSNAME.exe
-      - build\$UNITTESTSNAME.pdb
-      - buildLog.txt
-    expire_in: 1 week
-    when: always
   variables:
-    PYVERSION: "37"
+    PY_MAJOR_VERSION: 3
+    PY_MINOR_VERSION: 7
+    MAJOR_VERSION: $STABLE_MAJOR
     BUILDBATCH: "true"
     BUILDMODE: release
     DEVTOOLS: $DEVTOOLS_Win_Stable
     JOM_PATH: $JOM_PATH_512
     QMAKE_PATH: $QMAKE_PATH_512
-    VCvarsall: $VCvarsall_512
-
-windowsBuildDebugUnstablePy37:
+    VCvarsall: $VCVARS_2017_PS 
+    
+windowsBuildDebugUnstablePy39:
   stage: unstableBuild
   extends: 
     - .unstable-debug
     - .buildWinDebug
+    - .winDebugArtifacts
   needs:
     - job: devtoolsUpdateWindows
       optional: true
-  artifacts:
-    paths:
-      - lib\$TARGETDIRNAME\$TARGETNAME.dll
-      - lib\$TARGETDIRNAME\$TARGETNAME.lib
-      - lib\$TARGETDIRNAME\$TARGETNAME.pdb
-      - include\$TARGETDIRNAME\*.h
-      - build\$UNITTESTSNAME.exe
-      - build\$UNITTESTSNAME.pdb
-      - buildLog.txt
-    expire_in: 1 week
-    when: always
   variables:
-    PYVERSION: "37"
+    PY_MAJOR_VERSION: 3
+    PY_MINOR_VERSION: 9
+    MAJOR_VERSION: $UNSTABLE_MAJOR
     BUILDBATCH: "true"
-    BUILDMODE: release
     DEVTOOLS: $DEVTOOLS_Win_Unstable
     JOM_PATH: $JOM_PATH_515
     QMAKE_PATH: $QMAKE_PATH_515
-    VCvarsall: $VCvarsall_515
+    VCvarsall: $VCVARS_2019_PS
 
 windowsBuildReleasePy37:
   stage: build
   extends: 
     - .stable-release
     - .buildWinRelease
+    - .winReleaseArtifacts
   needs:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
-    PYVERSION: "37"
+    PY_MAJOR_VERSION: 3
+    PY_MINOR_VERSION: 7
     BUILDBATCH: "false"
+    MAJOR_VERSION: $STABLE_MAJOR
     DEVTOOLS: $DEVTOOLS_Win_Stable
     JOM_PATH: $JOM_PATH_512
     QMAKE_PATH: $QMAKE_PATH_512
-    VCvarsall: $VCvarsall_512
-
-windowsBuildReleaseUnstablePy37:
-  stage: unstableBuild
+    VCvarsall: $VCVARS_2017_PS
+ 
+windowsBuildReleaseUnstablePy39:
+  stage: build
   extends: 
-    - .unstable-release
+    - .stable-release
     - .buildWinRelease
+    - .winReleaseArtifacts
   needs:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
-    PYVERSION: "37"
-    BUILDBATCH: "false"
+    PY_MAJOR_VERSION: 3
+    PY_MINOR_VERSION: 9
+    MAJOR_VERSION: $UNSTABLE_MAJOR
+    BUILDBATCH: "true"
     DEVTOOLS: $DEVTOOLS_Win_Unstable
     JOM_PATH: $JOM_PATH_515
     QMAKE_PATH: $QMAKE_PATH_515
-    VCvarsall: $VCvarsall_515
+    VCvarsall: $VCVARS_2019_PS
     
 # build on Linux system
+.linuxDebugArtifacts:
+  artifacts:
+    paths:
+      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.so
+      - include/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/*.h
+      - build/$UNITTESTSNAME
+      - linuxBuild.txt
+    when: always
+    expire_in: 1 week
+    
+.linuxReleaseArtifacts:
+  artifacts:
+    paths:
+      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION.so
+      - include/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/*.h
+      - build/$UNITTESTSNAME
+      - linuxBuild.txt
+    when: always
+    expire_in: 1 week
+    
 linuxBuildDebugPy37:
   stage: build
   extends: 
     - .stable-debug
     - .buildLinuxDebug
+    - .linuxReleaseArtifacts
   needs:
     - job: devtoolsUpdateLinux
       optional: true
-  artifacts:
-    paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME.so
-      - include/$TARGETDIRNAME/*.h
-      - build/$UNITTESTSNAME
-      - linuxBuild.txt
-    when: always
-    expire_in: 1 week
   variables:
-    PYVERSION: 37
+    PY_MAJOR_VERSION: 3
+    PY_MINOR_VERSION: 7
+    MAJOR_VERSION: $STABLE_MAJOR
     BUILDBATCH: "false"
     BUILDMODE: release
     DEVTOOLS: $DEVTOOLS_Linux_Stable
     QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
 
-linuxBuildDebugUnstablePy37:
+linuxBuildDebugUnstablePy39:
   stage: unstableBuild
   extends: 
     - .unstable-debug
     - .buildLinuxDebug 
+    - .linuxDebugArtifacts
   needs:
     - job: devtoolsUpdateLinux
       optional: true
-  artifacts:
-    paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME.so
-      - include/$TARGETDIRNAME/*.h
-      - build/$UNITTESTSNAME
-      - linuxBuild.txt
-    when: always
-    expire_in: 1 week
   variables:
-    PYVERSION: 37
+    PY_MAJOR_VERSION: 3
+    PY_MINOR_VERSION: 9
+    BUILDUNITTESTS: "true"
     BUILDBATCH: "false"
-    BUILDMODE: release
+    MAJOR_VERSION: $UNSTABLE_MAJOR
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
     QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
  
@@ -224,28 +248,35 @@ linuxBuildReleasePy37:
   extends: 
     - .stable-release
     - .buildLinuxRelease 
+    - .linuxReleaseArtifacts
   needs:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
-    PYVERSION: 37
+    PY_MAJOR_VERSION: 3
+    PY_MINOR_VERSION: 7
+    MAJOR_VERSION: $STABLE_MAJOR
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Stable
     QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
 
-linuxBuildReleaseUnstablePy37:
+linuxBuildReleaseUnstablePy39:
   stage: unstableBuild
   extends: 
     - .unstable-release
     - .buildLinuxRelease 
+    - .linuxReleaseArtifacts
   needs:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
-    PYVERSION: 37
+    PY_MAJOR_VERSION: 3
+    PY_MINOR_VERSION: 9
+    MAJOR_VERSION: $UNSTABLE_MAJOR
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
     QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
+
 
 # run tests using the binary built before
 testWinPy37:
@@ -263,7 +294,7 @@ testWinPy37:
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-testWinUnstablePy37:
+testWinUnstablePy39:
   stage: unstableTest
   extends:
     - .unstable-debug  
@@ -272,9 +303,9 @@ testWinUnstablePy37:
     - .\tests\unittests\runUnittestsQt515.bat
     - get-content CoverageReport*\index.html
   needs: 
-    - windowsBuildDebugUnstablePy37
+    - windowsBuildDebugUnstablePy39
   dependencies: 
-    - windowsBuildDebugUnstablePy37
+    - windowsBuildDebugUnstablePy39
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Unstable  
 
@@ -290,15 +321,15 @@ testLinuxPy37:
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Stable    
 
-testLinuxUnstablePy37:
+testLinuxUnstablePy39:
   stage: unstableTest
   extends: 
     - .unstable-debug
     - .linuxTestTemplate
   needs: 
-    - linuxBuildDebugUnstablePy37
+    - linuxBuildDebugUnstablePy39
   dependencies:
-    - linuxBuildDebugUnstablePy37
+    - linuxBuildDebugUnstablePy39
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
     LINUX_QT_DIR: /opt/Qt/5.15.2/gcc_64
@@ -311,13 +342,13 @@ createJobs:
   dependencies: []
   variables:
     WinReStableJob: windowsBuildReleasePy37
-    WinReUnstableJob: windowsBuildReleaseUnstablePy37
+    WinReUnstableJob: windowsBuildReleaseUnstablePy39
     WinDeStableJob: windowsBuildDebugPy37
-    WinDeUnstableJob: windowsBuildDebugUnstablePy37
+    WinDeUnstableJob: windowsBuildDebugUnstablePy39
     LinReStableJob: linuxBuildReleasePy37
-    LinReUnstableJob: linuxBuildReleaseUnstablePy37
+    LinReUnstableJob: linuxBuildReleaseUnstablePy39
     LinDeStableJob: linuxBuildDebugPy37
-    LinDeUnstableJob: linuxBuildDebugUnstablePy37
+    LinDeUnstableJob: linuxBuildDebugUnstablePy39
 
 triggerJobs:
   stage: deploy
@@ -368,10 +399,10 @@ badgesUnstable:
     - .unstable-only-master
     - .badgeTemplate
   dependencies:
-    - windowsBuildDebugUnstablePy37
-    - linuxBuildDebugUnstablePy37
-    - testWinUnstablePy37
-    - testLinuxUnstablePy37
+    - windowsBuildDebugUnstablePy39
+    - linuxBuildDebugUnstablePy39
+    - testWinUnstablePy39
+    - testLinuxUnstablePy39
     - codingstyle
     
 

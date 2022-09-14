@@ -830,10 +830,7 @@ GtpyDecorator::setPropertyValue(GtObject* obj, const QString& id,
 
         if (!dataObj)
         {
-
-            PythonQtObjectPtr pyPtr = qvariant_cast<PythonQtObjectPtr>(val);
-
-            if (pyPtr)
+            if (PythonQtObjectPtr().fromVariant(val))
             {
                 dataObj = pyObjectToGtObject(val);
             }
@@ -1023,9 +1020,7 @@ GtpyDecorator::setPropertyValue(GtAbstractProperty* prop,
 
         if (!dataObj)
         {
-            PythonQtObjectPtr pyPtr = qvariant_cast<PythonQtObjectPtr>(val);
-
-            if (pyPtr)
+            if (PythonQtObjectPtr().fromVariant(val))
             {
                 dataObj = pyObjectToGtObject(val);
             }

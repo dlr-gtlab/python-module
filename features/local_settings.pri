@@ -7,9 +7,10 @@
 BUILD_BATCH     =   true
 BUILD_UNITTESTS =   true
 
-PY_VERSION = 37
 MAJOR_VERSION =    2
 
+PY_MAJOR_VERSION = 3
+PY_MINOR_VERSION = 9
 
 # path to dev tools
 DEV_TOOLS = PATH/TO/DEVTOOLS
@@ -22,8 +23,8 @@ GTLAB_H5_PATH =      $${DEV_TOOLS}
 GENH5_PATH   = $${DEV_TOOLS}
 
 # Third Party
-PYTHON_PATH      = $${DEV_TOOLS}\ThirdPartyLibraries\Python\Python_$${PY_VERSION}
-PYTHON_QT_PATH   = $${DEV_TOOLS}\ThirdPartyLibraries\PythonQt\PythonQt_$${PY_VERSION}
+PYTHON_PATH      = $${DEV_TOOLS}\ThirdPartyLibraries\Python\Python_$${PY_MAJOR_VERSION}$${PY_MINOR_VERSION}
+PYTHON_QT_PATH   = $${DEV_TOOLS}\ThirdPartyLibraries\PythonQt\PythonQt_$${PY_MAJOR_VERSION}$${PY_MINOR_VERSION}
 GOOGLE_TEST_PATH = $${DEV_TOOLS}\ThirdPartyLibraries\GoogleTest
 HDF5_PATH =        $${DEV_TOOLS}/ThirdPartyLibraries/hdf5
 
