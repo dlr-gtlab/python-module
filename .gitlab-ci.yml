@@ -170,7 +170,7 @@ windowsBuildReleasePy37:
 windowsBuildReleaseUnstablePy39:
   stage: build
   extends: 
-    - .stable-release
+    - .unstable-release
     - .buildWinRelease
     - .winReleaseArtifacts
   needs:
