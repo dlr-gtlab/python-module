@@ -168,7 +168,7 @@ windowsBuildReleasePy37:
     VCvarsall: $VCVARS_2017_PS
  
 windowsBuildReleaseUnstablePy39:
-  stage: build
+  stage: unbuild
   extends: 
     - .unstable-release
     - .buildWinRelease
@@ -404,5 +404,3 @@ badgesUnstable:
     - testWinUnstablePy39
     - testLinuxUnstablePy39
     - codingstyle
-    
-
