@@ -1,19 +1,19 @@
 #ifndef GTPYPYTHONCONNECTION_H
 #define GTPYPYTHONCONNECTION_H
 
-#include <QObject>
+#include "gt_object.h"
 
 #include "gt_objectlinkproperty.h"
 
 class GtObject;
 
-class GtpyPythonConnection : public QObject
+class GtpyConnection : public GtObject
 {
     Q_OBJECT
 
 public:
 
-    Q_INVOKABLE GtpyPythonConnection();
+    explicit GtpyConnection(GtObject* parent = nullptr);
 
     void registerPythonFunction(QString funcName);
 

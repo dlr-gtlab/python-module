@@ -1,7 +1,21 @@
+/* GTlab - Gas Turbine laboratory
+ * Source File: gtpy_connectiondock.h
+ * copyright 2009-2018 by DLR
+ *
+ *  Created on: 26.02.2020
+ *  Author: Marvin Noethen (AT-TW)
+ *  Tel.: +49 2203 601 2692
+ */
 #ifndef GTPYCONNECTIONDOCK_H
 #define GTPYCONNECTIONDOCK_H
 
+#include <QModelIndex>
+
 #include "gt_dockwidget.h"
+
+class QPushButton;
+class GtListView;
+class GtObject;
 
 class GtpyConnectionDock: public GtDockWidget
 {
@@ -15,7 +29,32 @@ public:
 
     /** Returns the recommended dock widget area in main windows.
         @return dock widget area */
-    Qt::DockWidgetArea getDockWidgetArea() override;
+    virtual Qt::DockWidgetArea getDockWidgetArea();
+
+protected:
+    /** Event called after current project has changed.
+        @param new current project */
+    void projectChangedEvent(GtProject* project) override;
+
+private:
+    QPushButton* m_addConnectionBtn{};
+
+    GtListView* m_listView{};
+
+    //GtpyConnectionModel* m_datamodel{};
+
+//    QModelIndex mapToSource(const QModelIndex& index) const;
+
+//private slots:
+//    void onAddConnection();
+
+//    void onCurrentChanged(const QModelIndex& current,
+//                          const QModelIndex& previous = QModelIndex());
+
+//    void onClicked(const QModelIndex& index);
+
+signals:
+    void selectedObjectChanged(GtObject*);
 };
 
 #endif // GTPYCONNECTIONDOCK_H
