@@ -7,7 +7,8 @@ GtpyConnectionDock::GtpyConnectionDock()
     setObjectName(tr("Python Connections"));
 }
 
-Qt::DockWidgetArea GtpyConnectionDock::getDockWidgetArea()
+Qt::DockWidgetArea
+GtpyConnectionDock::getDockWidgetArea()
 {
     return Qt::RightDockWidgetArea;
 }
