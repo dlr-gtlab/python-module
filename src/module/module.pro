@@ -49,6 +49,7 @@ INCLUDEPATH += .\
     collection/itemwidget \
     collection/localwidget \
     collection/localwidget/items \
+    connection \
     tasks \
     post \
     utilities \
@@ -78,6 +79,7 @@ HEADERS += \
     collection/localwidget/items/gtpy_collapsiblelocalitem.h \
     collection/localwidget/items/gtpy_localitem.h \
     connection/gtpy_pythonconnection.h \
+    connection/gtpy_connectiondock.h \
     gt_python.h \
     calculators/gtpy_scriptcalculator.h \
     collection/gtpy_scriptcollectionsettings.h \
@@ -91,7 +93,6 @@ HEADERS += \
     utilities/pythonextensions/gtpy_calculatorsmodule.h \
     utilities/pythonextensions/gtpy_loggingmodule.h \
     utilities/pythonextensions/gtpy_projectpathfunction.h \
-    widgets/gtpy_connectiondock.h \
     wizards/gtpy_abstractscriptingwizardpage.h \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_completer.h \
@@ -140,6 +141,7 @@ SOURCES += \
     collection/localwidget/items/gtpy_collapsiblelocalitem.cpp \
     collection/localwidget/items/gtpy_localitem.cpp \
     connection/gtpy_pythonconnection.cpp \
+    connection/gtpy_connectiondock.cpp \
     gt_python.cpp \
     calculators/gtpy_scriptcalculator.cpp \
     collection/gtpy_scriptcollectionsettings.cpp \
@@ -153,7 +155,6 @@ SOURCES += \
     utilities/pythonextensions/gtpy_calculatorsmodule.cpp \
     utilities/pythonextensions/gtpy_loggingmodule.cpp \
     utilities/pythonextensions/gtpy_projectpathfunction.cpp \
-    widgets/gtpy_connectiondock.cpp \
     wizards/gtpy_abstractscriptingwizardpage.cpp \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_completer.cpp \
