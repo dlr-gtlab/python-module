@@ -93,6 +93,7 @@ HEADERS += \
     utilities/pythonextensions/gtpy_calculatorsmodule.h \
     utilities/pythonextensions/gtpy_loggingmodule.h \
     utilities/pythonextensions/gtpy_projectpathfunction.h \
+    widgets/gtpy_connectiondock.h \
     wizards/gtpy_abstractscriptingwizardpage.h \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_completer.h \
@@ -155,6 +156,7 @@ SOURCES += \
     utilities/pythonextensions/gtpy_calculatorsmodule.cpp \
     utilities/pythonextensions/gtpy_loggingmodule.cpp \
     utilities/pythonextensions/gtpy_projectpathfunction.cpp \
+    widgets/gtpy_connectiondock.cpp \
     wizards/gtpy_abstractscriptingwizardpage.cpp \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_completer.cpp \
