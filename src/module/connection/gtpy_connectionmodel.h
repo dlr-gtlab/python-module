@@ -20,7 +20,8 @@ class GtpyConnectionModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit GtpyConnectionModel(QObject* parent = nullptr);
+    explicit GtpyConnectionModel(GtpyConnectionContainer* connections,
+                                 QObject* parent = nullptr);
 
     QVariant data(const QModelIndex& index, int role) const override;
 
@@ -33,12 +34,12 @@ public:
 
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    void setConnectionContainer(GtpyConnectionContainer* container);
+    void addConnection(GtpyConnection* connection);
+
+    GtpyConnection* connectionFromIndex(const QModelIndex& index) const;
 
 private:
     QPointer<GtpyConnectionContainer> m_connections{};
-
-    GtpyConnection* connectionFromIndex(const QModelIndex& index) const;
 };
 
 #endif // GTPYCONNECTIONMODEL_H

@@ -11,8 +11,10 @@
 
 #include "gtpy_connectionmodel.h"
 
-GtpyConnectionModel::GtpyConnectionModel(QObject* parent)
-    : QAbstractItemModel(parent)
+GtpyConnectionModel::GtpyConnectionModel(GtpyConnectionContainer* connections,
+                                         QObject* parent)
+    : QAbstractItemModel(parent),
+      m_connections{connections}
 {
 
 }
@@ -26,7 +28,7 @@ GtpyConnectionModel::data(const QModelIndex& index, int role) const
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    GtpyConnection* connection = connectionFromIndex(index);
+    auto* connection = connectionFromIndex(index);
 
     if (!connection)
         return QVariant();
@@ -46,7 +48,7 @@ GtpyConnectionModel::index(int row, int col, const QModelIndex& parent) const
     if (!m_connections)
         return {};
 
-    GtpyConnection* connection = m_connections->at(row);
+    auto* connection = m_connections->at(row);
 
     if (!connection)
     {
@@ -65,10 +67,7 @@ GtpyConnectionModel::parent(const QModelIndex& /*index*/) const
 int
 GtpyConnectionModel::rowCount(const QModelIndex& /*parent*/) const
 {
-    if (!m_connections)
-        return 0;
-
-    return m_connections->count();
+    return m_connections ? m_connections->count() : 0;
 }
 
 int
@@ -78,16 +77,23 @@ GtpyConnectionModel::columnCount(const QModelIndex& /*parent*/) const
 }
 
 void
-GtpyConnectionModel::setConnectionContainer(GtpyConnectionContainer* container)
+GtpyConnectionModel::addConnection(GtpyConnection* connection)
 {
-    m_connections = container;
+    if (!m_connections)
+        return ;
+
+    if (!connection)
+        return;
+
+    int count = m_connections->count();
+    beginInsertRows({}, count + 1, count + 1);
+    m_connections->addConnection(connection);
+    endInsertRows();
 }
 
 GtpyConnection*
 GtpyConnectionModel::connectionFromIndex(const QModelIndex& index) const
 {
-    if (!index.isValid())
-        return nullptr;
-
-    return static_cast<GtpyConnection*>(index.internalPointer());
+    return index.isValid() ?
+                static_cast<GtpyConnection*>(index.internalPointer()) : nullptr;
 }

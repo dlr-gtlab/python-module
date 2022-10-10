@@ -6,7 +6,6 @@
  *  Author: Marvin Noethen (AT-TW)
  *  Tel.: +49 2203 601 2692
  */
-#include "gtpy_connectiondock.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -14,11 +13,18 @@
 #include <QPushButton>
 
 #include "gt_logging.h"
+#include "gt_project.h"
 #include "gt_application.h"
 #include "gt_colors.h"
 #include "gt_stylesheets.h"
 #include "gt_icons.h"
 #include "gt_listview.h"
+
+#include "gtpy_connection.h"
+#include "gtpy_connectionmodel.h"
+
+
+#include "gtpy_connectiondock.h"
 
 GtpyConnectionDock::GtpyConnectionDock()
 {
@@ -49,10 +55,6 @@ GtpyConnectionDock::GtpyConnectionDock()
     m_listView->setFrameStyle(QListView::NoFrame);
     m_listView->setAlternatingRowColors(true);
     m_listView->installEventFilter(this);
-
-    //m_datamodel = new GtpyConnectionModel(this);
-
-    //m_listView->setModel(m_datamodel);
 
     auto* frame = new QFrame;
     frame->setAutoFillBackground(true);
@@ -85,19 +87,56 @@ GtpyConnectionDock::getDockWidgetArea()
 void
 GtpyConnectionDock::projectChangedEvent(GtProject* project)
 {
-    gtDebug() << "++++++++++++++++++++++++++++++";
-    gtDebug() << project;
-    m_listView->setModel(nullptr);
-    //delete m_datamodel;
-
     bool enable{false};
+
+    m_listView->setModel(nullptr);
+
+    delete m_datamodel;
+    m_datamodel = nullptr;
 
     if (project)
     {
         enable = true;
-//        m_datamodel = new GtpyConnectionModel(this);
-//        m_listView->setModel(m_datamodel);
+
+        auto* connections =
+                project->findDirectChild<GtpyConnectionContainer*>();
+
+        if (!connections)
+        {
+            connections = new GtpyConnectionContainer;
+            project->appendChild(connections);
+        }
+
+        m_datamodel = new GtpyConnectionModel(connections, this);
+        m_listView->setModel(m_datamodel);
     }
 
     m_addConnectionBtn->setEnabled(enable);
 }
+
+void
+GtpyConnectionDock::onAddConnection()
+{
+    if (!m_datamodel)
+        return;
+    auto* connection = new GtpyConnection;
+    connection->setObjectName("connection");
+    m_datamodel->addConnection(connection);
+}
+
+void
+GtpyConnectionDock::onCurrentChanged(const QModelIndex &current,
+                                     const QModelIndex &/*previous*/)
+{
+    if (!m_datamodel)
+        return;
+    auto* obj = m_datamodel->connectionFromIndex(current);
+    emit selectedObjectChanged(obj);
+}
+
+void
+GtpyConnectionDock::onClicked(const QModelIndex& index)
+{
+    onCurrentChanged(index);
+}
+

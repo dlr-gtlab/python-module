@@ -9,13 +9,17 @@
 #ifndef GTPYCONNECTIONDOCK_H
 #define GTPYCONNECTIONDOCK_H
 
+#include <QPointer>
 #include <QModelIndex>
 
 #include "gt_dockwidget.h"
 
+#include "gtpy_connectioncontainer.h"
+
 class QPushButton;
 class GtListView;
 class GtObject;
+class GtpyConnectionModel;
 
 class GtpyConnectionDock: public GtDockWidget
 {
@@ -41,17 +45,17 @@ private:
 
     GtListView* m_listView{};
 
-    //GtpyConnectionModel* m_datamodel{};
+    GtpyConnectionModel* m_datamodel{};
 
-//    QModelIndex mapToSource(const QModelIndex& index) const;
+    QPointer<GtpyConnectionContainer> m_connections{};
 
-//private slots:
-//    void onAddConnection();
+private slots:
+    void onAddConnection();
 
-//    void onCurrentChanged(const QModelIndex& current,
-//                          const QModelIndex& previous = QModelIndex());
+    void onCurrentChanged(const QModelIndex& current,
+                          const QModelIndex& previous = QModelIndex());
 
-//    void onClicked(const QModelIndex& index);
+    void onClicked(const QModelIndex& index);
 
 signals:
     void selectedObjectChanged(GtObject*);

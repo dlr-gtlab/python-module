@@ -14,7 +14,7 @@
 GtpyConnectionContainer::GtpyConnectionContainer(GtObject* parent)
     : GtObject(parent)
 {
-
+    setObjectName("Python connections");
 }
 
 void
