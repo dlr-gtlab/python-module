@@ -27,6 +27,8 @@ CONFIG += c++11
 
 DEFINES += GT_PYTHON_DLL
 
+DEFINES += "GT_MODULE_ID=\"Python Module\""
+
 CONFIG(debug, debug|release){
     DESTDIR = $${MOC_BUILD_DEST}/debug-$${TARGET_DIR_NAME}
     OBJECTS_DIR = $${MOC_BUILD_DEST}/debug-$${TARGET_DIR_NAME}/obj
