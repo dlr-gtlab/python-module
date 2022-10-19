@@ -12,6 +12,7 @@
 
 #include "gt_moduleinterface.h"
 #include "gt_application.h"
+
 #include "gt_versionnumber.h"
 
 /**
@@ -29,6 +30,7 @@ public:
      * @brief Returns current version number of datamodel extension
      * @return version number
      */
+
     GtVersionNumber version() override;
 
     /**
