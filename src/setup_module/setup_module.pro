@@ -48,63 +48,25 @@ INCLUDEPATH += .
 DESTDIR = $${BUILD_DEST}
 
 HEADERS += \
-    gt_python_setup.h
+    gt_python_setup.h \
+    gtps_pythonevaluator.h
 
 SOURCES += \
-    gt_python_setup.cpp
+    gt_python_setup.cpp \
+    gtps_pythonevaluator.cpp
 
 CONFIG(debug, debug|release){
     # GTLAB CORE
     LIBS += -lGTlabLogging-d
-
-    greaterThan(MAJOR_VERSION, 1) {
-        message(GTlab Version 2 or newer)
-        LIBS += -lGTlabCore-d -lGTlabDataProcessor-d
-    } else {
-        message(GTlab Version older than 2)
-        # GTLAB CORE
-        LIBS += -lGTlabCore-d
-    }
+    LIBS += -lGTlabCore-d -lGTlabDataProcessor-d
 
     # THIRD PARTY
-    win32: LIBS += -lpython$${PY_MAJOR_VERSION}$${PY_MINOR_VERSION}_d
-
-    unix {
-        LIBS += -lpython$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}d
-        #equals(PY_VERSION, 37) {
-        #    DEFINES += PYTHON_LIBRARY=\\\"libpython3.7m.so.1.0\\\"
-        #} else {
-        #    DEFINES += PYTHON_LIBRARY=\\\"libpython$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}d.so.1.0\\\"
-        #}
-    }
 } else {
     # GTLAB CORE
     LIBS += -lGTlabLogging
-
-    greaterThan(MAJOR_VERSION, 1) {
-        message(GTlab Version 2 or newer)
-        LIBS += -lGTlabCore -lGTlabDataProcessor
-    } else {
-        message(GTlab Version older than 2)
-        # GTLAB CORE
-        LIBS += -lGTlabCore
-    }
-
-    # GTLAB MODULES
+    LIBS += -lGTlabCore -lGTlabDataProcessor
 
     # THIRD PARTY
-    win32: LIBS += -lpython$${PY_MAJOR_VERSION}$${PY_MINOR_VERSION}
-    unix {
-        LIBS += -lpython$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}
-
-        #equals(PY_VERSION, 37) {
-
-        #    DEFINES += PYTHON_LIBRARY=\\\"libpython3.7m.so.1.0\\\"
-        #} else {
-
-        #    DEFINES += PYTHON_LIBRARY=\\\"libpython$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}.so.1.0\\\"
-        #}
-   }
 }
 
 unix:{
