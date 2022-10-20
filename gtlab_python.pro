@@ -29,7 +29,7 @@ contains(BUILD_BATCH, true) {
 }
 
 #### SETUP MODULE ####
-contains(BUILD_SETUP_MODULE, true) {
+greaterThan(MAJOR_VERSION, 1) {
     message("BUILD_SETUP_MODULE = true")
     SUBDIRS += setup_module
     setup_module.subdir = src/setup_module
