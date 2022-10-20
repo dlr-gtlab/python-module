@@ -7,6 +7,14 @@
  *  Tel.: +49 2203 601 2907
  */
 
+#include <QDir>
+#include <QProcess>
+
+#include "gt_logging.h"
+#include "gt_environment.h"
+
+#include "gtps_pythonevaluator.h"
+
 #include "gt_python_setup.h"
 
 #if GT_VERSION >= 0x010700
@@ -32,5 +40,19 @@ GtPythonSetupModule::description() const
 void
 GtPythonSetupModule::onLoad()
 {
-    gtApp->addSuppression(*this, "Python Module");
+    auto pyExe = gtEnvironment->value("PYTHONHOME").toString();
+    pyExe = QDir::toNativeSeparators(pyExe);
+
+    if (!pyExe.endsWith(QDir::separator()))
+        pyExe += QDir::separator();
+
+    pyExe += "python.exe";
+
+    GtpsPythonEvaluator evaluator{pyExe};
+
+    if (!evaluator.isValid())
+    {
+        qDebug() << "add suppression";
+        gtApp->addSuppression(*this, "Python Module");
+    }
 }
