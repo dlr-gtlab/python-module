@@ -40,6 +40,7 @@ GtpsPythonEvaluator::evaluate(const QString& pythonCommand, bool* ok) const
 bool
 GtpsPythonEvaluator::isValid() const
 {
+
     bool ok{false};
     evaluate("import sys", &ok);
     return ok;

@@ -59,14 +59,19 @@ GtPythonSetupModule::sharedFunctions() const
 void
 GtPythonSetupModule::onLoad()
 {
-    GtpsPythonEvaluator evaluator{pythonExe()};
+    auto pyExe = gtEnvironment->value("PYTHONHOME").toString();
+    pyExe = QDir::toNativeSeparators(pyExe);
+
+    if (!pyExe.endsWith(QDir::separator()))
+        pyExe += QDir::separator();
+
+    pyExe += "python.exe";
+
+    GtpsPythonEvaluator evaluator{pyExe};
 
     if (!evaluator.isValid())
     {
-        /// Suppress all modules that require a valid Python environment
-        gtApp->addSuppression(*this, "Python Module (Python 3.7)");
-        gtApp->addSuppression(*this, "Python Module (Python 3.9)");
-
-        return;
+        qDebug() << "add suppression";
+        gtApp->addSuppression(*this, "Python Module");
     }
 }

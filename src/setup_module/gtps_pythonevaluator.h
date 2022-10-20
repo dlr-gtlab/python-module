@@ -22,8 +22,11 @@ public:
     bool isValid() const;
 
     QString pythonVersion() const;
+
 private:
-    QString m_pythonExe{};
+    QString m_pythonExe;
+
+    bool m_isValid{false};
 };
 
 #endif // GTPSPYTHONEVALUATOR_H
