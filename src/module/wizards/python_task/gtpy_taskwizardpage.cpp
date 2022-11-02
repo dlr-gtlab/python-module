@@ -66,7 +66,12 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
     QPushButton* addElementButton = new QPushButton(tr("Add..."));
     addElementButton->setIcon(gtApp->icon("addIcon_16.png"));
     addElementButton->setToolTip(tr("Add New Element"));
+
+#if GT_VERSION < 0x020000
     addElementButton->setStyleSheet(GtStyleSheets::buttonStyleSheet());
+#else
+    addElementButton->setStyleSheet(gt::gui::stylesheet::buttonStyleSheet());
+#endif
 
     QVBoxLayout* treeViewLay = new QVBoxLayout;
 
