@@ -24,6 +24,7 @@ public:
     QString pythonVersion() const;
 private:
     QString m_pythonExe{};
+
 };
 
 #endif // GTPSPYTHONEVALUATOR_H

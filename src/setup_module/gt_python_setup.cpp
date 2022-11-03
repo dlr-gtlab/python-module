@@ -45,6 +45,7 @@ GtPythonSetupModule::description() const
     return QStringLiteral("GTlab Python Setup Module");
 }
 
+
 QList<gt::InterfaceFunction>
 GtPythonSetupModule::sharedFunctions() const
 {
@@ -68,6 +69,4 @@ GtPythonSetupModule::onLoad()
 
         return;
     }
-
-
 }

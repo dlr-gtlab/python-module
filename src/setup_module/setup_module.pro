@@ -13,6 +13,7 @@ include( $${PWD}/../../settings.pri )
 BUILD_DEST     = ../../$${LIB_BUILD_DEST}
 MOC_BUILD_DEST = ../../build
 
+
 GT_MODULE_ID="Python Setup"
 
 CONFIG(debug, debug|release){
@@ -28,6 +29,7 @@ CONFIG += silent
 CONFIG += c++11
 
 DEFINES += GT_PYTHON_SETUP_DLL
+
 
 isEmpty(GT_MODULE_ID) {
    error("GT_MODULE_ID undefined. Please define variable GT_MODULE_ID=\"My Module ID\" in project file.")
