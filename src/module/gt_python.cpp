@@ -63,17 +63,22 @@ GtPythonModule::version()
 }
 #endif
 
-QString
-GtPythonModule::ident() const
-{
-    return QStringLiteral("Python Module");
-}
 
 QString
 GtPythonModule::description() const
 {
     return QStringLiteral("GTlab Python Module");
 }
+
+#if GT_VERSION >= 0x020000
+GtPythonModule::MetaInformation
+GtPythonModule::metaInformation() const
+{
+    MetaInformation m;
+    m.author = "AT-TWK";
+    return m;
+}
+#endif
 
 void
 GtPythonModule::init()
@@ -86,7 +91,7 @@ GtPythonModule::init()
     widPath << "GtMainWin" << "Output" << "centralWidget" << "tabWidget";
 
     QWidget* outDock = findWidget(widPath);
-    gtDebug() << "FOUND WIDGET: " << outDock;
+//    gtDebug() << "FOUND WIDGET: " << outDock;
 
     QTabWidget* tab = qobject_cast<QTabWidget*>(outDock);
 
@@ -95,6 +100,9 @@ GtPythonModule::init()
         gtWarning() << "Output dock tab widget not found!";
         return;
     }
+
+    gtDebug() << "FOUND WIDGET: " << tab->metaObject()->className() <<
+        "(" << &tab << ", " << tab->objectName() << ")";
 
     // python console
     QWidget* pythonConsoleTab = new QWidget(tab);
@@ -217,9 +225,7 @@ GtPythonModule::dockWidgets()
 QMap<const char*, QMetaObject>
 GtPythonModule::uiItems()
 {
-    QMap<const char*, QMetaObject> retval;
-
-    return retval;
+    return {};
 }
 
 QList<QMetaObject>

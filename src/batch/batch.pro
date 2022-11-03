@@ -13,6 +13,8 @@ include( ../../settings.pri )
 BUILD_DEST     = ../../build
 MOC_BUILD_DEST = $${BUILD_DEST}
 
+GT_MODULE_ID="Python Batch Application"
+
 CONFIG(debug, debug|release){
     TARGET = GTlabPythonConsole$${PY_VERSION}-d
 } else {
@@ -23,7 +25,13 @@ QT += core xml gui widgets
 TEMPLATE = app
 CONFIG += console
 CONFIG += silent
-CONFIG += c++11
+CONFIG += c++14
+
+isEmpty(GT_MODULE_ID) {
+   error("GT_MODULE_ID undefined. Please define variable GT_MODULE_ID=\"My Module ID\" in project file.")
+}
+
+DEFINES += GT_MODULE_ID='"\\\"$${GT_MODULE_ID}\\\""'
 
 win32 {
     RC_FILE = batch-script.rc

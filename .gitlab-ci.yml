@@ -371,6 +371,7 @@ codingstyle:
 cppcheck:
   stage: codequality
   extends: .cppCheckReportTemplate
+  allow_failure: true
 
 pages:
   stage: badges
