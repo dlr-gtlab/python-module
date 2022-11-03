@@ -8,28 +8,36 @@
  */
 
 #include <QDir>
-#include <QProcess>
 
 #include "gt_logging.h"
 #include "gt_environment.h"
+#include "gt_functional_interface.h"
 
 #include "gtps_pythonevaluator.h"
 
 #include "gt_python_setup.h"
 
-#if GT_VERSION >= 0x010700
+namespace {
+
+QString
+pythonExe()
+{
+    return gtEnvironment->value("PYTHONEXE").toString();
+}
+
+QString
+pythonVersion()
+{
+    return GtpsPythonEvaluator{pythonExe()}.pythonVersion();
+}
+
+}
+
 GtVersionNumber
 GtPythonSetupModule::version()
 {
     return GtVersionNumber(1, 0, 0);
 }
-#else
-int
-GtPythonSetupModule::version()
-{
-    return 1;
-}
-#endif
 
 QString
 GtPythonSetupModule::description() const
@@ -37,22 +45,29 @@ GtPythonSetupModule::description() const
     return QStringLiteral("GTlab Python Setup Module");
 }
 
+QList<gt::InterfaceFunction>
+GtPythonSetupModule::sharedFunctions() const
+{
+    auto help = "If the Python environment is valid, it returns the Python "
+                "version. Otherwise it returns an empty string.";
+    auto func = gt::interface::makeInterfaceFunction(
+                "pythonVersion", pythonVersion, help);
+    return {func};
+}
+
 void
 GtPythonSetupModule::onLoad()
 {
-    auto pyExe = gtEnvironment->value("PYTHONHOME").toString();
-    pyExe = QDir::toNativeSeparators(pyExe);
-
-    if (!pyExe.endsWith(QDir::separator()))
-        pyExe += QDir::separator();
-
-    pyExe += "python.exe";
-
-    GtpsPythonEvaluator evaluator{pyExe};
+    GtpsPythonEvaluator evaluator{pythonExe()};
 
     if (!evaluator.isValid())
     {
-        qDebug() << "add suppression";
-        gtApp->addSuppression(*this, "Python Module");
+        /// Suppress all modules that require a valid Python environment
+        gtApp->addSuppression(*this, "Python Module (Python 3.7)");
+        gtApp->addSuppression(*this, "Python Module (Python 3.9)");
+
+        return;
     }
+
+
 }

@@ -29,7 +29,6 @@ CONFIG += c++14
 
 DEFINES += GT_PYTHON_DLL
 
-
 isEmpty(GT_MODULE_ID) {
    error("GT_MODULE_ID undefined. Please define variable GT_MODULE_ID=\"My Module ID\" in project file.")
 }
@@ -37,6 +36,7 @@ isEmpty(GT_MODULE_ID) {
 DEFINES += GT_MODULE_ID='"\\\"$${GT_MODULE_ID}\\\""'
 DEFINES += PY_MAJOR_VERSION=$${PY_MAJOR_VERSION}
 DEFINES += PY_MINOR_VERSION=$${PY_MINOR_VERSION}
+
 
 CONFIG(debug, debug|release){
     DESTDIR = $${MOC_BUILD_DEST}/debug-$${TARGET_DIR_NAME}
