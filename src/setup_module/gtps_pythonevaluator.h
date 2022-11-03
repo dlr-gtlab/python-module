@@ -15,7 +15,7 @@
 class GtpsPythonEvaluator
 {
 public:
-    GtpsPythonEvaluator(const QString& pythonExe);
+    explicit GtpsPythonEvaluator(const QString& pythonExe);
 
     QString evaluate(const QString& pythonCommand, bool* ok = nullptr) const;
 
