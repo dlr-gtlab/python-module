@@ -8,12 +8,13 @@
  */
 
 #include <QProcess>
+
 #include "gtps_pythonevaluator.h"
 
 GtpsPythonEvaluator::GtpsPythonEvaluator(const QString& pythonExe) :
         m_pythonExe{pythonExe}
 {
-    evaluate("import sys", &m_isValid);
+
 }
 
 QString
@@ -39,5 +40,21 @@ GtpsPythonEvaluator::evaluate(const QString& pythonCommand, bool* ok) const
 bool
 GtpsPythonEvaluator::isValid() const
 {
-    return m_isValid;
+    bool ok{false};
+    evaluate("import sys", &ok);
+    return ok;
+}
+
+QString
+GtpsPythonEvaluator::pythonVersion() const
+{
+    auto pyCode = "import sys;print('%s.%s.%s' % (sys.version_info.major, "
+                  "sys.version_info.minor, sys.version_info.micro), end='')";
+
+    bool ok{false};
+    auto version = evaluate(pyCode, &ok);
+    if (!ok)
+        return {};
+
+    return version;
 }

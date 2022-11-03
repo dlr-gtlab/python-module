@@ -13,10 +13,12 @@ include( $${PWD}/../../settings.pri )
 BUILD_DEST     = ../../$${LIB_BUILD_DEST}
 MOC_BUILD_DEST = ../../build
 
+GT_MODULE_ID="Python Setup"
+
 CONFIG(debug, debug|release){
-    TARGET = GTlabPythonSetup$${PY_VERSION}-d
+    TARGET = GTlabPythonSetup-d
 } else {
-    TARGET = GTlabPythonSetup$${PY_VERSION}
+    TARGET = GTlabPythonSetup
 }
 
 QT += core widgets
@@ -27,7 +29,11 @@ CONFIG += c++11
 
 DEFINES += GT_PYTHON_SETUP_DLL
 
-DEFINES += "GT_MODULE_ID=\"Python Setup\""
+isEmpty(GT_MODULE_ID) {
+   error("GT_MODULE_ID undefined. Please define variable GT_MODULE_ID=\"My Module ID\" in project file.")
+}
+
+DEFINES += GT_MODULE_ID='"\\\"$${GT_MODULE_ID}\\\""'
 
 CONFIG(debug, debug|release){
     DESTDIR = $${MOC_BUILD_DEST}/debug-$${TARGET_DIR_NAME}
