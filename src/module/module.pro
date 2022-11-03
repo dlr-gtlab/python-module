@@ -29,6 +29,7 @@ CONFIG += c++14
 
 DEFINES += GT_PYTHON_DLL
 
+
 isEmpty(GT_MODULE_ID) {
    error("GT_MODULE_ID undefined. Please define variable GT_MODULE_ID=\"My Module ID\" in project file.")
 }
