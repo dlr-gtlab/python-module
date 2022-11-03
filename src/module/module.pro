@@ -13,6 +13,8 @@ include( $${PWD}/../../settings.pri )
 BUILD_DEST     = ../../$${LIB_BUILD_DEST}
 MOC_BUILD_DEST = ../../build
 
+GT_MODULE_ID="Python Module (Python $${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION})"
+
 CONFIG(debug, debug|release){
     TARGET = GTlabPython$${PY_VERSION}-d
 } else {
@@ -23,9 +25,17 @@ QT += core widgets xml svg
 TEMPLATE = lib
 CONFIG += plugin
 CONFIG += silent
-CONFIG += c++11
+CONFIG += c++14
 
 DEFINES += GT_PYTHON_DLL
+
+isEmpty(GT_MODULE_ID) {
+   error("GT_MODULE_ID undefined. Please define variable GT_MODULE_ID=\"My Module ID\" in project file.")
+}
+
+DEFINES += GT_MODULE_ID='"\\\"$${GT_MODULE_ID}\\\""'
+DEFINES += PY_MAJOR_VERSION=$${PY_MAJOR_VERSION}
+DEFINES += PY_MINOR_VERSION=$${PY_MINOR_VERSION}
 
 CONFIG(debug, debug|release){
     DESTDIR = $${MOC_BUILD_DEST}/debug-$${TARGET_DIR_NAME}
@@ -78,6 +88,7 @@ HEADERS += \
     collection/localwidget/items/gtpy_collapsiblelocalitem.h \
     collection/localwidget/items/gtpy_localitem.h \
     gt_python.h \
+    gt_compat.h \
     calculators/gtpy_scriptcalculator.h \
     collection/gtpy_scriptcollectionsettings.h \
     collection/gtpy_collectionwidget.h \

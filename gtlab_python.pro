@@ -15,7 +15,7 @@ DISTFILES  += style.astylerc
 
 TEMPLATE = subdirs
 CONFIG += console
-CONFIG += c++11
+CONFIG += c++14
 
 SUBDIRS += module
 module.subdir = src/module

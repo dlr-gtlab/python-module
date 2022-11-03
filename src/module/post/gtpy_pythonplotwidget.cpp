@@ -44,7 +44,13 @@ GtpyPythonPlotWidget::GtpyPythonPlotWidget(GtpyPythonPlotItem* dm,
 
     m_labelStart->setAlignment(Qt::AlignCenter);
     m_labelStart->setContentsMargins(0, 0, 0, 0);
+
+#if GT_VERSION < 0x020000
     m_labelStart->setStyleSheet(GtStyleSheets::standardLabel());
+#else
+    m_labelStart->setStyleSheet(gt::gui::stylesheet::standardLabel());
+#endif
+
     m_labelStart->setFixedHeight(300);
     QFont font;
     font.setPointSize(14);

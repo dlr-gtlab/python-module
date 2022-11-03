@@ -9,6 +9,7 @@
 
 #include <QLineEdit>
 
+#include "gt_globals.h"
 #include "gt_regexp.h"
 
 #include "gtpy_taskdelegate.h"
@@ -26,7 +27,11 @@ GtpyTaskDelegate::createEditor(QWidget* parent,
 {
     QLineEdit* lineEdit = new QLineEdit(parent);
 
+#if GT_VERSION < 0x020000
     QRegExp regExp = GtRegExp::onlyLettersAndNumbersAndSpace();
+#else
+    QRegExp regExp = gt::re::onlyLettersAndNumbersAndSpace();
+#endif
 
     QValidator* validator = new QRegExpValidator(regExp, this->parent());;
 

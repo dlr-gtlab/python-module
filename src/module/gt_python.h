@@ -25,6 +25,8 @@
 #include "gt_initmoduleinterface.h"
 #endif
 
+#include "gt_compat.h"
+
 /**
  * @brief The GtPythonModule class
  */
@@ -36,8 +38,8 @@ class GtPythonModule: public QObject, public GtModuleInterface,
 #endif
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "de.dlr.gtlab.GtModuleInterface/0.1"
-                      FILE "gt_python.json")
+
+    GT_MODULE("gt_python.json")
 
     Q_INTERFACES(GtModuleInterface)
     Q_INTERFACES(GtProcessInterface)
@@ -55,106 +57,108 @@ public:
      * @return version number
      */
 #if GT_VERSION >= 0x010700
-    GtVersionNumber version() Q_DECL_OVERRIDE;
+    GtVersionNumber version() override;
 #else
-    int version() Q_DECL_OVERRIDE;
+    int version() override;
 #endif
-
-    /**
-     * @brief Returns module identification string.
-     * @return identification string
-     */
-    QString ident() const Q_DECL_OVERRIDE;
 
     /**
      * @brief Returns module description
      * @return description
      */
-    QString description() const Q_DECL_OVERRIDE;
+    QString description() const override;
+
+#if GT_VERSION >= 0x020000
+    /**
+     * @brief metaInformation
+     * @return baic meta information about the module
+     */
+    MetaInformation metaInformation() const override;
+#endif
 
     /**
      * @brief Initializes module. Called on application startup.
      */
-    void init() Q_DECL_OVERRIDE;
+    void init() override;
 
     /**
      * @brief Returns static meta objects of calculator classes.
      * @return list including meta objects
      */
-    QList<GtCalculatorData> calculators() Q_DECL_OVERRIDE;
+    QList<GtCalculatorData> calculators() override;
 
     /**
      * @brief Returns static meta objects of task classes.
      * @return list including meta objects
      */
-    QList<GtTaskData> tasks() Q_DECL_OVERRIDE;
+    QList<GtTaskData> tasks() override;
 
     /**
      * @brief Returns static meta objects of mdi item classes.
      * @return list including meta objects
      */
-    QList<QMetaObject> mdiItems() Q_DECL_OVERRIDE;
+    QList<QMetaObject> mdiItems() override;
 
     /**
      * @brief Returns static meta objects of dockwidget classes.
      * @return list including meta objects
      */
-    QList<QMetaObject> dockWidgets() Q_DECL_OVERRIDE;
+    QList<QMetaObject> dockWidgets() override;
 
     /**
      * @brief uiItems
      * @return
      */
-    QMap<const char*, QMetaObject> uiItems() Q_DECL_OVERRIDE;
+    QMap<const char*, QMetaObject> uiItems() override;
 
     /**
      * @brief postItems
      * @return
      */
-    virtual QList<QMetaObject> postItems() Q_DECL_OVERRIDE;
+    virtual QList<QMetaObject> postItems() override;
 
     /**
      * @brief postPlots
      * @return
      */
-    QList<QMetaObject> postPlots() Q_DECL_OVERRIDE;
+    QList<QMetaObject> postPlots() override;
 
     /**
      * @brief Returns collection specific icon.
      * @return Collection spezific icon.
      */
-    QIcon collectionIcon() const Q_DECL_OVERRIDE;
+    QIcon collectionIcon() const override;
 
     /**
      * @brief Returns identification string of collection. Same id
      * is used to generate access point data within the netowrk interface.
      * @return Identification string of collection.
      */
-    QString collectionId() const Q_DECL_OVERRIDE;
+    QString collectionId() const override;
 
     /**
      * @brief Returns meta object of GtAbstractCollectionSettings class.
      * @return Meta object of GtAbstractCollectionSettings class.
      */
-    QMetaObject collectionSettings() const Q_DECL_OVERRIDE;
+    QMetaObject collectionSettings() const override;
 
     /**
      * @brief Returns structure of collection items.
      * @return Sturcture of collection items.
      */
-    QMap<QString, QMetaType::Type> collectionStructure() const Q_DECL_OVERRIDE;
+    QMap<QString, QMetaType::Type> collectionStructure() const override;
 
     /**
      * @brief Returns identification string of access point.
      * @return Identification string of access point.
      */
-    QString accessId() Q_DECL_OVERRIDE;
+    QString accessId() override;
 
     /**
      * @brief Returns meta object of GtAbstractAccessDataConnection class.
      * @return Meta object of GtAbstractAccessDataConnection class.
      */
-    QMetaObject accessConnection() Q_DECL_OVERRIDE;
+    QMetaObject accessConnection() override;
 
 private:
     /**
