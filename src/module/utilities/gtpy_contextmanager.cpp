@@ -172,7 +172,7 @@ GtpyContextManager::collectionPath()
 void
 GtpyContextManager::setEnvironmentPaths() const
 {
-    QString var = gtEnvironment->value(GtpyGlobals::PYTHONHOME_VAR).toString();
+    QString var = qEnvironmentVariable("PYTHONHOME");
 
     if (var.isEmpty())
     {
@@ -186,8 +186,7 @@ GtpyContextManager::setEnvironmentPaths() const
         return;
     }
 
-    QByteArray pathEnvVar = qgetenv("PATH");
-    QString paths(pathEnvVar);
+    QString paths = qEnvironmentVariable("PATH");
 
     if (!paths.isEmpty())
     {
