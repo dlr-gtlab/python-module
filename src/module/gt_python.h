@@ -40,7 +40,6 @@ class GtPythonModule: public QObject, public GtModuleInterface,
 #endif
 {
     Q_OBJECT
-
     // cppcheck-suppress syntaxError // NOLINTNEXTLINE
     GT_MODULE("gt_python.json")
 
