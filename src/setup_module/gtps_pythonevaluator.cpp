@@ -29,12 +29,18 @@ GtpsPythonEvaluator::eval(const QString& pythonCommand, bool* ok) const
     auto succes = process.waitForFinished();
 
     if (succes)
+    {
         retval = process.readAll();
+    }
     else
+    {
         retval = process.errorString();
+    }
 
     if (ok)
+    {
         *ok = succes;
+    }
 
     return retval;
 }
@@ -74,6 +80,8 @@ GtpsPythonEvaluator::setPythonVersion()
     QString patch = eval(pyCode.arg("micro"), &patchOk);
 
     if (majorOk && minorOk && patchOk)
+    {
         m_pyVersion = GtVersionNumber{major.toInt(), minor.toInt(),
                                         patch.toInt()};
+    }
 }
