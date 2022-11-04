@@ -28,7 +28,7 @@ pythonExe()
 QString
 pythonVersion()
 {
-    return GtpsPythonEvaluator{pythonExe()}.pythonVersion();
+    return GtpsPythonEvaluator{pythonExe()}.pythonVersion().toString();
 }
 
 }
@@ -59,19 +59,58 @@ GtPythonSetupModule::sharedFunctions() const
 void
 GtPythonSetupModule::onLoad()
 {
-    auto pyExe = gtEnvironment->value("PYTHONHOME").toString();
-    pyExe = QDir::toNativeSeparators(pyExe);
+    GtpsPythonEvaluator evaluator{pythonExe()};
+    QString pyModuleId{"Python Module (Python %1.%2)"};
 
-    if (!pyExe.endsWith(QDir::separator()))
-        pyExe += QDir::separator();
+    gtError() << "Python Module (Python 3.9)";
+    gtError() << pyModuleId.arg(3).arg(9);
+    gtError() << evaluator.pythonVersion().toString();
+    gtError() << evaluator.pythonVersion().major();
+    gtError() << evaluator.pythonVersion().minor();
 
-    pyExe += "python.exe";
-
-    GtpsPythonEvaluator evaluator{pyExe};
-
-    if (!evaluator.isValid())
+    if (!evaluator.isValid() || evaluator.pythonVersion().major() != 3)
     {
-        qDebug() << "add suppression";
-        gtApp->addSuppression(*this, "Python Module");
+        gtError() << "Python path is invalid!";
+        /// Suppress all modules that require a valid Python environment
+        gtApp->addSuppression(*this, pyModuleId.arg(3).arg(7));
+        gtApp->addSuppression(*this, pyModuleId.arg(3).arg(9));
+        return;
     }
+
+    gtError() << "Python path is valid!";
+    if (evaluator.pythonVersion().minor() != 7)    
+        gtApp->addSuppression(*this, pyModuleId.arg(3).arg(7));
+
+    if (evaluator.pythonVersion().minor() != 9)
+        gtApp->addSuppression(*this, pyModuleId.arg(3).arg(9));
+
+    setPythonPaths(evaluator);
+}
+
+void
+GtPythonSetupModule::setPythonPaths(const GtpsPythonEvaluator& evaluator)
+{
+    QString pyCode = "import sys;print(', '.join([x for x in sys.path if x]), "
+                      "end='')";
+
+    bool ok{false};
+
+    auto pyPaths = evaluator.eval(pyCode, &ok);
+
+    if (!ok)
+        return;
+
+    QStringList pyPathsList{pyPaths.split(", ")};
+    QString pathVar = qEnvironmentVariable("PATH");
+
+    auto prependPath = [&pathVar](QString pyPath){
+                      pyPath.replace("\\\\", "\\");
+                      pathVar.prepend(QDir::toNativeSeparators(pyPath) + ";");};
+
+    std::for_each(pyPathsList.begin(), pyPathsList.end(), prependPath);
+
+    auto pyHome = QFileInfo(evaluator.pythonExe()).dir().path();
+
+    qputenv("PATH", pathVar.toUtf8());
+    qputenv("PYTHONHOME", QDir::toNativeSeparators(pyHome).toUtf8());
 }

@@ -9,16 +9,18 @@
 
 #include <QProcess>
 
+#include "gt_logging.h"
+
 #include "gtps_pythonevaluator.h"
 
 GtpsPythonEvaluator::GtpsPythonEvaluator(const QString& pythonExe) :
         m_pythonExe{pythonExe}
 {
-
+    setPythonVersion();
 }
 
 QString
-GtpsPythonEvaluator::evaluate(const QString& pythonCommand, bool* ok) const
+GtpsPythonEvaluator::eval(const QString& pythonCommand, bool* ok) const
 {
     QProcess process;
     process.start(m_pythonExe, QStringList() << "-c" << pythonCommand);
@@ -42,20 +44,36 @@ GtpsPythonEvaluator::isValid() const
 {
 
     bool ok{false};
-    evaluate("import sys", &ok);
+    eval("import sys", &ok);
     return ok;
 }
 
 QString
+GtpsPythonEvaluator::pythonExe() const
+{
+    return m_pythonExe;
+}
+
+GtVersionNumber
 GtpsPythonEvaluator::pythonVersion() const
 {
-    auto pyCode = "import sys;print('%s.%s.%s' % (sys.version_info.major, "
-                  "sys.version_info.minor, sys.version_info.micro), end='')";
+    return m_pyVersion;
+}
 
-    bool ok{false};
-    auto version = evaluate(pyCode, &ok);
-    if (!ok)
-        return {};
+void
+GtpsPythonEvaluator::setPythonVersion()
+{
+    auto pyCode = QString("import sys;"
+                          "print('%s' % sys.version_info.%1, end='')");
+    bool majorOk{false};
+    bool minorOk{false};
+    bool patchOk{false};
 
-    return version;
+    QString major = eval(pyCode.arg("major"), &majorOk);
+    QString minor = eval(pyCode.arg("minor"), &minorOk);
+    QString patch = eval(pyCode.arg("micro"), &patchOk);
+
+    if (majorOk && minorOk && patchOk)
+        m_pyVersion = GtVersionNumber{major.toInt(), minor.toInt(),
+                                        patch.toInt()};
 }

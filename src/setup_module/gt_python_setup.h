@@ -15,6 +15,8 @@
 
 #include "gt_versionnumber.h"
 
+class GtpsPythonEvaluator;
+
 /**
  * @brief The GtPythonModule class
  */
@@ -42,6 +44,9 @@ public:
     QList<gt::InterfaceFunction> sharedFunctions() const override;
 
     void onLoad() override;
+
+private:
+    void setPythonPaths(const GtpsPythonEvaluator& evaluator);
 };
 
 #endif // GTPYTHON_H

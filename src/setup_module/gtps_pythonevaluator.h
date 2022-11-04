@@ -12,21 +12,27 @@
 
 #include <QString>
 
+#include "gt_versionnumber.h"
+
 class GtpsPythonEvaluator
 {
 public:
     explicit GtpsPythonEvaluator(const QString& pythonExe);
 
-    QString evaluate(const QString& pythonCommand, bool* ok = nullptr) const;
-
     bool isValid() const;
 
-    QString pythonVersion() const;
+    QString pythonExe() const;
+
+    GtVersionNumber pythonVersion() const;
+
+    QString eval(const QString& pythonCommand, bool* ok = nullptr) const;
 
 private:
-    QString m_pythonExe;
+    QString m_pythonExe{};
 
-    bool m_isValid{false};
+    GtVersionNumber m_pyVersion{};
+
+    void setPythonVersion();
 };
 
 #endif // GTPSPYTHONEVALUATOR_H
