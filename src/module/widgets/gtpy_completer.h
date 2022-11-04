@@ -29,7 +29,7 @@ public:
      * @param contextId Id of the context the completer is used for.
      * @param widget Parent widget.
      */
-    GtpyCompleter(int contextId, QWidget* widget = Q_NULLPTR);
+    explicit GtpyCompleter(int contextId, QWidget* widget = nullptr);
 
     /**
      * @brief Handle completion if completion is selected.

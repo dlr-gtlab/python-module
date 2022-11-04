@@ -13,8 +13,6 @@
 #include "gt_calculator.h"
 #include "gt_codeeditor.h"
 
-#include "gtpy_contextmanager.h"
-
 class GtpyCompleter;
 
 /**
@@ -31,20 +29,20 @@ public:
      * editor are evaluated.
      * @param parent Parent of the editor.
      */
-    GtpyScriptEditor(int contextId, QWidget* parent = Q_NULLPTR);
+    explicit GtpyScriptEditor(int contextId, QWidget* parent = nullptr);
 
     /**
      * @brief Handles the tooltips after error messages.
      * @param event received event
      * @return true if the event was recognized and processed
      */
-    virtual bool event(QEvent* event) Q_DECL_OVERRIDE;
+    virtual bool event(QEvent* event) override;
 
     /**
      * @brief Handles the wheel events.
      * @param event Wheel event
      */
-    virtual void wheelEvent(QWheelEvent* event) Q_DECL_OVERRIDE;
+    virtual void wheelEvent(QWheelEvent* event) override;
 
     /**
      * @brief Returns the written script.
@@ -167,40 +165,40 @@ protected:
      * @brief Called when user presses a key.
      * @param e Event which was send by pressing a key.
      */
-    void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
+    void keyPressEvent(QKeyEvent* event) override;
 
     /**
      * @brief Called when the editor loses the focus. Deletes the highlithing of
      * the current line.
      * @param event Event sent by losing the focus.
      */
-    void focusOutEvent(QFocusEvent* event) Q_DECL_OVERRIDE;
+    void focusOutEvent(QFocusEvent* event) override;
 
     /**
      * @brief Called when the editor gets the focused. Highlights the current
      * line.
      * @param event Event sent by getting the focus.
      */
-    void focusInEvent(QFocusEvent* event) Q_DECL_OVERRIDE;
+    void focusInEvent(QFocusEvent* event) override;
 
     /**
      * @brief Accept the drag enter if the mimedata contains a calculator
      * object.
      * @param event Raised event.
      */
-    virtual void dragEnterEvent(QDragEnterEvent* event) Q_DECL_OVERRIDE;
+    virtual void dragEnterEvent(QDragEnterEvent* event) override;
 
     /**
      * @brief Accept the drag move if the mimedata contains a calculator object.
      * @param event Raised event.
      */
-    virtual void dragMoveEvent(QDragMoveEvent* event) Q_DECL_OVERRIDE;
+    virtual void dragMoveEvent(QDragMoveEvent* event) override;
 
     /**
      * @brief Accept the drop if the mimedata contains a calculator object.
      * @param event Raised event.
      */
-    virtual void dropEvent(QDropEvent* event) Q_DECL_OVERRIDE;
+    virtual void dropEvent(QDropEvent* event) override;
 
 private slots:
     /**

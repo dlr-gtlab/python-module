@@ -15,7 +15,7 @@
 #include "gt_mdiinterface.h"
 #include "gt_collectioninterface.h"
 #include "gt_networkinterface.h"
-#include "gt_application.h"
+#include "gt_globals.h"
 
 #if GT_VERSION >= 0x010700
 #include "gt_versionnumber.h"
@@ -23,6 +23,8 @@
 
 #if GT_VERSION < 0x020000
 #include "gt_initmoduleinterface.h"
+#else
+#include "gt_commandlinefunction.h"
 #endif
 
 #include "gt_compat.h"
@@ -38,7 +40,7 @@ class GtPythonModule: public QObject, public GtModuleInterface,
 #endif
 {
     Q_OBJECT
-
+    // cppcheck-suppress syntaxError // NOLINTNEXTLINE
     GT_MODULE("gt_python.json")
 
     Q_INTERFACES(GtModuleInterface)
@@ -160,6 +162,14 @@ public:
      */
     QMetaObject accessConnection() override;
 
+#if GT_VERSION >= 0x020000
+    /**
+     * @brief metaInformation
+     * @return baic meta information about the module
+     */
+    QList<GtCommandLineFunction> commandLineFunctions() const override;
+#endif
+
 private:
     /**
      * @brief Searches recursively for widget based on given objectName path.
@@ -169,7 +179,7 @@ private:
      * @return Widget found based on given objectName path. returns NULL if
      * widget was not found.
      */
-    QWidget* findWidget(QStringList path, QWidget* parent = Q_NULLPTR);
+    QWidget* findWidget(QStringList path, QWidget* parent = nullptr);
 
 };
 

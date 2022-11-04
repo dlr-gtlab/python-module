@@ -175,7 +175,7 @@ protected:
      * @brief Set the list of package names.
      * @param packageNames List of package names.
      */
-    void setPackageNames(QStringList packageNames);
+    void setPackageNames(const QStringList& packageNames);
 
     /**
      * @brief Adds a tab containing the given widget to the editor tab widget.

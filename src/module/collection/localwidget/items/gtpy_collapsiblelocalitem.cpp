@@ -9,7 +9,7 @@
 
 #include "gtpy_collapsiblelocalitem.h"
 
-GtpyCollapsibleLocalItem::GtpyCollapsibleLocalItem(QString ident) :
+GtpyCollapsibleLocalItem::GtpyCollapsibleLocalItem(QString const& ident) :
     m_ident(ident)
 {
 

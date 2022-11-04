@@ -89,13 +89,16 @@ GtpyCollectionWidget::onItemSelected(const QModelIndex& index)
             {
                 QTextStream in(&script);
 
-                if (m_editor != Q_NULLPTR)
+                if (m_editor)
                 {
                     m_editor->setPlainText(in.readAll());
                 }
             }
         }
 
-        m_editor->setVisible(true);
+        if (m_editor)
+        {
+            m_editor->setVisible(true);
+        }
     }
 }

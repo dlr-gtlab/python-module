@@ -17,7 +17,7 @@
 extern PyTypeObject GtpyPropertySetter_Type;
 
 PyObject*
-GtpyPropertySetter_New(QString propId, PyObject* self,
+GtpyPropertySetter_New(const QString& propId, PyObject* self,
                                  PyObject* module);
 
 //! defines a callable python object that set GtProperties

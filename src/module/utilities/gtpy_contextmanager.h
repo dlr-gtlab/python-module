@@ -342,7 +342,7 @@ private:
      * @param def The module definition.
      * @return A new reference of the extension module.
      */
-    PyObject* initExtensionModule(QString moduleName, PyModuleDef* def);
+    PyObject* initExtensionModule(const QString& moduleName, PyModuleDef* def);
 #else
     /**
      * @brief Initializes the extension module and assigns it the static

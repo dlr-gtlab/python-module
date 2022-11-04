@@ -633,7 +633,8 @@ GtpyAbstractScriptingWizardPage::insertToCurrentCursorPos(QString text)
 }
 
 void
-GtpyAbstractScriptingWizardPage::setPackageNames(QStringList packageNames)
+GtpyAbstractScriptingWizardPage::setPackageNames(
+        QStringList const& packageNames)
 {
     m_packageNames = packageNames;
 }

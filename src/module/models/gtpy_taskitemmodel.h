@@ -27,7 +27,7 @@ public:
      * @param root Root object.
      * @param parent Parent object.
      */
-    GtpyTaskItemModel(GtObject* root, QObject* parent = Q_NULLPTR);
+    explicit GtpyTaskItemModel(GtObject* root, QObject* parent = nullptr);
 
     /**
      * @brief Returns column count.
@@ -35,7 +35,7 @@ public:
      * @return Column count.
      */
     virtual int columnCount(
-        const QModelIndex& /*parent*/) const Q_DECL_OVERRIDE;
+        const QModelIndex& /*parent*/) const override;
 
     /**
      * @brief Returns row count.
@@ -43,7 +43,7 @@ public:
      * @return Row count.
      */
     virtual int rowCount(
-        const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
+        const QModelIndex& parent = QModelIndex()) const override;
 
     /**
      * @brief index Returns index of current row and column.
@@ -53,14 +53,14 @@ public:
      * @return Index of current row and column
      */
     virtual QModelIndex index(int row, int col, const QModelIndex& parent =
-                                  QModelIndex()) const Q_DECL_OVERRIDE;
+                                  QModelIndex()) const override;
 
     /**
      * @brief Returns parent index of given index.
      * @param index Index whose parent should be found.
      * @return Parent index of given index.
      */
-    virtual QModelIndex parent(const QModelIndex& index) const Q_DECL_OVERRIDE;
+    virtual QModelIndex parent(const QModelIndex& index) const override;
 
     /**
      * @brief Returns data of given index.
@@ -69,7 +69,7 @@ public:
      * @return Data of given index.
      */
     virtual QVariant data(const QModelIndex& index,
-                          int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+                          int role = Qt::DisplayRole) const override;
 
     /**
      * @brief Returns object from index.
@@ -94,13 +94,13 @@ public:
     */
     virtual bool setData(const QModelIndex& index,
                          const QVariant& value,
-                         int role = Qt::EditRole) Q_DECL_OVERRIDE;
+                         int role = Qt::EditRole) override;
 
     /**
      * @brief Returns list of mime types.
      * @return List of mime types.
      */
-    QStringList mimeTypes() const Q_DECL_OVERRIDE;
+    QStringList mimeTypes() const override;
 
     /**
      * @brief Returns an object that contains serialized items of data
@@ -108,7 +108,7 @@ public:
      * @param List of model indexes
      * @return MimeData
      */
-    QMimeData* mimeData(const QModelIndexList& indexes) const Q_DECL_OVERRIDE;
+    QMimeData* mimeData(const QModelIndexList& indexes) const override;
 
     /**
     * @brief Updates view.
@@ -120,20 +120,20 @@ protected:
      * @brief Returns the drop actions supported by this model.
      * @return Supported drop actions
      */
-    Qt::DropActions supportedDropActions() const Q_DECL_OVERRIDE;
+    Qt::DropActions supportedDropActions() const override;
 
     /**
      * @brief Returns the actions supported by the data in this model.
      * @return Supported drag actions
      */
-    Qt::DropActions supportedDragActions() const Q_DECL_OVERRIDE;
+    Qt::DropActions supportedDragActions() const override;
 
     /**
      * @brief Returns the item flags for the given index.
      * @param Model index
      * @return Item Flags
      */
-    Qt::ItemFlags flags(const QModelIndex& index) const Q_DECL_OVERRIDE;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 private:
     /// Root object.

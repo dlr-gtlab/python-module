@@ -164,8 +164,9 @@ private slots:
      * @param oldName Old name of the renamed calculator.
      * @param newName New name of the renamed calculator.
      */
-    void onProcessComponentRenamed(QString className, QString oldName,
-                                   QString newName);
+    void onProcessComponentRenamed(const QString& className,
+                                   const QString& oldName,
+                                   const QString& newName);
 
     /**
      * @brief Opens the menu for adding a calculator.

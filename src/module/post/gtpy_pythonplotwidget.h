@@ -31,19 +31,20 @@ public:
      * @param dm Post datamodel item.
      * @param parent Parent widget.
      */
-    GtpyPythonPlotWidget(GtpyPythonPlotItem* dm, QWidget* parent = Q_NULLPTR);
+    explicit GtpyPythonPlotWidget(GtpyPythonPlotItem* dm,
+                                  QWidget* parent = nullptr);
 
 
 public slots:
     /**
      * @brief Overloaded function to initialize user interface.
      */
-    void initFillingUI(GtObject* = Q_NULLPTR) Q_DECL_OVERRIDE;
+    void initFillingUI(GtObject* = nullptr) override;
 
     /**
      * @brief Overloaded function to create pdf plot.
      */
-    void plotToPdf() Q_DECL_OVERRIDE;
+    void plotToPdf() override;
 
     /**
      * @brief Overloaded function to print post widget content.
@@ -53,19 +54,19 @@ public slots:
      */
     void printEmbedded(QPrinter* printer,
                        QPainter* painter,
-                       QRectF rect) Q_DECL_OVERRIDE;
+                       QRectF rect) override;
 
     /**
      * @brief Overloaded function to change post plot identification string.
      * @param s New identification string.
      */
-    void changePlotName(QString s) Q_DECL_OVERRIDE;
+    void changePlotName(QString s) override;
 
     /**
      * @brief Overloaded function to return identification string of provider.
      * @return Provider identification string.
      */
-    QString providerName() Q_DECL_OVERRIDE;
+    QString providerName() override;
 
 protected:
 
@@ -73,13 +74,13 @@ protected:
      * @brief dragEnterEvent
      * @param event
      */
-    virtual void dragEnterEvent(QDragEnterEvent* event) Q_DECL_OVERRIDE;
+    virtual void dragEnterEvent(QDragEnterEvent* event) override;
 
     /**
      * @brief dropEvent
      * @param event
      */
-    virtual void dropEvent(QDropEvent* event) Q_DECL_OVERRIDE;
+    virtual void dropEvent(QDropEvent* event) override;
 
 private:
     /// comet post data
@@ -100,37 +101,37 @@ private slots:
     /**
      * @brief Overloaded function to open a configuration menu.
      */
-    void showConfigurationMenu(GtObject*) Q_DECL_OVERRIDE;
+    void showConfigurationMenu(GtObject*) override;
 
     /**
      * @brief Overloaded function to define whether a configuration menu exsits.
      * @return
      */
-    bool canShowConfigurationMenu(GtObject*) Q_DECL_OVERRIDE;
+    bool canShowConfigurationMenu(GtObject*) override;
 
     /**
      * @brief Overloaded function to hide axis labels.
      */
-    void hideAxisLabels(GtObject*) Q_DECL_OVERRIDE;
+    void hideAxisLabels(GtObject*) override;
 
     /**
      * @brief Overloaded function to define whether functionality to hide axis
      * labels exists.
      * @return
      */
-    bool canHideAxisLabels(GtObject*) Q_DECL_OVERRIDE;
+    bool canHideAxisLabels(GtObject*) override;
 
     /**
      * @brief Overloaded function to show axis labels.
      */
-    void showAxisLabels(GtObject*) Q_DECL_OVERRIDE;
+    void showAxisLabels(GtObject*) override;
 
     /**
      * @brief Overloaded function to define whether functionality to show axis
      * labels exists.
      * @return
      */
-    bool canShowAxisLabels(GtObject*) Q_DECL_OVERRIDE;
+    bool canShowAxisLabels(GtObject*) override;
 
 };
 
