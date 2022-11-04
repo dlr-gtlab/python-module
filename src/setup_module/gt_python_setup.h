@@ -41,8 +41,6 @@ public:
      */
     QString description() const override;
 
-    QList<gt::InterfaceFunction> sharedFunctions() const override;
-
     void onLoad() override;
 
 private:

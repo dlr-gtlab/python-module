@@ -25,12 +25,6 @@ pythonExe()
     return gtEnvironment->value("PYTHONEXE").toString();
 }
 
-QString
-pythonVersion()
-{
-    return GtpsPythonEvaluator{pythonExe()}.pythonVersion().toString();
-}
-
 }
 
 GtVersionNumber
@@ -43,17 +37,6 @@ QString
 GtPythonSetupModule::description() const
 {
     return QStringLiteral("GTlab Python Setup Module");
-}
-
-
-QList<gt::InterfaceFunction>
-GtPythonSetupModule::sharedFunctions() const
-{
-    auto help = "If the Python environment is valid, it returns the Python "
-                "version. Otherwise it returns an empty string.";
-    auto func = gt::interface::makeInterfaceFunction(
-                "pythonVersion", pythonVersion, help);
-    return {func};
 }
 
 void
