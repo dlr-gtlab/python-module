@@ -1,0 +1,5 @@
+{
+	"sys_env_vars" : [
+	        { "name" : "PYTHONEXE", "init" : "../python_env/python.exe"}
+	]
+}

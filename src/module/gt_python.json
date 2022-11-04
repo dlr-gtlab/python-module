@@ -1,7 +1,6 @@
 {
 	"dependencies" : [
+		{ "name" : "Python Setup", "version" : "1.0.0" }
 	],
-	"sys_env_vars" : [
-	        { "name" : "PYTHONHOME", "init" : "../python_env"}
-	]
+	"allowSuppressionBy": ["Python Setup"]
 }

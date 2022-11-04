@@ -66,7 +66,6 @@ GtPythonModule::version()
 }
 #endif
 
-
 QString
 GtPythonModule::description() const
 {
