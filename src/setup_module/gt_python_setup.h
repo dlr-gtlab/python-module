@@ -41,9 +41,21 @@ public:
      */
     QString description() const override;
 
+
+    /**
+     * @brief Is called directly after loading the module.
+     * It validates the Python environment and suppresses the Python Module
+     * if the environment is not valid.
+     */
     void onLoad() override;
 
 private:
+    /**
+     * @brief Asks the specified evaluator for the Python paths and prepends
+     * them to the PATH environment variable. In addition, it sets the
+     * PYTHONHOME variable.
+     * @param evaluator Python evaluator.
+     */
     void setPythonPaths(const GtpsPythonEvaluator& evaluator);
 };
 
