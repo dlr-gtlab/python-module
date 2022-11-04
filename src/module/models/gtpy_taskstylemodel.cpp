@@ -197,22 +197,22 @@ GtpyTaskStyleModel::canDropMimeData(const QMimeData* data,
     // get parent object
     GtObject* parentObj = static_cast<GtObject*>(parent.internalPointer());
 
-    if (qobject_cast<GtCalculator*>(obj) != Q_NULLPTR)
+    if (qobject_cast<GtCalculator*>(obj))
     {
         // handle calculator drop
-        if (qobject_cast<GtTask*>(parentObj) != Q_NULLPTR)
+        if (qobject_cast<GtTask*>(parentObj))
         {
             return true;
         }
     }
-    else if (GtTask* task = qobject_cast<GtTask*>(obj))
+    else if (const GtTask* task = qobject_cast<GtTask*>(obj))
     {
         // handle task drop
-        if (qobject_cast<GtProcessData*>(parentObj) != Q_NULLPTR)
+        if (qobject_cast<GtProcessData*>(parentObj))
         {
             return true;
         }
-        else if (GtTask* parentTask = qobject_cast<GtTask*>(parentObj))
+        else if (const GtTask* parentTask = qobject_cast<GtTask*>(parentObj))
         {
             if (parentTask != task)
             {

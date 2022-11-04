@@ -9,7 +9,7 @@
 
 #include "gtpy_collapsiblebrowseritem.h"
 
-GtpyCollapsibleBrowserItem::GtpyCollapsibleBrowserItem(QString ident) :
+GtpyCollapsibleBrowserItem::GtpyCollapsibleBrowserItem(QString const& ident) :
     GtpyAbstractBrowserItem(), m_ident(ident)
 {
     setSelected(false);

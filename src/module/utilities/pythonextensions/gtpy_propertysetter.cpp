@@ -20,7 +20,7 @@
 
 using namespace GtpyExtendedWrapperModule;
 
-static GtpyPropertySetterObject* setterfunction_free_list = Q_NULLPTR;
+static GtpyPropertySetterObject* setterfunction_free_list = nullptr;
 
 static void
 meth_dealloc(GtpyPropertySetterObject* m)
@@ -68,7 +68,7 @@ meth_hash(GtpyPropertySetterObject* a)
 {
     long x;
 
-    if (a->m_self == Q_NULLPTR)
+    if (a->m_self == nullptr)
     {
         x = 0;
     }
@@ -185,12 +185,12 @@ meth_richcompare(GtpyPropertySetterObject* a,
 }
 
 PyObject*
-GtpyPropertySetter_New(QString propId, PyObject* self, PyObject* module)
+GtpyPropertySetter_New(QString const& propId, PyObject* self, PyObject* module)
 {
     GtpyPropertySetterObject* op;
     op = setterfunction_free_list;
 
-    if (op != Q_NULLPTR)
+    if (op)
     {
         setterfunction_free_list = (GtpyPropertySetterObject*)(
                                        op->m_self);
@@ -202,9 +202,9 @@ GtpyPropertySetter_New(QString propId, PyObject* self, PyObject* module)
         op = PyObject_GC_New(GtpyPropertySetterObject,
                              &GtpyPropertySetter_Type);
 
-        if (op == Q_NULLPTR)
+        if (!op)
         {
-            return Q_NULLPTR;
+            return nullptr;
         }
     }
 

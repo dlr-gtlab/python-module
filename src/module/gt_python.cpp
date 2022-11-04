@@ -16,7 +16,10 @@
 #include "gt_taskdata.h"
 #include "gt_calculatordata.h"
 #include "gt_application.h"
-#include "gt_environment.h"
+#include "gt_logging.h"
+#if GT_VERSION >= 0x020000
+#include "gt_commandlinefunction.h"
+#endif
 
 // data model classes
 
@@ -87,6 +90,13 @@ GtPythonModule::init()
 
     GtpyContextManager::instance()->initContexts();
 
+#if GT_VERSION >= 0x020000
+    if (gtApp->batchMode())
+    {
+        return;
+    }
+#endif
+
     QStringList widPath;
     widPath << "GtMainWin" << "Output" << "centralWidget" << "tabWidget";
 
@@ -95,7 +105,7 @@ GtPythonModule::init()
 
     QTabWidget* tab = qobject_cast<QTabWidget*>(outDock);
 
-    if (tab == Q_NULLPTR)
+    if (!tab)
     {
         gtWarning() << "Output dock tab widget not found!";
         return;
@@ -289,6 +299,81 @@ GtPythonModule::accessConnection()
     return GT_METADATA(GtAccessDataConnection);
 }
 
+namespace PythonExecution
+{
+
+QString
+parseScriptFile(QFile& file)
+{
+    if (!file.exists())
+    {
+        gtError() << "ERROR: script file not found!";
+        return QString();
+    }
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        gtError() << "ERROR: could not open script file!";
+        return QString();
+    }
+
+    QTextStream out(&file);
+
+    return out.readAll();
+}
+
+int
+execPython(const QStringList& args)
+{
+    if (args.isEmpty())
+    {
+        return -1;
+    }
+
+    QFile f(args.first());
+
+    gtInfo() << "Start Python Script Execution for file" << args.first();
+    GtpyContextManager* python = GtpyContextManager::instance();
+
+    python->initContexts();
+
+    QString scriptContent = parseScriptFile(f);
+
+    if (scriptContent.isEmpty())
+    {
+        gtError() << "ERROR: empty script file!";
+        return -1;
+    }
+
+    if (python)
+    {
+        bool success = python->evalScript(GtpyContextManager::BatchContext,
+                                          scriptContent, true);
+
+        if (success)
+        {
+            return 0;
+        }
+    }
+
+    return -1;
+}
+}
+
+#if GT_VERSION >= 0x020000
+QList<GtCommandLineFunction>
+GtPythonModule::commandLineFunctions() const
+{
+    QList<GtCommandLineFunctionArgument> args;
+    args.append(GtCommandLineFunctionArgument{"<file>", "python file to execute"});
+    auto fun = gt::commandline::makeCommandLineFunction(
+                "python", PythonExecution::execPython,
+                "Executes python").setArgs(args);
+
+    return {fun};
+}
+#endif
+
 QWidget*
 GtPythonModule::findWidget(QStringList path, QWidget* parent)
 {
@@ -297,7 +382,7 @@ GtPythonModule::findWidget(QStringList path, QWidget* parent)
         return parent;
     }
 
-    if (parent == Q_NULLPTR)
+    if (!parent)
     {
         // no parent given... get all top level widgets from application
         QWidgetList wids = QApplication::topLevelWidgets();
@@ -316,10 +401,10 @@ GtPythonModule::findWidget(QStringList path, QWidget* parent)
     QWidget* child = parent->findChild<QWidget*>(widId,
                      Qt::FindDirectChildrenOnly);
 
-    if (child == Q_NULLPTR)
+    if (!child)
     {
         gtWarning() << "Could not find target widget!";
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     return findWidget(path, child);

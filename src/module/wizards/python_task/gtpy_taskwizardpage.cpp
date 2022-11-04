@@ -647,8 +647,8 @@ GtpyTaskWizardPage::deleteProcessElements(const QList<QModelIndex>& indexList)
 }
 
 void
-GtpyTaskWizardPage::onProcessComponentRenamed(QString className,
-        QString oldName, QString newName)
+GtpyTaskWizardPage::onProcessComponentRenamed(QString const& className,
+        QString const& oldName, QString const& newName)
 {
     QString oldHeadline = " " + oldName + " ";
 

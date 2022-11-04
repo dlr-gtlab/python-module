@@ -935,11 +935,12 @@ GtpyContextManager::context(int contextId) const
 
 #ifdef PY3K
 PyObject*
-GtpyContextManager::initExtensionModule(QString moduleName, PyModuleDef* def)
+GtpyContextManager::initExtensionModule(QString const& moduleName,
+                                        PyModuleDef* def)
 {
     if (!def)
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     GTPY_GIL_SCOPE
@@ -954,7 +955,7 @@ GtpyContextManager::initExtensionModule(QString moduleName, PyModuleDef* def)
 
     if (!sys)
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     PyObject* modules = PyObject_GetAttrString(sys, "modules");

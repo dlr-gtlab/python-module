@@ -84,7 +84,10 @@ int main(int argc, char* argv[])
 
     GtpyContextManager* python = GtpyContextManager::instance();
 
-    python->initContexts();
+    if (python)
+    {
+        python->initContexts();
+    }
 
     QStringList args = qApp->arguments();
 
@@ -102,7 +105,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    if (python != Q_NULLPTR)
+    if (python)
     {
         python->evalScript(GtpyContextManager::BatchContext, scriptContent,
                            true);

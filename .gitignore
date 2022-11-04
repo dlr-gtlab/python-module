@@ -10,3 +10,4 @@ local_settings.pri
 *.pro.user
 *.autosave
 .qmake.stash
+.qtc_clangd/
