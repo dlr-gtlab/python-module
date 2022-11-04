@@ -62,22 +62,14 @@ GtPythonSetupModule::onLoad()
     GtpsPythonEvaluator evaluator{pythonExe()};
     QString pyModuleId{"Python Module (Python %1.%2)"};
 
-    gtError() << "Python Module (Python 3.9)";
-    gtError() << pyModuleId.arg(3).arg(9);
-    gtError() << evaluator.pythonVersion().toString();
-    gtError() << evaluator.pythonVersion().major();
-    gtError() << evaluator.pythonVersion().minor();
-
     if (!evaluator.isValid() || evaluator.pythonVersion().major() != 3)
     {
-        gtError() << "Python path is invalid!";
         /// Suppress all modules that require a valid Python environment
         gtApp->addSuppression(*this, pyModuleId.arg(3).arg(7));
         gtApp->addSuppression(*this, pyModuleId.arg(3).arg(9));
         return;
     }
 
-    gtError() << "Python path is valid!";
     if (evaluator.pythonVersion().minor() != 7)    
         gtApp->addSuppression(*this, pyModuleId.arg(3).arg(7));
 
