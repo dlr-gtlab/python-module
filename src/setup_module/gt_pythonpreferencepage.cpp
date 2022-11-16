@@ -3,6 +3,7 @@
 
 #include "gt_settings.h"
 #include "gt_moduleinterface.h"
+#include "gtps_pythonevaluator.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -11,6 +12,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QDir>
+#include <QString>
 
 GtPythonPreferencePage::GtPythonPreferencePage() :
     GtPreferencesPage(tr("Python Environment"), nullptr),
@@ -23,6 +25,9 @@ GtPythonPreferencePage::GtPythonPreferencePage() :
 
     connect(ui->btnSelectPyExe, &QPushButton::clicked,
             this, &GtPythonPreferencePage::onBtnSelectPyExePressed);
+
+    connect(ui->btnTestPyEnv, &QPushButton::clicked, this,
+            &GtPythonPreferencePage::onBtnTestPyEnvPressed);
 }
 
 void GtPythonPreferencePage::saveSettings(GtSettings & settings) const
@@ -64,6 +69,29 @@ void GtPythonPreferencePage::onBtnSelectPyExePressed()
 
     auto selectedFiles = dlg.selectedFiles();
     ui->lePythonExe->setText(QDir::toNativeSeparators(selectedFiles[0]));
+}
+
+void GtPythonPreferencePage::onBtnTestPyEnvPressed()
+{
+    auto currentPyExe = ui->lePythonExe->text();
+    GtpsPythonEvaluator evaluator(currentPyExe);
+
+    QString pyCode = "import sys;print(', '.join([x for x in sys.path if x]), "
+                     "end='')";
+
+    bool ok{false};
+    evaluator.eval(pyCode, &ok);
+
+
+    if (ok)
+    {
+        ui->lbPythonStatus->setText(tr("Python %1 found")
+                                        .arg(evaluator.pythonVersion().toString()));
+    }
+    else
+    {
+        ui->lbPythonStatus->setText(tr("Error: invalid python executable!"));
+    }
 }
 
 

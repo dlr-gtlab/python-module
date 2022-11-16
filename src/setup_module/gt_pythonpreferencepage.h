@@ -23,6 +23,7 @@ public:
 
 private slots:
     void onBtnSelectPyExePressed();
+    void onBtnTestPyEnvPressed();
 
 private:
 
