@@ -11,9 +11,8 @@
 #include "gt_python_setup.h"
 #include "gt_pythonpreferencepage.h"
 
-#include "gt_logging.h"
 #include "gt_environment.h"
-#include "gt_functional_interface.h"
+#include "gt_settings.h"
 
 #include "gtps_pythoninterpreter.h"
 #include "gt_python_setup.h"
@@ -71,6 +70,10 @@ void GtPythonSetupModule::init()
         return new GtPythonPreferencePage;
     };
     GtApplication::addCustomPreferencePage(pageFactory);
+
+    // register current python environment path to settings
+    gtApp->settings()->registerSetting(
+        moduleSettingPath(GT_MODULENAME(), "pythonexe"), "");
 }
 
 void

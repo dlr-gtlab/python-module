@@ -24,14 +24,17 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLineEdit" name="lineEdit">
+      <widget class="QLineEdit" name="lePythonExe">
        <property name="text">
         <string>python_to_python.exe</string>
+       </property>
+       <property name="placeholderText">
+        <string>Path to Python Executable</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="btnSelectPyExe">
        <property name="text">
         <string>...</string>
        </property>

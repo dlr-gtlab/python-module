@@ -18,10 +18,14 @@ public:
     explicit GtPythonPreferencePage();
     ~GtPythonPreferencePage() override;
 
-    void saveSettings(GtSettings &) const;
-    void loadSettings(const GtSettings &);
+    void saveSettings(GtSettings &) const override;
+    void loadSettings(const GtSettings &) override;
+
+private slots:
+    void onBtnSelectPyExePressed();
 
 private:
+
     std::unique_ptr<Ui::GtPythonPreferencePage> ui;
 };
 
