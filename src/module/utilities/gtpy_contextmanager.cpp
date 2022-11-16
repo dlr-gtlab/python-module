@@ -80,8 +80,6 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     qRegisterMetaType<GtpyContextManager::Context>
     ("GtpyContextManager::Context");
 
-    setEnvironmentPaths();
-
 #ifdef Q_OS_LINUX
     dlopen(PYTHON_LIBRARY, RTLD_LAZY | RTLD_GLOBAL);
 #endif
@@ -167,48 +165,6 @@ GtpyContextManager::collectionPath()
     }
 
     return retval;
-}
-
-void
-GtpyContextManager::setEnvironmentPaths() const
-{
-    QString var = qEnvironmentVariable("PYTHONHOME");
-
-    if (var.isEmpty())
-    {
-        return;
-    }
-
-    QDir pythonDir(var);
-
-    if (!pythonDir.exists())
-    {
-        return;
-    }
-
-    QString paths = qEnvironmentVariable("PATH");
-
-    if (!paths.isEmpty())
-    {
-        if (!paths.endsWith(";"))
-        {
-            paths.append(";");
-        }
-    }
-
-    paths += QDir::toNativeSeparators(pythonDir.path()) + ";";
-
-    if (pythonDir.cd("Library"))
-    {
-        paths += QDir::toNativeSeparators(pythonDir.path()) + ";";
-    }
-
-    if (pythonDir.cd("bin"))
-    {
-        paths += QDir::toNativeSeparators(pythonDir.path()) + ";";
-    }
-
-    qputenv("PATH", paths.toUtf8());
 }
 
 void

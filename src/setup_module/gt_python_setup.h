@@ -15,7 +15,7 @@
 
 #include "gt_versionnumber.h"
 
-class GtpsPythonEvaluator;
+class GtpsPythonInterpreter;
 
 /**
  * @brief The GtPythonModule class
@@ -54,9 +54,9 @@ private:
      * @brief Asks the specified evaluator for the Python paths and prepends
      * them to the PATH environment variable. In addition, it sets the
      * PYTHONHOME variable.
-     * @param evaluator Python evaluator.
+     * @param interpreter Python interpreter.
      */
-    void setPythonPaths(const GtpsPythonEvaluator& evaluator);
+    void setPythonPaths(const GtpsPythonInterpreter& interpreter);
 };
 
 #endif // GTPYTHON_H

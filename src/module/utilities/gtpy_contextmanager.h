@@ -301,12 +301,6 @@ private:
     static const QString CALC_MODULE;
 
     /**
-     * @brief Adds the paths of the Python environment to PATH. It uses the
-     * user-specific Python environment path defined in PYTHONHOME.
-     */
-    void setEnvironmentPaths() const;
-
-    /**
     * @brief Configures the python context indicated by contextId with the
     * functionality indicated by type
     * @param type Identifies the functionality of the context.
