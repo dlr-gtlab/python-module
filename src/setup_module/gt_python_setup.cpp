@@ -13,6 +13,7 @@
 
 #include "gt_environment.h"
 #include "gt_settings.h"
+#include "gt_logging.h"
 
 #include "gtps_pythoninterpreter.h"
 #include "gt_python_setup.h"
@@ -24,7 +25,7 @@ namespace {
 QString
 pythonExe()
 {
-    return gtEnvironment->value("PYTHONEXE").toString();
+    return gtApp->settings()->getSetting(moduleSettingPath(GT_MODULENAME(), "pythonexe")).toString();
 }
 
 }
@@ -44,7 +45,12 @@ GtPythonSetupModule::description() const
 void
 GtPythonSetupModule::onLoad()
 {
+    // register current python environment path to settings
+    gtApp->settings()->registerSettingRestart(
+        moduleSettingPath(GT_MODULENAME(), "pythonexe"), "");
+
     GtpsPythonInterpreter interpreter{pythonExe()};
+
     QString pyModuleId{"Python Module (Python %1.%2)"};
 
     if (!interpreter.isValid() || interpreter.pythonVersion().major() != 3)
@@ -70,10 +76,6 @@ void GtPythonSetupModule::init()
         return new GtPythonPreferencePage;
     };
     GtApplication::addCustomPreferencePage(pageFactory);
-
-    // register current python environment path to settings
-    gtApp->settings()->registerSetting(
-        moduleSettingPath(GT_MODULENAME(), "pythonexe"), "");
 }
 
 void
