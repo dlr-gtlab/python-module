@@ -57,11 +57,11 @@ DESTDIR = $${BUILD_DEST}
 
 HEADERS += \
     gt_python_setup.h \
-    gtps_pythonevaluator.h
+    gtps_pythoninterpreter.h
 
 SOURCES += \
     gt_python_setup.cpp \
-    gtps_pythonevaluator.cpp
+    gtps_pythoninterpreter.cpp
 
 CONFIG(debug, debug|release){
     # GTLAB CORE
