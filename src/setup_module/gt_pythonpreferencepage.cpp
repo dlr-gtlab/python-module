@@ -5,11 +5,6 @@
 #include "gt_moduleinterface.h"
 #include "gtps_pythoninterpreter.h"
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
 #include <QFileDialog>
 #include <QDir>
 #include <QString>
