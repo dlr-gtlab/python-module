@@ -115,9 +115,13 @@ GtpsPythonInterpreter::setSharedLibPath()
     QString pyCode{
     "import os;"
     "import sys;"
-    "pyDll = 'python%s%s.dll'%(sys.version_info.major, sys.version_info.minor);"
+#ifdef _WIN32
+    "pyShardLib = 'python%s%s.dll'%(sys.version_info.major, sys.version_info.minor);"
+#else
+    "pyShardLib = 'libpython%s.%s.so'%(sys.version_info.major, sys.version_info.minor);"
+#endif
     "[exit(print(p, end='')) for p in sys.path "
-    "if os.path.isfile(os.path.join(p, pyDll))];"};
+    "if os.path.isfile(os.path.join(p, pyShardLib))];"};
 
     bool ok{false};
     auto homePath = eval(pyCode, &ok);
