@@ -3,7 +3,7 @@
 
 #include "gt_settings.h"
 #include "gt_moduleinterface.h"
-#include "gtps_pythonevaluator.h"
+#include "gtps_pythoninterpreter.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -74,7 +74,7 @@ void GtPythonPreferencePage::onBtnSelectPyExePressed()
 void GtPythonPreferencePage::onBtnTestPyEnvPressed()
 {
     auto currentPyExe = ui->lePythonExe->text();
-    GtpsPythonEvaluator evaluator(currentPyExe);
+    GtpsPythonInterpreter evaluator(currentPyExe);
 
     QString pyCode = "import sys;print(', '.join([x for x in sys.path if x]), "
                      "end='')";
@@ -82,11 +82,12 @@ void GtPythonPreferencePage::onBtnTestPyEnvPressed()
     bool ok{false};
     evaluator.eval(pyCode, &ok);
 
+    auto pyVer = evaluator.pythonVersion();
 
-    if (ok)
+    if (ok && pyVer != GtVersionNumber(0,0,0))
     {
         ui->lbPythonStatus->setText(tr("Python %1 found")
-                                        .arg(evaluator.pythonVersion().toString()));
+                                        .arg(pyVer.toString()));
     }
     else
     {

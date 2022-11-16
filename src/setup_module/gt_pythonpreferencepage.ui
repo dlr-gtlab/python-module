@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Python Exectable</string>
+      <string>Python Executable</string>
      </property>
     </widget>
    </item>
