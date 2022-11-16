@@ -53,7 +53,7 @@ private:
     /**
      * @brief Asks the specified evaluator for the Python paths and prepends
      * them to the PATH environment variable. In addition, it sets the
-     * PYTHONHOME variable.
+     * PYTHONHOME and the PYTHONPATH variable.
      * @param interpreter Python interpreter.
      */
     void setPythonPaths(const GtpsPythonInterpreter& interpreter);

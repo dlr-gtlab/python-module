@@ -54,10 +54,14 @@ GtPythonSetupModule::onLoad()
     }
 
     if (interpreter.pythonVersion().minor() != 7)
+    {
         gtApp->addSuppression(*this, pyModuleId.arg(3).arg(7));
+    }
 
     if (interpreter.pythonVersion().minor() != 9)
+    {
         gtApp->addSuppression(*this, pyModuleId.arg(3).arg(9));
+    }
 
     setPythonPaths(interpreter);
 }
@@ -67,10 +71,8 @@ GtPythonSetupModule::setPythonPaths(const GtpsPythonInterpreter& interpreter)
 {
     QString pathVar{qEnvironmentVariable("PATH")};
     pathVar.prepend(interpreter.sharedLibPath() + ";");
-
-    qDebug() << interpreter.pythonHomePath();
-
     QString pySysPaths{interpreter.sysPaths().join(";")};
+
     qputenv("PATH", pathVar.toUtf8());
     qputenv("PYTHONPATH", pySysPaths.toUtf8());
     qputenv("PYTHONHOME", interpreter.pythonHomePath().toUtf8());

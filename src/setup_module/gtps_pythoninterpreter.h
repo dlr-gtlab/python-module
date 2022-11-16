@@ -46,10 +46,22 @@ public:
      */
     const GtVersionNumber& pythonVersion() const;
 
+    /**
+     * @brief Returns the path to the shared Python library.
+     * @return Path to the shared Python library.
+     */
     const QString& sharedLibPath() const;
 
+    /**
+     * @brief Returns the list of paths that are registered in sys.path.
+     * @return The list of paths that are registered in sys.path.
+     */
     const QStringList& sysPaths() const;
 
+    /**
+     * @brief Retruns the PYTHONHOME path.
+     * @return The PYTHONHOME path.
+     */
     QString pythonHomePath() const;
 
     /**
@@ -64,6 +76,7 @@ public:
     QString eval(const QString& pythonCommand, bool* ok = nullptr) const;
 
 private:
+    // Python sys paths.
     QStringList m_sysPaths{};
 
     // Python executalbe.
@@ -76,13 +89,21 @@ private:
     GtVersionNumber m_pyVersion{};
 
     /**
-     * @brief Asks the Python execution for the Python version and stores
+     * @brief Asks the Python interpreter for the Python version and stores
      * the result in the version variable.
      */
     void setPythonVersion();
 
+    /**
+     * @brief Asks the interpreter for the path to the shared library and
+     * stores it in the shared lib variable.
+     */
     void setSharedLibPath();
 
+    /**
+     * @brief Asks the interpreter for the paths registered in sys.path and
+     * stores them in the sys paths variable.
+     */
     void setSysPaths();
 };
 
