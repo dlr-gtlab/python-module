@@ -7,22 +7,25 @@
  *  Tel.: +49 2203 601 2907
  */
 
-#include <QDir>
-
-#include "gt_logging.h"
-#include "gt_environment.h"
-#include "gt_functional_interface.h"
-
-#include "gtps_pythoninterpreter.h"
 
 #include "gt_python_setup.h"
+#include "gt_pythonpreferencepage.h"
+
+#include "gt_environment.h"
+#include "gt_settings.h"
+#include "gt_logging.h"
+
+#include "gtps_pythoninterpreter.h"
+#include "gt_python_setup.h"
+
+#include <QDir>
 
 namespace {
 
 QString
 pythonExe()
 {
-    return gtEnvironment->value("PYTHONEXE").toString();
+    return gtApp->settings()->getSetting(moduleSettingPath(GT_MODULENAME(), "pythonexe")).toString();
 }
 
 }
@@ -42,7 +45,12 @@ GtPythonSetupModule::description() const
 void
 GtPythonSetupModule::onLoad()
 {
+    // register current python environment path to settings
+    gtApp->settings()->registerSettingRestart(
+        moduleSettingPath(GT_MODULENAME(), "pythonexe"), "");
+
     GtpsPythonInterpreter interpreter{pythonExe()};
+
     QString pyModuleId{"Python Module (Python %1.%2)"};
 
     if (!interpreter.isValid() || interpreter.pythonVersion().major() != 3)
@@ -64,6 +72,14 @@ GtPythonSetupModule::onLoad()
     }
 
     setPythonPaths(interpreter);
+}
+
+void GtPythonSetupModule::init()
+{
+    auto pageFactory = []() -> GtPreferencesPage* {
+        return new GtPythonPreferencePage;
+    };
+    GtApplication::addCustomPreferencePage(pageFactory);
 }
 
 void
