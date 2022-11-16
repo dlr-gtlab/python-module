@@ -57,22 +57,25 @@ DESTDIR = $${BUILD_DEST}
 
 HEADERS += \
     gt_python_setup.h \
-    gtps_pythoninterpreter.h
+    gtps_pythoninterpreter.h \
+    gt_pythonpreferencepage.h
 
 SOURCES += \
     gt_python_setup.cpp \
-    gtps_pythoninterpreter.cpp
+    gtps_pythoninterpreter.cpp \
+    gt_pythonpreferencepage.cpp
+
 
 CONFIG(debug, debug|release){
     # GTLAB CORE
     LIBS += -lGTlabLogging-d
-    LIBS += -lGTlabCore-d -lGTlabDataProcessor-d
+    LIBS += -lGTlabGui-d -lGTlabCore-d -lGTlabDataProcessor-d
 
     # THIRD PARTY
 } else {
     # GTLAB CORE
     LIBS += -lGTlabLogging
-    LIBS += -lGTlabCore -lGTlabDataProcessor
+    LIBS += -lGTlabGui -lGTlabCore -lGTlabDataProcessor
 
     # THIRD PARTY
 }
@@ -91,3 +94,9 @@ copyToEnvironmentPathModules()
 ######################################################################
 
 ######################################################################
+
+FORMS += \
+    gt_pythonpreferencepage.ui
+
+RESOURCES += \
+    resources.qrc

@@ -7,15 +7,18 @@
  *  Tel.: +49 2203 601 2907
  */
 
-#include <QDir>
+
+#include "gt_python_setup.h"
+#include "gt_pythonpreferencepage.h"
 
 #include "gt_logging.h"
 #include "gt_environment.h"
 #include "gt_functional_interface.h"
 
 #include "gtps_pythoninterpreter.h"
-
 #include "gt_python_setup.h"
+
+#include <QDir>
 
 namespace {
 
@@ -60,6 +63,14 @@ GtPythonSetupModule::onLoad()
         gtApp->addSuppression(*this, pyModuleId.arg(3).arg(9));
 
     setPythonPaths(interpreter);
+}
+
+void GtPythonSetupModule::init()
+{
+    auto pageFactory = []() -> GtPreferencesPage* {
+        return new GtPythonPreferencePage;
+    };
+    GtApplication::addCustomPreferencePage(pageFactory);
 }
 
 void

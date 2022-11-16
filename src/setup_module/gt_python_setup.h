@@ -49,6 +49,11 @@ public:
      */
     void onLoad() override;
 
+    /**
+     * @brief To register the python preferences dialog
+     */
+    void init() override;
+
 private:
     /**
      * @brief Asks the specified evaluator for the Python paths and prepends
