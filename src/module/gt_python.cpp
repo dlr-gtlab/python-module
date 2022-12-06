@@ -363,9 +363,9 @@ execPython(const QStringList& args)
 QList<GtCommandLineFunction>
 GtPythonModule::commandLineFunctions() const
 {
-    QList<GtCommandLineFunctionArgument> args;
-    args.append(GtCommandLineFunctionArgument{"<file>", "python file to execute"});
-    auto fun = gt::commandline::makeCommandLineFunction(
+    QList<GtCommandLineArgument> args;
+    args.append(GtCommandLineArgument{"<file>", "python file to execute"});
+    auto fun = gt::makeCommandLineFunction(
                 "python", PythonExecution::execPython,
                 "Executes python").setArgs(args);
 

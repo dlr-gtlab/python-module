@@ -11,6 +11,7 @@
 #define GTPY_PYTHONPLOTWIDGET_H
 
 #include "gt_abstractpostwidget.h"
+#include "gt_globals.h"
 
 #include <QPointer>
 
@@ -60,7 +61,12 @@ public slots:
      * @brief Overloaded function to change post plot identification string.
      * @param s New identification string.
      */
+
+#if GT_VERSION < GT_VERSION_CHECK(2,0, 0)
     void changePlotName(QString s) override;
+#else
+    void changePlotName(const QString& s) override;
+#endif
 
     /**
      * @brief Overloaded function to return identification string of provider.
@@ -74,13 +80,13 @@ protected:
      * @brief dragEnterEvent
      * @param event
      */
-    virtual void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
 
     /**
      * @brief dropEvent
      * @param event
      */
-    virtual void dropEvent(QDropEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
 
 private:
     /// comet post data

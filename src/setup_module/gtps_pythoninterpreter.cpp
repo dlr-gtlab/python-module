@@ -52,7 +52,6 @@ GtpsPythonInterpreter::eval(const QString& pythonCommand, bool* ok) const
 bool
 GtpsPythonInterpreter::isValid() const
 {
-
     bool ok{false};
     eval("import sys", &ok);
     return ok;
@@ -65,7 +64,7 @@ GtpsPythonInterpreter::pythonExe() const
 }
 
 const GtVersionNumber&
-GtpsPythonInterpreter::pythonVersion() const
+GtpsPythonInterpreter::version() const
 {
     return m_pyVersion;
 }
@@ -92,7 +91,7 @@ void
 GtpsPythonInterpreter::setPythonVersion()
 {
     QString pyCode{"import sys;"
-                   "print('%s' % sys.version_info.%1, end='')"};
+                   "sys.stdout.write('%s' % sys.version_info.%1)"};
 
     bool majorOk{false};
     bool minorOk{false};

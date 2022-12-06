@@ -28,6 +28,7 @@ CONFIG += silent
 CONFIG += c++14
 
 DEFINES += GT_PYTHON_DLL
+DEFINES += GT_LOG_USE_QT_BINDINGS
 
 isEmpty(GT_MODULE_ID) {
    error("GT_MODULE_ID undefined. Please define variable GT_MODULE_ID=\"My Module ID\" in project file.")

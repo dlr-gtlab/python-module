@@ -98,7 +98,11 @@ GtpyPythonPlotWidget::printEmbedded(QPrinter* /*printer*/,
 }
 
 void
+#if GT_VERSION < GT_VERSION_CHECK(2,0, 0)
 GtpyPythonPlotWidget::changePlotName(QString s)
+#else
+GtpyPythonPlotWidget::changePlotName(const QString& s)
+#endif
 {
     m_dm->setObjectName(s);
 }

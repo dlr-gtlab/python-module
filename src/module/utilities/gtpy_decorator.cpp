@@ -22,7 +22,7 @@
 #include "gt_calculator.h"
 #include "gt_objectlinkproperty.h"
 #include "gt_command.h"
-#include "gt_datazone0d.h"
+//#include "gt_datazone0d.h"
 #include "gt_abstractrunnable.h"
 #include "gt_globals.h"
 
@@ -1162,105 +1162,107 @@ GtpyDecorator::setObjectName(QObject* obj, QString name)
     obj->setObjectName(name);
 }
 
-double
-GtpyDecorator::value(GtDataZone0D* dataZone, const QString& paramName,
-                     bool* ok)
-{
-    if (!dataZone)
-    {
-        if (ok)
-        {
-            *ok = false;
-        }
+// TODO: comment in using datazones from basictools
 
-        return 0.0;
-    }
-#if GT_VERSION >= 0x020000
-    return dataZone->fetchData().value(paramName, ok);
-#else
-    return dataZone->value(paramName, ok);
-#endif
-}
+//double
+//GtpyDecorator::value(GtDataZone0D* dataZone, const QString& paramName,
+//                     bool* ok)
+//{
+//    if (!dataZone)
+//    {
+//        if (ok)
+//        {
+//            *ok = false;
+//        }
 
-QMap<QString, double>
-GtpyDecorator::entries(GtDataZone0D* dataZone, bool* ok)
-{
-    if (!dataZone)
-    {
-        if (ok)
-        {
-            *ok = false;
-        }
+//        return 0.0;
+//    }
+//#if GT_VERSION >= 0x020000
+//    return dataZone->fetchData().value(paramName, ok);
+//#else
+//    return dataZone->value(paramName, ok);
+//#endif
+//}
 
-        return QMap<QString, double>();
-    }
+//QMap<QString, double>
+//GtpyDecorator::entries(GtDataZone0D* dataZone, bool* ok)
+//{
+//    if (!dataZone)
+//    {
+//        if (ok)
+//        {
+//            *ok = false;
+//        }
 
-    QMap<QString, double> retVal;
+//        return QMap<QString, double>();
+//    }
 
-#if GT_VERSION >= 0x020000
-    auto data = dataZone->fetchData();
-#endif
+//    QMap<QString, double> retVal;
 
-#if GT_VERSION >= 0x020000
-    for (QString const& s : data.params())
-    {
-        retVal.insert(s, data.value(s));
-    }
-#else
-    foreach(QString s, dataZone->params())
-    {
-        retVal.insert(s, dataZone->value(s));
-    }
-#endif
+//#if GT_VERSION >= 0x020000
+//    auto data = dataZone->fetchData();
+//#endif
 
-    return retVal;
-}
+//#if GT_VERSION >= 0x020000
+//    for (QString const& s : data.params())
+//    {
+//        retVal.insert(s, data.value(s));
+//    }
+//#else
+//    foreach(QString s, dataZone->params())
+//    {
+//        retVal.insert(s, dataZone->value(s));
+//    }
+//#endif
 
-bool
-GtpyDecorator::setValue(GtDataZone0D* dataZone, const QString& paramName,
-                        const double& value)
-{
-    if (!dataZone)
-    {
-        return false;
-    }
+//    return retVal;
+//}
 
-#if GT_VERSION >= 0x020000
-    auto data = dataZone->fetchData();
-    return data.setValue(paramName, value);
-#else
-    return dataZone->setValue(paramName, value);
-#endif
-}
+//bool
+//GtpyDecorator::setValue(GtDataZone0D* dataZone, const QString& paramName,
+//                        const double& value)
+//{
+//    if (!dataZone)
+//    {
+//        return false;
+//    }
 
-bool
-GtpyDecorator::appendData(GtDataZone0D* dataZone, const QString& paramName,
-                          double value)
-{
-    if (!dataZone)
-    {
-        return false;
-    }
-#if GT_VERSION >= 0x020000
-    auto data = dataZone->fetchData();
-    return data.appendData(paramName, value);
-#else
-    return dataZone->appendData(paramName, value);
-#endif
-}
+//#if GT_VERSION >= 0x020000
+//    auto data = dataZone->fetchData();
+//    return data.setValue(paramName, value);
+//#else
+//    return dataZone->setValue(paramName, value);
+//#endif
+//}
 
-bool
-GtpyDecorator::appendData(GtDataZone0D* dataZone, const QString& paramName,
-                          const QString& unit, double value)
-{
-    if (!dataZone)
-    {
-        return false;
-    }
-#if GT_VERSION >= 0x020000
-    auto data = dataZone->fetchData();
-    return data.appendData(paramName, unit, value);
-#else
-    return dataZone->appendData(paramName, unit, value);
-#endif
-}
+//bool
+//GtpyDecorator::appendData(GtDataZone0D* dataZone, const QString& paramName,
+//                          double value)
+//{
+//    if (!dataZone)
+//    {
+//        return false;
+//    }
+//#if GT_VERSION >= 0x020000
+//    auto data = dataZone->fetchData();
+//    return data.appendData(paramName, value);
+//#else
+//    return dataZone->appendData(paramName, value);
+//#endif
+//}
+
+//bool
+//GtpyDecorator::appendData(GtDataZone0D* dataZone, const QString& paramName,
+//                          const QString& unit, double value)
+//{
+//    if (!dataZone)
+//    {
+//        return false;
+//    }
+//#if GT_VERSION >= 0x020000
+//    auto data = dataZone->fetchData();
+//    return data.appendData(paramName, unit, value);
+//#else
+//    return dataZone->appendData(paramName, unit, value);
+//#endif
+//}

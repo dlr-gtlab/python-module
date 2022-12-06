@@ -57,13 +57,15 @@ DESTDIR = $${BUILD_DEST}
 
 HEADERS += \
     gt_python_setup.h \
+    gtps_globals.h \
     gtps_pythoninterpreter.h \
-    gt_pythonpreferencepage.h
+    gtps_pythonpreferencepage.h
 
 SOURCES += \
     gt_python_setup.cpp \
+    gtps_globals.cpp \
     gtps_pythoninterpreter.cpp \
-    gt_pythonpreferencepage.cpp
+    gtps_pythonpreferencepage.cpp
 
 
 CONFIG(debug, debug|release){
@@ -96,7 +98,7 @@ copyToEnvironmentPathModules()
 ######################################################################
 
 FORMS += \
-    gt_pythonpreferencepage.ui
+    gtps_pythonpreferencepage.ui
 
 RESOURCES += \
     resources.qrc
