@@ -38,7 +38,6 @@
 #include "gt_coreapplication.h"
 #include "gt_calculatordata.h"
 #include "gt_calculatorfactory.h"
-//#include "gt_datazone0d.h"
 #include "gt_calculatorhelperfactory.h"
 
 #include "gtpy_stdout.h"
@@ -100,9 +99,6 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
                                     CLASS_WRAPPER_MODULE.toLocal8Bit().data());
     PythonQt::self()->registerClass(&GtCalculator::staticMetaObject,
                                     CLASS_WRAPPER_MODULE.toLocal8Bit().data());
-//    TODO: comment in using datazones from basictools
-//    PythonQt::self()->registerClass(&GtDataZone0D::staticMetaObject,
-//                                    CLASS_WRAPPER_MODULE.toLocal8Bit().data());
 
     registerTypeConverters();
 
