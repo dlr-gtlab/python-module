@@ -32,7 +32,7 @@ pythonExe()
 GtVersionNumber
 GtPythonSetupModule::version()
 {
-    return GtVersionNumber(1, 0, 0);
+    return GtVersionNumber(1, 2, 0);
 }
 
 QString

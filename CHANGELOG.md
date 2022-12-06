@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2022-12-06
+### Added
+ - Python Setup Module was created, which together with the Python module represents a module bundle.
+ - The Python Setup Module checks if the specified Python environment is valid and offers the possibility to specify another environment via the GTlab preferences dialog.
+ - The Python Setup Module suppresses the Python Module if the Python environment is not valid.
+ - Different types of Python environments (e.g. venv, conda env, ...) are supported.
+ - Since GTlab Core version 2.0.0 the Python module supports Python 3.9
+
+### Changed
+ - The Python Module no longer crashes GTlab if the Python environment is not valid.
+ 
 ## [1.1.0] - 2022-04-22
 ### Changed
  - Compatibility to GTlab core version 2.0.0 #167

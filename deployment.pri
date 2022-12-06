@@ -19,15 +19,13 @@ COPY_LIB_FILE = false
 
 ## FUNCTION DEFINITION FOR COPY FUNCTION
 defineTest(copyHeaders) {
-
     files = $$1
     dir = $${HEADERS_DIR_PATH}/$${TARGET_DIR_NAME}
-
     win32 {
 
         dir ~= s,/,\\,g
 
-        QMAKE_POST_LINK += if exist $$shell_quote($$dir) rmdir /s /q $$shell_quote($$dir) $$escape_expand(\\n\\t)
+        QMAKE_PRE_LINK += if exist $$shell_quote($$dir) rmdir /s /q $$shell_quote($$dir) $$escape_expand(\\n\\t)
         QMAKE_POST_LINK += if not exist $$shell_quote($$dir) $$QMAKE_MKDIR $$shell_quote($$dir) $$escape_expand(\\n\\t)
 
         exists(*.h) {
