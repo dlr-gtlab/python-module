@@ -87,6 +87,9 @@ devtoolsUpdateLinux:
 .winDebugArtifacts:
   artifacts:
     paths:
+      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPythonSetup-d.dll
+      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPythonSetup-d.lib
+      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPythonSetup-d.pdb
       - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.dll
       - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.lib
       - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.pdb
@@ -100,6 +103,8 @@ devtoolsUpdateLinux:
 .winReleaseArtifacts:
   artifacts:
     paths:
+      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPythonSetup.dll
+      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPythonSetup.lib
       - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION.dll
       - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION.lib
       - include\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\*.h
@@ -190,6 +195,7 @@ windowsBuildReleaseUnstablePy39:
 .linuxDebugArtifacts:
   artifacts:
     paths:
+      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPythonSetup-d.so
       - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.so
       - include/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/*.h
       - build/$UNITTESTSNAME
@@ -200,6 +206,7 @@ windowsBuildReleaseUnstablePy39:
 .linuxReleaseArtifacts:
   artifacts:
     paths:
+      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPythonSetup.so
       - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION.so
       - include/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/*.h
       - build/$UNITTESTSNAME
