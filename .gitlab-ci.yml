@@ -195,8 +195,8 @@ windowsBuildReleaseUnstablePy39:
 .linuxDebugArtifacts:
   artifacts:
     paths:
-      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPythonSetup-d.so
-      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.so
+      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPythonSetup-d.so*
+      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.so*
       - include/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/*.h
       - build/$UNITTESTSNAME
       - linuxBuild.txt
@@ -206,8 +206,8 @@ windowsBuildReleaseUnstablePy39:
 .linuxReleaseArtifacts:
   artifacts:
     paths:
-      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPythonSetup.so
-      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION.so
+      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPythonSetup.so*
+      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION.so*
       - include/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/*.h
       - build/$UNITTESTSNAME
       - linuxBuild.txt
