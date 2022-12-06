@@ -11,8 +11,6 @@
 #define GTPYTHON_H
 
 #include "gt_moduleinterface.h"
-#include "gt_application.h"
-
 #include "gt_versionnumber.h"
 
 class GtpsPythonInterpreter;
@@ -32,7 +30,6 @@ public:
      * @brief Returns current version number of datamodel extension
      * @return version number
      */
-
     GtVersionNumber version() override;
 
     /**
@@ -40,7 +37,6 @@ public:
      * @return description
      */
     QString description() const override;
-
 
     /**
      * @brief Is called directly after loading the module.
@@ -55,6 +51,12 @@ public:
     void init() override;
 
 private:
+    /// Validity of the Python interpreter    
+    bool m_isPythonValid{false};
+
+    /// Python version
+    GtVersionNumber m_pyVersion{};
+
     /**
      * @brief Asks the specified evaluator for the Python paths and prepends
      * them to the PATH environment variable. In addition, it sets the
@@ -62,6 +64,28 @@ private:
      * @param interpreter Python interpreter.
      */
     void setPythonPaths(const GtpsPythonInterpreter& interpreter);
+
+    /**
+     * @brief Opens a message box to ask the user to
+     * specify a Python interpreter.
+     * @param msg Message for the user.
+     */
+    void showNotification(const QString& msg);
+
+    /**
+     * @brief Accepts the Python Module built with the specified Python
+     * version. That means it suppresses all supported Python Modules except
+     * the module built with the specified version.
+     * @param Python version to be accepted.
+     */
+    void acceptPythonModule(const GtVersionNumber& version);
+
+    /**
+     * @brief Suppresses all Python Modules built with the Python versions
+     * specified in the vector of versions.
+     * @param Vector of Python versions to be suppressed.
+     */
+    void suppressPythonModules(const QVector<GtVersionNumber>& pyVersions);
 };
 
 #endif // GTPYTHON_H

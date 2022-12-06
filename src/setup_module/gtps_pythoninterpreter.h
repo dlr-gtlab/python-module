@@ -44,7 +44,7 @@ public:
      * @brief Returns the Python version the evaluator uses.
      * @return The Python version the evaluator uses.
      */
-    const GtVersionNumber& pythonVersion() const;
+    const GtVersionNumber& version() const;
 
     /**
      * @brief Returns the path to the shared Python library.

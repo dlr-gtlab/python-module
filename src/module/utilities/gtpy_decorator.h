@@ -428,27 +428,28 @@ public slots:
      */
     void setObjectName(QObject* obj, QString name);
 
-    ///-------> functions of GtDataZone0D <-------\\\
+//    TODO: comment in using datazones from basictools
+//    ///-------> functions of GtDataZone0D <-------\\\
 
-    double value(GtDataZone0D* dataZone, const QString& paramName, bool* ok =
-                     Q_NULLPTR);
+//    double value(GtDataZone0D* dataZone, const QString& paramName, bool* ok =
+//                     Q_NULLPTR);
 
-    /**
-     * @brief entries
-     * @param dataZone - data to export as map (dictionary in python)
-     * @param ok - flag to show success
-     * @return a map of the entries of the datazone
-     */
-    QMap<QString, double> entries(GtDataZone0D* dataZone, bool* ok = Q_NULLPTR);
+//    /**
+//     * @brief entries
+//     * @param dataZone - data to export as map (dictionary in python)
+//     * @param ok - flag to show success
+//     * @return a map of the entries of the datazone
+//     */
+//    QMap<QString, double> entries(GtDataZone0D* dataZone, bool* ok = Q_NULLPTR);
 
-    bool setValue(GtDataZone0D* dataZone, const QString& paramName,
-                  const double& value);
+//    bool setValue(GtDataZone0D* dataZone, const QString& paramName,
+//                  const double& value);
 
-    bool appendData(GtDataZone0D* dataZone, const QString& paramName,
-                    double value);
+//    bool appendData(GtDataZone0D* dataZone, const QString& paramName,
+//                    double value);
 
-    bool appendData(GtDataZone0D* dataZone, const QString& paramName,
-                    const QString& unit, double value);
+//    bool appendData(GtDataZone0D* dataZone, const QString& paramName,
+//                    const QString& unit, double value);
 
 signals:
     /**

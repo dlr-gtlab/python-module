@@ -17,6 +17,8 @@
 
 #include "gt_application.h"
 #include "gtpy_contextmanager.h"
+#include "gt_globals.h"
+#include "gt_versionnumber.h"
 
 using namespace std;
 
@@ -31,7 +33,11 @@ showSplashScreen()
     cout << "    / /_/ / _  /   _  / / /_/ /_  /_/ /" << endl;
     cout << "    \\____/  /_/    /_/  \\__,_/ /_.___/ " << endl;
     cout << "                                 " <<
+#if GT_VERSION < GT_VERSION_CHECK(2,0, 0)
          GtApplication::versionToString().toStdString() << endl;
+#else
+         GtApplication::version().toString().toStdString() << endl;
+#endif
     cout << "******************************************" << endl;
     cout << endl;
 }
@@ -64,7 +70,11 @@ int main(int argc, char* argv[])
     QCoreApplication::setOrganizationName("DLR");
     QCoreApplication::setApplicationName("GTlab");
 
+#if GT_VERSION < GT_VERSION_CHECK(2,0, 0)
     QCoreApplication::setApplicationVersion(GtApplication::versionToString());
+#else
+    QCoreApplication::setApplicationVersion(GtApplication::version().toString());
+#endif
 
     QApplication a(argc, argv);
 

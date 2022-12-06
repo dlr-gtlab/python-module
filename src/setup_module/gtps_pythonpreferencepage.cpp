@@ -1,8 +1,10 @@
-#include "gt_pythonpreferencepage.h"
-#include "ui_gt_pythonpreferencepage.h"
+#include "gtps_pythonpreferencepage.h"
+#include "ui_gtps_pythonpreferencepage.h"
 
 #include "gt_settings.h"
 #include "gt_moduleinterface.h"
+
+#include "gtps_globals.h"
 #include "gtps_pythoninterpreter.h"
 
 #include <QFileDialog>
@@ -69,24 +71,23 @@ void GtPythonPreferencePage::onBtnSelectPyExePressed()
 void GtPythonPreferencePage::onBtnTestPyEnvPressed()
 {
     auto currentPyExe = ui->lePythonExe->text();
-    GtpsPythonInterpreter evaluator(currentPyExe);
+    GtpsPythonInterpreter interpreter{currentPyExe};
 
-    QString pyCode = "import sys;print(', '.join([x for x in sys.path if x]), "
-                     "end='')";
+    auto pyVer = interpreter.version();
 
-    bool ok{false};
-    evaluator.eval(pyCode, &ok);
-
-    auto pyVer = evaluator.pythonVersion();
-
-    if (ok && pyVer != GtVersionNumber(0,0,0))
+    if (!interpreter.isValid())
     {
-        ui->lbPythonStatus->setText(tr("Python %1 found")
-                                        .arg(pyVer.toString()));
+        ui->lbPythonStatus->setText(tr("Error: invalid python executable!"));
+    }
+    else if (!gtps::validation::isSupported(pyVer))
+    {
+        ui->lbPythonStatus->setText(tr("Error: Python %1 is not supported!")
+                                        .arg(gtps::apiVersionStr(pyVer)));
     }
     else
     {
-        ui->lbPythonStatus->setText(tr("Error: invalid python executable!"));
+        ui->lbPythonStatus->setText(tr("Python %1 found")
+                                        .arg(pyVer.toString()));
     }
 }
 
