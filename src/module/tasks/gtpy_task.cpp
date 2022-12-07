@@ -171,12 +171,11 @@ GtpyTask::packageNames()
 bool
 GtpyTask::childAccepted(GtObject* /*child*/)
 {
-    if (qobject_cast<GtProcessData*>(this->parent()))
-    {
-        return false;
-    }
-
-    return true;
+#if GT_VERSION >= 0x020000
+    return qobject_cast<GtTaskGroup*>(this->parent()) != nullptr;
+#else
+    return qobject_cast<GtProcessData*>(this->parent()) != nullptr;
+#endif
 }
 
 QStringList

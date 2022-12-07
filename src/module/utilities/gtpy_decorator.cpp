@@ -18,7 +18,6 @@
 #include "gt_project.h"
 #include "gt_task.h"
 #include "gt_coreprocessexecutor.h"
-#include "gt_processdata.h"
 #include "gt_calculator.h"
 #include "gt_objectlinkproperty.h"
 #include "gt_command.h"
