@@ -35,6 +35,15 @@ variables:
   # e.g. /^main_1_0$|^main_1_1$/
   STABLE_BRANCHES: /^master$/
   
+  STABLE_PY_MAJOR: 3
+  STABLE_PY_MINOR: 7
+  
+  UNSTABLE_PY_MAJOR: 3
+  UNSTABLE_PY_MINOR: 9
+  
+  STABLE_TARGETDIR: python$STABLE_PY_MAJOR$STABLE_PY_MINOR
+  UNSTABLE_TARGETDIR: python$UNSTABLE_PY_MAJOR$UNSTABLE_PY_MINOR
+  
   # Name of the unstable branch (if it exists)
   #UNSTABLE_BRANCH: unstable_master
 
@@ -50,9 +59,9 @@ stages:
   - regressionTest
   - unstableBuild
   - unstableTest
+  - package
   - deploy
   - codequality
-  - package
   - badges
 
 findCodeBaseStatus:
@@ -87,13 +96,13 @@ devtoolsUpdateLinux:
 .winDebugArtifacts:
   artifacts:
     paths:
-      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPythonSetup-d.dll
-      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPythonSetup-d.lib
-      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPythonSetup-d.pdb
-      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.dll
-      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.lib
-      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.pdb
-      - include\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\*.h
+      - lib\python$PY_MAJOR$PY_MINOR\GTlabPythonSetup-d.dll
+      - lib\python$PY_MAJOR$PY_MINOR\GTlabPythonSetup-d.lib
+      - lib\python$PY_MAJOR$PY_MINOR\GTlabPythonSetup-d.pdb
+      - lib\python$PY_MAJOR$PY_MINOR\GTlabPython$PY_MAJOR$PY_MINOR-d.dll
+      - lib\python$PY_MAJOR$PY_MINOR\GTlabPython$PY_MAJOR$PY_MINOR-d.lib
+      - lib\python$PY_MAJOR$PY_MINOR\GTlabPython$PY_MAJOR$PY_MINOR-d.pdb
+      - include\python$PY_MAJOR$PY_MINOR\*.h
       - build\$UNITTESTSNAME.exe
       - build\$UNITTESTSNAME.pdb
       - buildLog.txt
@@ -103,18 +112,18 @@ devtoolsUpdateLinux:
 .winReleaseArtifacts:
   artifacts:
     paths:
-      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPythonSetup.dll
-      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPythonSetup.lib
-      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION.dll
-      - lib\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\GTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION.lib
-      - include\python$PY_MAJOR_VERSION$PY_MINOR_VERSION\*.h
+      - lib\python$PY_MAJOR$PY_MINOR\GTlabPythonSetup.dll
+      - lib\python$PY_MAJOR$PY_MINOR\GTlabPythonSetup.lib
+      - lib\python$PY_MAJOR$PY_MINOR\GTlabPython$PY_MAJOR$PY_MINOR.dll
+      - lib\python$PY_MAJOR$PY_MINOR\GTlabPython$PY_MAJOR$PY_MINOR.lib
+      - include\python$PY_MAJOR$PY_MINOR\*.h
       - build\$UNITTESTSNAME.exe
       - build\$UNITTESTSNAME.pdb
       - buildLog.txt
     expire_in: 1 week
     when: always
     
-windowsBuildDebugPy37:
+winBuildDebug:
   stage: build
   extends: 
     - .stable-debug
@@ -124,8 +133,8 @@ windowsBuildDebugPy37:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
-    PY_MAJOR_VERSION: 3
-    PY_MINOR_VERSION: 7
+    PY_MAJOR: $STABLE_PY_MAJOR
+    PY_MINOR: $STABLE_PY_MINOR
     MAJOR_VERSION: $STABLE_MAJOR
     BUILDBATCH: "true"
     BUILDMODE: release
@@ -134,7 +143,7 @@ windowsBuildDebugPy37:
     QMAKE_PATH: $QMAKE_PATH_512
     VCvarsall: $VCVARS_2017_PS 
     
-windowsBuildDebugUnstablePy39:
+winDebugUnstable:
   stage: unstableBuild
   extends: 
     - .unstable-debug
@@ -144,8 +153,8 @@ windowsBuildDebugUnstablePy39:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
-    PY_MAJOR_VERSION: 3
-    PY_MINOR_VERSION: 9
+    PY_MAJOR: $UNSTABLE_PY_MAJOR
+    PY_MINOR: $UNSTABLE_PY_MINOR
     MAJOR_VERSION: $UNSTABLE_MAJOR
     BUILDBATCH: "true"
     DEVTOOLS: $DEVTOOLS_Win_Unstable
@@ -153,7 +162,7 @@ windowsBuildDebugUnstablePy39:
     QMAKE_PATH: $QMAKE_PATH_515
     VCvarsall: $VCVARS_2019_PS
 
-windowsBuildReleasePy37:
+winBuildRelease:
   stage: build
   extends: 
     - .stable-release
@@ -163,8 +172,8 @@ windowsBuildReleasePy37:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
-    PY_MAJOR_VERSION: 3
-    PY_MINOR_VERSION: 7
+    PY_MAJOR: $STABLE_PY_MAJOR
+    PY_MINOR: $STABLE_PY_MINOR
     BUILDBATCH: "false"
     MAJOR_VERSION: $STABLE_MAJOR
     DEVTOOLS: $DEVTOOLS_Win_Stable
@@ -172,7 +181,7 @@ windowsBuildReleasePy37:
     QMAKE_PATH: $QMAKE_PATH_512
     VCvarsall: $VCVARS_2017_PS
  
-windowsBuildReleaseUnstablePy39:
+winBuildReleaseUnstable:
   stage: unstableBuild
   extends: 
     - .unstable-release
@@ -182,8 +191,8 @@ windowsBuildReleaseUnstablePy39:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
-    PY_MAJOR_VERSION: 3
-    PY_MINOR_VERSION: 9
+    PY_MAJOR: $UNSTABLE_PY_MAJOR
+    PY_MINOR: $UNSTABLE_PY_MINOR
     MAJOR_VERSION: $UNSTABLE_MAJOR
     BUILDBATCH: "true"
     DEVTOOLS: $DEVTOOLS_Win_Unstable
@@ -195,9 +204,9 @@ windowsBuildReleaseUnstablePy39:
 .linuxDebugArtifacts:
   artifacts:
     paths:
-      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPythonSetup-d.so*
-      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION-d.so*
-      - include/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/*.h
+      - lib/python$PY_MAJOR$PY_MINOR/libGTlabPythonSetup-d.so*
+      - lib/python$PY_MAJOR$PY_MINOR/libGTlabPython$PY_MAJOR$PY_MINOR-d.so*
+      - include/python$PY_MAJOR$PY_MINOR/*.h
       - build/$UNITTESTSNAME
       - linuxBuild.txt
     when: always
@@ -206,33 +215,32 @@ windowsBuildReleaseUnstablePy39:
 .linuxReleaseArtifacts:
   artifacts:
     paths:
-      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPythonSetup.so*
-      - lib/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/libGTlabPython$PY_MAJOR_VERSION$PY_MINOR_VERSION.so*
-      - include/python$PY_MAJOR_VERSION$PY_MINOR_VERSION/*.h
+      - lib/python$PY_MAJOR$PY_MINOR/libGTlabPythonSetup.so*
+      - lib/python$PY_MAJOR$PY_MINOR/libGTlabPython$PY_MAJOR$PY_MINOR.so*
+      - include/python$PY_MAJOR$PY_MINOR/*.h
       - build/$UNITTESTSNAME
       - linuxBuild.txt
     when: always
     expire_in: 1 week
     
-linuxBuildDebugPy37:
+linuxBuildDebug:
   stage: build
   extends: 
     - .stable-debug
     - .buildLinuxDebug
-    - .linuxReleaseArtifacts
+    - .linuxDebugArtifacts
   needs:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
-    PY_MAJOR_VERSION: 3
-    PY_MINOR_VERSION: 7
+    PY_MAJOR: $STABLE_PY_MAJOR
+    PY_MINOR: $STABLE_PY_MINOR
     MAJOR_VERSION: $STABLE_MAJOR
     BUILDBATCH: "false"
-    BUILDMODE: release
     DEVTOOLS: $DEVTOOLS_Linux_Stable
     QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
 
-linuxBuildDebugUnstablePy39:
+linuxBuildDebugUnstable:
   stage: unstableBuild
   extends: 
     - .unstable-debug
@@ -242,15 +250,15 @@ linuxBuildDebugUnstablePy39:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
-    PY_MAJOR_VERSION: 3
-    PY_MINOR_VERSION: 9
+    PY_MAJOR: $UNSTABLE_PY_MAJOR
+    PY_MINOR: $UNSTABLE_PY_MINOR
     BUILDUNITTESTS: "true"
     BUILDBATCH: "false"
     MAJOR_VERSION: $UNSTABLE_MAJOR
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
     QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
  
-linuxBuildReleasePy37:
+linuxBuildRelease:
   stage: build
   extends: 
     - .stable-release
@@ -260,14 +268,14 @@ linuxBuildReleasePy37:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
-    PY_MAJOR_VERSION: 3
-    PY_MINOR_VERSION: 7
+    PY_MAJOR: $STABLE_PY_MAJOR
+    PY_MINOR: $STABLE_PY_MINOR
     MAJOR_VERSION: $STABLE_MAJOR
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Stable
     QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
 
-linuxBuildReleaseUnstablePy39:
+linuxBuildReleaseUnstable:
   stage: unstableBuild
   extends: 
     - .unstable-release
@@ -277,8 +285,8 @@ linuxBuildReleaseUnstablePy39:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
-    PY_MAJOR_VERSION: 3
-    PY_MINOR_VERSION: 9
+    PY_MAJOR: $UNSTABLE_PY_MAJOR
+    PY_MINOR: $UNSTABLE_PY_MINOR
     MAJOR_VERSION: $UNSTABLE_MAJOR
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
@@ -286,7 +294,7 @@ linuxBuildReleaseUnstablePy39:
 
 
 # run tests using the binary built before
-testWinPy37:
+testWin:
   stage: test
   extends: 
     - .stable-debug
@@ -295,13 +303,13 @@ testWinPy37:
     - .\tests\unittests\runUnittestsQt512.bat
     - get-content CoverageReport*\index.html
   needs: 
-    - windowsBuildDebugPy37
+    - winBuildDebug
   dependencies: 
-    - windowsBuildDebugPy37
+    - winBuildDebug
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-testWinUnstablePy39:
+testWinUnstable:
   stage: unstableTest
   extends:
     - .unstable-debug  
@@ -310,65 +318,180 @@ testWinUnstablePy39:
     - .\tests\unittests\runUnittestsQt515.bat
     - get-content CoverageReport*\index.html
   needs: 
-    - windowsBuildDebugUnstablePy39
+    - winDebugUnstable
   dependencies: 
-    - windowsBuildDebugUnstablePy39
+    - winDebugUnstable
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Unstable  
 
-testLinuxPy37:
+testLinux:
   stage: test
   extends: 
     - .stable-debug
     - .linuxTestTemplate
   needs: 
-    - linuxBuildDebugPy37
+    - linuxBuildDebug
   dependencies:
-    - linuxBuildDebugPy37
+    - linuxBuildDebug
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Stable    
 
-testLinuxUnstablePy39:
+testLinuxUnstable:
   stage: unstableTest
   extends: 
     - .unstable-debug
     - .linuxTestTemplate
   needs: 
-    - linuxBuildDebugUnstablePy39
+    - linuxBuildDebugUnstable
   dependencies:
-    - linuxBuildDebugUnstablePy39
+    - linuxBuildDebugUnstable
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
     LINUX_QT_DIR: /opt/Qt/5.15.2/gcc_64
 
+# run package jobs
+.package:
+  stage: package
+  tags:
+    - Linux
+  script:
+    - mkdir pkg
+    - mkdir -p pkg/$BINDIR
+    - mkdir -p pkg/$BINDEBUGDIR
+    - mkdir pkg/lib
+    # copy all runtime libs into bindirs
+    - mv lib/$SUBDIR/*-d.dll pkg/$BINDEBUGDIR 2> /dev/null || `:`
+    - mv lib/$SUBDIR/*-d.so* pkg/$BINDEBUGDIR 2> /dev/null || `:`
+    - mv lib/$SUBDIR/*.dll pkg/$BINDIR 2> /dev/null || `:`
+    - mv lib/$SUBDIR/*.so* pkg/$BINDIR 2> /dev/null || `:`
+    # copy all libs into pkg/lib
+    - mv lib/$SUBDIR/*.lib pkg/lib 2> /dev/null || `:`
+    - cp pkg/$BINDIR/*.so* pkg/lib 2> /dev/null || `:`
+    - cp pkg/$BINDEBUGDIR/*.so* pkg/lib 2> /dev/null || `:`
+    # move include and libdir into package
+    - mv include/ pkg/
+    # show package contents
+    - find pkg/
+  artifacts:
+    paths:
+    - pkg
+  variables:
+    BINDIR: bin/modules
+    BINDEBUGDIR: binDebug/modules
+    SUBDIR: $STABLE_TARGETDIR
+
+packageWinStable:
+  extends:
+    - .package
+    - .stable-release
+  needs:
+    - job: winBuildDebug
+    - job: winBuildRelease
+      optional: true
+
+packageWinUnstable:
+  extends:
+    - .package
+    - .unstable-release
+  needs:
+    - job: winDebugUnstable
+    - job: winBuildReleaseUnstable
+      optional: true
+  variables:
+    SUBDIR: $UNSTABLE_TARGETDIR
+
+packageLinuxStable:
+  extends:
+    - .package
+    - .stable-release
+  needs:
+    - job: linuxBuildDebug
+    - job: linuxBuildRelease
+      optional: true
+
+packageLinuxUnstable:
+  extends:
+    - .package
+    - .unstable-release
+  needs:
+    - job: linuxBuildDebugUnstable
+    - job: linuxBuildReleaseUnstable
+      optional: true
+  variables:
+    SUBDIR: $UNSTABLE_TARGETDIR
+    
+packageXml:
+  stage: package
+  extends: .packageTemplate
+
 # deployment
-createJobs:
+.stable-tag:
+  rules:
+    - if: $CI_COMMIT_TAG != null && $STABLE_BASE != null && $STABLE_BASE == "True"
+
+.unstable-tag:
+  rules:
+    - if: $CI_COMMIT_TAG != null && $UNSTABLE_BRANCH == null && $STABLE_BASE != null && $STABLE_BASE == "True"
+    - if: $CI_COMMIT_TAG != null && $UNSTABLE_BRANCH != null && $STABLE_BASE != null && $STABLE_BASE == "False"
+
+.deploy:
+  script:
+    - robocopy pkg C:\deployment\$PLATFORMNAME\$CATEGORY\$CI_PROJECT_NAME\$RELEASESTATUS\$CI_COMMIT_TAG /MIR
+  variables:
+    PLATFORMNAME: windows
+    RELEASESTATUS: stable
+
+deployWinStable:
   stage: deploy
   extends:
-    - .createJobsTemplate
-  dependencies: []
-  variables:
-    WinReStableJob: windowsBuildReleasePy37
-    WinReUnstableJob: windowsBuildReleaseUnstablePy39
-    WinDeStableJob: windowsBuildDebugPy37
-    WinDeUnstableJob: windowsBuildDebugUnstablePy39
-    LinReStableJob: linuxBuildReleasePy37
-    LinReUnstableJob: linuxBuildReleaseUnstablePy39
-    LinDeStableJob: linuxBuildDebugPy37
-    LinDeUnstableJob: linuxBuildDebugUnstablePy39
-
-triggerJobs:
-  stage: deploy
-  extends: .only-tags-child
+    - .stable-tag
+    - .deploy
+  tags:
+    - Win10
   needs:
-    - createJobs
-  trigger:
-    include:
-      - artifact: deploy.yml
-        job: createJobs
-    strategy: depend
+    - packageWinStable
   variables:
-    PARENT_PIPELINE_ID: $CI_PIPELINE_ID
+    PLATFORMNAME: windows
+    RELEASESTATUS: stable
+
+deployWinUnstable:
+  stage: deploy
+  extends:
+    - .unstable-tag
+    - .deploy
+  tags:
+    - Win10
+  needs:
+    - packageWinUnstable
+  variables:
+    PLATFORMNAME: windows
+    RELEASESTATUS: unstable
+
+deployLinuxStable:
+  stage: deploy
+  extends:
+    - .stable-tag
+    - .deploy
+  tags:
+    - Win10
+  needs:
+    - packageLinuxStable
+  variables:
+    PLATFORMNAME: linux
+    RELEASESTATUS: stable
+
+deployLinuxUnstable:
+  stage: deploy
+  extends:
+    - .unstable-tag
+    - .deploy
+  tags:
+    - Win10
+  needs:
+    - packageLinuxUnstable
+  variables:
+    PLATFORMNAME: linux
+    RELEASESTATUS: unstable
 
 # code quality
 codingstyle:
@@ -383,10 +506,6 @@ pages:
   stage: badges
   extends: .pageTemplate
 
-package:
-  stage: package
-  extends: .packageTemplate
-
 # badges
 badges:
   stage: badges
@@ -394,10 +513,10 @@ badges:
     - .stable-only-master
     - .badgeTemplate
   dependencies:
-    - windowsBuildDebugPy37
-    - linuxBuildDebugPy37
-    - testWinPy37
-    - testLinuxPy37
+    - winBuildDebug
+    - linuxBuildDebug
+    - testWin
+    - testLinux
     - codingstyle
 
 badgesUnstable:
@@ -406,8 +525,8 @@ badgesUnstable:
     - .unstable-only-master
     - .badgeTemplate
   dependencies:
-    - windowsBuildDebugUnstablePy39
-    - linuxBuildDebugUnstablePy39
-    - testWinUnstablePy39
-    - testLinuxUnstablePy39
+    - winDebugUnstable
+    - linuxBuildDebugUnstable
+    - testWinUnstable
+    - testLinuxUnstable
     - codingstyle
