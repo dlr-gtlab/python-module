@@ -17,11 +17,11 @@
 #include "gt_networkinterface.h"
 #include "gt_globals.h"
 
-#if GT_VERSION >= 0x010700
+#if GT_VERSION >= GT_VERSION_CHECK(1, 7, 0)
 #include "gt_versionnumber.h"
 #endif
 
-#if GT_VERSION < 0x020000
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
 #include "gt_initmoduleinterface.h"
 #else
 #include "gt_commandlinefunction.h"
@@ -35,13 +35,17 @@
 class GtPythonModule: public QObject, public GtModuleInterface,
     public GtProcessInterface, public GtMdiInterface,
     public GtCollectionInterface, public GtNetworkInterface
-#if GT_VERSION < 0x020000
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
     , public GtInitModuleInterface
 #endif
 {
     Q_OBJECT
-    // cppcheck-suppress syntaxError // NOLINTNEXTLINE
-    GT_MODULE("gt_python.json")
+
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
+    GT_MODULE("gt_python_1_7.json") // cppcheck-suppress syntaxError
+#else
+    GT_MODULE("gt_python.json") // cppcheck-suppress syntaxError
+#endif
 
     Q_INTERFACES(GtModuleInterface)
     Q_INTERFACES(GtProcessInterface)
@@ -49,7 +53,7 @@ class GtPythonModule: public QObject, public GtModuleInterface,
     Q_INTERFACES(GtCollectionInterface)
     Q_INTERFACES(GtNetworkInterface)
 
-#if GT_VERSION < 0x020000
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
     Q_INTERFACES(GtInitModuleInterface)
 #endif
 
@@ -58,7 +62,7 @@ public:
      * @brief Returns current version number of datamodel extension
      * @return version number
      */
-#if GT_VERSION >= 0x010700
+#if GT_VERSION >= GT_VERSION_CHECK(1, 7, 0)
     GtVersionNumber version() override;
 #else
     int version() override;
@@ -70,7 +74,7 @@ public:
      */
     QString description() const override;
 
-#if GT_VERSION >= 0x020000
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
     /**
      * @brief metaInformation
      * @return baic meta information about the module
@@ -162,7 +166,7 @@ public:
      */
     QMetaObject accessConnection() override;
 
-#if GT_VERSION >= 0x020000
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
     /**
      * @brief metaInformation
      * @return baic meta information about the module
