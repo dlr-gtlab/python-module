@@ -11,7 +11,6 @@
 #include "gt_processdata.h"
 #include "gt_project.h"
 #include "gt_task.h"
-#include "gtpy_scriptcalculator.h"
 
 #include "gtpy_processdatadistributor.h"
 
@@ -27,11 +26,21 @@ GtpyProcessDataDistributor::taskElement(const QString& name)
 
     if (!data)
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
-    GtTask* task = data->findDirectChild<GtTask*>(name);
+#if GT_VERSION >= 0x020000
+    GtTaskGroup* group = data->taskGroup();
 
+    if (!group)
+    {
+        return nullptr;
+    }
+
+    GtTask* task = group->findDirectChild<GtTask*>(name);
+#else
+    GtTask* task = data->findDirectChild<GtTask*>(name);
+#endif
     if (!task)
     {
         return task;
