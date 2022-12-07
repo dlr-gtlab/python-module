@@ -172,9 +172,9 @@ bool
 GtpyTask::childAccepted(GtObject* /*child*/)
 {
 #if GT_VERSION >= 0x020000
-    return qobject_cast<GtTaskGroup*>(this->parent()) != nullptr;
+    return qobject_cast<GtTaskGroup*>(this->parent()) == nullptr;
 #else
-    return qobject_cast<GtProcessData*>(this->parent()) != nullptr;
+    return qobject_cast<GtProcessData*>(this->parent()) == nullptr;
 #endif
 }
 
