@@ -22,7 +22,12 @@
 #include "gt_extendedtaskdata.h"
 #include "gt_datamodel.h"
 #include "gt_processfactory.h"
+#if GT_VERSION >= 0x020000
+#include "gt_taskgroup.h"
+#else
 #include "gt_processdata.h"
+#endif
+
 
 #include "gtpy_taskstylemodel.h"
 
@@ -208,7 +213,11 @@ GtpyTaskStyleModel::canDropMimeData(const QMimeData* data,
     else if (const GtTask* task = qobject_cast<GtTask*>(obj))
     {
         // handle task drop
+#if GT_VERSION >= 0x020000
+        if (qobject_cast<GtTaskGroup*>(parentObj))
+#else
         if (qobject_cast<GtProcessData*>(parentObj))
+#endif
         {
             return true;
         }

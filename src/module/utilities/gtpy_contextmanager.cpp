@@ -32,7 +32,7 @@
 #include "gt_logging.h"
 #include "gt_abstractproperty.h"
 #include "gt_project.h"
-#include "gt_processdata.h"
+
 #include "gt_task.h"
 #include "gt_calculator.h"
 #include "gt_coreapplication.h"

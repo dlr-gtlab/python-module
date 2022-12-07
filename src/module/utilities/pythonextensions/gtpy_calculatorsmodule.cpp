@@ -12,19 +12,15 @@
 #include "PythonQtInstanceWrapper.h"
 
 #include "gt_application.h"
-#include "gt_processdata.h"
-#include "gt_project.h"
 #include "gt_calculator.h"
 #include "gt_calculatordata.h"
 #include "gt_calculatorfactory.h"
-#include "gt_coreprocessexecutor.h"
 #include "gt_abstractrunnable.h"
 
 #include "gtpy_processdatadistributor.h"
 #include "gtpy_calculatorfactory.h"
 #include "gtpy_decorator.h"
 #include "gtpy_gilscope.h"
-#include "gtpy_extendedwrapper.h"
 
 #include "gtpy_calculatorsmodule.h"
 
