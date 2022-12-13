@@ -28,6 +28,7 @@ LIBS        += -L$${GTLAB_CORE_PATH}/lib/core
 DEPENDPATH  += $${GTLAB_CORE_PATH}/lib/core
 INCLUDEPATH += $${GTLAB_CORE_PATH}/include/core
 
+DEFINES     += GT_LOG_USE_QT_BINDINGS
 LIBS        += -L$${GTLAB_LOGGING_PATH}/lib/logging
 DEPENDPATH  += $${GTLAB_LOGGING_PATH}/lib/logging
 INCLUDEPATH += $${GTLAB_LOGGING_PATH}/include/logging

@@ -19,6 +19,8 @@
 #include "PythonQtObjectPtr.h"
 #include "PythonQtConversion.h"
 
+#include "gt_globals.h"
+
 #include "gtpy_gilscope.h"
 #include "gtpy_globals.h"
 
@@ -299,6 +301,14 @@ private:
     static const QString TASK_VAR;
     static const QString CLASS_WRAPPER_MODULE;
     static const QString CALC_MODULE;
+
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
+    /**
+     * @brief Adds the paths of the Python environment to PATH. It uses the
+     * user-specific Python environment path defined in PYTHONHOME.
+     */
+    void setEnvironmentPaths() const;
+#endif
 
     /**
     * @brief Configures the python context indicated by contextId with the
