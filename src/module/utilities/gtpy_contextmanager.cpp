@@ -24,24 +24,20 @@
 #include "PythonQt.h"
 #include "PythonQtObjectPtr.h"
 #include "PythonQtMethodInfo.h"
-#include "PythonQtSignal.h"
-#include "PythonQtProperty.h"
 #include "PythonQtConversion.h"
 
-#include "gt_environment.h"
-#include "gt_logging.h"
 #include "gt_abstractproperty.h"
 #include "gt_project.h"
-
 #include "gt_task.h"
 #include "gt_calculator.h"
 #include "gt_coreapplication.h"
 #include "gt_calculatordata.h"
 #include "gt_calculatorfactory.h"
-#include "gt_calculatorhelperfactory.h"
+#if GT_VERSION < 0x020000
+#include "gt_datazone0d.h"
+#endif
 
 #include "gtpy_stdout.h"
-#include "gtpy_calculatorfactory.h"
 #include "gtpy_decorator.h"
 #include "gtpy_interruptrunnable.h"
 #include "gtpy_scriptrunnable.h"
@@ -79,6 +75,10 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     qRegisterMetaType<GtpyContextManager::Context>
     ("GtpyContextManager::Context");
 
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
+    setEnvironmentPaths();
+#endif
+
 #ifdef Q_OS_LINUX
     dlopen(PYTHON_LIBRARY, RTLD_LAZY | RTLD_GLOBAL);
 #endif
@@ -99,7 +99,10 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
                                     CLASS_WRAPPER_MODULE.toLocal8Bit().data());
     PythonQt::self()->registerClass(&GtCalculator::staticMetaObject,
                                     CLASS_WRAPPER_MODULE.toLocal8Bit().data());
-
+#if GT_VERSION < 0x020000
+    PythonQt::self()->registerClass(&GtDataZone0D::staticMetaObject,
+                                    CLASS_WRAPPER_MODULE.toLocal8Bit().data());
+#endif
     registerTypeConverters();
 
     m_decorator = new GtpyDecorator(this);
@@ -163,6 +166,50 @@ GtpyContextManager::collectionPath()
 
     return retval;
 }
+
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
+void
+GtpyContextManager::setEnvironmentPaths() const
+{
+    QString var = qEnvironmentVariable("PYTHONHOME");
+
+    if (var.isEmpty())
+    {
+        return;
+    }
+
+    QDir pythonDir(var);
+
+    if (!pythonDir.exists())
+    {
+        return;
+    }
+
+    QString paths = qEnvironmentVariable("PATH");
+
+    if (!paths.isEmpty())
+    {
+        if (!paths.endsWith(";"))
+        {
+            paths.append(";");
+        }
+    }
+
+    paths += QDir::toNativeSeparators(pythonDir.path()) + ";";
+
+    if (pythonDir.cd("Library"))
+    {
+        paths += QDir::toNativeSeparators(pythonDir.path()) + ";";
+    }
+
+    if (pythonDir.cd("bin"))
+    {
+        paths += QDir::toNativeSeparators(pythonDir.path()) + ";";
+    }
+
+    qputenv("PATH", paths.toUtf8());
+}
+#endif
 
 void
 GtpyContextManager::initExtensions()
@@ -650,7 +697,7 @@ GtpyContextManager::deleteContext(int contextId, bool emitSignal)
 
     if (contextId < metaEnum.keyCount())
     {
-        gtDebug() << "It is not allowed to remove one of the default contexts!";
+        //gtDebug() << "It is not allowed to remove one of the default contexts!";
         return false;
     }
 

@@ -34,7 +34,7 @@ GtpsPythonInterpreter::eval(const QString& pythonCommand, bool* ok) const
 
     if (succes)
     {
-        retval = process.readAll();
+        retval = QString(process.readAll());
     }
     else
     {

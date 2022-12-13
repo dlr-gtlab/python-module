@@ -15,6 +15,8 @@
 #include <QObject>
 #include <QVariant>
 
+#include "gt_globals.h"
+
 class GtCoreApplication;
 class GtProject;
 class GtTask;
@@ -24,6 +26,10 @@ class GtCalculator;
 class GtpyTask;
 class GtpyProcessDataDistributor;
 class GtProcessComponent;
+
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
+class GtDataZone0D;
+#endif
 
 #ifndef Q_MOC_RUN
 
@@ -427,6 +433,28 @@ public slots:
      */
     void setObjectName(QObject* obj, QString name);
 
+    ///-------> functions of GtDataZone0D <-------
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
+    double value(GtDataZone0D* dataZone, const QString& paramName, bool* ok =
+                     Q_NULLPTR);
+
+    /**
+     * @brief entries
+     * @param dataZone - data to export as map (dictionary in python)
+     * @param ok - flag to show success
+     * @return a map of the entries of the datazone
+     */
+    QMap<QString, double> entries(GtDataZone0D* dataZone, bool* ok = Q_NULLPTR);
+
+    bool setValue(GtDataZone0D* dataZone, const QString& paramName,
+                  const double& value);
+
+    bool appendData(GtDataZone0D* dataZone, const QString& paramName,
+                    double value);
+
+    bool appendData(GtDataZone0D* dataZone, const QString& paramName,
+                    const QString& unit, double value);
+#endif
 signals:
     /**
      * @brief sendPythonConsoleOutput signal for transmitting an output message
