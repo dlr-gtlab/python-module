@@ -143,7 +143,7 @@ winBuildDebug:
     QMAKE_PATH: $QMAKE_PATH_512
     VCvarsall: $VCVARS_2017_PS 
     
-winDebugUnstable:
+winBuildDebugUnstable:
   stage: unstableBuild
   extends: 
     - .unstable-debug
@@ -304,8 +304,6 @@ testWin:
     - get-content CoverageReport*\index.html
   needs: 
     - winBuildDebug
-  dependencies: 
-    - winBuildDebug
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
@@ -318,9 +316,7 @@ testWinUnstable:
     - .\tests\unittests\runUnittestsQt515.bat
     - get-content CoverageReport*\index.html
   needs: 
-    - winDebugUnstable
-  dependencies: 
-    - winDebugUnstable
+    - winBuildDebugUnstable
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Unstable  
 
@@ -331,8 +327,6 @@ testLinux:
     - .linuxTestTemplate
   needs: 
     - linuxBuildDebug
-  dependencies:
-    - linuxBuildDebug
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Stable    
 
@@ -342,8 +336,6 @@ testLinuxUnstable:
     - .unstable-debug
     - .linuxTestTemplate
   needs: 
-    - linuxBuildDebugUnstable
-  dependencies:
     - linuxBuildDebugUnstable
   variables:
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
@@ -358,16 +350,16 @@ testLinuxUnstable:
     - mkdir pkg
     - mkdir -p pkg/$BINDIR
     - mkdir -p pkg/$BINDEBUGDIR
-    - mkdir pkg/lib
+    - mkdir -p pkg/lib/$SUBDIR
     # copy all runtime libs into bindirs
     - mv lib/$SUBDIR/*-d.dll pkg/$BINDEBUGDIR 2> /dev/null || `:`
     - mv lib/$SUBDIR/*-d.so* pkg/$BINDEBUGDIR 2> /dev/null || `:`
     - mv lib/$SUBDIR/*.dll pkg/$BINDIR 2> /dev/null || `:`
     - mv lib/$SUBDIR/*.so* pkg/$BINDIR 2> /dev/null || `:`
     # copy all libs into pkg/lib
-    - mv lib/$SUBDIR/*.lib pkg/lib 2> /dev/null || `:`
-    - cp pkg/$BINDIR/*.so* pkg/lib 2> /dev/null || `:`
-    - cp pkg/$BINDEBUGDIR/*.so* pkg/lib 2> /dev/null || `:`
+    - mv lib/$SUBDIR/*.lib pkg/lib/$SUBDIR 2> /dev/null || `:`
+    - cp pkg/$BINDIR/*.so* pkg/lib/$SUBDIR 2> /dev/null || `:`
+    - cp pkg/$BINDEBUGDIR/*.so* pkg/lib/$SUBDIR 2> /dev/null || `:`
     # move include and libdir into package
     - mv include/ pkg/
     # show package contents
@@ -394,7 +386,7 @@ packageWinUnstable:
     - .package
     - .unstable-release
   needs:
-    - job: winDebugUnstable
+    - job: winBuildDebugUnstable
     - job: winBuildReleaseUnstable
       optional: true
   variables:
@@ -525,7 +517,7 @@ badgesUnstable:
     - .unstable-only-master
     - .badgeTemplate
   dependencies:
-    - winDebugUnstable
+    - winBuildDebugUnstable
     - linuxBuildDebugUnstable
     - testWinUnstable
     - testLinuxUnstable
