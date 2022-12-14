@@ -45,7 +45,7 @@ variables:
   UNSTABLE_TARGETDIR: python$UNSTABLE_PY_MAJOR$UNSTABLE_PY_MINOR
   
   # Name of the unstable branch (if it exists)
-  #UNSTABLE_BRANCH: unstable_master
+  UNSTABLE_BRANCH: unstable_master
 
 # inlcude some templates from this file
 include:
