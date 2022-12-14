@@ -377,18 +377,16 @@ packageWinStable:
     - .package
     - .stable-release
   needs:
-    - job: winBuildDebug
-    - job: winBuildRelease
-      optional: true
+    - winBuildDebug
+    - winBuildRelease
 
 packageWinUnstable:
   extends:
     - .package
     - .unstable-release
   needs:
-    - job: winBuildDebugUnstable
-    - job: winBuildReleaseUnstable
-      optional: true
+    - winBuildDebugUnstable
+    - winBuildReleaseUnstable
   variables:
     SUBDIR: $UNSTABLE_TARGETDIR
 
@@ -397,18 +395,16 @@ packageLinuxStable:
     - .package
     - .stable-release
   needs:
-    - job: linuxBuildDebug
-    - job: linuxBuildRelease
-      optional: true
+    - linuxBuildDebug
+    - linuxBuildRelease
 
 packageLinuxUnstable:
   extends:
     - .package
     - .unstable-release
   needs:
-    - job: linuxBuildDebugUnstable
-    - job: linuxBuildReleaseUnstable
-      optional: true
+    - linuxBuildDebugUnstable
+    - linuxBuildReleaseUnstable
   variables:
     SUBDIR: $UNSTABLE_TARGETDIR
     
