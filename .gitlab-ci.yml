@@ -428,7 +428,7 @@ packageXml:
 
 .deploy:
   script:
-    - robocopy pkg C:\deployment\$PLATFORMNAME\$CATEGORY\$CI_PROJECT_NAME\$RELEASESTATUS\$CI_COMMIT_TAG /MIR
+    - robocopy pkg C:\deployment\$PLATFORMNAME\$CATEGORY\$CI_PROJECT_NAME\$RELEASESTATUS\$CI_COMMIT_TAG /MIR; if ($lastexitcode -lt 4) { $global:LASTEXITCODE = $null }
   variables:
     PLATFORMNAME: windows
     RELEASESTATUS: stable
