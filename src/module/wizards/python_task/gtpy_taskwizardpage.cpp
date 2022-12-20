@@ -16,11 +16,11 @@
 
 // python includes
 #include "gtpy_contextmanager.h"
-#include "gtpy_taskitemmodel.h"
 #include "gtpy_taskstylemodel.h"
 #include "gtpy_tasktreeview.h"
 #include "gtpy_codegenerator.h"
 #include "gtpy_scripteditor.h"
+#include "gtpy_objectmodel.h"
 
 // GTlab framework includes
 #include "gt_stylesheets.h"
@@ -42,6 +42,10 @@
 #include "gt_pyhighlighter.h"
 #include "gt_calculatordata.h"
 
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+#include "gt_icons.h"
+#endif
+
 #include "gtpy_taskwizardpage.h"
 
 const QString GtpyTaskWizardPage::ARROW_LEFT = " <--";
@@ -49,11 +53,11 @@ const QString GtpyTaskWizardPage::ARROW_RIGHT = "-->";
 
 GtpyTaskWizardPage::GtpyTaskWizardPage() :
     GtpyAbstractScriptingWizardPage(GtpyContextManager::TaskEditorContext),
-    m_task(Q_NULLPTR),
-    m_treeView(Q_NULLPTR),
-    m_calcModel(Q_NULLPTR),
-    m_styledModel(Q_NULLPTR),
-    m_filterModel(Q_NULLPTR),
+    m_task(nullptr),
+    m_treeView(nullptr),
+    m_calcModel(nullptr),
+    m_styledModel(nullptr),
+    m_filterModel(nullptr),
     m_actionMapper(new QSignalMapper(this))
 {
     m_treeView = new GtpyTaskTreeView(this);
@@ -61,12 +65,13 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
     m_treeView->setFrameStyle(defaultFrameStyle());
 
     QPushButton* addElementButton = new QPushButton(tr("Add..."));
-    addElementButton->setIcon(gtApp->icon("addIcon_16.png"));
     addElementButton->setToolTip(tr("Add New Element"));
 
-#if GT_VERSION < 0x020000
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
+    addElementButton->setIcon(gtApp->icon("addIcon_16.png"));
     addElementButton->setStyleSheet(GtStyleSheets::buttonStyleSheet());
 #else
+    addElementButton->setIcon(gt::gui::icon::add16());
     addElementButton->setStyleSheet(gt::gui::stylesheet::buttonStyleSheet());
 #endif
 
@@ -114,11 +119,8 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
 void
 GtpyTaskWizardPage::endEval(bool /*success*/)
 {
-    if (m_calcModel != Q_NULLPTR &&
-            m_task != Q_NULLPTR &&
-            m_treeView != Q_NULLPTR)
+    if (m_task && m_treeView)
     {
-        m_calcModel->updateView();
         m_treeView->expandAll();
     }
 }
@@ -135,21 +137,21 @@ GtpyTaskWizardPage::initialization()
         return;
     }
 
-    if (m_task != Q_NULLPTR)
+    if (m_task)
     {
         delete m_task;
     }
 
     m_task = memento.restore<GtpyTask*>(gtProcessFactory);
 
-    if (m_task == Q_NULLPTR)
+    if (!m_task)
     {
         return;
     }
 
     m_task->setParent(this);
 
-    if (gtDataModel->objectByUuid(m_task->uuid()) == Q_NULLPTR)
+    if (!gtDataModel->objectByUuid(m_task->uuid()))
     {
         enableSaving(false);
     }
@@ -162,7 +164,7 @@ GtpyTaskWizardPage::initialization()
 
     foreach (GtObject* child, m_task->findChildren<GtObject*>())
     {
-        if (child != Q_NULLPTR)
+        if (child)
         {
             child->setFlag(GtObject::NewlyCreated, false);
             child->setFlag(GtObject::HasOwnChanges, false);
@@ -172,7 +174,8 @@ GtpyTaskWizardPage::initialization()
 
     m_treeView->setHeaderHidden(true);
 
-    m_calcModel = new GtpyTaskItemModel(m_task, m_treeView);
+    m_calcModel = new GtpyObjectModel(m_treeView);
+    m_calcModel->setRootObject(m_task);
 
     /// Own styled model created to enable editing calculator names
     m_styledModel = new GtpyTaskStyleModel(m_treeView);
@@ -192,11 +195,15 @@ GtpyTaskWizardPage::initialization()
 
     createSettings();
 
-    connect(m_calcModel, SIGNAL(processComponentRenamed(
-                                    QString, QString, QString)), this,
-            SLOT(onProcessComponentRenamed(QString, QString, QString)));
-    connect(m_task, SIGNAL(childAppended(GtObject*, GtObject*)), this,
-            SLOT(calculatorAppendedToTask(GtObject*, GtObject*)));
+    connect(m_calcModel, SIGNAL(
+                processComponentRenamed(QString,QString,QString)), this,
+            SLOT(onProcessComponentRenamed(QString,QString,QString)));
+    connect(m_task, SIGNAL(childAppended(GtObject*,GtObject*)), this,
+            SLOT(calculatorAppendedToTask(GtObject*,GtObject*)));
+    connect(m_task, SIGNAL(dataChanged(GtObject*)), m_calcModel,
+            SLOT(update()));
+    connect(m_task, SIGNAL(dataChanged(GtObject*)), m_treeView,
+            SLOT(expandAll()));
     connect(this, SIGNAL(calculatorDropReceived(GtCalculator*)), this,
             SLOT(onCalculatorDropReceived(GtCalculator*)));
 }
@@ -204,7 +211,7 @@ GtpyTaskWizardPage::initialization()
 bool
 GtpyTaskWizardPage::validation()
 {
-    if (m_task == Q_NULLPTR)
+    if (!m_task)
     {
         return false;
     }
@@ -215,9 +222,9 @@ GtpyTaskWizardPage::validation()
 
     foreach (QObject* child, children)
     {
-        child->setParent(Q_NULLPTR);
+        child->setParent(nullptr);
         delete child;
-        child = Q_NULLPTR;
+        child = nullptr;
     }
 
     provider()->setComponentData(m_task->toMemento());
@@ -228,7 +235,7 @@ GtpyTaskWizardPage::validation()
 void
 GtpyTaskWizardPage::saveScript()
 {
-    if (m_task == Q_NULLPTR)
+    if (!m_task)
     {
         return;
     }
@@ -260,7 +267,7 @@ GtpyTaskWizardPage::componentUuid() const
 {
     QString uuid;
 
-    if (m_task != Q_NULLPTR)
+    if (m_task)
     {
         uuid = m_task->uuid();
     }
@@ -271,7 +278,7 @@ GtpyTaskWizardPage::componentUuid() const
 void
 GtpyTaskWizardPage::setComponentName(const QString& name)
 {
-    if (m_task != Q_NULLPTR)
+    if (m_task)
     {
         m_task->setObjectName(name);
     }
@@ -280,9 +287,9 @@ GtpyTaskWizardPage::setComponentName(const QString& name)
 GtpyEditorSettings*
 GtpyTaskWizardPage::createSettings()
 {
-    GtpyEditorSettings* pref = Q_NULLPTR;
+    GtpyEditorSettings* pref = nullptr;
 
-    if (m_task != Q_NULLPTR)
+    if (m_task)
     {
         pref = new GtpyEditorSettings(this);
 
@@ -304,7 +311,7 @@ GtpyTaskWizardPage::createSettings()
 void
 GtpyTaskWizardPage::saveSettings(GtpyEditorSettings* pref)
 {
-    if (pref != Q_NULLPTR && m_task != Q_NULLPTR)
+    if (pref && m_task)
     {
         m_task->setTabSize(pref->tabSize());
         m_task->setReplaceTabBySpaces(pref->replaceTabBySpace());
@@ -327,14 +334,14 @@ GtpyTaskWizardPage::mapToSource(const QModelIndex& index)
 void
 GtpyTaskWizardPage::configCalculator(GtCalculator* calc)
 {
-    if (calc == Q_NULLPTR)
+    if (!calc)
     {
         return;
     }
 
     GtProject* project = gtDataModel->currentProject();
 
-    if (project == Q_NULLPTR)
+    if (!project)
     {
         return;
     }
@@ -400,7 +407,7 @@ GtpyTaskWizardPage::addCalculator()
 {
     GtProject* project = gtDataModel->currentProject();
 
-    if (project == Q_NULLPTR)
+    if (!project)
     {
         return;
     }
@@ -426,7 +433,7 @@ GtpyTaskWizardPage::addCalculator()
 
     GtCalculator* calc = qobject_cast<GtCalculator*>(component);
 
-    if (calc == Q_NULLPTR)
+    if (!calc)
     {
         return;
     }
@@ -476,7 +483,7 @@ GtpyTaskWizardPage::updateLastUsedElementList(const QString& str)
 void
 GtpyTaskWizardPage::insertConstructor(GtCalculator* calc)
 {
-    if (calc == Q_NULLPTR)
+    if (!calc)
     {
         return;
     }
@@ -512,7 +519,7 @@ GtpyTaskWizardPage::onDoubleClicked(const QModelIndex& index)
         return;
     }
 
-    if (m_task == Q_NULLPTR)
+    if (!m_task)
     {
         return;
     }
@@ -533,7 +540,7 @@ GtpyTaskWizardPage::onDoubleClicked(const QModelIndex& index)
 void
 GtpyTaskWizardPage::deleteProcessElements(const QList<QModelIndex>& indexList)
 {
-    if (m_task == Q_NULLPTR)
+    if (!m_task)
     {
         return;
     }
@@ -566,7 +573,7 @@ GtpyTaskWizardPage::deleteProcessElements(const QList<QModelIndex>& indexList)
 
         GtObject* obj = m_calcModel->objectFromIndex(srcIndex);
 
-        if (obj == Q_NULLPTR)
+        if (!obj)
         {
             continue;
         }
@@ -619,11 +626,10 @@ GtpyTaskWizardPage::deleteProcessElements(const QList<QModelIndex>& indexList)
                     if (comp == obj)
                     {
                         delete comp;
-                        comp = Q_NULLPTR;
+                        comp = nullptr;
 
-                        if (m_calcModel != Q_NULLPTR && m_treeView != Q_NULLPTR)
+                        if (m_calcModel && m_treeView)
                         {
-                            m_calcModel->updateView();
                             m_treeView->expandAll();
                         }
 
@@ -700,7 +706,12 @@ GtpyTaskWizardPage::addElement()
     QMenu menu(this);
 
     QAction* addcalc = menu.addAction(tr("New Calculator..."));
+
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
     addcalc->setIcon(gtApp->icon(QStringLiteral("calculatorIcon_16.png")));
+#else
+    addcalc->setIcon(gt::gui::icon::calculator16());
+#endif
 
     QStringList list = gtApp->settings()->lastProcessElements();
 
@@ -743,11 +754,14 @@ GtpyTaskWizardPage::addElement()
                         dynamic_cast<GtExtendedCalculatorDataImpl*>(
                             calcData.get());
 
-                    if (extendedData == Q_NULLPTR ||
-                            extendedData->icon.isNull())
+                    if (!extendedData || extendedData->icon.isNull())
                     {
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
                         act->setIcon(gtApp->icon(QStringLiteral(
-                                                     "calculatorIcon_16.png")));
+                                                 "calculatorIcon_16.png")));
+#else
+                        act->setIcon(gt::gui::icon::calculator16());
+#endif
                     }
                     else
                     {
@@ -769,14 +783,14 @@ GtpyTaskWizardPage::addElement()
 void
 GtpyTaskWizardPage::actionTriggered(QObject* obj)
 {
-    if (gtApp->currentProject() == Q_NULLPTR)
+    if (!gtApp->currentProject())
     {
         return;
     }
 
     QAction* act = qobject_cast<QAction*>(obj);
 
-    if (act == Q_NULLPTR)
+    if (!act)
     {
         return;
     }
@@ -800,14 +814,14 @@ GtpyTaskWizardPage::actionTriggered(QObject* obj)
 
         QObject* newObj = calcData->metaData().newInstance();
 
-        if (newObj == Q_NULLPTR)
+        if (!newObj)
         {
             return;
         }
 
         GtCalculator* calc = qobject_cast<GtCalculator*>(newObj);
 
-        if (calc == Q_NULLPTR)
+        if (!calc)
         {
             delete newObj;
             return;
@@ -853,12 +867,12 @@ GtpyTaskWizardPage::actionTriggered(QObject* obj)
 void
 GtpyTaskWizardPage::calculatorAppendedToTask(GtObject* child, GtObject* parent)
 {
-    if (child == Q_NULLPTR)
+    if (!child)
     {
         return;
     }
 
-    if (parent == Q_NULLPTR)
+    if (!parent)
     {
         return;
     }
@@ -879,7 +893,7 @@ GtpyTaskWizardPage::calculatorNameChanged(const QString& name)
 {
     GtObject* calc = qobject_cast<GtObject*>(sender());
 
-    if (calc == Q_NULLPTR)
+    if (!calc)
     {
         return;
     }
@@ -897,7 +911,7 @@ GtpyTaskWizardPage::calculatorDestroyed(QObject* obj)
 {
     GtObject* calc = qobject_cast<GtObject*>(obj);
 
-    if (calc == Q_NULLPTR)
+    if (!calc)
     {
         return;
     }

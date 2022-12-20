@@ -14,10 +14,11 @@
 
 #include "gtpy_task.h"
 
+class QSignalMapper;
 class GtProcessFilterModel;
-class GtpyTaskItemModel;
 class GtpyTaskStyleModel;
 class GtpyTaskTreeView;
+class GtpyObjectModel;
 
 #include "gtpy_abstractscriptingwizardpage.h"
 
@@ -128,7 +129,7 @@ private:
     GtpyTaskTreeView* m_treeView;
 
     /// Calculator object model.
-    GtpyTaskItemModel* m_calcModel;
+    GtpyObjectModel* m_calcModel;
 
     /// Styled model.
     GtpyTaskStyleModel* m_styledModel;

@@ -104,7 +104,7 @@ protected:
      * child will not be accepted.
      * @return Whether child will be accepted or not.
      */
-    bool childAccepted(GtObject* /*child*/);
+    bool childAccepted(GtObject* /*child*/) override;
 
 private:
     /**
