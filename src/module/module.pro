@@ -93,6 +93,7 @@ HEADERS += \
     calculators/gtpy_scriptcalculator.h \
     collection/gtpy_scriptcollectionsettings.h \
     collection/gtpy_collectionwidget.h \
+    models/gtpy_objectmodel.h \
     post/gtpy_pythonplotconfigdialog.h \
     post/gtpy_pythonplotdata.h \
     post/gtpy_pythonplotitem.h \
@@ -111,7 +112,6 @@ HEADERS += \
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.h \
     widgets/gtpy_console.h \
     tasks/gtpy_task.h \
-    models/gtpy_taskitemmodel.h \
     models/gtpy_taskstylemodel.h \
     widgets/gtpy_taskdelegate.h \
     widgets/gtpy_tasktreeview.h \
@@ -153,6 +153,7 @@ SOURCES += \
     calculators/gtpy_scriptcalculator.cpp \
     collection/gtpy_scriptcollectionsettings.cpp \
     collection/gtpy_collectionwidget.cpp \
+    models/gtpy_objectmodel.cpp \
     post/gtpy_pythonplotconfigdialog.cpp \
     post/gtpy_pythonplotdata.cpp \
     post/gtpy_pythonplotitem.cpp \
@@ -171,7 +172,6 @@ SOURCES += \
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.cpp \
     widgets/gtpy_console.cpp \
     tasks/gtpy_task.cpp \
-    models/gtpy_taskitemmodel.cpp \
     models/gtpy_taskstylemodel.cpp \
     widgets/gtpy_taskdelegate.cpp \
     widgets/gtpy_tasktreeview.cpp \
