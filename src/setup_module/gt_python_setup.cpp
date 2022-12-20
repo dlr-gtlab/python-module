@@ -10,7 +10,9 @@
 #include <QMessageBox>
 
 #include "gt_application.h"
+#include "gt_logging.h"
 #include "gt_settings.h"
+#include "gt_environment.h"
 
 #include "gtps_globals.h"
 #include "gtps_pythoninterpreter.h"
@@ -44,6 +46,8 @@ GtPythonSetupModule::description() const
 void
 GtPythonSetupModule::onLoad()
 {
+    clearPythonPaths();
+
     // register current python environment path to settings
     gtApp->settings()->registerSettingRestart(
         moduleSettingPath(GT_MODULENAME(), "pythonexe"), "");
@@ -94,10 +98,30 @@ GtPythonSetupModule::setPythonPaths(const GtpsPythonInterpreter& interpreter)
     QString pathVar{qEnvironmentVariable("PATH")};
     pathVar.prepend(interpreter.sharedLibPath() + ";");
     QString pySysPaths{interpreter.sysPaths().join(";")};
+    QString pyHome = interpreter.pythonHomePath();
 
     qputenv("PATH", pathVar.toUtf8());
     qputenv("PYTHONPATH", pySysPaths.toUtf8());
-    qputenv("PYTHONHOME", interpreter.pythonHomePath().toUtf8());
+    qputenv("PYTHONHOME", pyHome.toUtf8());
+
+    QVariant var = gtEnvironment->value("PYTHONHOME");
+
+    if (!var.isNull())
+    {
+        if (var.toString() != pyHome)
+        {
+            gtInfo() << tr("PYTHONHOME has been set to ('%1')").arg(pyHome);
+            gtEnvironment->setValue("PYTHONHOME", pyHome);
+            gtEnvironment->saveEnvironment();
+        }
+    }
+}
+
+void
+GtPythonSetupModule::clearPythonPaths()
+{
+    qunsetenv("PYTHONPATH");
+    qunsetenv("PYTHONHOME");
 }
 
 void

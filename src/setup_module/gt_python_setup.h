@@ -51,19 +51,23 @@ public:
     void init() override;
 
 private:
-    /// Validity of the Python interpreter    
+    /// Validity of the Python interpreter
     bool m_isPythonValid{false};
 
     /// Python version
     GtVersionNumber m_pyVersion{};
 
     /**
-     * @brief Asks the specified evaluator for the Python paths and prepends
-     * them to the PATH environment variable. In addition, it sets the
-     * PYTHONHOME and the PYTHONPATH variable.
+     * @brief It prepends the Python paths to the PATH environment variable.
+     * In addition, it sets the PYTHONHOME and the PYTHONPATH variable.
      * @param interpreter Python interpreter.
      */
     void setPythonPaths(const GtpsPythonInterpreter& interpreter);
+
+    /**
+     * @brief It unsets the PYTHONPATH and the PYTHONHOME variable.
+     */
+    void clearPythonPaths();
 
     /**
      * @brief Opens a message box to ask the user to
