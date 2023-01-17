@@ -12,6 +12,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QFile>
 
 #include "gt_versionnumber.h"
 
@@ -47,10 +48,11 @@ public:
     const GtVersionNumber& version() const;
 
     /**
-     * @brief Returns the path to the shared Python library.
-     * @return Path to the shared Python library.
+     * @brief Returns the shared Python library filename
+     *        (e.g. /path/to/libpython.3.9.so)
+     * @return Filename of to the shared Python library.
      */
-    const QString& sharedLibPath() const;
+    const QString& sharedLib() const;
 
     /**
      * @brief Returns the list of paths that are registered in sys.path.
@@ -75,6 +77,29 @@ public:
      */
     QString eval(const QString& pythonCommand, bool* ok = nullptr) const;
 
+    /**
+     * @brief Runs a python script
+     * @param scriptFile The file to the script. Note, this file needs to
+     *        be already written to disk and must have a filename.
+     *
+     * @param ok Optional control flag. Is true if the evaluation
+     * was successful.
+     * @return The output string resulting from the execution of the
+     * Python code.
+     */
+    QString runScript(const QFile& scriptFile, bool* ok = nullptr) const;
+
+    /**
+     * @brief Function to call the python interpreter with generic arguments
+     * @param args The argument list to pass to python
+     * @param ok Optional control flag. Is true if the evaluation
+     * was successful.
+     * @return The output string resulting from the execution of the
+     * Python code.
+     */
+    QString runPythonInterpreter(const QStringList& args, bool* ok = nullptr) const;
+
+
 private:
     // Python sys paths.
     QStringList m_sysPaths{};
@@ -82,8 +107,8 @@ private:
     // Python executalbe.
     QString m_pythonExe{};
 
-    // Shared python lib path.
-    QString m_sharedLibPath{};
+    // Shared python library
+    QString m_sharedLib{};
 
     // Python version.
     GtVersionNumber m_pyVersion{};

@@ -7,8 +7,6 @@
  *  Tel.: +49 2203 601 2907
  */
 
-#include <QMessageBox>
-
 #include "gt_application.h"
 #include "gt_logging.h"
 #include "gt_settings.h"
@@ -19,6 +17,9 @@
 #include "gtps_pythonpreferencepage.h"
 
 #include "gt_python_setup.h"
+
+#include <QLibrary>
+#include <QMessageBox>
 
 namespace {
 
@@ -95,14 +96,38 @@ void GtPythonSetupModule::init()
 void
 GtPythonSetupModule::setPythonPaths(const GtpsPythonInterpreter& interpreter)
 {
-    QString pathVar{qEnvironmentVariable("PATH")};
-    pathVar.prepend(interpreter.sharedLibPath() + ";");
-    QString pySysPaths{interpreter.sysPaths().join(";")};
+#ifdef _WIN32
+    QString pathSeparator{";"};
+#else
+    QString pathSeparator{":"};
+#endif
+
+    QString pySysPaths{interpreter.sysPaths().join(pathSeparator)};
     QString pyHome = interpreter.pythonHomePath();
 
-    qputenv("PATH", pathVar.toUtf8());
     qputenv("PYTHONPATH", pySysPaths.toUtf8());
     qputenv("PYTHONHOME", pyHome.toUtf8());
+
+    gtDebug().medium() << "Python library == " << interpreter.sharedLib();
+    gtDebug().medium() << "PYTHONPATH == " << pySysPaths;
+    gtDebug().medium() << "PYTHONHOME == " << pyHome;
+
+
+    // Setting path or LD_LIBRARY_PATH does not work on UNIX systems
+    // as these variables is evaluated only at the start of each process
+    // The workaround is to preload the python library instead
+
+    QLibrary pythonlib(interpreter.sharedLib());
+    pythonlib.setLoadHints(QLibrary::ExportExternalSymbolsHint);
+    auto loadSuccess = pythonlib.load();
+    if (!loadSuccess)
+    {
+        gtError() << "Python library could not be loaded.";
+    }
+    else
+    {
+        gtDebug().medium() << "Sucessfully loaded python library";
+    }
 
     QVariant var = gtEnvironment->value("PYTHONHOME");
 
