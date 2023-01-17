@@ -14,6 +14,8 @@
 #include "gt_logging.h"
 
 #include "gtps_pythoninterpreter.h"
+#include "find_libpython.h"
+#include <QTemporaryFile>
 
 GtpsPythonInterpreter::GtpsPythonInterpreter(const QString& pythonExe) :
         m_pythonExe{pythonExe}
@@ -26,8 +28,32 @@ GtpsPythonInterpreter::GtpsPythonInterpreter(const QString& pythonExe) :
 QString
 GtpsPythonInterpreter::eval(const QString& pythonCommand, bool* ok) const
 {
+    return runPythonInterpreter(QStringList() << "-c" << pythonCommand, ok);
+}
+
+QString
+GtpsPythonInterpreter::runScript(const QFile& scriptFile, bool* ok) const
+{
+    // Workaround, since QTemporaryFile().exists() is always false
+    if (!QFile(scriptFile.fileName()).exists())
+    {
+        if (ok != nullptr)
+        {
+            *ok = false;
+        }
+
+        return {};
+    }
+
+    return runPythonInterpreter({scriptFile.fileName()}, ok);
+}
+
+QString
+GtpsPythonInterpreter::runPythonInterpreter(const QStringList &args, bool *ok) const
+{
+
     QProcess process;
-    process.start(m_pythonExe, QStringList() << "-c" << pythonCommand);
+    process.start(m_pythonExe, args);
 
     QString retval;
     bool succes{process.waitForFinished()};
@@ -69,10 +95,9 @@ GtpsPythonInterpreter::version() const
     return m_pyVersion;
 }
 
-const QString&
-GtpsPythonInterpreter::sharedLibPath() const
+const QString &GtpsPythonInterpreter::sharedLib() const
 {
-    return m_sharedLibPath;
+    return m_sharedLib;
 }
 
 const QStringList&
@@ -108,26 +133,28 @@ GtpsPythonInterpreter::setPythonVersion()
     }
 }
 
+std::unique_ptr<QTemporaryFile>
+getFindLibPythonScriptFile()
+{
+    auto file = std::make_unique<QTemporaryFile>();
+    if (file->open())
+    {
+        file->write(findPythonLibCode);
+        file->flush();
+    }
+    return file;
+}
+
 void
 GtpsPythonInterpreter::setSharedLibPath()
 {
-    QString pyCode{
-    "import os;"
-    "import sys;"
-#ifdef _WIN32
-    "pyShardLib = 'python%s%s.dll'%(sys.version_info.major, sys.version_info.minor);"
-#else
-    "pyShardLib = 'libpython%s.%s.so'%(sys.version_info.major, sys.version_info.minor);"
-#endif
-    "[exit(print(p, end='')) for p in sys.path "
-    "if os.path.isfile(os.path.join(p, pyShardLib))];"};
 
     bool ok{false};
-    auto homePath = eval(pyCode, &ok);
+    auto sharedLib = runScript(*getFindLibPythonScriptFile(), &ok);
 
     if (ok)
     {
-        m_sharedLibPath = homePath.replace("\\\\", "\\");
+        m_sharedLib = sharedLib.replace("\\\\", "\\");
     }
 }
 

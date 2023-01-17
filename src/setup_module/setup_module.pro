@@ -56,6 +56,7 @@ INCLUDEPATH += .
 DESTDIR = $${BUILD_DEST}
 
 HEADERS += \
+    find_libpython.h \
     gt_python_setup.h \
     gtps_globals.h \
     gtps_pythoninterpreter.h \
