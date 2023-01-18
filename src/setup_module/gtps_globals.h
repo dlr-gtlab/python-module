@@ -15,18 +15,16 @@
 namespace gtps {
 
 /**
- * @brief Returns a vector of the supported Python versions.
- * @return Vector of supported Python version.
- */
-QVector<GtVersionNumber> supportedVersions();
-
-/**
  * @brief Takes a version number and returns a string containing the major and
  * minor version separated by a dot.
  * @param version Version number.
  * @return A string containing the major and minor version separated by a dot.
  */
 QString apiVersionStr(const GtVersionNumber& version);
+
+namespace python {
+
+namespace module {
 
 /**
  * @brief Returns the Python module id depending on the given version number.
@@ -35,8 +33,16 @@ QString apiVersionStr(const GtVersionNumber& version);
  */
 QString pythonModuleId(const GtVersionNumber& version);
 
-namespace validation
+} // namespace mdoule
+
+namespace version
 {
+
+/**
+ * @brief Returns a vector of the supported Python versions.
+ * @return Vector of supported Python version.
+ */
+QVector<GtVersionNumber> supportedVersions();
 
 /**
  * @brief Checks whether the given Python version is supported.
@@ -45,7 +51,9 @@ namespace validation
  */
 bool isSupported(const GtVersionNumber& version);
 
-} // namespace validation
+} // namespace version
+
+} // namespace python
 
 } // namespace gtps
 

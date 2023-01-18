@@ -7,8 +7,8 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#ifndef GTPSPYTHONEVALUATOR_H
-#define GTPSPYTHONEVALUATOR_H
+#ifndef GTPSPYTHONINTERPRETER_H
+#define GTPSPYTHONINTERPRETER_H
 
 #include <QString>
 #include <QStringList>
@@ -17,13 +17,13 @@
 #include "gt_versionnumber.h"
 
 /**
- * @brief The GtpsPythonEvaluator class
+ * @brief The GtpsPythonInterpreter class
  */
 class GtpsPythonInterpreter
 {
 public:
     /**
-     * @brief GtpsPythonEvaluator
+     * @brief GtpsPythonInterpreter
      * @param pythonExe Path to the Python executable.
      */
     explicit GtpsPythonInterpreter(const QString& pythonExe);
@@ -34,12 +34,6 @@ public:
      * @return True, if the evaluator can execute Python code.
      */
     bool isValid() const;
-
-    /**
-     * @brief Returns the path to the Python executable.
-     * @return The path to the Python executalbe.
-     */
-    const QString& pythonExe() const;
 
     /**
      * @brief Returns the Python version the evaluator uses.
@@ -75,7 +69,7 @@ public:
      * @return The output string resulting from the execution of the
      * Python code.
      */
-    QString eval(const QString& pythonCommand, bool* ok = nullptr) const;
+    QString runCommand(const QString& pythonCommand, bool* ok = nullptr) const;
 
     /**
      * @brief Runs a python script
@@ -98,7 +92,6 @@ public:
      * Python code.
      */
     QString runPythonInterpreter(const QStringList& args, bool* ok = nullptr) const;
-
 
 private:
     // Python sys paths.
@@ -132,4 +125,4 @@ private:
     void setSysPaths();
 };
 
-#endif // GTPSPYTHONEVALUATOR_H
+#endif // GTPSPYTHONINTERPRETER_H

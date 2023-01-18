@@ -7,16 +7,17 @@
  *  Tel.: +49 2203 601 2907
  */
 
+#include "gt_python_setup.h"
+
 #include "gt_application.h"
 #include "gt_logging.h"
 #include "gt_settings.h"
 #include "gt_environment.h"
 
 #include "gtps_globals.h"
+#include "gtps_systemsettings.h"
 #include "gtps_pythoninterpreter.h"
 #include "gtps_pythonpreferencepage.h"
-
-#include "gt_python_setup.h"
 
 #include <QLibrary>
 #include <QMessageBox>
@@ -47,7 +48,7 @@ GtPythonSetupModule::description() const
 void
 GtPythonSetupModule::onLoad()
 {
-    clearPythonPaths();
+    gtps::system::clearPythonVars();
 
     // register current python environment path to settings
     gtApp->settings()->registerSettingRestart(
@@ -57,9 +58,9 @@ GtPythonSetupModule::onLoad()
     m_pyVersion = interpreter.version();
 
     if (!(m_isPythonValid = interpreter.isValid()) ||
-        !gtps::validation::isSupported(m_pyVersion))
+        !gtps::python::version::isSupported(m_pyVersion))
     {
-        suppressPythonModules(gtps::supportedVersions());
+        suppressPythonModules(gtps::python::version::supportedVersions());
         return;
     }
 
@@ -67,7 +68,8 @@ GtPythonSetupModule::onLoad()
     setPythonPaths(interpreter);
 }
 
-void GtPythonSetupModule::init()
+void
+GtPythonSetupModule::init()
 {
     auto pageFactory = []() -> GtPreferencesPage* {
         return new GtPythonPreferencePage;
@@ -85,7 +87,7 @@ void GtPythonSetupModule::init()
                             "Do you want to specify another Python "
                             "interpreter?"));
     }
-    else if (!gtps::validation::isSupported(m_pyVersion))
+    else if (!gtps::python::version::isSupported(m_pyVersion))
     {
         showNotification(tr("Python %1 is not supported.\n"
                             "Do you want to specify another Python iterpreter?")
@@ -96,22 +98,16 @@ void GtPythonSetupModule::init()
 void
 GtPythonSetupModule::setPythonPaths(const GtpsPythonInterpreter& interpreter)
 {
-#ifdef _WIN32
-    QString pathSeparator{";"};
-#else
-    QString pathSeparator{":"};
-#endif
-
-    QString pySysPaths{interpreter.sysPaths().join(pathSeparator)};
+    QString pySysPaths{
+        interpreter.sysPaths().join(gtps::system::pathSeperator())};
     QString pyHome = interpreter.pythonHomePath();
 
-    qputenv("PYTHONPATH", pySysPaths.toUtf8());
-    qputenv("PYTHONHOME", pyHome.toUtf8());
+    gtps::system::setPythonPath(pySysPaths.toUtf8());
+    gtps::system::setPythonHome(pyHome.toUtf8());
 
     gtDebug().medium() << "Python library == " << interpreter.sharedLib();
     gtDebug().medium() << "PYTHONPATH == " << pySysPaths;
     gtDebug().medium() << "PYTHONHOME == " << pyHome;
-
 
     // Setting path or LD_LIBRARY_PATH does not work on UNIX systems
     // as these variables is evaluated only at the start of each process
@@ -143,13 +139,6 @@ GtPythonSetupModule::setPythonPaths(const GtpsPythonInterpreter& interpreter)
 }
 
 void
-GtPythonSetupModule::clearPythonPaths()
-{
-    qunsetenv("PYTHONPATH");
-    qunsetenv("PYTHONHOME");
-}
-
-void
 GtPythonSetupModule::showNotification(const QString& msg)
 {
     auto reply = QMessageBox::question(nullptr, tr("Python setup"), msg,
@@ -164,7 +153,7 @@ GtPythonSetupModule::showNotification(const QString& msg)
 void
 GtPythonSetupModule::acceptPythonModule(const GtVersionNumber& version)
 {
-    auto versions = gtps::supportedVersions();
+    auto versions = gtps::python::version::supportedVersions();
     versions.removeOne(GtVersionNumber{version.major(), version.minor()});
     suppressPythonModules(versions);
 }
@@ -174,7 +163,8 @@ GtPythonSetupModule::suppressPythonModules(
         const QVector<GtVersionNumber>& pyVersions)
 {
     auto suppress = [this](const GtVersionNumber& version) {
-        gtApp->addSuppression(*this, gtps::pythonModuleId(version));
+        gtApp->addSuppression(*this,
+                              gtps::python::module::pythonModuleId(version));
     };
     std::for_each(pyVersions.begin(), pyVersions.end(), suppress);
 }
