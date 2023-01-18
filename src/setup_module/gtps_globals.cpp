@@ -12,28 +12,28 @@
 
 #include "gtps_globals.h"
 
-QVector<GtVersionNumber>
-gtps::supportedVersions()
-{
-    return QVector<GtVersionNumber>{GtVersionNumber(3, 9)};
-}
-
 QString
-gtps::apiVersionStr(const GtVersionNumber& version)
+gtps::apiVersionStr(const GtVersionNumber &version)
 {
     return {QString::number(version.major()) + "." +
             QString::number(version.minor())};
 }
 
 QString
-gtps::pythonModuleId(const GtVersionNumber& version)
+gtps::python::module::pythonModuleId(const GtVersionNumber& version)
 {
     return QString{"Python Module (Python %1)"}
-                   .arg(apiVersionStr(version));
+                   .arg(gtps::apiVersionStr(version));
+}
+
+QVector<GtVersionNumber>
+gtps::python::version::supportedVersions()
+{
+    return QVector<GtVersionNumber>{GtVersionNumber(3, 9)};
 }
 
 bool
-gtps::validation::isSupported(const GtVersionNumber& version)
+gtps::python::version::isSupported(const GtVersionNumber& version)
 {
     auto versions = supportedVersions();
     auto iter = std::find_if(versions.begin(), versions.end(),

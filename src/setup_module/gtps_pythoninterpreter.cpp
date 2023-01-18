@@ -6,15 +6,16 @@
  *  Author: Marvin Noethen (AT-TW)
  *  Tel.: +49 2203 601 2692
  */
+#include "gtps_pythoninterpreter.h"
+
+#include "gt_logging.h"
+
+#include "find_libpython.h"
+#include "gtps_systemsettings.h"
 
 #include <QProcess>
 #include <QDir>
 #include <QFileInfo>
-
-#include "gt_logging.h"
-
-#include "gtps_pythoninterpreter.h"
-#include "find_libpython.h"
 #include <QTemporaryFile>
 
 GtpsPythonInterpreter::GtpsPythonInterpreter(const QString& pythonExe) :
@@ -26,7 +27,7 @@ GtpsPythonInterpreter::GtpsPythonInterpreter(const QString& pythonExe) :
 }
 
 QString
-GtpsPythonInterpreter::eval(const QString& pythonCommand, bool* ok) const
+GtpsPythonInterpreter::runCommand(const QString& pythonCommand, bool* ok) const
 {
     return runPythonInterpreter(QStringList() << "-c" << pythonCommand, ok);
 }
@@ -49,9 +50,17 @@ GtpsPythonInterpreter::runScript(const QFile& scriptFile, bool* ok) const
 }
 
 QString
-GtpsPythonInterpreter::runPythonInterpreter(const QStringList &args, bool *ok) const
+GtpsPythonInterpreter::runPythonInterpreter(const QStringList& args,
+                                            bool* ok) const
 {
+    // temporarily clear the PYTHONPATH and PYTHONHOME variables to
+    // ensure that the Python executable can be executed without
+    // configuration problems
+    QByteArray pySysPaths = gtps::system::pythonPath();
+    QByteArray pyHome = gtps::system::pythonHome();
+    gtps::system::clearPythonVars();
 
+    // run Python in a separate process
     QProcess process;
     process.start(m_pythonExe, args);
 
@@ -72,6 +81,10 @@ GtpsPythonInterpreter::runPythonInterpreter(const QStringList &args, bool *ok) c
         *ok = succes;
     }
 
+    // set PYTHONPATH and PYTHONHOME variables again
+    gtps::system::setPythonPath(pySysPaths);
+    gtps::system::setPythonHome(pyHome);
+
     return retval;
 }
 
@@ -79,14 +92,8 @@ bool
 GtpsPythonInterpreter::isValid() const
 {
     bool ok{false};
-    eval("import sys", &ok);
+    runCommand("import sys", &ok);
     return ok;
-}
-
-const QString&
-GtpsPythonInterpreter::pythonExe() const
-{
-    return m_pythonExe;
 }
 
 const GtVersionNumber&
@@ -95,7 +102,8 @@ GtpsPythonInterpreter::version() const
     return m_pyVersion;
 }
 
-const QString &GtpsPythonInterpreter::sharedLib() const
+const QString&
+GtpsPythonInterpreter::sharedLib() const
 {
     return m_sharedLib;
 }
@@ -116,20 +124,15 @@ void
 GtpsPythonInterpreter::setPythonVersion()
 {
     QString pyCode{"import sys;"
-                   "sys.stdout.write('%s' % sys.version_info.%1)"};
+                   "sys.stdout.write('%s.%s.%s' % (sys.version_info.major, "
+                   "sys.version_info.minor, sys.version_info.micro))"};
 
-    bool majorOk{false};
-    bool minorOk{false};
-    bool patchOk{false};
+    bool ok{false};
+    auto version = runCommand(pyCode, &ok);
 
-    auto major = eval(pyCode.arg("major"), &majorOk);
-    auto minor = eval(pyCode.arg("minor"), &minorOk);
-    auto patch = eval(pyCode.arg("micro"), &patchOk);
-
-    if (majorOk && minorOk && patchOk)
+    if (ok)
     {
-        m_pyVersion = GtVersionNumber{major.toInt(), minor.toInt(),
-                                        patch.toInt()};
+        m_pyVersion = GtVersionNumber{version};
     }
 }
 
@@ -148,7 +151,6 @@ getFindLibPythonScriptFile()
 void
 GtpsPythonInterpreter::setSharedLibPath()
 {
-
     bool ok{false};
     auto sharedLib = runScript(*getFindLibPythonScriptFile(), &ok);
 
@@ -164,7 +166,8 @@ GtpsPythonInterpreter::setSysPaths()
     QString pyCode{"import sys;print(', '.join([x for x in sys.path if x]), "
                    "end='')"};
     bool ok{false};
-    auto pyPaths = eval(pyCode, &ok);
+    auto pyPaths = runCommand(pyCode, &ok);
+
     if (ok)
     {
         m_sysPaths = pyPaths.split(", ");

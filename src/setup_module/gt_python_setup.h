@@ -65,11 +65,6 @@ private:
     void setPythonPaths(const GtpsPythonInterpreter& interpreter);
 
     /**
-     * @brief It unsets the PYTHONPATH and the PYTHONHOME variable.
-     */
-    void clearPythonPaths();
-
-    /**
      * @brief Opens a message box to ask the user to
      * specify a Python interpreter.
      * @param msg Message for the user.

@@ -79,7 +79,7 @@ void GtPythonPreferencePage::onBtnTestPyEnvPressed()
     {
         ui->lbPythonStatus->setText(tr("Error: invalid python executable!"));
     }
-    else if (!gtps::validation::isSupported(pyVer))
+    else if (!gtps::python::version::isSupported(pyVer))
     {
         ui->lbPythonStatus->setText(tr("Error: Python %1 is not supported!")
                                         .arg(gtps::apiVersionStr(pyVer)));

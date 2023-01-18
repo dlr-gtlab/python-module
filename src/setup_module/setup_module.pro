@@ -60,13 +60,15 @@ HEADERS += \
     gt_python_setup.h \
     gtps_globals.h \
     gtps_pythoninterpreter.h \
-    gtps_pythonpreferencepage.h
+    gtps_pythonpreferencepage.h \
+    gtps_systemsettings.h
 
 SOURCES += \
     gt_python_setup.cpp \
     gtps_globals.cpp \
     gtps_pythoninterpreter.cpp \
-    gtps_pythonpreferencepage.cpp
+    gtps_pythonpreferencepage.cpp \
+    gtps_systemsettings.cpp
 
 
 CONFIG(debug, debug|release){
