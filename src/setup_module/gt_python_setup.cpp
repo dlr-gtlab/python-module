@@ -71,6 +71,7 @@ GtPythonSetupModule::onLoad()
 void
 GtPythonSetupModule::init()
 {
+
     auto pageFactory = []() -> GtPreferencesPage* {
         return new GtPythonPreferencePage;
     };
@@ -78,20 +79,20 @@ GtPythonSetupModule::init()
 
     if (pythonExe().isEmpty())
     {
-        showNotification(tr("No Python interpreter specified.\n"
-                            "Do you want to specify a Python interpreter?"));
+        showPythonErrorNotification(tr("No Python interpreter specified."),
+                         tr("Do you want to specify a Python interpreter?"));
     }
     else if (!m_isPythonValid)
     {
-        showNotification(tr("The specified Python interpreter is invalid.\n"
-                            "Do you want to specify another Python "
+        showPythonErrorNotification(tr("The specified Python interpreter is invalid."),
+                         tr("Do you want to specify another Python "
                             "interpreter?"));
     }
     else if (!gtps::python::version::isSupported(m_pyVersion))
     {
-        showNotification(tr("Python %1 is not supported.\n"
-                            "Do you want to specify another Python iterpreter?")
-                            .arg(gtps::apiVersionStr(m_pyVersion)));
+        showPythonErrorNotification(tr("Python %1 is not supported.")
+                                        .arg(gtps::apiVersionStr(m_pyVersion)),
+                                    tr("Do you want to specify another Python iterpreter?"));
     }
 }
 
@@ -139,14 +140,23 @@ GtPythonSetupModule::setPythonPaths(const GtpsPythonInterpreter& interpreter)
 }
 
 void
-GtPythonSetupModule::showNotification(const QString& msg)
+GtPythonSetupModule::showPythonErrorNotification(const QString& error, const QString& taskMsg)
 {
-    auto reply = QMessageBox::question(nullptr, tr("Python setup"), msg,
-                                QMessageBox::Yes|QMessageBox::No);
-
-    if (reply == QMessageBox::Yes)
+    if (!gtApp->batchMode())
     {
-        gtApp->showPreferences("Python Environment");
+
+        auto reply = QMessageBox::question(nullptr, tr("Python setup"),
+                                          QString("%1\n%2").arg(error, taskMsg),
+                                          QMessageBox::Yes|QMessageBox::No);
+
+        if (reply == QMessageBox::Yes)
+        {
+            gtApp->showPreferences("Python Environment");
+        }
+    }
+    else
+    {
+        gtError() << error;
     }
 }
 
