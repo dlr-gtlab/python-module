@@ -69,7 +69,7 @@ private:
      * specify a Python interpreter.
      * @param msg Message for the user.
      */
-    void showNotification(const QString& msg);
+    void showPythonErrorNotification(const QString& error, const QString& task);
 
     /**
      * @brief Accepts the Python Module built with the specified Python
