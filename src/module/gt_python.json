@@ -1,6 +1,6 @@
 {
 	"dependencies" : [
-		{ "name" : "Python Setup", "version" : "1.2.1" }
+		{ "name" : "Python Setup", "version" : "1.2.2" }
 	],
 	"allowSuppressionBy": ["Python Setup"]
 }
