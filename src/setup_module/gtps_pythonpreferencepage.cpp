@@ -54,9 +54,11 @@ void GtPythonPreferencePage::onBtnSelectPyExePressed()
 
 #ifdef WIN32
     dlg.setNameFilter("Python (*.exe)");
+#else
+    dlg.setNameFilter("Python Executable (python*)");
 #endif
 
-    dlg.setFilter(QDir::Executable | QDir::Files);
+    dlg.setFilter(QDir::Files);
     dlg.setFileMode(QFileDialog::ExistingFile);
 
     if (!dlg.exec())
