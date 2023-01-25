@@ -10,12 +10,10 @@
 #include "PythonQt.h"
 #include "PythonQtConversion.h"
 
-#include "gt_logging.h"
 #include "gt_object.h"
 #include "gt_abstractproperty.h"
 #include "gt_calculatorhelperfactory.h"
 
-#include "gtpy_gilscope.h"
 #include "gtpy_createhelperfunction.h"
 #include "gtpy_propertysetter.h"
 #include "gtpy_decorator.h"
@@ -40,7 +38,7 @@ pointerAdress(QObject* obj)
     return retVal;
 }
 
-static ternaryfunc pythonqt_slot_call = Q_NULLPTR;
+static ternaryfunc pythonqt_slot_call = nullptr;
 
 PyObject*
 PythonQtSlotFunction_MyCall(PyObject* func, PyObject* args, PyObject* kw)
@@ -89,7 +87,7 @@ GtpyExtendedWrapper_dealloc(GtpyExtendedWrapper* self)
     if (self->_obj)
     {
         Py_DECREF(self->_obj);
-        self->_obj = Q_NULLPTR;
+        self->_obj = nullptr;
     }
 
     Py_TYPE(self)->tp_free((PyObject*)self);
@@ -112,7 +110,7 @@ GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* args,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     int argsCount = PyTuple_Size(args);
@@ -126,7 +124,7 @@ GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* args,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
     else if (argsCount > 1)
     {
@@ -138,7 +136,7 @@ GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* args,
 
         PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     PyObject* obj = PyTuple_GetItem(args, 0);
@@ -186,9 +184,9 @@ object___dir__(PyObject* self/*, PyObject* Py_UNUSED(ignored)*/)
 {
     GtpyExtendedWrapper* wrapper = (GtpyExtendedWrapper*)self;
 
-    PyObject* result = Q_NULLPTR;
-    PyObject* dict = Q_NULLPTR;
-    PyObject* wrappedKeys = Q_NULLPTR;
+    PyObject* result = nullptr;
+    PyObject* dict = nullptr;
+    PyObject* wrappedKeys = nullptr;
 
     dict = PyObject_GetAttrString(self, "__dict__");
 
@@ -207,7 +205,7 @@ object___dir__(PyObject* self/*, PyObject* Py_UNUSED(ignored)*/)
     if (wrappedKeys)
     {
         int count = PyList_Size(wrappedKeys);
-        PyObject* key = Q_NULLPTR;
+        PyObject* key = nullptr;
 
         for (int i = 0; i < count; i++)
         {
@@ -244,7 +242,7 @@ GtpyExtendedWrapper_methods[] =
         "__dir__", (PyCFunction)object___dir__, METH_NOARGS,
         "GtpyExtendedWrapper dir() implementation"
     },
-    {Q_NULLPTR, Q_NULLPTR, 0, Q_NULLPTR}  /* Sentinel */
+    {nullptr, nullptr, 0, nullptr}  /* Sentinel */
 };
 
 static int
@@ -260,8 +258,8 @@ GtpyExtendedWrapper_setattro(PyObject* obj, PyObject* name, PyObject* value)
     QString error;
     GtpyExtendedWrapper* wrapper = (GtpyExtendedWrapper*)obj;
 
-    QObject* qObj = Q_NULLPTR;
-    GtObject* gtObj = Q_NULLPTR;
+    QObject* qObj = nullptr;
+    GtObject* gtObj = nullptr;
 
     if (!wrapper->_obj)
     {
@@ -337,242 +335,182 @@ GtpyExtendedWrapper_setattro(PyObject* obj, PyObject* name, PyObject* value)
             name, value);
 }
 
+
 static PyObject*
 GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
 {
-    QString error;
-
     GtpyExtendedWrapper* wrapper = (GtpyExtendedWrapper*)obj;
 
-    if (!wrapper)
+    // Check if the wrapped objects are valid.
+    if (!wrapper->_obj || !wrapper->_obj->_obj)
     {
-        return Q_NULLPTR;
+        PyErr_SetString(PyExc_AttributeError, "invalid instance");
+        return nullptr;
     }
 
-    QString strName = QString(PyString_AsString(name));
-
-    if (strName.isEmpty())
+    // Check if the given name is a string object
+    if (!PyString_Check(name))
     {
-        return Q_NULLPTR;
+        PyErr_SetString(PyExc_AttributeError, "invalid attribute name");
+        return nullptr;
     }
 
-    const char* attributeName;
+    QString strName{PyString_AsString(name)};
 
-    if ((attributeName = PyString_AsString(name)) == Q_NULLPTR)
+    if(strName.isEmpty())
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
-    QObject* qObj = Q_NULLPTR;
-    GtObject* gtObj = Q_NULLPTR;
-
-    if (!wrapper->_obj)
-    {
-        error = "Invalid " + QString(GtObject::staticMetaObject.className()) +
-                " instance";
-        PyErr_SetString(PyExc_AttributeError, error.toLatin1().data());
-
-        return Q_NULLPTR;
-    }
-
-    if (wrapper->_obj->_obj)
-    {
-        qObj = qobject_cast<QObject*>(wrapper->_obj->_obj.data());
-    }
+    // Cast wrapped object to QObject
+    QObject* qObj = qobject_cast<QObject*>(wrapper->_obj->_obj.data());
 
     if (!qObj)
     {
-        error = "Object is no " + QString(QObject::staticMetaObject.className())
-                + " instance";
-
-        PyErr_SetString(PyExc_AttributeError, error.toLatin1().data());
-
-        return Q_NULLPTR;
+        PyErr_SetString(PyExc_AttributeError, "Wrapped object is invalid");
+        return nullptr;
     }
 
-    gtObj = qobject_cast<GtObject*>(qObj);
+    // Get attribute object of GtpyExtendedWrapper
+    PyErr_Clear();
+    PyObject* attr = PyObject_GenericGetAttr(obj, name);
+    PyErr_Clear();
 
-    /// if __dict__ is called fill dict with GtProperties
-    if (qstrcmp(attributeName, "__dict__") == 0)
+    // If __dict__ is called fill dict with GtProperties
+    if (strName == "__dict__")
     {
-        PyObject* dict = PyBaseObject_Type.tp_getattro(obj, name);
+        PyObject* dict = nullptr;
 
-        PyObject* pyQtWrapperDict = PythonQtInstanceWrapper_Type.tp_getattro(
-                                        (PyObject*)wrapper->_obj, name);
-
-        if (!dict)
+        // Create a dict object
+        if (!attr || !PyDict_Check(attr))
         {
             dict = PyDict_New();
         }
         else
         {
-            dict = PyDict_Copy(dict);
+            dict = PyDict_Copy(attr);
         }
+
+        // Get the __dict__ of the wrapped object and merge it with the
+        // created dict
+        PyObject* pyQtWrapperDict = PyObject_GetAttr(
+                    (PyObject*)wrapper->_obj, name);
+        PyErr_Clear();
 
         if (pyQtWrapperDict)
         {
             PyDict_Merge(dict, pyQtWrapperDict, false);
         }
 
-        if (!gtObj)
+        // Add the GtProperty instances to the dict
+        if (GtObject* gtObj = qobject_cast<GtObject*>(qObj))
         {
-            return dict;
-        }
-
-        QList<GtAbstractProperty*> propList = gtObj->fullPropertyList();
-
-        QStringList l;
-
-        foreach (GtAbstractProperty* prop, propList)
-        {
-            l << pyValidGtPropertyId(prop->ident());
-        }
-
-        foreach (QString name, l)
-        {
-            PyObject* o = PyObject_GetAttrString(obj, name.toLatin1().data());
-
-            if (o)
+            auto propList = gtObj->fullPropertyList();
+            for (auto* prop : qAsConst(propList))
             {
-                PyDict_SetItemString(dict, name.toLatin1().data(), o);
+                QString propId{pyValidGtPropertyId(prop->ident())};
 
-                Py_DECREF(o);
+                if (PyObject* o = PyObject_GetAttrString(
+                            obj, propId.toLatin1().data()))
+                {
+                    PyDict_SetItemString(dict, propId.toLatin1().data(), o);
+                    Py_DECREF(o);
+                }
             }
         }
 
+        Py_XDECREF(pyQtWrapperDict);
+        Py_XDECREF(attr);
         return dict;
     }
 
-    ///look for base type attribute
-    PyObject* superAttr = PyBaseObject_Type.tp_getattro(obj, name);
-
-    if (superAttr)
+    // Return the attribute of GtpyExtendedWrapper if it is valid
+    if (attr)
     {
-        return superAttr;
+        return attr;
     }
 
-    PyErr_Clear();
-
-    /// look for child
-    QObjectList children = wrapper->_obj->_obj->children();
-
-    for (int i = 0; i < children.count(); i++)
+    // If the attribute is a child object, it will be wrapped and returned
+    auto children = wrapper->_obj->_obj->children();
+    for (auto* child : qAsConst(children))
     {
-        QObject* child = children.at(i);
-
-        if (child->objectName() == attributeName)
+        if (child->objectName() == strName)
         {
             PyObject* pyQtWrapper = PythonQt::priv()->wrapQObject(child);
 
-            if (pyQtWrapper && pyQtWrapper->ob_type->tp_base ==
-                    &PythonQtInstanceWrapper_Type)
+            if (pyQtWrapper)
             {
                 PyObject* childArg = PyTuple_New(1);
-
                 PyTuple_SetItem(childArg, 0, pyQtWrapper);
 
-                PyObject* retVal = GtpyExtendedWrapper_Type.tp_new(
-                                       &GtpyExtendedWrapper_Type, childArg,
-                                       Q_NULLPTR);
+                // Create a new GtpyExtendedWrapper object
+                PyObject* childObj = PyObject_CallObject(
+                            (PyObject*) &GtpyExtendedWrapper_Type, childArg);
 
                 Py_DECREF(childArg);
 
-                return retVal;
+                return childObj;
             }
         }
     }
 
-    ///look for PythonQt wrapper attribute
-    PyObject* pyQtWrapperAttr = PythonQtInstanceWrapper_Type.tp_getattro(
-                                    (PyObject*)wrapper->_obj, name);
+    // Get attribute object of PythonQtInstanceWrapper
+    PyObject* pyQtWrapperAttr = PyObject_GetAttr(
+                (PyObject*)wrapper->_obj, name);
+    PyErr_Clear();
 
     if (pyQtWrapperAttr)
     {
         return pyQtWrapperAttr;
     }
 
-    PyErr_Clear();
-
-    ///look for python internal methode
-#ifdef PY3K
-    PyObject* internalMethod = PyObject_GenericGetAttr(obj, name);
-#else
-    PyObject* internalMethod = Py_FindMethod(GtpyExtendedWrapper_methods,
-                               obj, (char*)attributeName);
-#endif
-
-    if (internalMethod)
+    // Get GtProperties values or setter methods
+    if (GtObject* gtObj = qobject_cast<GtObject*>(qObj))
     {
-        return internalMethod;
-    }
-
-    PyErr_Clear();
-
-    ///look for GtProperties
-    if (gtObj)
-    {
-        QList<GtAbstractProperty*> propList = gtObj->fullPropertyList();
-
-        foreach (GtAbstractProperty* prop, propList)
+        auto propList = gtObj->fullPropertyList();
+        for (auto* prop : qAsConst(propList))
         {
-            QString pyName = pyValidGtPropertyId(prop->ident());
+            QString propId{pyValidGtPropertyId(prop->ident())};
 
-            if (pyName.isEmpty())
+            if (!propId.isEmpty())
             {
-                continue;
-            }
-
-            if (pyName == strName)
-            {
-                PyObject* propVal = PythonQtConv::QVariantToPyObject(
-                                        prop->valueToVariant());
-                return propVal;
-            }
-            else if (strName.startsWith("set"))
-            {
-                pyName.replace(0, 1, pyName.at(0).toUpper());
-                pyName.prepend("set");
-
-                if (pyName == strName)
+                if (propId == strName)
                 {
-                    return GtpyPropertySetter_New(prop->ident(), obj,
-                                                  Q_NULLPTR);
+                    PyObject* propVal = PythonQtConv::QVariantToPyObject(
+                                            prop->valueToVariant());
+                    return propVal;
                 }
-            }
-        }
 
-        ///look for setter functions to keep old scripts valid with the new
-        /// object wrapper
-        if (strName.startsWith("set"))
-        {
-            foreach (GtAbstractProperty* prop, propList)
-            {
-                QString funcName = prop->ident();
-
-                if (!funcName.isEmpty())
+                if (strName.startsWith("set"))
                 {
-                    funcName.replace(0, 1, funcName.at(0).toUpper());
-                    funcName.prepend("set");
+                    // Name of setter methods without string validation,
+                    // in order to keep old scripts running
+                    QString oldSetterName{prop->ident()};
+                    oldSetterName.replace(0, 1, oldSetterName.at(0).toUpper());
+                    oldSetterName.prepend("set");
 
-                    if (funcName == strName)
+                    propId.replace(0, 1, oldSetterName.at(0).toUpper());
+                    propId.prepend("set");
+
+                    if (propId == strName || oldSetterName == strName)
                     {
                         return GtpyPropertySetter_New(prop->ident(), obj,
-                                                      Q_NULLPTR);
+                                                      nullptr);
                     }
                 }
             }
         }
     }
 
-    ///look for create helper function
+    // Get create helper methods
     QStringList helperList = gtCalculatorHelperFactory->connectedHelper(
                                  Py_TYPE(wrapper->_obj)->tp_name);
 
-    foreach (QString helperName, helperList)
+    for (const auto& helperName : qAsConst(helperList))
     {
-        QString temp = "create" + helperName;
+        QString createHelperName{"create" + helperName};
 
-        if (strName == temp)
+        if (strName == createHelperName)
         {
             PyObject* childArg = PyTuple_New(2);
 
@@ -582,21 +520,23 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
             Py_INCREF(obj);
             PyTuple_SetItem(childArg, 1, obj);
 
-            PyObject* retVal = GtpyCreateHelperFunction_Type.tp_new(
-                                   &GtpyCreateHelperFunction_Type, childArg,
-                                   Q_NULLPTR);
+//            PyObject* createHelper = GtpyCreateHelperFunction_Type.tp_new(
+//                                   &GtpyCreateHelperFunction_Type, childArg,
+//                                   nullptr);
+            PyObject* createHelper = PyObject_CallObject(
+                        (PyObject*) &GtpyCreateHelperFunction_Type, childArg);
 
             Py_DECREF(childArg);
 
-            return retVal;
+            return createHelper;
         }
     }
 
-    error = qObj->objectName() + "(" + pointerAdress(qObj) + ") " +
-            "has no attribute named '" + QString(attributeName) + "'";
+    // Set error string because no attribute with the given name was found
+    QString error{"%1 (%2) has no attribute named '%3'"};
+    error = error.arg(qObj->objectName(), pointerAdress(qObj), strName);
     PyErr_SetString(PyExc_AttributeError, error.toLatin1().data());
-
-    return Q_NULLPTR;
+    return nullptr;
 }
 
 static PyObject*
@@ -624,7 +564,7 @@ GtpyExtendedWrapper_builtin_nonzero(PyObject* self)
 {
     GtpyExtendedWrapper* wrapper = (GtpyExtendedWrapper*)self;
     return (wrapper->_obj->_wrappedPtr ==
-            Q_NULLPTR && wrapper->_obj->_obj == Q_NULLPTR) ? 0 : 1;
+            nullptr && wrapper->_obj->_obj == nullptr) ? 0 : 1;
 }
 
 static PyNumberMethods
