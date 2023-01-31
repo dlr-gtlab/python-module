@@ -64,28 +64,29 @@ GtpsPythonInterpreter::runPythonInterpreter(const QStringList& args,
     QProcess process;
     process.start(m_pythonExe, args);
 
-    QString retval;
-    bool succes{process.waitForFinished()};
+    QByteArray retval;
+    bool success{process.waitForFinished()};
 
-    if (succes)
+    if (success && process.exitCode() == 0)
     {
-        retval = QString(process.readAll());
+        retval = process.readAll();
     }
     else
     {
-        retval = process.errorString();
+        retval = process.readAllStandardError();
+        success = false;
     }
 
     if (ok)
     {
-        *ok = succes;
+        *ok = success;
     }
 
     // set PYTHONPATH and PYTHONHOME variables again
     gtps::system::setPythonPath(pySysPaths);
     gtps::system::setPythonHome(pyHome);
 
-    return retval;
+    return  QString{retval};
 }
 
 bool
