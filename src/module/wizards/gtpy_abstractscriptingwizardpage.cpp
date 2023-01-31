@@ -34,14 +34,9 @@
 // GTlab framework includes
 #include "gt_object.h"
 #include "gt_project.h"
-#include "gt_package.h"
 #include "gt_application.h"
-#include "gt_calculatorhelperfactory.h"
-#include "gt_modeproperty.h"
-#include "gt_objectlinkproperty.h"
 #include "gt_datamodel.h"
 #include "gt_filedialog.h"
-#include "gt_processwizard.h"
 #include "gt_saveprojectmessagebox.h"
 
 #include "gt_pyhighlighter.h"
@@ -53,14 +48,14 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     GtpyContextManager::Context type) :
     m_contextId(-1),
     m_contextType(type),
-    m_editor(Q_NULLPTR),
-    m_editorSplitter(Q_NULLPTR),
-    m_tabWidget(Q_NULLPTR),
+    m_editor(nullptr),
+    m_editorSplitter(nullptr),
+    m_tabWidget(nullptr),
+    m_editorSettings(nullptr),
     m_isEvaluating(false),
-    m_runnable(Q_NULLPTR),
+    m_runnable(nullptr),
     m_savingEnabled(true),
-    m_componentUuid(QString()),
-    m_editorSettings(Q_NULLPTR)
+    m_componentUuid(QString())
 {
     setTitle(tr("Python Script Editor"));
 
@@ -333,7 +328,7 @@ GtpyAbstractScriptingWizardPage::initializePage()
 
     GtObject* component = gtDataModel->objectByUuid(m_componentUuid);
 
-    if (component == Q_NULLPTR)
+    if (!component)
     {
         enableSaving(false);
     }
@@ -427,12 +422,12 @@ GtpyAbstractScriptingWizardPage::insertWidgetNextToEditor(QWidget* widget,
         int index,
         int stretchFactor)
 {
-    if (m_editorSplitter == Q_NULLPTR)
+    if (!m_editorSplitter)
     {
         return;
     }
 
-    if (widget == Q_NULLPTR)
+    if (!widget)
     {
         return;
     }
@@ -445,7 +440,7 @@ GtpyAbstractScriptingWizardPage::insertWidgetNextToEditor(QWidget* widget,
 int
 GtpyAbstractScriptingWizardPage::defaultFrameStyle()
 {
-    if (m_editor == Q_NULLPTR)
+    if (!m_editor)
     {
         return 0;
     }
@@ -456,7 +451,7 @@ GtpyAbstractScriptingWizardPage::defaultFrameStyle()
 void
 GtpyAbstractScriptingWizardPage::setPlainTextToEditor(const QString& text)
 {
-    if (m_editor == Q_NULLPTR)
+    if (!m_editor)
     {
         return;
     }
@@ -467,7 +462,7 @@ GtpyAbstractScriptingWizardPage::setPlainTextToEditor(const QString& text)
 QString
 GtpyAbstractScriptingWizardPage::editorText()
 {
-    if (m_editor == Q_NULLPTR)
+    if (!m_editor)
     {
         return QString();
     }
@@ -531,7 +526,7 @@ GtpyAbstractScriptingWizardPage::replaceBlockHeaders(const QString& oldHeader,
         const QString& oldCaption,
         const QString& newCaption)
 {
-    if (m_editor == Q_NULLPTR)
+    if (!m_editor)
     {
         return;
     }
@@ -543,7 +538,7 @@ void
 GtpyAbstractScriptingWizardPage::searchAndReplaceEditorText(
     const QRegExp& searchFor, const QString& replaceBy, bool all)
 {
-    if (m_editor == Q_NULLPTR)
+    if (!m_editor)
     {
         return;
     }
@@ -555,7 +550,7 @@ void
 GtpyAbstractScriptingWizardPage::searchAndReplaceEditorText(
     const QString& searchFor, const QString& replaceBy, bool all)
 {
-    if (m_editor == Q_NULLPTR)
+    if (!m_editor)
     {
         return;
     }
@@ -566,17 +561,17 @@ GtpyAbstractScriptingWizardPage::searchAndReplaceEditorText(
 void
 GtpyAbstractScriptingWizardPage::setConsoleVisible(bool visible)
 {
-    if (m_separator != Q_NULLPTR)
+    if (m_separator)
     {
         m_separator->setVisible(visible);
     }
 
-    if (m_pythonConsole != Q_NULLPTR)
+    if (m_pythonConsole)
     {
         m_pythonConsole->setVisible(visible);
     }
 
-    if (m_consoleClearButton != Q_NULLPTR)
+    if (m_consoleClearButton)
     {
         m_consoleClearButton->setVisible(visible);
     }
@@ -612,7 +607,7 @@ GtpyAbstractScriptingWizardPage::indentation(const QString& codeLine) const
 void
 GtpyAbstractScriptingWizardPage::insertToCurrentCursorPos(QString text)
 {
-    if (m_editor == Q_NULLPTR)
+    if (!m_editor)
     {
         return;
     }
@@ -643,7 +638,7 @@ void
 GtpyAbstractScriptingWizardPage::addTabWidget(QWidget* wid,
         const QString& label)
 {
-    if (wid == Q_NULLPTR || m_tabWidget == Q_NULLPTR)
+    if (!wid || !m_tabWidget)
     {
         return;
     }
@@ -766,9 +761,9 @@ GtpyAbstractScriptingWizardPage::enableSaveButton(bool enable)
 void
 GtpyAbstractScriptingWizardPage::saveMesssageBox()
 {
-    QWidget* wiz = findParentWizard();
+    QWidget* wiz = wizard();
 
-    if (wiz == Q_NULLPTR)
+    if (!wiz)
     {
         return;
     }
@@ -802,37 +797,6 @@ GtpyAbstractScriptingWizardPage::saveMesssageBox()
         default:
             break;
     }
-}
-
-QWidget*
-GtpyAbstractScriptingWizardPage::findParentWizard()
-{
-    return findParentWizard(parent());
-}
-
-QWidget*
-GtpyAbstractScriptingWizardPage::findParentWizard(QObject* obj)
-{
-    if (obj == Q_NULLPTR)
-    {
-        return Q_NULLPTR;
-    }
-
-    if (!obj->parent())
-    {
-        return qobject_cast<QWidget*>(obj);
-    }
-    else
-    {
-        QMainWindow* mainWin = qobject_cast<QMainWindow*>(obj->parent());
-
-        if (mainWin)
-        {
-            return qobject_cast<QWidget*>(obj);
-        }
-    }
-
-    return findParentWizard(obj->parent());
 }
 
 void
@@ -872,7 +836,7 @@ GtpyAbstractScriptingWizardPage::registerGeometry()
 {
     if (!m_componentUuid.isEmpty())
     {
-        QWidget* wiz = findParentWizard();
+        QWidget* wiz = wizard();
 
         if (wiz)
         {
@@ -899,8 +863,7 @@ GtpyAbstractScriptingWizardPage::reloadWizardGeometry()
 {
     if (!m_componentUuid.isEmpty())
     {
-
-        QWidget* wiz = findParentWizard();
+        QWidget* wiz = wizard();
 
         if (!wiz)
         {
@@ -936,7 +899,7 @@ GtpyAbstractScriptingWizardPage::loadPackages()
                         scope()->objectName()
                         << packageName);
 
-        if (obj != Q_NULLPTR)
+        if (obj)
         {
             GtObject* clone = obj->clone();
             clone->setParent(this);
@@ -954,14 +917,14 @@ GtpyAbstractScriptingWizardPage::deleteRunnable()
     {
         GtpyContextManager::instance()->autoDeleteRunnable(m_runnable);
         m_runnable->interrupt();
-        m_runnable = Q_NULLPTR;
+        m_runnable = nullptr;
     }
 }
 
 void
 GtpyAbstractScriptingWizardPage::showEvalButton(bool show)
 {
-    if (m_evalButton == Q_NULLPTR)
+    if (!m_evalButton)
     {
         return;
     }
@@ -1164,7 +1127,7 @@ GtpyAbstractScriptingWizardPage::evaluationFinished()
                    this, &GtpyAbstractScriptingWizardPage::evaluationFinished);
 
         delete m_runnable;
-        m_runnable = Q_NULLPTR;
+        m_runnable = nullptr;
 
         endEval(success);
     }

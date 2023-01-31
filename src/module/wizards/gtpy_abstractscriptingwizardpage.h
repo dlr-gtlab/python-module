@@ -287,20 +287,6 @@ private:
     void saveMesssageBox();
 
     /**
-     * @brief Searchs the parent GtProcessWizard and returns it.
-     * @return The parent GtProcessWizard.
-     */
-    QWidget* findParentWizard();
-
-    /**
-     * @brief Searchs the parent GtProcessWizard of the given object
-     * and returns it.
-     * @param obj Object which parent GtProcessWizard is searched.
-     * @return The parent GtProcessWizard.
-     */
-    QWidget* findParentWizard(QObject* obj);
-
-    /**
      * @brief Sets the window modality of the wizard to non modal. This allows
      * the interaction with the GTlab UI while the wizard is open.
      */
