@@ -878,14 +878,12 @@ GtpyDecorator::setPropertyValue(GtObject* obj, const QString& id,
         }
     }
 
-    bool success = false;
-
     //    GtCommand cmmd = gtApp->startCommand(
     //                gtApp->currentProject(), prop->objectName() +
     //                         QStringLiteral(" of ") + obj->objectName() +
     //                         QStringLiteral(" changed!"));
 
-    success = prop->setValueFromVariant(val, QString(), &success);
+    bool success = prop->setValueFromVariant(val, QString());
 
     //    gtApp->endCommand(cmmd);
 
@@ -1068,14 +1066,12 @@ GtpyDecorator::setPropertyValue(GtAbstractProperty* prop,
         }
     }
 
-    bool success = false;
-
     //    GtCommand cmmd = gtApp->startCommand(
     //                gtApp->currentProject(), prop->objectName() +
     //                         QStringLiteral(" of ") + obj->objectName() +
     //                         QStringLiteral(" changed!"));
 
-    subProp->setValueFromVariant(val, QString(), &success);
+    bool success = subProp->setValueFromVariant(val, QString());
 
     //    gtApp->endCommand(cmmd);
 
