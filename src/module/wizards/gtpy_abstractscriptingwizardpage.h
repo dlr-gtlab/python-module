@@ -172,12 +172,6 @@ protected:
     void insertToCurrentCursorPos(QString text);
 
     /**
-     * @brief Set the list of package names.
-     * @param packageNames List of package names.
-     */
-    void setPackageNames(const QStringList& packageNames);
-
-    /**
      * @brief Adds a tab containing the given widget to the editor tab widget.
      * @param wid Widget to add to the editor tab widget.
      * @param label Label of the new tab.

@@ -191,8 +191,6 @@ GtpyTaskWizardPage::initialization()
 
     setPlainTextToEditor(m_task->script());
 
-    setPackageNames(m_task->packageNames());
-
     createSettings();
 
     connect(m_calcModel, SIGNAL(

@@ -30,6 +30,8 @@
 #include "gtpy_scriptrunnable.h"
 #include "gtpy_wizardgeometries.h"
 #include "gtpy_editorsettingsdialog.h"
+#include "gtpy_packageiteration.h"
+#include "gtpy_utilities.h"
 
 // GTlab framework includes
 #include "gt_object.h"
@@ -628,13 +630,6 @@ GtpyAbstractScriptingWizardPage::insertToCurrentCursorPos(QString text)
 }
 
 void
-GtpyAbstractScriptingWizardPage::setPackageNames(
-        QStringList const& packageNames)
-{
-    m_packageNames = packageNames;
-}
-
-void
 GtpyAbstractScriptingWizardPage::addTabWidget(QWidget* wid,
         const QString& label)
 {
@@ -892,22 +887,18 @@ GtpyAbstractScriptingWizardPage::reloadWizardGeometry()
 
 void
 GtpyAbstractScriptingWizardPage::loadPackages()
-{
-    foreach (QString packageName, m_packageNames)
-    {
-        GtObject* obj = scope()->getObjectByPath(QStringList() <<
-                        scope()->objectName()
-                        << packageName);
-
+{   
+    using PackageInfo = gtpy::package::PackageInfo;
+    gtpy::package::forEachPackage([&](const PackageInfo& pInfo){
+        auto* obj = scope()->getObjectByPath(
+                    QStringList() << scope()->objectName() << pInfo.objectName);
         if (obj)
         {
-            GtObject* clone = obj->clone();
+            auto* clone = obj->clone();
             clone->setParent(this);
-
-            GtpyContextManager::instance()->addGtObject(
-                m_contextId, clone->objectName(), clone);
+            gtpy::gtObjectToPython(m_contextId, clone);
         }
-    }
+    });
 }
 
 void

@@ -100,6 +100,9 @@ HEADERS += \
     post/gtpy_pythonplotwidget.h \
     post/gtpy_pythonsvgwidget.h \
     utilities/gtpy_globals.h \
+    utilities/gtpy_packageiteration.h \
+    utilities/gtpy_regexp.h \
+    utilities/gtpy_utilities.h \
     utilities/pythonextensions/gtpy_calculatorsmodule.h \
     utilities/pythonextensions/gtpy_loggingmodule.h \
     utilities/pythonextensions/gtpy_projectpathfunction.h \
@@ -160,6 +163,8 @@ SOURCES += \
     post/gtpy_pythonplotwidget.cpp \
     post/gtpy_pythonsvgwidget.cpp \
     utilities/gtpy_globals.cpp \
+    utilities/gtpy_regexp.cpp \
+    utilities/gtpy_utilities.cpp \
     utilities/pythonextensions/gtpy_calculatorsmodule.cpp \
     utilities/pythonextensions/gtpy_loggingmodule.cpp \
     utilities/pythonextensions/gtpy_projectpathfunction.cpp \

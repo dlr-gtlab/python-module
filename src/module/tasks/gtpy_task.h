@@ -41,7 +41,7 @@ public:
      *  the script evaluation.
      * @return Whether evaluation was successful or not.
      */
-    virtual bool runIteration() Q_DECL_OVERRIDE;
+    virtual bool runIteration() override;
 
     /**
      * @brief Returns current script.
@@ -54,12 +54,6 @@ public:
      * @param New script.
      */
     void setScript(QString script);
-
-    /**
-     * @brief Returns names of available packages.
-     * @return List of names of available packages.
-     */
-    QStringList packageNames();
 
     /**
      * @brief Returns the value of the calculator definitions property.
@@ -107,12 +101,6 @@ protected:
     bool childAccepted(GtObject* /*child*/) override;
 
 private:
-    /**
-     * @brief Returns ids of modules.
-     * @return List of ids of modules.
-     */
-    QStringList getModuleIds();
-
     /// Script.
     GtStringProperty m_script;
 

@@ -39,7 +39,7 @@ public:
      * @brief Main run method of the calculator.
      * @return Whether run process was successful or not.
      */
-    bool run() Q_DECL_OVERRIDE;
+    bool run() override;
 
     /**
      * @brief Returns current script.
@@ -52,12 +52,6 @@ public:
      * @param New script.
      */
     void setScript(QString script);
-
-    /**
-     * @brief Returns names of available packages.
-     * @return List of names of available packages.
-     */
-    QStringList packageNames();
 
     /**
      * @brief Returns whether tabs are replaced by spaces.
@@ -85,12 +79,6 @@ public:
     void setTabSize(int tabSize);
 
 private:
-    /**
-     * @brief Returns ids of modules.
-     * @return List of ids of modules.
-     */
-    QStringList getModuleIds();
-
     /**
      * @brief If connection is true, it connects to the stateChanged
      * signal of its root task. Else it disconnects from the root task.
