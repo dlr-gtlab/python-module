@@ -7,12 +7,12 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include "gt_application.h"
 #include "gt_objectpathproperty.h"
 #include "gt_package.h"
-#include "gt_project.h"
 #include "gt_processdata.h"
 
+#include "gtpy_utilities.h"
+#include "gtpy_packageiteration.h"
 #include "gtpy_contextmanager.h"
 #include "gtpy_wizardgeometries.h"
 
@@ -40,25 +40,16 @@ GtpyTask::GtpyTask():
     m_replaceTabBySpaces.hide();
     m_tabSize.hide();
 
-    foreach (const QString& modId, getModuleIds())
-    {
-        QString modClass = gtApp->modulePackageId(modId);
+    using PackageInfo = gtpy::package::PackageInfo;
+    gtpy::package::forEachPackage([&](const PackageInfo& pInfo){
+        auto pathProp = new GtObjectPathProperty(
+                    QStringLiteral(""), QStringLiteral(""), QStringLiteral(""),
+                    pInfo.modId, this, QStringList() << pInfo.className);
 
-        if (!modClass.isEmpty())
-        {
-            GtObjectPathProperty* pathProp =
-                new GtObjectPathProperty(QStringLiteral(""),
-                                         QStringLiteral(""),
-                                         QStringLiteral(""),
-                                         modId,
-                                         this,
-                                         QStringList() << modClass);
-            pathProp->hide(true);
-            registerProperty(*pathProp);
+        pathProp->hide(true);
+        registerProperty(*pathProp);
 
-            m_dynamicPathProps << pathProp;
-        }
-    }
+        m_dynamicPathProps << pathProp; });
 
     connect(this, SIGNAL(stateChanged(GtProcessComponent::STATE)), this,
             SLOT(onStateChanged(GtProcessComponent::STATE)));
@@ -88,15 +79,9 @@ GtpyTask::runIteration()
     ///Initialize context with data model objects
     GtpyContextManager::instance()->addTaskValue(contextId, this);
 
-    foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
+    for (auto* pathProp : qAsConst(m_dynamicPathProps))
     {
-        GtPackage* package = data<GtPackage*>(pathProp->path());
-
-        if (package != Q_NULLPTR)
-        {
-            GtpyContextManager::instance()->addGtObject(contextId,
-                    package->objectName(), package);
-        }
+        gtpy::gtObjectToPython(contextId, data<GtPackage*>(pathProp->path()));
     }
 
     ///Save the current thread settings
@@ -114,15 +99,10 @@ GtpyTask::runIteration()
                   contextId, script(), true);
 
     ///Remove the data model objects from the context
-    foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
+    for (auto* pathProp : qAsConst(m_dynamicPathProps))
     {
-        GtPackage* package = data<GtPackage*>(pathProp->path());
-
-        if (package != Q_NULLPTR)
-        {
-            GtpyContextManager::instance()->removeObject(contextId,
-                    package->objectName());
-        }
+        gtpy::removeGtObjectFromPython(
+                    contextId, data<GtPackage*>(pathProp->path()));
     }
 
     ///Delete the context
@@ -155,19 +135,6 @@ GtpyTask::setScript(QString script)
     m_script = script;
 }
 
-QStringList
-GtpyTask::packageNames()
-{
-    QStringList list;
-
-    foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
-    {
-        list.append(pathProp->path().toString());
-    }
-
-    return list;
-}
-
 bool
 GtpyTask::childAccepted(GtObject* /*child*/)
 {
@@ -176,19 +143,6 @@ GtpyTask::childAccepted(GtObject* /*child*/)
 #else
     return qobject_cast<GtProcessData*>(this->parent()) == nullptr;
 #endif
-}
-
-QStringList
-GtpyTask::getModuleIds()
-{
-    GtProject* project = gtApp->currentProject();
-
-    if (project == Q_NULLPTR)
-    {
-        return QStringList();
-    }
-
-    return project->moduleIds();
 }
 
 QString

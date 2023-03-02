@@ -7,14 +7,13 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include "gt_logging.h"
-#include "gt_application.h"
 #include "gt_package.h"
-#include "gt_project.h"
 #include "gt_objectpathproperty.h"
 #include "gt_processdata.h"
 
 #include "gtpy_contextmanager.h"
+#include "gtpy_packageiteration.h"
+#include "gtpy_utilities.h"
 #include "gtpy_wizardgeometries.h"
 
 #include "gtpy_scriptcalculator.h"
@@ -38,25 +37,15 @@ GtpyScriptCalculator::GtpyScriptCalculator() :
     m_replaceTabBySpaces.hide();
     m_tabSize.hide();
 
-    foreach (const QString& modId, getModuleIds())
-    {
-        QString modClass = gtApp->modulePackageId(modId);
+    using PackageInfo = gtpy::package::PackageInfo;
+    gtpy::package::forEachPackage([&](const PackageInfo& pInfo){
+        auto pathProp = new GtObjectPathProperty(
+                    QStringLiteral(""), QStringLiteral(""), QStringLiteral(""),
+                    pInfo.modId, this, QStringList() << pInfo.className);
+        pathProp->hide(true);
+        registerProperty(*pathProp);
 
-        if (!modClass.isEmpty())
-        {
-            GtObjectPathProperty* pathProp =
-                new GtObjectPathProperty(QStringLiteral(""),
-                                         QStringLiteral(""),
-                                         QStringLiteral(""),
-                                         modId,
-                                         this,
-                                         QStringList() << modClass);
-            pathProp->hide(true);
-            registerProperty(*pathProp);
-
-            m_dynamicPathProps << pathProp;
-        }
-    }
+        m_dynamicPathProps << pathProp; });
 
     connect(this, SIGNAL(stateChanged(GtProcessComponent::STATE)), this,
             SLOT(onStateChanged(GtProcessComponent::STATE)));
@@ -82,15 +71,9 @@ GtpyScriptCalculator::run()
     int contextId = GtpyContextManager::instance()->createNewContext(
                         GtpyContextManager::CalculatorRunContext, true);
 
-    foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
+    for (auto* pathProp : qAsConst(m_dynamicPathProps))
     {
-        GtPackage* package = data<GtPackage*>(pathProp->path());
-
-        if (package != Q_NULLPTR)
-        {
-            GtpyContextManager::instance()->addGtObject(contextId,
-                    package->objectName(), package);
-        }
+        gtpy::gtObjectToPython(contextId, data<GtPackage*>(pathProp->path()));
     }
 
     gtInfo() << "running script...";
@@ -105,15 +88,10 @@ GtpyScriptCalculator::run()
     success = GtpyContextManager::instance()->evalScript(
                   contextId, script(), true);
 
-    foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
+    for (auto* pathProp : qAsConst(m_dynamicPathProps))
     {
-        GtPackage* package = data<GtPackage*>(pathProp->path());
-
-        if (package != Q_NULLPTR)
-        {
-            GtpyContextManager::instance()->removeObject(contextId,
-                    package->objectName());
-        }
+        gtpy::removeGtObjectFromPython(
+                    contextId, data<GtPackage*>(pathProp->path()));
     }
 
     GtpyContextManager::instance()->deleteContext(contextId, true);
@@ -144,19 +122,6 @@ GtpyScriptCalculator::setScript(QString script)
     m_script = script;
 }
 
-QStringList
-GtpyScriptCalculator::packageNames()
-{
-    QStringList list;
-
-    foreach (GtObjectPathProperty* pathProp, m_dynamicPathProps)
-    {
-        list.append(pathProp->path().toString());
-    }
-
-    return list;
-}
-
 bool
 GtpyScriptCalculator::replaceTabBySpaces() const
 {
@@ -179,20 +144,6 @@ void
 GtpyScriptCalculator::setTabSize(int tabSize)
 {
     m_tabSize = tabSize;
-}
-
-
-QStringList
-GtpyScriptCalculator::getModuleIds()
-{
-    GtProject* project = gtApp->currentProject();
-
-    if (project == Q_NULLPTR)
-    {
-        return QStringList();
-    }
-
-    return project->moduleIds();
 }
 
 void GtpyScriptCalculator::connectWithRootTask(bool connection)

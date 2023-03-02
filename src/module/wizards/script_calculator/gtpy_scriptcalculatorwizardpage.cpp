@@ -56,8 +56,6 @@ GtpyScriptCalculatorWizardPage::initialization()
     }
 
     setPlainTextToEditor(m_calc->script());
-
-    setPackageNames(m_calc->packageNames());
 }
 
 bool
