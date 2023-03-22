@@ -25,6 +25,7 @@
 #include <QApplication>
 
 // python includes
+#include "gtpy_icons_compat.h"
 #include "gtpy_scripteditor.h"
 #include "gtpy_console.h"
 #include "gtpy_scriptrunnable.h"
@@ -36,7 +37,6 @@
 // GTlab framework includes
 #include "gt_object.h"
 #include "gt_project.h"
-#include "gt_application.h"
 #include "gt_datamodel.h"
 #include "gt_filedialog.h"
 #include "gt_saveprojectmessagebox.h"
@@ -112,7 +112,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     separatorLay->addWidget(m_searchWidget);
 
     m_backwardButton = new QPushButton;
-    m_backwardButton->setIcon(gtApp->icon("arrowleftIcon.png"));
+    m_backwardButton->setIcon(GTPY_ICON(triangleSmallLeft));
     m_backwardButton->setToolTip(tr("Search backwards"));
     m_backwardButton->setMaximumSize(QSize(15, 20));
     m_backwardButton->setFlat(true);
@@ -121,7 +121,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     separatorLay->addWidget(m_backwardButton);
 
     m_forwardButton = new QPushButton;
-    m_forwardButton->setIcon(gtApp->icon("arrowrightIcon.png"));
+    m_forwardButton->setIcon(GTPY_ICON(triangleSmallRight));
     m_forwardButton->setToolTip(tr("Search forwards"));
     m_forwardButton->setMaximumSize(QSize(15, 20));
     m_forwardButton->setFlat(true);
@@ -147,7 +147,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     //Clear Button
     m_consoleClearButton = new QPushButton;
-    m_consoleClearButton->setIcon(gtApp->icon("clearIcon_16.png"));
+    m_consoleClearButton->setIcon(GTPY_ICON(clear));
     m_consoleClearButton->setToolTip(tr("Clear Output"));
 
     QLabel* shortCutClearOutput = new QLabel("<font color='grey'></font>");
@@ -166,7 +166,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     //Evaluation Button
     m_evalButton = new QPushButton;
-    m_evalButton->setIcon(gtApp->icon("runProcessIcon_24.png"));
+    m_evalButton->setIcon(GTPY_ICON(play));
     m_evalButton->setToolTip(tr("Evaluate Python script"));
 
     m_shortCutEval = new QLabel("<font color='grey'>  Ctrl+E</font>");
@@ -192,7 +192,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     m_shortCutSave->setFont(fontSave);
 
     m_saveButton = new QPushButton;
-    m_saveButton->setIcon(gtApp->icon("saveProjectIcon.png"));
+    m_saveButton->setIcon(GTPY_ICON(save));
     m_saveButton->setToolTip(tr("Save Script"));
 
     QVBoxLayout* saveButtonLay = new QVBoxLayout;
@@ -211,7 +211,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     shortCutImport->setFont(fontImport);
 
     QPushButton* importButton = new QPushButton;
-    importButton->setIcon(gtApp->icon("importIcon.png"));
+    importButton->setIcon(GTPY_ICON(import));
     importButton->setToolTip(tr("Import Python Script"));
 
     QVBoxLayout* importButtonLay = new QVBoxLayout;
@@ -223,7 +223,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
     //Export Button
     QPushButton* exportButton = new QPushButton;
-    exportButton->setIcon(gtApp->icon("exportIcon.png"));
+    exportButton->setIcon(GTPY_ICON(export_));
     exportButton->setToolTip(tr("Export Python Script"));
 
     QLabel* shortCutExport = new QLabel("<font color='grey'></font>");
@@ -247,7 +247,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     shortCutSettings->setFont(fontSettings);
 
     QPushButton* settingsButton = new QPushButton;
-    settingsButton->setIcon(gtApp->icon("configIcon.png"));
+    settingsButton->setIcon(GTPY_ICON(config));
     settingsButton->setToolTip(tr("Editor settings"));
 
     QVBoxLayout* settingsButtonLay = new QVBoxLayout;
@@ -922,14 +922,14 @@ GtpyAbstractScriptingWizardPage::showEvalButton(bool show)
 
     if (show)
     {
-        m_evalButton->setIcon(gtApp->icon("runProcessIcon_24.png"));
+        m_evalButton->setIcon(GTPY_ICON(play));
         m_evalButton->setToolTip(tr("Evaluate Python script"));
 
         m_shortCutEval->setText("<font color='grey'>  Ctrl+E</font>");
     }
     else
     {
-        m_evalButton->setIcon(gtApp->icon("stopIcon.png"));
+        m_evalButton->setIcon(GTPY_ICON(stop));
         m_evalButton->setToolTip(tr("Interrupt evaluation"));
 
         m_shortCutEval->setText("<font color='grey'>  Ctrl+I</font>");

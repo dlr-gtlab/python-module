@@ -9,7 +9,6 @@
 
 #include <QMimeData>
 
-#include "gt_application.h"
 #include "gt_object.h"
 #include "gt_processcomponent.h"
 #include "gt_calculator.h"
@@ -28,6 +27,7 @@
 #include "gt_processdata.h"
 #endif
 
+#include "gtpy_icons_compat.h"
 
 #include "gtpy_taskstylemodel.h"
 
@@ -82,8 +82,7 @@ GtpyTaskStyleModel::data(const QModelIndex& index, int role) const
                     }
                     else
                     {
-                        return gtApp->icon(
-                                   QStringLiteral("calculatorIcon_16.png"));
+                        return GTPY_ICON(calculator);
                     }
                 }
                 else if (qobject_cast<GtTask*>(pc))
@@ -102,8 +101,7 @@ GtpyTaskStyleModel::data(const QModelIndex& index, int role) const
                     }
                     else
                     {
-                        return gtApp->icon(
-                                   QStringLiteral("processIcon_16.png"));
+                        return GTPY_ICON(process);
                     }
                 }
             }

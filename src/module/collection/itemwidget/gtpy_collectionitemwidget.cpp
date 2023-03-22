@@ -7,8 +7,6 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include "gtpy_collectionitemwidget.h"
-
 #include <QVBoxLayout>
 #include <QFrame>
 #include <QTabWidget>
@@ -17,9 +15,10 @@
 #include <QMainWindow>
 #include <QApplication>
 
-#include "gt_logging.h"
 #include "gt_collectionitem.h"
-#include "gt_application.h"
+
+#include "gtpy_stylesheet_compat.h"
+#include "gtpy_icons_compat.h"
 
 #include "gtpy_collectionitemwidget.h"
 
@@ -43,7 +42,7 @@ GtpyCollectionItemWidget::GtpyCollectionItemWidget(const
     }
 
     setWindowTitle(collectionItem.ident());
-    setWindowIcon(gtApp->icon(QStringLiteral("infoIcon_16.png")));
+    setWindowIcon(GTPY_ICON(info));
 
     QVBoxLayout* lay = new QVBoxLayout;
     lay->setContentsMargins(0, 0, 0, 0);
@@ -53,24 +52,7 @@ GtpyCollectionItemWidget::GtpyCollectionItemWidget(const
     frame->setAutoFillBackground(true);
     frame->setFrameShape(QFrame::Box);
     frame->setFrameShadow(QFrame::Raised);
-
-    bool dark = false;
-#if GT_VERSION >= 0x020000
-    dark = gtApp->inDarkMode();
-#endif
-
-    if (dark)
-    {
-        frame->setStyleSheet(
-                    "#frame {border-image: "
-                    "url(:/pixmaps/startup-background_dark.png)}");
-    }
-    else
-    {
-        frame->setStyleSheet(
-                    "#frame {border-image: "
-                    "url(:/pixmaps/startup-background.png)}");
-    }
+    frame->setStyleSheet(GTPY_STYLESHEET(backgroundFrame));
 
     QVBoxLayout* frameLay = new QVBoxLayout;
     frameLay->setContentsMargins(10, 10, 10, 10);
@@ -132,15 +114,11 @@ GtpyCollectionItemWidget::GtpyCollectionItemWidget(const
 
     overviewWidget->setLayout(overviewLay);
 
-    tabWidget->addTab(overviewWidget,
-                      gtApp->icon(QStringLiteral("listIcon_16.png")),
-                      tr("Overview"));
+    tabWidget->addTab(overviewWidget, GTPY_ICON(list), tr("Overview"));
 
     QWidget* docWidget = new QWidget;
 
-    tabWidget->addTab(docWidget,
-                      gtApp->icon(QStringLiteral("questionIcon_16.png")),
-                      tr("Documentation"));
+    tabWidget->addTab(docWidget, GTPY_ICON(questionmark), tr("Documentation"));
 
     tabWidget->setTabEnabled(1, false);
 
@@ -233,9 +211,7 @@ GtpyCollectionItemWidget::newFileLayout(const QString& filename)
     QHBoxLayout* fileLay = new QHBoxLayout;
     QLabel* iconLabel = new QLabel;
     iconLabel->setMaximumWidth(16);
-    iconLabel->setPixmap(
-        gtApp->icon(
-            QStringLiteral("fileIcon_16.png")).pixmap(QSize(16, 16)));
+    iconLabel->setPixmap(GTPY_ICON(file).pixmap(QSize(16, 16)));
     QLabel* fileLabel = new QLabel(filename);
     fileLay->addWidget(iconLabel);
     fileLay->addWidget(fileLabel);

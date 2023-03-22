@@ -30,7 +30,7 @@ public:
      * @brief GtpyCollectionBrowser
      * @param parent Parent widget.
      */
-    explicit GtpyCollectionBrowser(QWidget* parent = Q_NULLPTR);
+    explicit GtpyCollectionBrowser(QWidget* parent = nullptr);
 
     /**
      * @brief Appends the given list of items as children of the root
@@ -47,23 +47,23 @@ public:
      * @brief Returns a list of the items to download.
      * @return A list of the items to download.
      */
-    QList<GtCollectionNetworkItem> itemsToDownload() Q_DECL_OVERRIDE;
+    QList<GtCollectionNetworkItem> itemsToDownload() override;
 
     /**
      * @brief Returns a list of the itmes to update.
      * @return A list of the items to update.
      */
-    QList<GtCollectionNetworkItem> itemsToUpdate() Q_DECL_OVERRIDE;
+    QList<GtCollectionNetworkItem> itemsToUpdate() override;
 
     /**
      * @brief Selects all items.
      */
-    void selectAllItems() Q_DECL_OVERRIDE;
+    void selectAllItems() override;
 
     /**
      * @brief Unselect all items.
      */
-    void unselectAllItems() Q_DECL_OVERRIDE;
+    void unselectAllItems() override;
 
 private:
     /**

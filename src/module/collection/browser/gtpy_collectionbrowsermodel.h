@@ -12,7 +12,7 @@
 
 #include <QAbstractItemModel>
 
-#include "gtpy_abstractbrowseritem.h"
+#include "gt_collectionnetworkitem.h"
 
 class GtpyRootBrowserItem;
 class GtpyCollapsibleBrowserItem;
@@ -36,7 +36,7 @@ public:
      * @brief GtpyCollectionBrowserModel
      * @param parent Parent object.
      */
-    explicit GtpyCollectionBrowserModel(QObject* parent = Q_NULLPTR);
+    explicit GtpyCollectionBrowserModel(QObject* parent = nullptr);
 
     /**
      * @brief ~GtpyCollectionBrowserModel
@@ -48,14 +48,14 @@ public:
      * @param parent Parent index.
      * @return The row count under the given parent.
      */
-    int rowCount(const QModelIndex& parent) const Q_DECL_OVERRIDE;
+    int rowCount(const QModelIndex& parent) const override;
 
     /**
      * @brief Returns the column count for the children under the given parent.
      * @param parent Parent index.
      * @return The column count for the children under the given parent.
      */
-    int columnCount(const QModelIndex& parent) const Q_DECL_OVERRIDE;
+    int columnCount(const QModelIndex& parent) const override;
 
     /**
      * @brief Returns the data for the item at the given index.
@@ -63,7 +63,7 @@ public:
      * @param role Type of data.
      * @return The data for the item at the given index.
      */
-    QVariant data(const QModelIndex& index, int role) const Q_DECL_OVERRIDE;
+    QVariant data(const QModelIndex& index, int role) const override;
 
     /**
      * @brief Set the item with the given index checked or unchecked.
@@ -74,7 +74,7 @@ public:
      * @return
      */
     bool setData(const QModelIndex& index,
-                 const QVariant& value, int role) Q_DECL_OVERRIDE;
+                 const QVariant& value, int role) override;
 
     /**
      * @brief Returns the header data.
@@ -84,7 +84,7 @@ public:
      * @return The header data.
      */
     QVariant headerData(int section, Qt::Orientation orientation,
-                        int role) const Q_DECL_OVERRIDE;
+                        int role) const override;
 
     /**
      * @brief setCollectionData
@@ -105,21 +105,21 @@ public:
      * @return Index of the item in the model.
      */
     QModelIndex index(int row, int column, const QModelIndex& parent =
-                          QModelIndex()) const Q_DECL_OVERRIDE;
+                          QModelIndex()) const override;
 
     /**
      * @brief Returns the parent index of the item with the given index.
      * @param index Index of an item of the model.
      * @return The parent index of the item with the given index.
      */
-    QModelIndex parent(const QModelIndex& index) const Q_DECL_OVERRIDE;
+    QModelIndex parent(const QModelIndex& index) const override;
 
     /**
      * @brief Returns the item flags for the given index.
      * @param index Index of an item.
      * @return The item flags for the given index.
      */
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const Q_DECL_OVERRIDE;
+    virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     /**
      * @brief Retruns the collection item with the given index.

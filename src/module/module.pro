@@ -93,6 +93,8 @@ HEADERS += \
     calculators/gtpy_scriptcalculator.h \
     collection/gtpy_scriptcollectionsettings.h \
     collection/gtpy_collectionwidget.h \
+    gtpy_icons_compat.h \
+    gtpy_stylesheet_compat.h \
     models/gtpy_objectmodel.h \
     post/gtpy_pythonplotconfigdialog.h \
     post/gtpy_pythonplotdata.h \

@@ -14,6 +14,7 @@
 
 #include "gtpy_contextmanager.h"
 #include "gtpy_globals.h"
+#include "gtpy_icons_compat.h"
 #include "gtpy_collapsiblelocalitem.h"
 #include "gtpy_localitem.h"
 
@@ -36,7 +37,7 @@ GtpyCollectionLocalModel::~GtpyCollectionLocalModel()
 int
 GtpyCollectionLocalModel::rowCount(const QModelIndex& parent) const
 {
-    if (m_rootItem == Q_NULLPTR)
+    if (!m_rootItem)
     {
         return 0;
     }
@@ -77,14 +78,14 @@ GtpyCollectionLocalModel::columnCount(const QModelIndex& /*parent*/) const
 QVariant
 GtpyCollectionLocalModel::data(const QModelIndex& index, int role) const
 {
-    if (m_rootItem == Q_NULLPTR)
+    if (!m_rootItem)
     {
-        return QVariant();
+        return {};
     }
 
     if (!index.isValid())
     {
-        return QVariant();
+        return {};
     }
 
     const int col = index.column();
@@ -94,7 +95,7 @@ GtpyCollectionLocalModel::data(const QModelIndex& index, int role) const
 
     if (!item)
     {
-        return QVariant();
+        return {};
     }
 
     bool dark = false;
@@ -160,11 +161,11 @@ GtpyCollectionLocalModel::data(const QModelIndex& index, int role) const
             case Qt::DecorationRole:
                 if (col == 0)
                 {
-                    return gtApp->icon(QStringLiteral("propertyIcon_16.png"));
+                    return GTPY_ICON(property);
                 }
                 else if (col == 1)
                 {
-                    return gtApp->icon(QStringLiteral("infoBlueIcon_16.png"));
+                    return GTPY_ICON(info2);
                 }
 
                 break;
@@ -174,7 +175,7 @@ GtpyCollectionLocalModel::data(const QModelIndex& index, int role) const
         }
     }
 
-    return QVariant();
+    return {};
 }
 
 QVariant
@@ -246,14 +247,14 @@ QModelIndex
 GtpyCollectionLocalModel::index(int row, int column,
                                 const QModelIndex& parent) const
 {
-    if (m_rootItem == Q_NULLPTR)
+    if (!m_rootItem)
     {
-        return QModelIndex();
+        return {};
     }
 
     if (!hasIndex(row, column, parent))
     {
-        return QModelIndex();
+        return {};
     }
 
     GtpyAbstractLocalItem* parentItem;
@@ -278,20 +279,20 @@ GtpyCollectionLocalModel::index(int row, int column,
         }
     }
 
-    return QModelIndex();
+    return {};
 }
 
 QModelIndex
 GtpyCollectionLocalModel::parent(const QModelIndex& index) const
 {
-    if (m_rootItem == Q_NULLPTR)
+    if (!m_rootItem)
     {
-        return QModelIndex();
+        return {};
     }
 
     if (!index.isValid())
     {
-        return QModelIndex();
+        return {};
     }
 
     GtpyAbstractLocalItem* childItem =
@@ -299,9 +300,9 @@ GtpyCollectionLocalModel::parent(const QModelIndex& index) const
 
     GtpyAbstractLocalItem* parentItem = childItem->parentItem();
 
-    if (parentItem == m_rootItem)
+    if (!parentItem)
     {
-        return QModelIndex();
+        return {};
     }
 
     return createIndex(parentItem->row(), 0, parentItem);
@@ -312,19 +313,19 @@ GtpyCollectionLocalModel::itemFromIndex(const QModelIndex& index)
 {
     if (!index.isValid())
     {
-        return GtCollectionItem();
+        return {};
     }
 
     if (index.model() != this)
     {
-        return GtCollectionItem();
+        return {};
     }
 
     QModelIndex parent = index.parent();
 
     if (!parent.isValid())
     {
-        return GtCollectionItem();
+        return {};
     }
 
     GtpyLocalItem* item = static_cast<GtpyLocalItem*>
@@ -332,12 +333,12 @@ GtpyCollectionLocalModel::itemFromIndex(const QModelIndex& index)
 
     if (!item)
     {
-        return GtCollectionItem();
+        return {};
     }
 
     if (item->isCollapsible())
     {
-        return GtCollectionItem();
+        return {};
     }
 
     return item->item();
@@ -389,7 +390,7 @@ GtpyCollectionLocalModel::uninstallItem(const QModelIndex& index)
 
     if (parentItem->deleteChild(row))
     {
-        item = Q_NULLPTR;
+        item = nullptr;
         QString collectionPath = GtpyContextManager::collectionPath();
 
         if (!collectionPath.isEmpty())

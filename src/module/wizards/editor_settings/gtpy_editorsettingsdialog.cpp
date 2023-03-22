@@ -13,9 +13,8 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 
-#include "gt_application.h"
-
 #include "gtpy_generalpage.h"
+#include "gtpy_icons_compat.h"
 
 #include "gtpy_editorsettingsdialog.h"
 
@@ -42,9 +41,9 @@ GtpyEditorSettingsDialog::GtpyEditorSettingsDialog(GtpyEditorSettings*
     m_pagesWidget->addWidget(new GtpyGeneralPage);
 
     QPushButton* saveButton = new QPushButton(tr("Save"));
-    saveButton->setIcon(gtApp->icon("saveProjectIcon_16.png"));
+    saveButton->setIcon(GTPY_ICON(save));
     QPushButton* closeButton = new QPushButton(tr("Cancel"));
-    closeButton->setIcon(gtApp->icon("closeIcon_16.png"));
+    closeButton->setIcon(GTPY_ICON(close));
 
     createIcons();
     loadSettings();
@@ -71,7 +70,7 @@ GtpyEditorSettingsDialog::GtpyEditorSettingsDialog(GtpyEditorSettings*
     setLayout(mainLayout);
 
     setWindowTitle(tr("Editor settings"));
-    setWindowIcon(gtApp->icon("configIcon_16.png"));
+    setWindowIcon(GTPY_ICON(config));
     setFixedHeight(470);
     setFixedWidth(600);
 }
@@ -80,7 +79,7 @@ void
 GtpyEditorSettingsDialog::createIcons()
 {
     QListWidgetItem* configButton = new QListWidgetItem(m_contentsWidget);
-    configButton->setIcon(gtApp->icon("configIcon.png"));
+    configButton->setIcon(GTPY_ICON(config));
     configButton->setText(tr("Editor"));
     configButton->setTextAlignment(Qt::AlignHCenter);
     configButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);

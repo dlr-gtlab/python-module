@@ -31,7 +31,7 @@ public:
      * @brief GtpyCollectionLocalWidget
      * @param parent Parent widget.
      */
-    explicit GtpyCollectionLocalWidget(QWidget* parent = Q_NULLPTR);
+    explicit GtpyCollectionLocalWidget(QWidget* parent = nullptr);
 
     /**
        * @brief Passes the given list of items to the model.
@@ -59,14 +59,6 @@ public:
     void setShowItemInfo(bool val);
 
 private:
-    /**
-     * @brief Returns the source model index corresponding to the given index
-     * from the sorting model.
-     * @param index Index of the sorting model.
-     * @return The source model index corresponding to the given index.
-     */
-    QModelIndex mapToSource(const QModelIndex& index) const;
-
     /// Tree view.
     QTreeView* m_view;
 
@@ -78,6 +70,14 @@ private:
 
     /// Enables custom context menu
     bool m_contextMenuEnabled;
+
+    /**
+     * @brief Returns the source model index corresponding to the given index
+     * from the sorting model.
+     * @param index Index of the sorting model.
+     * @return The source model index corresponding to the given index.
+     */
+    QModelIndex mapToSource(const QModelIndex& index) const;
 
 private slots:
     /**

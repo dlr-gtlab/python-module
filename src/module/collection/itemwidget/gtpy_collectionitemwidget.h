@@ -30,7 +30,7 @@ public:
      * @param parent Parent widget.
      */
     explicit GtpyCollectionItemWidget(const GtCollectionItem& collectionItem,
-                                      QWidget* parent = Q_NULLPTR);
+                                      QWidget* parent = nullptr);
 private:
     /// Filter string.
     QString m_filter;
