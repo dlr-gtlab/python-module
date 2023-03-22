@@ -2,8 +2,10 @@
 #include "ui_gtps_pythonpreferencepage.h"
 
 #include "gt_settings.h"
-#include "gt_moduleinterface.h"
+#include "gt_colors.h"
+#include "gt_icons.h"
 
+#include "gtps_constants.h"
 #include "gtps_globals.h"
 #include "gtps_pythoninterpreter.h"
 
@@ -15,7 +17,7 @@ GtPythonPreferencePage::GtPythonPreferencePage() :
     GtPreferencesPage(tr("Python Environment"), nullptr),
     ui(std::make_unique<Ui::GtPythonPreferencePage>())
 {
-    setIcon(QIcon(":/resources/python-icon-tinted_128.png"));
+    setIcon(gt::gui::icon::python());
     setTitleShort("Python");
 
     ui->setupUi(this);
@@ -27,21 +29,25 @@ GtPythonPreferencePage::GtPythonPreferencePage() :
             &GtPythonPreferencePage::onBtnTestPyEnvPressed);
 }
 
-void GtPythonPreferencePage::saveSettings(GtSettings & settings) const
-{
-    settings.setSetting(moduleSettingPath(GT_MODULENAME(), "pythonexe"),
+void
+GtPythonPreferencePage::saveSettings(GtSettings& settings) const
+{  
+    settings.setSetting(gtps::settings::path(gtps::constants::PYEXE_S_ID),
                         ui->lePythonExe->text());
+
 }
 
-void GtPythonPreferencePage::loadSettings(const GtSettings & settings)
+void
+GtPythonPreferencePage::loadSettings(const GtSettings& settings)
 {
-    auto pathToPython = settings.getSetting(moduleSettingPath(GT_MODULENAME(), "pythonexe"))
-                            .toString();
+    auto pathToPython = settings.getSetting(
+                gtps::settings::path(gtps::constants::PYEXE_S_ID)).toString();
 
     ui->lePythonExe->setText(std::move(pathToPython));
 }
 
-void GtPythonPreferencePage::onBtnSelectPyExePressed()
+void
+GtPythonPreferencePage::onBtnSelectPyExePressed()
 {
     auto currentPyExe = ui->lePythonExe->text();
 
@@ -68,30 +74,46 @@ void GtPythonPreferencePage::onBtnSelectPyExePressed()
 
     auto selectedFiles = dlg.selectedFiles();
     ui->lePythonExe->setText(QDir::toNativeSeparators(selectedFiles[0]));
+    onBtnTestPyEnvPressed();
 }
 
-void GtPythonPreferencePage::onBtnTestPyEnvPressed()
+void
+GtPythonPreferencePage::onBtnTestPyEnvPressed()
 {
     auto currentPyExe = ui->lePythonExe->text();
+    ui->lbPythonStatus->clear();
+
+    using Status = GtpsPythonInterpreter::Status;
     GtpsPythonInterpreter interpreter{currentPyExe};
 
-    auto pyVer = interpreter.version();
-
-    if (!interpreter.isValid())
+    switch (interpreter.status())
     {
-        ui->lbPythonStatus->setText(tr("Error: invalid python executable!"));
-    }
-    else if (!gtps::python::version::isSupported(pyVer))
-    {
-        ui->lbPythonStatus->setText(tr("Error: Python %1 is not supported!")
-                                        .arg(gtps::apiVersionStr(pyVer)));
-    }
-    else
-    {
+    case Status::Valid:
+        setStatusTextColor(gt::gui::color::text());
         ui->lbPythonStatus->setText(tr("Python %1 found")
-                                        .arg(pyVer.toString()));
+                                    .arg(interpreter.version().toString()));
+        break;
+    case Status::Invalid:
+        setStatusTextColor(gt::gui::color::errorText());
+        ui->lbPythonStatus->setText(tr("Error: invalid python executable!"));
+        break;
+    case Status::NotSupported:
+        setStatusTextColor(gt::gui::color::errorText());
+        ui->lbPythonStatus->setText(
+                    tr("Error: Python %1 is not supported!")
+                    .arg(gtps::apiVersionStr(interpreter.version())));
+        break;
+    default:
+        break;
     }
 }
 
+void
+GtPythonPreferencePage::setStatusTextColor(const QColor& color)
+{
+    auto palette = ui->lbPythonStatus->palette();
+    palette.setColor(QPalette::Foreground, color);
+    ui->lbPythonStatus->setPalette(palette);
+}
 
 GtPythonPreferencePage::~GtPythonPreferencePage() = default;

@@ -11,7 +11,6 @@
 #define GTPYTHON_H
 
 #include "gt_moduleinterface.h"
-#include "gt_versionnumber.h"
 
 class GtpsPythonInterpreter;
 
@@ -51,11 +50,14 @@ public:
     void init() override;
 
 private:
-    /// Validity of the Python interpreter
-    bool m_isPythonValid{false};
+    struct ErrorMsg
+    {
+        QString error;
+        QString task;
+    };
 
-    /// Python version
-    GtVersionNumber m_pyVersion{};
+    /// Error message
+    ErrorMsg m_errorMsg;
 
     /**
      * @brief It prepends the Python paths to the PATH environment variable.
@@ -69,7 +71,7 @@ private:
      * specify a Python interpreter.
      * @param msg Message for the user.
      */
-    void showPythonErrorNotification(const QString& error, const QString& task);
+    void showPythonErrorNotification(const ErrorMsg& error);
 
     /**
      * @brief Accepts the Python Module built with the specified Python

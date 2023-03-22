@@ -12,8 +12,9 @@
 #include "gt_application.h"
 #include "gt_logging.h"
 #include "gt_settings.h"
-#include "gt_environment.h"
+#include "gt_icons.h"
 
+#include "gtps_constants.h"
 #include "gtps_globals.h"
 #include "gtps_systemsettings.h"
 #include "gtps_pythoninterpreter.h"
@@ -21,14 +22,20 @@
 
 #include <QLibrary>
 #include <QMessageBox>
+#include <QCheckBox>
 
 namespace {
 
-QString
-pythonExe()
+void
+setSetting(const QString& settingId, const QVariant& value)
 {
-    return gtApp->settings()->getSetting(moduleSettingPath(GT_MODULENAME(),
-                                         "pythonexe")).toString();
+    gtApp->settings()->setSetting(gtps::settings::path(settingId), value);
+}
+
+QVariant
+getSetting(const QString& settingId)
+{
+    return gtApp->settings()->getSetting(gtps::settings::path(settingId));
 }
 
 }
@@ -52,47 +59,69 @@ GtPythonSetupModule::onLoad()
 
     // register current python environment path to settings
     gtApp->settings()->registerSettingRestart(
-        moduleSettingPath(GT_MODULENAME(), "pythonexe"), "");
+                gtps::settings::path(gtps::constants::PYEXE_S_ID), "");
 
-    GtpsPythonInterpreter interpreter{pythonExe()};
-    m_pyVersion = interpreter.version();
+    // register show python path warning to settings
+    gtApp->settings()->registerSetting(
+                gtps::settings::path(gtps::constants::SHOWHINT_S_ID), true);
 
-    if (!(m_isPythonValid = interpreter.isValid()) ||
-        !gtps::python::version::isSupported(m_pyVersion))
-    {
+    auto errorOccurred = [this](const ErrorMsg& msg){
         suppressPythonModules(gtps::python::version::supportedVersions());
+        m_errorMsg = msg;
+    };
+
+    auto python = getSetting(gtps::constants::PYEXE_S_ID).toString();
+
+    if (python.isEmpty())
+    {
+        errorOccurred({tr("No Python interpreter specified."),
+                     tr("Do you want to specify a Python interpreter?")});
         return;
     }
 
-    acceptPythonModule(m_pyVersion);
-    setPythonPaths(interpreter);
+    // Validate selected Python interpreter
+    using Status = GtpsPythonInterpreter::Status;
+    GtpsPythonInterpreter interpreter{python};
+
+    switch (interpreter.status())
+    {
+    case Status::Valid:
+        acceptPythonModule(interpreter.version());
+        setPythonPaths(interpreter);
+        // Next time the Python executable is invalid, the hint message box is
+        // shown again.
+        setSetting(gtps::constants::SHOWHINT_S_ID, true);
+        break;
+    case Status::Invalid:
+        errorOccurred({tr("The specified Python interpreter is invalid."),
+                       tr("Do you want to specify another Python "
+                       "interpreter?")});
+        break;
+    case Status::NotSupported:
+        errorOccurred({tr("Python %1 is not supported.")
+                       .arg(gtps::apiVersionStr(interpreter.version())),
+                       tr("Do you want to specify another Python "
+                       "iterpreter?")});
+        // Set the GTlab environment variable PYTHONHOME to avoid problems
+        // with other modules using this variable.
+        gtps::system::setGtlabPythonHome(interpreter.pythonHomePath().toUtf8());
+        break;
+    default:
+        break;
+    }
 }
 
 void
 GtPythonSetupModule::init()
 {
-
     auto pageFactory = []() -> GtPreferencesPage* {
         return new GtPythonPreferencePage;
     };
     GtApplication::addCustomPreferencePage(pageFactory);
 
-    if (pythonExe().isEmpty())
+    if (!m_errorMsg.error.isEmpty())
     {
-        showPythonErrorNotification(tr("No Python interpreter specified."),
-                         tr("Do you want to specify a Python interpreter?"));
-    }
-    else if (!m_isPythonValid)
-    {
-        showPythonErrorNotification(tr("The specified Python interpreter is invalid."),
-                         tr("Do you want to specify another Python "
-                            "interpreter?"));
-    }
-    else if (!gtps::python::version::isSupported(m_pyVersion))
-    {
-        showPythonErrorNotification(tr("Python %1 is not supported.")
-                                        .arg(gtps::apiVersionStr(m_pyVersion)),
-                                    tr("Do you want to specify another Python iterpreter?"));
+        showPythonErrorNotification(m_errorMsg);
     }
 }
 
@@ -125,38 +154,43 @@ GtPythonSetupModule::setPythonPaths(const GtpsPythonInterpreter& interpreter)
     {
         gtDebug().medium() << "Sucessfully loaded python library";
     }
-
-    QVariant var = gtEnvironment->value("PYTHONHOME");
-
-    if (!var.isNull())
-    {
-        if (var.toString() != pyHome)
-        {
-            gtInfo() << tr("PYTHONHOME has been set to ('%1')").arg(pyHome);
-            gtEnvironment->setValue("PYTHONHOME", pyHome);
-            gtEnvironment->saveEnvironment();
-        }
-    }
 }
 
 void
-GtPythonSetupModule::showPythonErrorNotification(const QString& error, const QString& taskMsg)
+GtPythonSetupModule::showPythonErrorNotification(const ErrorMsg& msg)
 {
-    if (!gtApp->batchMode())
+    if (gtApp->batchMode())
     {
+        gtError() << msg.error;
+        return;
+    }
 
-        auto reply = QMessageBox::question(nullptr, tr("Python setup"),
-                                          QString("%1\n%2").arg(error, taskMsg),
-                                          QMessageBox::Yes|QMessageBox::No);
+    if (getSetting(gtps::constants::SHOWHINT_S_ID).toBool())
+    {
+        QMessageBox mb;
+        mb.setIcon(QMessageBox::Question);
+        mb.setWindowTitle(tr("Python setup"));
+        mb.setWindowIcon(gt::gui::icon::python());
+        mb.setText(QString{"%1\n%2"}.arg(msg.error, msg.task));
+        mb.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        mb.setDefaultButton(QMessageBox::Yes);
 
-        if (reply == QMessageBox::Yes)
+        QCheckBox* cb = new QCheckBox(tr("Don't ask me again."));
+        mb.setCheckBox(cb);
+
+        auto ret = mb.exec();
+
+        setSetting(gtps::constants::SHOWHINT_S_ID, !cb->isChecked());
+
+        if (ret == QMessageBox::Yes)
         {
             gtApp->showPreferences("Python Environment");
         }
     }
     else
     {
-        gtError() << error;
+        gtInfo() << msg.error <<
+                    tr("To set up Python go to Edit > Preferences > Python.");
     }
 }
 
@@ -178,5 +212,3 @@ GtPythonSetupModule::suppressPythonModules(
     };
     std::for_each(pyVersions.begin(), pyVersions.end(), suppress);
 }
-
-

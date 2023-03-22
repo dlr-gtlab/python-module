@@ -55,6 +55,13 @@ QByteArray pythonHome();
  */
 void setPythonHome(const QByteArray& val);
 
+/**
+ * @brief Sets the value of the GTlab PYTHONHOME environment variable to the
+ * given value.
+ * @param val Value to be stored in the GTlab PYTHONHOME environment variable.
+ */
+void setGtlabPythonHome(const QByteArray& val);
+
 } // namespace system
 
 } // namespace gtps
