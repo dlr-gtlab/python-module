@@ -22,6 +22,13 @@
 class GtpsPythonInterpreter
 {
 public:
+    enum Status
+    {
+        Valid = 0,
+        Invalid,
+        NotSupported
+    };
+
     /**
      * @brief GtpsPythonInterpreter
      * @param pythonExe Path to the Python executable.
@@ -33,7 +40,7 @@ public:
      * can execute Python code. Otherwise it returns false.
      * @return True, if the evaluator can execute Python code.
      */
-    bool isValid() const;
+    bool isValid();
 
     /**
      * @brief Returns the Python version the evaluator uses.
@@ -93,6 +100,8 @@ public:
      */
     QString runPythonInterpreter(const QStringList& args, bool* ok = nullptr) const;
 
+    Status status() const;
+
 private:
     // Python sys paths.
     QStringList m_sysPaths{};
@@ -105,6 +114,9 @@ private:
 
     // Python version.
     GtVersionNumber m_pyVersion{};
+
+    // Interpreter status.
+    Status m_status{Invalid};
 
     /**
      * @brief Asks the Python interpreter for the Python version and stores

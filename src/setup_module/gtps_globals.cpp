@@ -10,6 +10,9 @@
 #include <QVector>
 #include <QString>
 
+#include "gt_globals.h"
+#include "gt_moduleinterface.h"
+
 #include "gtps_globals.h"
 
 QString
@@ -41,4 +44,10 @@ gtps::python::version::isSupported(const GtVersionNumber& version)
                         return supported.major() == version.major() &&
                                 supported.minor() == version.minor();});
     return iter != versions.end() ? true : false;
+}
+
+QString
+gtps::settings::path(const QString& settingId)
+{
+    return moduleSettingPath(GT_MODULENAME(), settingId);
 }

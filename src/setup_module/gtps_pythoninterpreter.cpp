@@ -12,6 +12,7 @@
 
 #include "find_libpython.h"
 #include "gtps_systemsettings.h"
+#include "gtps_globals.h"
 
 #include <QProcess>
 #include <QDir>
@@ -21,9 +22,12 @@
 GtpsPythonInterpreter::GtpsPythonInterpreter(const QString& pythonExe) :
         m_pythonExe{pythonExe}
 {
-    setPythonVersion();
-    setSharedLibPath();
-    setSysPaths();
+    if (isValid())
+    {
+        setPythonVersion();
+        setSharedLibPath();
+        setSysPaths();
+    }
 }
 
 QString
@@ -86,14 +90,21 @@ GtpsPythonInterpreter::runPythonInterpreter(const QStringList& args,
     gtps::system::setPythonPath(pySysPaths);
     gtps::system::setPythonHome(pyHome);
 
-    return  QString{retval};
+    return {retval};
+}
+
+GtpsPythonInterpreter::Status
+GtpsPythonInterpreter::status() const
+{
+    return m_status;
 }
 
 bool
-GtpsPythonInterpreter::isValid() const
+GtpsPythonInterpreter::isValid()
 {
     bool ok{false};
     runCommand("import sys", &ok);
+    m_status = ok ? Status::Valid : Status::Invalid;
     return ok;
 }
 
@@ -134,6 +145,11 @@ GtpsPythonInterpreter::setPythonVersion()
     if (ok)
     {
         m_pyVersion = GtVersionNumber{version};
+
+        if (!gtps::python::version::isSupported(m_pyVersion))
+        {
+            m_status = Status::NotSupported;
+        }
     }
 }
 

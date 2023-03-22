@@ -55,6 +55,18 @@ bool isSupported(const GtVersionNumber& version);
 
 } // namespace python
 
+namespace settings
+{
+
+/**
+ * @brief Returns the setting path.
+ * @param settingId Id of the setting.
+ * @return The setting path.
+ */
+QString path(const QString& settingId);
+
+}
+
 } // namespace gtps
 
 #endif // GTPSGLOBALS_H

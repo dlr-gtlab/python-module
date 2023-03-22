@@ -7,6 +7,8 @@
  *  Tel.: +49 2203 601 2692
  */
 
+#include "gt_environment.h"
+
 #include "gtps_systemsettings.h"
 
 QString
@@ -56,4 +58,20 @@ void
 gtps::system::setPythonHome(const QByteArray& val)
 {
     qputenv("PYTHONHOME", val);
+    setGtlabPythonHome(val);
+}
+
+void
+gtps::system::setGtlabPythonHome(const QByteArray &val)
+{
+    auto var = gtEnvironment->value("PYTHONHOME");
+
+    if (!var.isNull())
+    {
+        if (var.toByteArray() != val)
+        {
+            gtEnvironment->setValue("PYTHONHOME", QString{val});
+            gtEnvironment->saveEnvironment();
+        }
+    }
 }

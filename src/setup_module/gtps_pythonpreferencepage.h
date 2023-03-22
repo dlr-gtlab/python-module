@@ -1,7 +1,7 @@
 #ifndef GTPS_PYTHONPREFERENCEPAGE_H
 #define GTPS_PYTHONPREFERENCEPAGE_H
 
-#include <gt_preferencespage.h>
+#include "gt_preferencespage.h"
 
 #include <memory.h>
 
@@ -48,8 +48,9 @@ private slots:
      */
     void onBtnTestPyEnvPressed();
 
-private:
+    void setStatusTextColor(const QColor& color);
 
+private:
     std::unique_ptr<Ui::GtPythonPreferencePage> ui;
 };
 
