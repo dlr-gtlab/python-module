@@ -15,6 +15,7 @@
 #include <QSignalMapper>
 
 // python includes
+#include "gtpy_icons_compat.h"
 #include "gtpy_contextmanager.h"
 #include "gtpy_taskstylemodel.h"
 #include "gtpy_tasktreeview.h"
@@ -42,10 +43,6 @@
 #include "gt_pyhighlighter.h"
 #include "gt_calculatordata.h"
 
-#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-#include "gt_icons.h"
-#endif
-
 #include "gtpy_taskwizardpage.h"
 
 const QString GtpyTaskWizardPage::ARROW_LEFT = " <--";
@@ -67,13 +64,13 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
     QPushButton* addElementButton = new QPushButton(tr("Add..."));
     addElementButton->setToolTip(tr("Add New Element"));
 
-#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
-    addElementButton->setIcon(gtApp->icon("addIcon_16.png"));
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0) 
     addElementButton->setStyleSheet(GtStyleSheets::buttonStyleSheet());
 #else
-    addElementButton->setIcon(gt::gui::icon::add16());
     addElementButton->setStyleSheet(gt::gui::stylesheet::buttonStyleSheet());
 #endif
+
+    addElementButton->setIcon(GTPY_ICON(add));
 
     QVBoxLayout* treeViewLay = new QVBoxLayout;
 
@@ -705,11 +702,7 @@ GtpyTaskWizardPage::addElement()
 
     QAction* addcalc = menu.addAction(tr("New Calculator..."));
 
-#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
-    addcalc->setIcon(gtApp->icon(QStringLiteral("calculatorIcon_16.png")));
-#else
-    addcalc->setIcon(gt::gui::icon::calculator16());
-#endif
+    addcalc->setIcon(GTPY_ICON(calculator));
 
     QStringList list = gtApp->settings()->lastProcessElements();
 
@@ -754,12 +747,7 @@ GtpyTaskWizardPage::addElement()
 
                     if (!extendedData || extendedData->icon.isNull())
                     {
-#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
-                        act->setIcon(gtApp->icon(QStringLiteral(
-                                                 "calculatorIcon_16.png")));
-#else
-                        act->setIcon(gt::gui::icon::calculator16());
-#endif
+                        act->setIcon(GTPY_ICON(calculator));
                     }
                     else
                     {

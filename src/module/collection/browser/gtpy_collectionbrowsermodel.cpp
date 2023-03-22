@@ -12,6 +12,7 @@
 #include "gt_application.h"
 
 #include "gtpy_globals.h"
+#include "gtpy_icons_compat.h"
 #include "gtpy_browseritem.h"
 #include "gtpy_collapsiblebrowseritem.h"
 #include "gtpy_rootbrowseritem.h"
@@ -19,7 +20,7 @@
 #include "gtpy_collectionbrowsermodel.h"
 
 GtpyCollectionBrowserModel::GtpyCollectionBrowserModel(QObject* parent) :
-    QAbstractItemModel(parent), m_rootItem(Q_NULLPTR)
+    QAbstractItemModel(parent), m_rootItem(nullptr)
 {
     m_rootItem = new GtpyRootBrowserItem();
 }
@@ -35,7 +36,7 @@ GtpyCollectionBrowserModel::~GtpyCollectionBrowserModel()
 int
 GtpyCollectionBrowserModel::rowCount(const QModelIndex& parent) const
 {
-    if (m_rootItem == Q_NULLPTR)
+    if (!m_rootItem)
     {
         return 0;
     }
@@ -69,14 +70,14 @@ GtpyCollectionBrowserModel::columnCount(const QModelIndex& /*parent*/) const
 QVariant
 GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
 {
-    if (m_rootItem == Q_NULLPTR)
+    if (!m_rootItem)
     {
-        return QVariant();
+        return {};
     }
 
     if (!index.isValid())
     {
-        return QVariant();
+        return {};
     }
 
     const int col = index.column();
@@ -86,7 +87,7 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
 
     if (!item)
     {
-        return QVariant();
+        return {};
     }
 
     QColor main(245, 245, 245);
@@ -125,16 +126,15 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
                 {
                     if (item == m_rootItem->child(UpdateAvailableItem))
                     {
-                        return gtApp->icon(QStringLiteral("updateIcon_16.png"));
+                        return GTPY_ICON(update);
                     }
                     else if (item == m_rootItem->child(AvailableItem))
                     {
-                        return gtApp->icon(QStringLiteral("stackIcon.png"));
+                        return GTPY_ICON(layers);
                     }
                     else if (item == m_rootItem->child(InstalledItem))
                     {
-                        return gtApp->icon(
-                                   QStringLiteral("collectionIcon_16.png"));
+                        return GTPY_ICON(collection);
                     }
                 }
 
@@ -205,13 +205,11 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
             case Qt::DecorationRole:
                 if (col == 0)
                 {
-                    return gtApp->icon(
-                               QStringLiteral("pluginIcon_16.png"));
+                    return GTPY_ICON(plugin);
                 }
                 else if (col == 1)
                 {
-                    return gtApp->icon(
-                               QStringLiteral("infoBlueIcon_16.png"));
+                    return GTPY_ICON(info2);
                 }
 
                 break;
@@ -255,7 +253,7 @@ GtpyCollectionBrowserModel::data(const QModelIndex& index, int role) const
         }
     }
 
-    return QVariant();
+    return {};
 }
 
 bool
@@ -400,14 +398,14 @@ QModelIndex
 GtpyCollectionBrowserModel::index(int row, int column,
                                   const QModelIndex& parent) const
 {
-    if (m_rootItem == Q_NULLPTR)
+    if (!m_rootItem)
     {
-        return QModelIndex();
+        return {};
     }
 
     if (!hasIndex(row, column, parent))
     {
-        return QModelIndex();
+        return {};
     }
 
     GtpyAbstractBrowserItem* parentItem;
@@ -432,20 +430,20 @@ GtpyCollectionBrowserModel::index(int row, int column,
         }
     }
 
-    return QModelIndex();
+    return {};
 }
 
 QModelIndex
 GtpyCollectionBrowserModel::parent(const QModelIndex& index) const
 {
-    if (m_rootItem == Q_NULLPTR)
+    if (!m_rootItem)
     {
-        return QModelIndex();
+        return {};
     }
 
     if (!index.isValid())
     {
-        return QModelIndex();
+        return {};
     }
 
     GtpyAbstractBrowserItem* childItem =
@@ -455,7 +453,7 @@ GtpyCollectionBrowserModel::parent(const QModelIndex& index) const
 
     if (parentItem == m_rootItem)
     {
-        return QModelIndex();
+        return {};
     }
 
     return createIndex(parentItem->row(), 0, parentItem);
@@ -500,19 +498,19 @@ GtpyCollectionBrowserModel::itemFromIndex(const QModelIndex& index)
 {
     if (!index.isValid())
     {
-        return GtCollectionItem();
+        return {};
     }
 
     if (index.model() != this)
     {
-        return GtCollectionItem();
+        return {};
     }
 
     QModelIndex parent = index.parent();
 
     if (!parent.isValid())
     {
-        return GtCollectionItem();
+        return {};
     }
 
     GtpyAbstractBrowserItem* item = static_cast<GtpyAbstractBrowserItem*>
@@ -520,12 +518,12 @@ GtpyCollectionBrowserModel::itemFromIndex(const QModelIndex& index)
 
     if (!item)
     {
-        return GtCollectionItem();
+        return {};
     }
 
     if (item->isCollapsible())
     {
-        return GtCollectionItem();
+        return {};
     }
 
     return item->item();

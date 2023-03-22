@@ -17,9 +17,12 @@
 #include "gt_calculatordata.h"
 #include "gt_application.h"
 #include "gt_logging.h"
+
 #if GT_VERSION >= 0x020000
 #include "gt_commandlinefunction.h"
 #endif
+
+#include "gtpy_icons_compat.h"
 
 // data model classes
 
@@ -145,7 +148,7 @@ GtPythonModule::init()
 
     // clear python console button
     QPushButton* pyClearButton = new QPushButton;
-    pyClearButton->setIcon(gtApp->icon("clearIcon_16.png"));
+    pyClearButton->setIcon(GTPY_ICON(clear));
     pyClearButton->setMaximumSize(QSize(20, 20));
     pyClearButton->setFlat(true);
     pyClearButton->setToolTip(tr("Clear Output"));
@@ -174,7 +177,8 @@ GtPythonModule::calculators()
 #endif
 
     python->author = QStringLiteral("Marvin Nöthen");
-    python->icon = gtApp->icon(QStringLiteral("pythonIcon_16.png"));
+    python->icon = GTPY_ICON(python);
+
     python->status = GtAbstractProcessData::RELEASE;
 
     GtCustomProcessWizard* pythonWizard = new GtCustomProcessWizard;
@@ -202,7 +206,7 @@ GtPythonModule::tasks()
 #endif
 
     pythonTask->author = QStringLiteral("Marvin Nöthen");
-    pythonTask->icon = gtApp->icon(QStringLiteral("pythonIcon_16.png"));
+    pythonTask->icon = GTPY_ICON(python);
     pythonTask->status = GtAbstractProcessData::RELEASE;
 
     GtCustomProcessWizard* pythonWizard = new GtCustomProcessWizard;
@@ -260,7 +264,7 @@ GtPythonModule::postPlots()
 QIcon
 GtPythonModule::collectionIcon() const
 {
-    return gtApp->icon(QStringLiteral("pythonIcon_16.png"));
+    return GTPY_ICON(python);
 }
 
 QString

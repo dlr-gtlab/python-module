@@ -28,7 +28,7 @@ public:
      * @brief GtpyCollectionLocalModel
      * @param parent Parent object.
      */
-    explicit GtpyCollectionLocalModel(QObject* parent = Q_NULLPTR);
+    explicit GtpyCollectionLocalModel(QObject* parent = nullptr);
 
     /**
      * @brief ~GtpyCollectionLocalModel
@@ -40,14 +40,14 @@ public:
      * @param parent Parent index.
      * @return The row count under the given parent.
      */
-    int rowCount(const QModelIndex& parent) const Q_DECL_OVERRIDE;
+    int rowCount(const QModelIndex& parent) const override;
 
     /**
      * @brief Returns the column count for the children under the given parent.
      * @param parent Parent index.
      * @return The column count for the children under the given parent.
      */
-    int columnCount(const QModelIndex& parent) const Q_DECL_OVERRIDE;
+    int columnCount(const QModelIndex& parent) const override;
 
     /**
      * @brief Returns the data for the item at the given index.
@@ -55,7 +55,7 @@ public:
      * @param role Type of data.
      * @return The data for the item at the given index.
      */
-    QVariant data(const QModelIndex& index, int role) const Q_DECL_OVERRIDE;
+    QVariant data(const QModelIndex& index, int role) const override;
 
     /**
      * @brief Returns the header data.
@@ -65,7 +65,7 @@ public:
      * @return The header data.
      */
     QVariant headerData(int section, Qt::Orientation orientation,
-                        int role) const Q_DECL_OVERRIDE;
+                        int role) const override;
 
     /**
      * @brief Appends the given list of items as children of the root item.
@@ -81,14 +81,14 @@ public:
      * @return Index of the item in the model.
      */
     QModelIndex index(int row, int column,
-                      const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
+                      const QModelIndex& parent = QModelIndex()) const override;
 
     /**
      * @brief Returns the parent index of the item with the given index.
      * @param index Index of an item of the model.
      * @return The parent index of the item with the given index.
      */
-    QModelIndex parent(const QModelIndex& index) const Q_DECL_OVERRIDE;
+    QModelIndex parent(const QModelIndex& index) const override;
 
     /**
      * @brief Retruns the collection item with the given index.

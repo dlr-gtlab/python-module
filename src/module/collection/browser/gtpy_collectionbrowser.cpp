@@ -11,9 +11,6 @@
 #include <QVBoxLayout>
 #include <QCheckBox>
 
-#include "gt_application.h"
-#include "gt_logging.h"
-
 #include "gtpy_collectionbrowsermodel.h"
 #include "gtpy_collectionitemwidget.h"
 

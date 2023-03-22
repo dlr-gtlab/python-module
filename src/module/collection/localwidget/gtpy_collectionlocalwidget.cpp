@@ -12,17 +12,17 @@
 #include <QSortFilterProxyModel>
 #include <QTreeView>
 
-#include "gt_application.h"
 #include "gt_logging.h"
 
+#include "gtpy_icons_compat.h"
 #include "gtpy_collectionlocalmodel.h"
 #include "gtpy_collectionitemwidget.h"
 
 #include "gtpy_collectionlocalwidget.h"
 
 GtpyCollectionLocalWidget::GtpyCollectionLocalWidget(QWidget* parent) :
-    QWidget(parent), m_contextMenuEnabled(true), m_view(Q_NULLPTR),
-    m_model(Q_NULLPTR), m_sortModel(Q_NULLPTR)
+    QWidget(parent), m_view(nullptr), m_model(nullptr),
+    m_sortModel(nullptr), m_contextMenuEnabled(true)
 {
     QVBoxLayout* lay = new QVBoxLayout;
     lay->setContentsMargins(0, 0, 0, 0);
@@ -80,7 +80,7 @@ GtpyCollectionLocalWidget::setCustomContextMenuEnabled(bool val)
 void
 GtpyCollectionLocalWidget::setShowItemInfo(bool val)
 {
-    if (m_model == Q_NULLPTR)
+    if (!m_model)
     {
         return;
     }
@@ -162,9 +162,7 @@ GtpyCollectionLocalWidget::onCustomContextMenuRequested(const QPoint& /*pos*/)
 
     QMenu menu;
 
-    QAction* deleteAction = menu.addAction(
-                                gtApp->icon(QStringLiteral("closeIcon_16.png")),
-                                tr("Uninstall"));
+    QAction* deleteAction = menu.addAction(GTPY_ICON(remove), tr("Uninstall"));
 
     QAction* a = menu.exec(QCursor::pos());
 
