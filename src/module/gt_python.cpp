@@ -40,6 +40,9 @@
 #include "gt_extendedtaskdata.h"
 #include "gt_customprocesswizard.h"
 
+// dock widgets
+#include "gtpy_connectiondock.h"
+
 // wizards
 #include "gtpy_scriptcalculatorwizardpage.h"
 #include "python_task/gtpy_taskwizardpage.h"
@@ -231,6 +234,8 @@ QList<QMetaObject>
 GtPythonModule::dockWidgets()
 {
     QList<QMetaObject> metaData;
+
+    metaData << GtpyConnectionDock::staticMetaObject;
 
     return metaData;
 }

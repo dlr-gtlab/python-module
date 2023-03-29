@@ -60,6 +60,7 @@ INCLUDEPATH += .\
     collection/itemwidget \
     collection/localwidget \
     collection/localwidget/items \
+    connection \
     tasks \
     post \
     utilities \
@@ -88,6 +89,10 @@ HEADERS += \
     collection/localwidget/items/gtpy_abstractlocalitem.h \
     collection/localwidget/items/gtpy_collapsiblelocalitem.h \
     collection/localwidget/items/gtpy_localitem.h \
+    connection/gtpy_connection.h \
+    connection/gtpy_connectioncontainer.h \
+    connection/gtpy_connectionmodel.h \
+    connection/gtpy_connectiondock.h \
     gt_python.h \
     gt_compat.h \
     calculators/gtpy_scriptcalculator.h \
@@ -156,6 +161,10 @@ SOURCES += \
     collection/localwidget/items/gtpy_abstractlocalitem.cpp \
     collection/localwidget/items/gtpy_collapsiblelocalitem.cpp \
     collection/localwidget/items/gtpy_localitem.cpp \
+    connection/gtpy_connection.cpp \
+    connection/gtpy_connectioncontainer.cpp \
+    connection/gtpy_connectionmodel.cpp \
+    connection/gtpy_connectiondock.cpp \
     gt_python.cpp \
     calculators/gtpy_scriptcalculator.cpp \
     collection/gtpy_scriptcollectionsettings.cpp \
