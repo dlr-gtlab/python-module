@@ -317,8 +317,7 @@ private:
     * @param contextId Id of a python context.
     * @param contextName The name of the Python context.
     */
-    void defaultContextConfig(const GtpyContextManager::Context& type,
-                              int contextId,
+    void defaultContextConfig(const Context& type, int contextId,
                               const QString& contextName);
 
     /**

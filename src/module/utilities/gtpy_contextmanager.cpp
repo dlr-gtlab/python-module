@@ -33,7 +33,7 @@
 #include "gt_coreapplication.h"
 #include "gt_calculatordata.h"
 #include "gt_calculatorfactory.h"
-#if GT_VERSION < 0x020000
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
 #include "gt_datazone0d.h"
 #endif
 
@@ -43,12 +43,12 @@
 #include "gtpy_scriptrunnable.h"
 #include "gtpy_projectpathfunction.h"
 #include "gtpy_loggingmodule.h"
-
 #include "gtpy_extendedwrapper.h"
 #include "gtpy_createhelperfunction.h"
 #include "gtpy_propertysetter.h"
 #include "gtpy_importfunction.h"
 #include "gtpy_calculatorsmodule.h"
+#include "gtpy_sharedfunctiondef.h"
 
 #include "gtpy_contextmanager.h"
 
@@ -851,9 +851,8 @@ GtpyContextManager::threadDictMetaData()
 }
 
 void
-GtpyContextManager::defaultContextConfig(
-    const GtpyContextManager::Context& type,
-    int contextId, const QString& contextName)
+GtpyContextManager::defaultContextConfig(const Context& type, int contextId,
+                                         const QString& contextName)
 {
     GTPY_GIL_SCOPE
 
@@ -874,14 +873,18 @@ GtpyContextManager::defaultContextConfig(
 
     m_addedObjectNames.insert(contextId, QStringList());
 
-    PyObject* projectPathFunc =
-        GtpyProjectPathFunction::GtpyProjectPathFunction_Type.tp_new(
-            &GtpyProjectPathFunction::GtpyProjectPathFunction_Type, Q_NULLPTR,
-            Q_NULLPTR);
+    auto* projectPathFunc =
+            GtpyProjectPathFunction::GtpyProjectPathFunction_Type.tp_new(
+                &GtpyProjectPathFunction::GtpyProjectPathFunction_Type, nullptr,
+                nullptr);
 
     PyModule_AddObject(context.module,
                        QSTRING_TO_CHAR_PTR(GtpyGlobals::FUNC_currentProPath),
                        projectPathFunc);
+
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+    PyModule_AddFunctions(context.module, gtpy::python::func::sharedFuncDef);
+#endif
 
     specificContextConfig(type, contextId);
 }
@@ -1965,7 +1968,7 @@ GtpyContextManager::customCompletions() const
 
     QString print = QStringLiteral("print");
     GtpyFunction printFunc;
-    printFunc.completion = print + QStringLiteral(" ()");
+    printFunc.completion = print + QStringLiteral("()");
     printFunc.name = print + QStringLiteral("()");
     printFunc.toolTip = print + QStringLiteral("() [built-in]");
     printFunc.cursorOffset = 1;

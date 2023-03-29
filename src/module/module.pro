@@ -101,6 +101,7 @@ HEADERS += \
     post/gtpy_pythonplotitem.h \
     post/gtpy_pythonplotwidget.h \
     post/gtpy_pythonsvgwidget.h \
+    utilities/gtpy_constants.h \
     utilities/gtpy_globals.h \
     utilities/gtpy_packageiteration.h \
     utilities/gtpy_regexp.h \
@@ -108,6 +109,7 @@ HEADERS += \
     utilities/pythonextensions/gtpy_calculatorsmodule.h \
     utilities/pythonextensions/gtpy_loggingmodule.h \
     utilities/pythonextensions/gtpy_projectpathfunction.h \
+    utilities/pythonextensions/gtpy_sharedfunctiondef.h \
     wizards/gtpy_abstractscriptingwizardpage.h \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_completer.h \
@@ -170,6 +172,7 @@ SOURCES += \
     utilities/pythonextensions/gtpy_calculatorsmodule.cpp \
     utilities/pythonextensions/gtpy_loggingmodule.cpp \
     utilities/pythonextensions/gtpy_projectpathfunction.cpp \
+    utilities/pythonextensions/gtpy_sharedfunctiondef.cpp \
     wizards/gtpy_abstractscriptingwizardpage.cpp \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_completer.cpp \
