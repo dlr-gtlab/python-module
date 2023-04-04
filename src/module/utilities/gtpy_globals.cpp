@@ -30,13 +30,11 @@ const QString ATTR_outputToApp = "__outputToAppConsole";
 
 ///Python Functions
 const QString FUNC_importGtCalc   = "importGtCalculators";
-const QString FUNC_currentProPath = "projectPath";
 
 ///StdOut meta data
 const char* CONTEXT_KEY = "CONTEXT_NAME";
 const char* OUTPUT_KEY  = "OUTPUT_TO_CONSOLE";
 const char* ERROR_KEY   = "ERROR_TO_CONSOLE";
-
 
 ///Collection
 const QString COLLECTION_ID     = "Python Script Collection";
