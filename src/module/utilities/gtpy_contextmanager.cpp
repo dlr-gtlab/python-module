@@ -41,14 +41,13 @@
 #include "gtpy_decorator.h"
 #include "gtpy_interruptrunnable.h"
 #include "gtpy_scriptrunnable.h"
-#include "gtpy_projectpathfunction.h"
 #include "gtpy_loggingmodule.h"
 #include "gtpy_extendedwrapper.h"
 #include "gtpy_createhelperfunction.h"
 #include "gtpy_propertysetter.h"
 #include "gtpy_importfunction.h"
 #include "gtpy_calculatorsmodule.h"
-#include "gtpy_sharedfunctiondef.h"
+#include "gtpy_pythonfunctions.h"
 
 #include "gtpy_contextmanager.h"
 
@@ -255,14 +254,6 @@ GtpyContextManager::initExtensions()
     }
 
     Py_INCREF(&GtpyCalculatorsModule::GtpyCreateCalculator_Type);
-
-    if (PyType_Ready(&GtpyProjectPathFunction::GtpyProjectPathFunction_Type)
-            < 0)
-    {
-        gtError() << "could not initialize GtpyProjectPathFunction_Type";
-    }
-
-    Py_INCREF(&GtpyProjectPathFunction::GtpyProjectPathFunction_Type);
 
     if (PyType_Ready(&GtpyLoggingModule::GtpyPyLogger_Type) < 0)
     {
@@ -873,17 +864,12 @@ GtpyContextManager::defaultContextConfig(const Context& type, int contextId,
 
     m_addedObjectNames.insert(contextId, QStringList());
 
-    auto* projectPathFunc =
-            GtpyProjectPathFunction::GtpyProjectPathFunction_Type.tp_new(
-                &GtpyProjectPathFunction::GtpyProjectPathFunction_Type, nullptr,
-                nullptr);
-
-    PyModule_AddObject(context.module,
-                       QSTRING_TO_CHAR_PTR(GtpyGlobals::FUNC_currentProPath),
-                       projectPathFunc);
+    PyModule_AddFunctions(context.module,
+                          gtpy::extension::func::PROJECT_PATH_F_DEF);
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-    PyModule_AddFunctions(context.module, gtpy::python::func::sharedFuncDef);
+    PyModule_AddFunctions(context.module,
+                          gtpy::extension::func::SHARED_FUNC_F_DEF);
 #endif
 
     specificContextConfig(type, contextId);

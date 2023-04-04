@@ -62,6 +62,7 @@ INCLUDEPATH += .\
     collection/localwidget/items \
     tasks \
     post \
+    extensions \
     utilities \
     utilities/pythonextensions \
     wizards \
@@ -88,6 +89,7 @@ HEADERS += \
     collection/localwidget/items/gtpy_abstractlocalitem.h \
     collection/localwidget/items/gtpy_collapsiblelocalitem.h \
     collection/localwidget/items/gtpy_localitem.h \
+    extensions/gtpy_pythonfunctions.h \
     gt_python.h \
     gt_compat.h \
     calculators/gtpy_scriptcalculator.h \
@@ -106,10 +108,7 @@ HEADERS += \
     utilities/gtpy_packageiteration.h \
     utilities/gtpy_regexp.h \
     utilities/gtpy_utilities.h \
-    utilities/pythonextensions/gtpy_calculatorsmodule.h \
     utilities/pythonextensions/gtpy_loggingmodule.h \
-    utilities/pythonextensions/gtpy_projectpathfunction.h \
-    utilities/pythonextensions/gtpy_sharedfunctiondef.h \
     wizards/gtpy_abstractscriptingwizardpage.h \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_completer.h \
@@ -156,6 +155,7 @@ SOURCES += \
     collection/localwidget/items/gtpy_abstractlocalitem.cpp \
     collection/localwidget/items/gtpy_collapsiblelocalitem.cpp \
     collection/localwidget/items/gtpy_localitem.cpp \
+    extensions/gtpy_pythonfunctions.cpp \
     gt_python.cpp \
     calculators/gtpy_scriptcalculator.cpp \
     collection/gtpy_scriptcollectionsettings.cpp \
@@ -171,8 +171,6 @@ SOURCES += \
     utilities/gtpy_utilities.cpp \
     utilities/pythonextensions/gtpy_calculatorsmodule.cpp \
     utilities/pythonextensions/gtpy_loggingmodule.cpp \
-    utilities/pythonextensions/gtpy_projectpathfunction.cpp \
-    utilities/pythonextensions/gtpy_sharedfunctiondef.cpp \
     wizards/gtpy_abstractscriptingwizardpage.cpp \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_completer.cpp \

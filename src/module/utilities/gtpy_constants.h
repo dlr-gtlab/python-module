@@ -16,7 +16,10 @@ namespace gtpy
 namespace constants
 {
 
-constexpr const char* SHAREDFUNCCALLER_FUNC_NAME = "sharedFunction";
+///Python function names
+constexpr const char* CALL_SHARED_FUNC_F_NAME = "call_shared_function";
+constexpr const char* SHARED_FUNC_F_NAME = "shared_function";
+constexpr const char* PROJECT_PATH_F_NAME = "projectPath";
 
 } // namespace constants
 
