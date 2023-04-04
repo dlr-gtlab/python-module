@@ -59,7 +59,7 @@
 GtVersionNumber
 GtPythonModule::version()
 {
-    return GtVersionNumber(1, 3, 0);
+    return GtVersionNumber(1, 3, 1);
 }
 #else
 int
