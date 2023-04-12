@@ -9,8 +9,6 @@
 # These variables are defined in the CI project settings:
 #  CATEGORY: 03_core_modules
 #  PROFILENAME: gtlab_python.pro
-#  TARGETDIRNAME: python37
-#  TARGETNAME: GTlabPython37
 #  UNITTESTSNAME: GTlabUnitTest
 
 # These variables are defined in the AT-TWK group settings:
@@ -31,19 +29,27 @@ variables:
   
   # Regulare expression pattern
   # enclose the branch name with ^ and $
-  # separete severl branch names with |
+  # separete several branch names with |
   # e.g. /^main_1_0$|^main_1_1$/
   STABLE_BRANCHES: /^master$/
   
-  STABLE_PY_MAJOR: 3
-  STABLE_PY_MINOR: 7
+  PY_MAJOR: 3
+  PY_MINOR: 7
   
-  UNSTABLE_PY_MAJOR: 3
-  UNSTABLE_PY_MINOR: 9
+  PY_MAJOR_UNSTABLE: 3
+  PY_MINOR_UNSTABLE: 9
   
-  STABLE_TARGETDIR: python$STABLE_PY_MAJOR$STABLE_PY_MINOR
-  UNSTABLE_TARGETDIR: python$UNSTABLE_PY_MAJOR$UNSTABLE_PY_MINOR
+  TARGETNAME: GTlabPython$PY_MAJOR$PY_MINOR
+  TARGETNAME_UNSTABLE: GTlabPython$PY_MAJOR_UNSTABLE$PY_MINOR_UNSTABLE
   
+  TARGETDIRNAME: python$PY_MAJOR$PY_MINOR
+  TARGETDIRNAME_UNSTABLE: python$PY_MAJOR_UNSTABLE$PY_MINOR_UNSTABLE
+  
+  GT_MODULE_ID: "Python Module (Python $PY_MAJOR.$PY_MINOR)"
+  GT_MODULE_ID_UNSTABLE: "Python Module (Python $PY_MAJOR_UNSTABLE.$PY_MINOR_UNSTABLE)"
+
+  TARGETNAME_SETUP_MODULE: GTlabPythonSetup
+
   # Name of the unstable branch (if it exists)
   #UNSTABLE_BRANCH: unstable_master
 
@@ -96,27 +102,26 @@ devtoolsUpdateLinux:
 .winDebugArtifacts:
   artifacts:
     paths:
-      - lib\python$PY_MAJOR$PY_MINOR\GTlabPythonSetup-d.dll
-      - lib\python$PY_MAJOR$PY_MINOR\GTlabPythonSetup-d.lib
-      - lib\python$PY_MAJOR$PY_MINOR\GTlabPythonSetup-d.pdb
-      - lib\python$PY_MAJOR$PY_MINOR\GTlabPython$PY_MAJOR$PY_MINOR-d.dll
-      - lib\python$PY_MAJOR$PY_MINOR\GTlabPython$PY_MAJOR$PY_MINOR-d.lib
-      - lib\python$PY_MAJOR$PY_MINOR\GTlabPython$PY_MAJOR$PY_MINOR-d.pdb
-      - include\python$PY_MAJOR$PY_MINOR\*.h
+      - lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE-d.dll
+      - lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE-d.lib
+      - lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE-d.pdb
+      - lib\$TARGETDIRNAME\$TARGETNAME-d.dll
+      - lib\$TARGETDIRNAME\$TARGETNAME-d.lib
+      - lib\$TARGETDIRNAME\$TARGETNAME-d.pdb
+      - include\$TARGETDIRNAME\
       - build\$UNITTESTSNAME.exe
       - build\$UNITTESTSNAME.pdb
-      - buildLog.txt
     expire_in: 1 week
     when: always
 
 .winReleaseArtifacts:
   artifacts:
     paths:
-      - lib\python$PY_MAJOR$PY_MINOR\GTlabPythonSetup.dll
-      - lib\python$PY_MAJOR$PY_MINOR\GTlabPythonSetup.lib
-      - lib\python$PY_MAJOR$PY_MINOR\GTlabPython$PY_MAJOR$PY_MINOR.dll
-      - lib\python$PY_MAJOR$PY_MINOR\GTlabPython$PY_MAJOR$PY_MINOR.lib
-      - include\python$PY_MAJOR$PY_MINOR\*.h
+      - lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE.dll
+      - lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE.lib
+      - lib\$TARGETDIRNAME\$TARGETNAME.dll
+      - lib\$TARGETDIRNAME\$TARGETNAME.lib
+      - include\$TARGETDIRNAME\
       - build\$UNITTESTSNAME.exe
       - build\$UNITTESTSNAME.pdb
       - buildLog.txt
@@ -133,8 +138,6 @@ winBuildDebug:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
-    PY_MAJOR: $STABLE_PY_MAJOR
-    PY_MINOR: $STABLE_PY_MINOR
     MAJOR_VERSION: $STABLE_MAJOR
     BUILDBATCH: "true"
     BUILDMODE: release
@@ -153,14 +156,16 @@ winBuildDebugUnstable:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
-    PY_MAJOR: $UNSTABLE_PY_MAJOR
-    PY_MINOR: $UNSTABLE_PY_MINOR
     MAJOR_VERSION: $UNSTABLE_MAJOR
     BUILDBATCH: "true"
     DEVTOOLS: $DEVTOOLS_Win_Unstable
     JOM_PATH: $JOM_PATH_515
     QMAKE_PATH: $QMAKE_PATH_515
     VCvarsall: $VCVARS_2019_PS
+    TARGETNAME: $TARGETNAME_UNSTABLE
+    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
+    PY_MAJOR: $PY_MAJOR_UNSTABLE
+    PY_MINOR: $PY_MINOR_UNSTABLE
 
 winBuildRelease:
   stage: build
@@ -172,8 +177,6 @@ winBuildRelease:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
-    PY_MAJOR: $STABLE_PY_MAJOR
-    PY_MINOR: $STABLE_PY_MINOR
     BUILDBATCH: "false"
     MAJOR_VERSION: $STABLE_MAJOR
     DEVTOOLS: $DEVTOOLS_Win_Stable
@@ -191,22 +194,24 @@ winBuildReleaseUnstable:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
-    PY_MAJOR: $UNSTABLE_PY_MAJOR
-    PY_MINOR: $UNSTABLE_PY_MINOR
     MAJOR_VERSION: $UNSTABLE_MAJOR
     BUILDBATCH: "true"
     DEVTOOLS: $DEVTOOLS_Win_Unstable
     JOM_PATH: $JOM_PATH_515
     QMAKE_PATH: $QMAKE_PATH_515
     VCvarsall: $VCVARS_2019_PS
-    
+    TARGETNAME: $TARGETNAME_UNSTABLE
+    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
+    PY_MAJOR: $PY_MAJOR_UNSTABLE
+    PY_MINOR: $PY_MINOR_UNSTABLE
+
 # build on Linux system
 .linuxDebugArtifacts:
   artifacts:
     paths:
-      - lib/python$PY_MAJOR$PY_MINOR/libGTlabPythonSetup-d.so*
-      - lib/python$PY_MAJOR$PY_MINOR/libGTlabPython$PY_MAJOR$PY_MINOR-d.so*
-      - include/python$PY_MAJOR$PY_MINOR/*.h
+      - lib/$TARGETDIRNAME/lib$TARGETNAME_SETUP_MODULE-d.so*
+      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so*
+      - include/$TARGETDIRNAME/
       - build/$UNITTESTSNAME
       - linuxBuild.txt
     when: always
@@ -215,11 +220,11 @@ winBuildReleaseUnstable:
 .linuxReleaseArtifacts:
   artifacts:
     paths:
-      - lib/python$PY_MAJOR$PY_MINOR/libGTlabPythonSetup.so*
-      - lib/python$PY_MAJOR$PY_MINOR/libGTlabPython$PY_MAJOR$PY_MINOR.so*
-      - include/python$PY_MAJOR$PY_MINOR/*.h
-      - build/$UNITTESTSNAME
-      - linuxBuild.txt
+      - lib/$TARGETDIRNAME/lib$TARGETNAME_SETUP_MODULE.so*
+      - lib/$TARGETDIRNAME/lib$TARGETNAME.so*
+      - include/$TARGETDIRNAME/
+      - meta/
+      - examples/
     when: always
     expire_in: 1 week
     
@@ -233,8 +238,6 @@ linuxBuildDebug:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
-    PY_MAJOR: $STABLE_PY_MAJOR
-    PY_MINOR: $STABLE_PY_MINOR
     MAJOR_VERSION: $STABLE_MAJOR
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Stable
@@ -250,14 +253,16 @@ linuxBuildDebugUnstable:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
-    PY_MAJOR: $UNSTABLE_PY_MAJOR
-    PY_MINOR: $UNSTABLE_PY_MINOR
     BUILDUNITTESTS: "true"
     BUILDBATCH: "false"
     MAJOR_VERSION: $UNSTABLE_MAJOR
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
     QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
- 
+    TARGETNAME: $TARGETNAME_UNSTABLE
+    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
+    PY_MAJOR: $PY_MAJOR_UNSTABLE
+    PY_MINOR: $PY_MINOR_UNSTABLE
+
 linuxBuildRelease:
   stage: build
   extends: 
@@ -268,8 +273,6 @@ linuxBuildRelease:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
-    PY_MAJOR: $STABLE_PY_MAJOR
-    PY_MINOR: $STABLE_PY_MINOR
     MAJOR_VERSION: $STABLE_MAJOR
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Stable
@@ -285,13 +288,14 @@ linuxBuildReleaseUnstable:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
-    PY_MAJOR: $UNSTABLE_PY_MAJOR
-    PY_MINOR: $UNSTABLE_PY_MINOR
     MAJOR_VERSION: $UNSTABLE_MAJOR
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
     QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
-
+    TARGETNAME: $TARGETNAME_UNSTABLE
+    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
+    PY_MAJOR: $PY_MAJOR_UNSTABLE
+    PY_MINOR: $PY_MINOR_UNSTABLE
 
 # run tests using the binary built before
 testWin:
@@ -342,71 +346,87 @@ testLinuxUnstable:
     LINUX_QT_DIR: /opt/Qt/5.15.2/gcc_64
 
 # run package jobs
-.package:
+winPackageRelease:
   stage: package
-  tags:
-    - Linux
-  script:
-    - mkdir pkg
-    - mkdir -p pkg/$BINDIR
-    - mkdir -p pkg/$BINDEBUGDIR
-    - mkdir -p pkg/lib/$SUBDIR
-    # copy all runtime libs into bindirs
-    - mv lib/$SUBDIR/*-d.dll pkg/$BINDEBUGDIR 2> /dev/null || `:`
-    - mv lib/$SUBDIR/*-d.so* pkg/$BINDEBUGDIR 2> /dev/null || `:`
-    - mv lib/$SUBDIR/*.dll pkg/$BINDIR 2> /dev/null || `:`
-    - mv lib/$SUBDIR/*.so* pkg/$BINDIR 2> /dev/null || `:`
-    # copy all libs into pkg/lib
-    - mv lib/$SUBDIR/*.lib pkg/lib/$SUBDIR 2> /dev/null || `:`
-    - cp pkg/$BINDIR/*.so* pkg/lib/$SUBDIR 2> /dev/null || `:`
-    - cp pkg/$BINDEBUGDIR/*.so* pkg/lib/$SUBDIR 2> /dev/null || `:`
-    # move include and libdir into package
-    - mv include/ pkg/
-    # show package contents
-    - find pkg/
-  artifacts:
-    paths:
-    - pkg
-  variables:
-    BINDIR: bin/modules
-    BINDEBUGDIR: binDebug/modules
-    SUBDIR: $STABLE_TARGETDIR
-
-packageWinStable:
   extends:
-    - .package
+    - .pkgTemplate
     - .stable-release
   needs:
-    - winBuildDebug
     - winBuildRelease
 
-packageWinUnstable:
+winPackageDebug:
+  stage: package
   extends:
-    - .package
+    - .pkgTemplate
+    - .stable-debug
+  needs:
+    - winBuildDebug
+  variables:
+    BINDIR: binDebug/modules
+
+winPackageReleaseUnstable:
+  stage: package
+  extends:
+    - .pkgTemplate
     - .unstable-release
   needs:
-    - winBuildDebugUnstable
     - winBuildReleaseUnstable
   variables:
-    SUBDIR: $UNSTABLE_TARGETDIR
+    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
+    GT_MODULE_ID: $GT_MODULE_ID_UNSTABLE
 
-packageLinuxStable:
+winPackageDebugUnstable:
+  stage: package
   extends:
-    - .package
+    - .pkgTemplate
+    - .unstable-debug
+  needs:
+    - winBuildDebugUnstable
+  variables:
+    BINDIR: binDebug/modules
+    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
+    GT_MODULE_ID: $GT_MODULE_ID_UNSTABLE
+    
+linuxPackageRelease:
+  stage: package
+  extends:
+    - .pkgTemplate
     - .stable-release
   needs:
-    - linuxBuildDebug
     - linuxBuildRelease
-
-packageLinuxUnstable:
+    
+linuxPackageDebug:
+  stage: package
   extends:
-    - .package
+    - .pkgTemplate
+    - .stable-debug
+  needs:
+    - linuxBuildDebug
+  variables:
+    BINDIR: binDebug/modules
+
+linuxPackageReleaseUnstable:
+  stage: package
+  extends:
+    - .pkgTemplate
     - .unstable-release
   needs:
-    - linuxBuildDebugUnstable
     - linuxBuildReleaseUnstable
   variables:
-    SUBDIR: $UNSTABLE_TARGETDIR
+    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
+    GT_MODULE_ID: $GT_MODULE_ID_UNSTABLE
+
+linuxPackageDebugUnstable:
+  stage: package
+  extends:
+    - .pkgTemplate
+    - .unstable-debug
+  needs:
+    - linuxBuildDebugUnstable
+  variables:
+    BINDIR: binDebug/modules
+    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
+    GT_MODULE_ID: $GT_MODULE_ID_UNSTABLE
     
 packageXml:
   stage: package
@@ -429,7 +449,7 @@ packageXml:
     PLATFORMNAME: windows
     RELEASESTATUS: stable
 
-deployWinStable:
+winDeployStable:
   stage: deploy
   extends:
     - .stable-tag
@@ -437,12 +457,13 @@ deployWinStable:
   tags:
     - Win10
   needs:
-    - packageWinStable
+    - winPackageDebug
+    - winPackageRelease
   variables:
     PLATFORMNAME: windows
     RELEASESTATUS: stable
 
-deployWinUnstable:
+winDeployUnstable:
   stage: deploy
   extends:
     - .unstable-tag
@@ -450,12 +471,13 @@ deployWinUnstable:
   tags:
     - Win10
   needs:
-    - packageWinUnstable
+    - winPackageDebugUnstable
+    - winPackageReleaseUnstable
   variables:
     PLATFORMNAME: windows
     RELEASESTATUS: unstable
 
-deployLinuxStable:
+linuxDeployStable:
   stage: deploy
   extends:
     - .stable-tag
@@ -463,12 +485,13 @@ deployLinuxStable:
   tags:
     - Win10
   needs:
-    - packageLinuxStable
+    - linuxPackageDebug
+    - linuxPackageRelease
   variables:
     PLATFORMNAME: linux
     RELEASESTATUS: stable
 
-deployLinuxUnstable:
+linuxDeployUnstable:
   stage: deploy
   extends:
     - .unstable-tag
@@ -476,7 +499,8 @@ deployLinuxUnstable:
   tags:
     - Win10
   needs:
-    - packageLinuxUnstable
+    - linuxPackageDebugUnstable
+    - linuxPackageReleaseUnstable
   variables:
     PLATFORMNAME: linux
     RELEASESTATUS: unstable
