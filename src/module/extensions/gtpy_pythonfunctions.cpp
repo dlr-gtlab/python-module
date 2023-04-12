@@ -21,14 +21,13 @@
 #include "gtpy_pythonfunctions.h"
 
 PyObject*
-gtpy::extension::func::projectPath(PyObject* /*self*/, PyObject* /*args*/)
+gtpy::extension::func::projectPath(PyObject* /*self*/)
 {
     auto pro = gtApp->currentProject();
 
     if (!pro)
     {
-        QString error = "No project is open.";
-        PyErr_SetString(PyExc_Warning, error.toLatin1().data());
+        PyErr_SetString(PyExc_Warning, "No project open.");
 
         return nullptr;
     }
@@ -39,29 +38,38 @@ gtpy::extension::func::projectPath(PyObject* /*self*/, PyObject* /*args*/)
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 
 PyObject*
-gtpy::extension::func::sharedFunc(PyObject* /*self*/, PyObject* args)
+gtpy::extension::func::sharedFunc(PyObject* /*self*/, PyObject* args,
+                                  PyObject* keywds)
 {
-    int argc = PyTuple_Size(args);
+    const char* moduleId;
+    const char* functionId;
 
-    if (argc != 2)
+    static const char* kwlist[] = {"module_id", "function_id", nullptr};
+
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "ss",
+                                     const_cast<char**>(kwlist),
+                                     &moduleId, &functionId))
     {
-        auto e = QString{"%1(module_id: str, function_id: str) "
-                         "takes 2 positional arguments but %2 were given"}
-                .arg(gtpy::constants::SHARED_FUNC_F_NAME,
-                     QString::number(argc));
-
-        PyErr_SetString(PyExc_ValueError, e.toLatin1().constData());
-
         return nullptr;
     }
 
-    auto moduleIdObj = PyTuple_GetItem(args, 0);
-    auto moduleId = PythonQtConv::PyObjGetString(moduleIdObj);
+    auto ids = gt::interface::sharedFunctionIDs();
 
-    auto functionIdObj = PyTuple_GetItem(args, 1);
-    auto functionId = PythonQtConv::PyObjGetString(functionIdObj);
+    using FuncId = gt::interface::SharedFunctionID;
+    auto res = std::find_if(ids.begin(), ids.end(),
+                            [&moduleId, &functionId](const FuncId& id) {
+        return id.moduleId == moduleId && id.functionId == functionId;
+    });
 
-    /// todo: check that shared function exists. otherwise return None
+    if (res == ids.end())
+    {
+        auto e = QString{"%1 has no shared function named %2"}
+                .arg(moduleId, functionId);
+
+        PyErr_SetString(PyExc_NameError, e.toLatin1().constData());
+
+        return nullptr;
+    }
 
     auto pyCode = QString{"lambda *args: call_shared_function("
                           "'%1', '%2', args)"}.arg(moduleId, functionId);
@@ -71,27 +79,24 @@ gtpy::extension::func::sharedFunc(PyObject* /*self*/, PyObject* args)
 }
 
 PyObject*
-gtpy::extension::func::callSharedFunc(PyObject* /*self*/, PyObject* args)
+gtpy::extension::func::callSharedFunc(PyObject* /*self*/, PyObject* args,
+                                      PyObject* keywds)
 {
-    int argc = PyTuple_Size(args);
+    const char* moduleId;
+    const char* functionId;
+    PyObject* argTuple = nullptr;
 
-    if (argc != 3)
+    static const char* kwlist[] = {"module_id", "function_id", "args", nullptr};
+
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "ssO!",
+                                     const_cast<char**>(kwlist),
+                                     &moduleId, &functionId,
+                                     &PyTuple_Type, &argTuple))
     {
-        auto e = QString{"%1(module_id: str, function_id: str, args: tuple) "
-                         "takes 3 positional arguments but %2 were given"}
-                .arg(gtpy::constants::CALL_SHARED_FUNC_F_NAME,
-                     QString::number(argc));
-
-        PyErr_SetString(PyExc_ValueError, e.toLatin1().constData());
-
         return nullptr;
     }
 
-    auto moduleIdObj = PyTuple_GetItem(args, 0);
-    auto moduleId = PythonQtConv::PyObjGetString(moduleIdObj);
-
-    auto functionIdObj = PyTuple_GetItem(args, 1);
-    auto functionId = PythonQtConv::PyObjGetString(functionIdObj);
+    Py_INCREF(argTuple);
 
     auto func = gt::interface::getSharedFunction(moduleId, functionId);
 
@@ -105,10 +110,10 @@ gtpy::extension::func::callSharedFunc(PyObject* /*self*/, PyObject* args)
         return nullptr;
     }
 
-    auto argListObj = PyTuple_GetItem(args, 2);
-    auto argList = PythonQtConv::PyObjToQVariant(argListObj).toList();
+    auto argList = PythonQtConv::PyObjToQVariant(argTuple).toList();
+    Py_DECREF(argTuple);
 
-    PyObject* res{nullptr};
+    PyObject* res = nullptr;
 
     try
     {
@@ -126,5 +131,35 @@ gtpy::extension::func::callSharedFunc(PyObject* /*self*/, PyObject* args)
     return res;
 }
 
+PyObject*
+gtpy::extension::func::sharedFuncIds(PyObject* /*self*/)
+{
+    auto ids = gt::interface::sharedFunctionIDs();
+    auto list = PyList_New(0);
+
+    using FuncId = gt::interface::SharedFunctionID;
+    for (const FuncId& id : qAsConst(ids))
+    {
+        /// convert the ids to PyObject pointers
+        auto modId = PythonQtConv::QStringToPyObject(id.moduleId);
+        auto funcId = PythonQtConv::QStringToPyObject(id.functionId);
+
+        /// set ids to a new dictionary
+        auto dict = PyDict_New();
+        PyDict_SetItemString(dict, "module_id", modId);
+        PyDict_SetItemString(dict, "function_id", funcId);
+
+        /// append dict to list
+        PyList_Append(list, dict);
+
+        /// decrement the object counter, because PyDict_SetItemString and
+        /// PyList_Append do not steal the value reference
+        Py_DECREF(modId);
+        Py_DECREF(funcId);
+        Py_DECREF(dict);
+    }
+
+    return list;
+}
 
 #endif

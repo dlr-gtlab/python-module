@@ -88,8 +88,6 @@ GtPythonModule::metaInformation() const
 void
 GtPythonModule::init()
 {
-    gtDebug() << "python module initialization...";
-
     GtpyContextManager::instance()->initContexts();
 
 #if GT_VERSION >= 0x020000
@@ -103,7 +101,6 @@ GtPythonModule::init()
     widPath << "GtMainWin" << "Output" << "centralWidget" << "tabWidget";
 
     QWidget* outDock = findWidget(widPath);
-//    gtDebug() << "FOUND WIDGET: " << outDock;
 
     QTabWidget* tab = qobject_cast<QTabWidget*>(outDock);
 
@@ -112,9 +109,6 @@ GtPythonModule::init()
         gtWarning() << "Output dock tab widget not found!";
         return;
     }
-
-    gtDebug() << "FOUND WIDGET: " << tab->metaObject()->className() <<
-        "(" << &tab << ", " << tab->objectName() << ")";
 
     // python console
     QWidget* pythonConsoleTab = new QWidget(tab);
