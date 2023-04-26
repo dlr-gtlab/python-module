@@ -10,6 +10,8 @@
 #ifndef GTPY_SCRIPTEDITOR_H
 #define GTPY_SCRIPTEDITOR_H
 
+#include "gt_pythonmodule_exports.h"
+
 #include "gt_calculator.h"
 #include "gt_codeeditor.h"
 
@@ -18,7 +20,7 @@ class GtpyCompleter;
 /**
  * @brief The GtpyScriptEditor class
  */
-class GtpyScriptEditor : public GtCodeEditor
+class GT_PYTHON_EXPORT GtpyScriptEditor : public GtCodeEditor
 {
     Q_OBJECT
 

@@ -102,7 +102,7 @@ GtpyPropertySetter_Call(PyObject* func, PyObject* args,
 
         PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     PyObject* value = PyTuple_GET_ITEM(args, 0);
@@ -138,7 +138,7 @@ GtpyPropertySetter_Call(PyObject* func, PyObject* args,
     QString error = "Invalid GtpyExtendedWrapper instance";
     PyErr_SetString(PyExc_ValueError, error.toLatin1().data());
 
-    return Q_NULLPTR;
+    return nullptr;
 }
 
 // for python 3.x
@@ -176,12 +176,12 @@ meth_richcompare(GtpyPropertySetterObject* a,
 
     if (r)
     {
-        Py_RETURN_TRUE;
+        Py_INCREF(Py_True);
+        return Py_True;
     }
-    else
-    {
-        Py_RETURN_FALSE;
-    }
+
+    Py_INCREF(Py_False);
+    return Py_False;
 }
 
 PyObject*

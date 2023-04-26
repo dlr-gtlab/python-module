@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2023-04-26
+### Fixed
+ - shared_function(module_id: str, function_id: str) ends with an error if shared function does not exist  - #226
+ - code vulnerabilities fixed  - #229
+
 ## [1.3.1] - 2023-04-04
 ### Added
  - 'Don't ask me again' checkbox added to Python setup warning

@@ -20,6 +20,7 @@
 
 #else
 
+#include <QIcon>
 #include "gt_application.h"
 
 #define GTPY_ICON(x) gtApp->icon(QStringLiteral(GTPY_PNG_ICON_##x))

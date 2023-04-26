@@ -35,9 +35,4 @@ const QString FUNC_importGtCalc   = "importGtCalculators";
 const char* CONTEXT_KEY = "CONTEXT_NAME";
 const char* OUTPUT_KEY  = "OUTPUT_TO_CONSOLE";
 const char* ERROR_KEY   = "ERROR_TO_CONSOLE";
-
-///Collection
-const QString COLLECTION_ID     = "Python Script Collection";
-const QString COLLECTION_cat    = "category";
-const QString COLLECTION_subcat = "subcategory";
 }

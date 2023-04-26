@@ -16,6 +16,7 @@
 
 class GtpyRootBrowserItem;
 class GtpyCollapsibleBrowserItem;
+class GtpyAbstractBrowserItem;
 
 /**
  * @brief The GtpyCollectionBrowserModel class
@@ -28,8 +29,8 @@ public:
     enum GtpyCollectionItemType
     {
         InstalledItem = 1,
-        AvailableItem = 2,
-        UpdateAvailableItem = 3
+        AvailableItem,
+        UpdateAvailableItem
     };
 
     /**
@@ -151,6 +152,9 @@ public:
     void unselectAll();
 
 private:
+    /// Root item.
+    GtpyRootBrowserItem* m_rootItem;
+
     /**
      * @brief Appends the given item to the given collapsible item.
      * @param item Item to append.
@@ -159,8 +163,13 @@ private:
     void appendItemTo(GtCollectionNetworkItem item ,
                       GtpyCollapsibleBrowserItem* to);
 
-    /// Root item.
-    GtpyRootBrowserItem* m_rootItem;
+    /**
+     * @brief Casts the internal index pointer to an abstract browser item and
+     * returns it.
+     * @param index Index to be cast to abstract browser item.
+     * @return Returns an abstract browser item.
+     */
+    GtpyAbstractBrowserItem* indexToBrowserItem(const QModelIndex& index) const;
 
 signals:
     /**

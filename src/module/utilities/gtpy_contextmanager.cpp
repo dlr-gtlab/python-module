@@ -37,6 +37,7 @@
 #include "gt_datazone0d.h"
 #endif
 
+#include "gtpy_constants.h"
 #include "gtpy_stdout.h"
 #include "gtpy_decorator.h"
 #include "gtpy_interruptrunnable.h"
@@ -158,7 +159,7 @@ GtpyContextManager::collectionPath()
     if (dir.cdUp())
     {
         dir.setPath(dir.absolutePath() + QDir::separator() + "Collections" +
-                    QDir::separator() + GtpyGlobals::COLLECTION_ID);
+                    QDir::separator() + gtpy::constants::COLLECTION_ID);
 
         retval = dir.absolutePath();
     }
@@ -923,7 +924,7 @@ GtpyContextManager::context(int contextId) const
 
 #ifdef PY3K
 PyObject*
-GtpyContextManager::initExtensionModule(QString const& moduleName,
+GtpyContextManager::initExtensionModule(const QString& moduleName,
                                         PyModuleDef* def)
 {
     if (!def)
@@ -958,7 +959,7 @@ GtpyContextManager::initExtensionModule(QString const& moduleName,
 }
 #else
 PyObject*
-GtpyContextManager::initExtensionModule(QString moduleName,
+GtpyContextManager::initExtensionModule(const QString& moduleName,
                                         PyMethodDef* methods)
 {
     GTPY_GIL_SCOPE

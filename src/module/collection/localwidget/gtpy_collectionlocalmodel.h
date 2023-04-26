@@ -14,6 +14,7 @@
 
 #include "gt_collectionitem.h"
 
+class GtpyAbstractLocalItem;
 class GtpyCollapsibleLocalItem;
 
 /**
@@ -111,11 +112,18 @@ public:
     void setShowInfoColumns(bool val);
 
 private:
+    /// Root item
+    GtpyCollapsibleLocalItem* m_rootItem;
+
     /// Shows info columns
     bool m_showInfoColumns;
 
-    /// Root item
-    GtpyCollapsibleLocalItem* m_rootItem;
+    /**
+     * @brief Casts the internal index pointer to an local item and returns it.
+     * @param index Index to be cast to local item.
+     * @return Returns a local item.
+     */
+    GtpyAbstractLocalItem* indexToLocalItem(const QModelIndex& index) const;
 };
 
 #endif // GTPYCOLLECTIONLOCALMODEL_H
