@@ -25,7 +25,8 @@ class GtpyObjectModel;
 /**
  * @brief The GtpyTaskWizardPage class
  */
-class GtpyTaskWizardPage : public GtpyAbstractScriptingWizardPage
+class GT_PYTHON_EXPORT GtpyTaskWizardPage :
+        public GtpyAbstractScriptingWizardPage
 {
     Q_OBJECT
 

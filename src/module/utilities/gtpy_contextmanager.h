@@ -355,7 +355,8 @@ private:
      * @param methods Definition of the static methods.
      * @return A new reference of the extension module.
      */
-    PyObject* initExtensionModule(QString moduleName, PyMethodDef* methods);
+    PyObject* initExtensionModule(const QString& moduleName,
+                                  PyMethodDef* methods);
 #endif
 
     /**

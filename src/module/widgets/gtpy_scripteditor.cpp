@@ -21,6 +21,10 @@
 
 #include "gtpy_completer.h"
 
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+#include "gt_colors.h"
+#endif
+
 #include "gtpy_scripteditor.h"
 
 GtpyScriptEditor::GtpyScriptEditor(int contextId, QWidget* parent) :
@@ -211,7 +215,7 @@ GtpyScriptEditor::replaceIntoBlock(const QString& header,
 
                 if (selectedText.contains(pyObjName + "." + functionName))
                 {
-                    selectedText.trimmed();
+                    //selectedText.trimmed();
 
                     int startVal = selectedText.indexOf("(") + 1;
                     int endVal = selectedText.size() - 1;
@@ -422,81 +426,68 @@ GtpyScriptEditor::replaceTabsBySpaces(bool enable)
     }
 }
 
+
 void
 GtpyScriptEditor::searchHighlighting(const QString& searchText,
                                      bool moveToNextFound)
 {
     m_lastSearch = searchText;
 
-    if (!searchText.isEmpty() && !isReadOnly())
-    {
-        QList<QTextEdit::ExtraSelection> extraSelections;
-
-        QTextCursor highlightingCursor = textCursor();
-        highlightingCursor.movePosition(QTextCursor::Start);
-        highlightingCursor = document()->find(searchText, highlightingCursor);
-
-        QList<QTextCursor> cursorList;
-
-        while (!highlightingCursor.isNull())
-        {
-            cursorList.append(highlightingCursor);
-
-            highlightingCursor = document()->find(searchText,
-                                                  highlightingCursor);
-        }
-
-        for (int i = 0; i < cursorList.size(); i++)
-        {
-            QTextEdit::ExtraSelection selection;
-
-            bool dark = false;
-#if GT_VERSION >= 0x020000
-            dark = gtApp->inDarkMode();
-#endif
-            if (dark)
-            {
-                QColor color = QColor(Qt::blue).lighter(120);
-                selection.format.setBackground(color);
-            }
-            else
-            {
-                QColor color = QColor(Qt::green).lighter(160);
-                selection.format.setBackground(color);
-            }
-
-
-
-            selection.cursor = cursorList.at(i);
-            extraSelections.append(selection);
-        }
-
-        setExtraSelections(extraSelections);
-
-        if (moveToNextFound)
-        {
-            highlightingCursor = textCursor();
-            highlightingCursor.movePosition(QTextCursor::StartOfLine);
-            highlightingCursor = document()->find(searchText,
-                                                  highlightingCursor);
-
-            if (highlightingCursor.isNull())
-            {
-                highlightingCursor = document()->find(searchText,
-                                                      highlightingCursor,
-                                                      QTextDocument::FindBackward);
-            }
-
-            if (!highlightingCursor.isNull())
-            {
-                setTextCursor(highlightingCursor);
-            }
-        }
-    }
-    else
+    if (searchText.isEmpty() || isReadOnly())
     {
         removeSearchHighlighting();
+        return;
     }
+
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+    auto color = !gtApp->inDarkMode() ?
+                QColor{Qt::green}.lighter(160) :
+                gt::gui::color::code_editor::highlightLine();
+#else
+    auto color = QColor{Qt::green}.lighter(160);
+#endif
+
+    QList<QTextEdit::ExtraSelection> extraSelections;
+
+    // search forwards
+    auto cursor = textCursor();
+    cursor.movePosition(QTextCursor::StartOfLine);
+    cursor = document()->find(searchText, cursor);
+
+    while (!cursor.isNull())
+    {
+        QTextEdit::ExtraSelection selection;
+
+        selection.format.setBackground(color);
+        selection.cursor = cursor;
+        extraSelections.append(selection);
+
+        cursor = document()->find(searchText, cursor);
+    }
+
+    // search backwards
+    cursor = textCursor();
+    cursor.movePosition(QTextCursor::StartOfLine);
+    cursor = document()->find(searchText, cursor, QTextDocument::FindBackward);
+
+    while (!cursor.isNull())
+    {
+        QTextEdit::ExtraSelection selection;
+
+        selection.format.setBackground(color);
+        selection.cursor = cursor;
+        extraSelections.append(selection);
+
+        cursor = document()->find(searchText, cursor,
+                                  QTextDocument::FindBackward);
+    }
+
+    if (moveToNextFound && !extraSelections.isEmpty())
+    {
+        setTextCursor(extraSelections.first().cursor);
+    }
+
+    setExtraSelections(extraSelections);
 
     lineHighlighting();
 }
@@ -907,23 +898,14 @@ GtpyScriptEditor::lineHighlighting()
 
         QTextEdit::ExtraSelection selection;
 
-        bool dark = false;
-#if GT_VERSION >= 0x020000
-        dark = gtApp->inDarkMode();
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+        auto lineColor = gt::gui::color::code_editor::highlightLine();
+        if (gtApp->inDarkMode())
+            lineColor.setAlpha(100);
+        selection.format.setBackground(lineColor);
+#else
+        selection.format.setBackground(QColor{Qt::yellow}.lighter(160));
 #endif
-
-        if (!dark)
-        {
-            QColor lineColor = QColor(Qt::yellow).lighter(160);
-            selection.format.setBackground(lineColor);
-        }
-        else
-        {
-            QColor lineColor = QColor(Qt::gray).lighter(120);
-            lineColor.setAlpha(200);
-            selection.format.setBackground(lineColor);
-        }
-
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();

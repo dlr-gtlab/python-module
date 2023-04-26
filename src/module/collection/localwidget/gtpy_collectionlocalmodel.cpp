@@ -7,13 +7,10 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include <QIcon>
 #include <QDir>
 
-#include "gt_application.h"
-
 #include "gtpy_contextmanager.h"
-#include "gtpy_globals.h"
+#include "gtpy_constants.h"
 #include "gtpy_icons_compat.h"
 #include "gtpy_collapsiblelocalitem.h"
 #include "gtpy_localitem.h"
@@ -21,7 +18,7 @@
 #include "gtpy_collectionlocalmodel.h"
 
 GtpyCollectionLocalModel::GtpyCollectionLocalModel(QObject* parent) :
-    QAbstractItemModel(parent), m_showInfoColumns(true), m_rootItem(Q_NULLPTR)
+    QAbstractItemModel(parent), m_rootItem(nullptr), m_showInfoColumns(true)
 {
     m_rootItem = new GtpyCollapsibleLocalItem("Root");
 }
@@ -42,24 +39,13 @@ GtpyCollectionLocalModel::rowCount(const QModelIndex& parent) const
         return 0;
     }
 
-    GtpyAbstractLocalItem* parentItem;
-
     if (parent.column() > 0)
     {
         return 0;
     }
 
-    if (!parent.isValid())
-    {
-        parentItem = m_rootItem;
-    }
-    else
-    {
-        parentItem =
-            static_cast<GtpyAbstractLocalItem*>(parent.internalPointer());
-    }
-
-    return parentItem->childCount();
+    return !parent.isValid() ? m_rootItem->childCount() :
+                               indexToLocalItem(parent)->childCount();
 }
 
 int
@@ -89,53 +75,31 @@ GtpyCollectionLocalModel::data(const QModelIndex& index, int role) const
     }
 
     const int col = index.column();
-
-    GtpyAbstractLocalItem* item = static_cast<GtpyAbstractLocalItem*>
-                                  (index.internalPointer());
-
-    if (!item)
-    {
-        return {};
-    }
-
-    bool dark = false;
-#if GT_VERSION >= 0x020000
-    dark = gtApp->inDarkMode();
-#endif
+    auto item = indexToLocalItem(index);
 
     if (item->isCollapsible())
     {
-        if (role == Qt::DisplayRole && col == 0)
+        switch (role)
         {
-            return item->ident();
-        }
-        else if (item->parentItem() == m_rootItem)
-        {
-            if (role == Qt::BackgroundRole)
-            {
-                if (dark)
+            case Qt::DisplayRole:
+                if (col == 0)
                 {
-                     return QColor(45, 45, 45);
+                    return item->ident();
                 }
-                else
+
+                break;
+
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
+            case Qt::BackgroundRole:
+                if (item->parentItem() == m_rootItem)
                 {
                     return QColor(245, 245, 245);
                 }
-            }
-        }
-        else
-        {
-            if (role == Qt::BackgroundRole)
-            {
-                if (dark)
-                {
-                     return QColor(50, 50, 50);
-                }
-                else
-                {
-                    return QColor(250, 250, 250);
-                }
-            }
+
+                return QColor(250, 250, 250);
+#endif
+            default:
+                break;
         }
     }
     else
@@ -223,13 +187,13 @@ GtpyCollectionLocalModel::setItems(const QList<GtCollectionItem>& items)
     {
         QStringList hierarchy;
 
-        QString cat = item.property(GtpyGlobals::COLLECTION_cat).toString();
+        auto cat = item.property(gtpy::constants::COLLECTION_CAT).toString();
 
         if (!cat.isEmpty())
         {
             hierarchy << cat;
 
-            cat = item.property(GtpyGlobals::COLLECTION_subcat).toString();
+            cat = item.property(gtpy::constants::COLLECTION_SUBCAT).toString();
 
             if (!cat.isEmpty())
             {
@@ -257,19 +221,8 @@ GtpyCollectionLocalModel::index(int row, int column,
         return {};
     }
 
-    GtpyAbstractLocalItem* parentItem;
-
-    if (!parent.isValid())
-    {
-        parentItem = m_rootItem;
-    }
-    else
-    {
-        parentItem = static_cast<GtpyAbstractLocalItem*>(
-                         parent.internalPointer());
-    }
-
-    GtpyAbstractLocalItem* childItem = parentItem->child(row);
+    auto childItem = !parent.isValid() ? m_rootItem->child(row) :
+                                         indexToLocalItem(parent)->child(row);
 
     if (childItem)
     {
@@ -295,17 +248,9 @@ GtpyCollectionLocalModel::parent(const QModelIndex& index) const
         return {};
     }
 
-    GtpyAbstractLocalItem* childItem =
-        static_cast<GtpyAbstractLocalItem*>(index.internalPointer());
-
-    GtpyAbstractLocalItem* parentItem = childItem->parentItem();
-
-    if (!parentItem)
-    {
-        return {};
-    }
-
-    return createIndex(parentItem->row(), 0, parentItem);
+    auto parent = indexToLocalItem(index)->parentItem();
+    return parent != m_rootItem ? createIndex(parent->row(), 0, parent) :
+                                  QModelIndex{};
 }
 
 GtCollectionItem
@@ -328,20 +273,15 @@ GtpyCollectionLocalModel::itemFromIndex(const QModelIndex& index)
         return {};
     }
 
-    GtpyLocalItem* item = static_cast<GtpyLocalItem*>
-                          (index.internalPointer());
-
-    if (!item)
+    if (auto item = static_cast<GtpyLocalItem*>(index.internalPointer()))
     {
-        return {};
+        if (!item->isCollapsible())
+        {
+            return item->item();
+        }
     }
 
-    if (item->isCollapsible())
-    {
-        return {};
-    }
-
-    return item->item();
+    return {};
 }
 
 bool
@@ -357,16 +297,15 @@ GtpyCollectionLocalModel::uninstallItem(const QModelIndex& index)
         return false;
     }
 
-    GtpyLocalItem* item =
-        static_cast<GtpyLocalItem*>(index.internalPointer());
+    auto item = static_cast<GtpyLocalItem*>(index.internalPointer());
 
     if (!item)
     {
         return false;
     }
 
-    GtpyCollapsibleLocalItem* parentItem =
-        static_cast<GtpyCollapsibleLocalItem*>(item->parentItem());
+    auto parentItem = static_cast<GtpyCollapsibleLocalItem*>(
+                item->parentItem());
 
     if (!parentItem)
     {
@@ -461,5 +400,11 @@ GtpyCollectionLocalModel::setShowInfoColumns(bool val)
     beginResetModel();
     m_showInfoColumns = val;
     endResetModel();
+}
+
+GtpyAbstractLocalItem*
+GtpyCollectionLocalModel::indexToLocalItem(const QModelIndex& index) const
+{
+    return static_cast<GtpyAbstractLocalItem*>(index.internalPointer());
 }
 

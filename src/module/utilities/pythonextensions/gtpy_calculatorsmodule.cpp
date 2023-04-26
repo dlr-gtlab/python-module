@@ -165,24 +165,13 @@ findTaskFromHigherFrame()
 static GtTask*
 findTaskByRunnable()
 {
-    GtTask* parentTask = Q_NULLPTR;
+    auto thread = QThread::currentThread();
 
-    if (!parentTask)
-    {
-        QThread* thread = QThread::currentThread();
+    auto runnable = thread->findChild<GtAbstractRunnable*>(
+                {}, Qt::FindDirectChildrenOnly);
 
-        GtAbstractRunnable* runnable =
-            thread->findChild<GtAbstractRunnable*>(QString(),
-                    Qt::FindDirectChildrenOnly);
-
-        if (runnable)
-        {
-            parentTask = runnable->findChild<GtTask*>(
-                             QString(), Qt::FindDirectChildrenOnly);
-        }
-    }
-
-    return parentTask;
+    return runnable ? runnable->findChild<GtTask*>(
+                          {}, Qt::FindDirectChildrenOnly) : nullptr;
 }
 
 GtTask*

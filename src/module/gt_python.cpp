@@ -22,6 +22,7 @@
 #include "gt_commandlinefunction.h"
 #endif
 
+#include "gtpy_constants.h"
 #include "gtpy_icons_compat.h"
 
 // data model classes
@@ -59,7 +60,7 @@
 GtVersionNumber
 GtPythonModule::version()
 {
-    return GtVersionNumber(1, 3, 1);
+    return GtVersionNumber(1, 3, 2);
 }
 #else
 int
@@ -264,7 +265,7 @@ GtPythonModule::collectionIcon() const
 QString
 GtPythonModule::collectionId() const
 {
-    return GtpyGlobals::COLLECTION_ID;
+    return gtpy::constants::COLLECTION_ID;
 }
 
 QMetaObject
@@ -278,8 +279,8 @@ GtPythonModule::collectionStructure() const
 {
     QMap<QString, QMetaType::Type> retval;
 
-    retval.insert(GtpyGlobals::COLLECTION_cat, QMetaType::QString);
-    retval.insert(GtpyGlobals::COLLECTION_subcat, QMetaType::QString);
+    retval.insert(gtpy::constants::COLLECTION_CAT, QMetaType::QString);
+    retval.insert(gtpy::constants::COLLECTION_SUBCAT, QMetaType::QString);
 
     return retval;
 }

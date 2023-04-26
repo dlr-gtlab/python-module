@@ -7,7 +7,7 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include <PythonQtPythonInclude.h>
+#include "PythonQtPythonInclude.h"
 
 #include "gt_calculatordata.h"
 #include "gt_calculator.h"
@@ -31,6 +31,7 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
     GtCalculator* calc = Q_NULLPTR;
 
     Py_BEGIN_ALLOW_THREADS
+
     //    if (parent != Q_NULLPTR)
     //    {
     //        QList<GtCalculator*> calculators =
