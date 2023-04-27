@@ -33,19 +33,19 @@ variables:
   # e.g. /^main_1_0$|^main_1_1$/
   STABLE_BRANCHES: /^master$/
   
-  PY_MAJOR: 3
-  PY_MINOR: 7
+  PY_MAJOR_STABLE: 3
+  PY_MINOR_STABLE: 7
   
   PY_MAJOR_UNSTABLE: 3
   PY_MINOR_UNSTABLE: 9
   
-  TARGETNAME: GTlabPython$PY_MAJOR$PY_MINOR
+  TARGETNAME_STABLE: GTlabPython$PY_MAJOR_STABLE$PY_MINOR_STABLE
   TARGETNAME_UNSTABLE: GTlabPython$PY_MAJOR_UNSTABLE$PY_MINOR_UNSTABLE
   
-  TARGETDIRNAME: python$PY_MAJOR$PY_MINOR
+  TARGETDIRNAME_STABLE: python$PY_MAJOR_STABLE$PY_MINOR_STABLE
   TARGETDIRNAME_UNSTABLE: python$PY_MAJOR_UNSTABLE$PY_MINOR_UNSTABLE
   
-  GT_MODULE_ID: "Python Module (Python $PY_MAJOR.$PY_MINOR)"
+  GT_MODULE_ID_STABLE: "Python Module (Python $PY_MAJOR_STABLE.$PY_MINOR_STABLE)"
   GT_MODULE_ID_UNSTABLE: "Python Module (Python $PY_MAJOR_UNSTABLE.$PY_MINOR_UNSTABLE)"
 
   TARGETNAME_SETUP_MODULE: GTlabPythonSetup
@@ -104,10 +104,10 @@ devtoolsUpdateLinux:
     paths:
       - lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE-d.dll
       - lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE-d.lib
-      - lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE-d.pdb
+      #- lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE-d.pdb
       - lib\$TARGETDIRNAME\$TARGETNAME-d.dll
       - lib\$TARGETDIRNAME\$TARGETNAME-d.lib
-      - lib\$TARGETDIRNAME\$TARGETNAME-d.pdb
+      #- lib\$TARGETDIRNAME\$TARGETNAME-d.pdb
       - include\$TARGETDIRNAME\
       - build\$UNITTESTSNAME.exe
       - build\$UNITTESTSNAME.pdb
@@ -138,13 +138,17 @@ winBuildDebug:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
+    PY_MAJOR: $PY_MAJOR_STABLE
+    PY_MINOR: $PY_MINOR_STABLE
     MAJOR_VERSION: $STABLE_MAJOR
     BUILDBATCH: "true"
     BUILDMODE: release
     DEVTOOLS: $DEVTOOLS_Win_Stable
     JOM_PATH: $JOM_PATH_512
     QMAKE_PATH: $QMAKE_PATH_512
-    VCvarsall: $VCVARS_2017_PS 
+    VCvarsall: $VCVARS_2017_PS
+    TARGETDIRNAME: $TARGETDIRNAME_STABLE
+    TARGETNAME: $TARGETNAME_STABLE
     
 winBuildDebugUnstable:
   stage: unstableBuild
@@ -156,16 +160,16 @@ winBuildDebugUnstable:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
+    PY_MAJOR: $PY_MAJOR_UNSTABLE
+    PY_MINOR: $PY_MINOR_UNSTABLE
     MAJOR_VERSION: $UNSTABLE_MAJOR
     BUILDBATCH: "true"
     DEVTOOLS: $DEVTOOLS_Win_Unstable
     JOM_PATH: $JOM_PATH_515
     QMAKE_PATH: $QMAKE_PATH_515
     VCvarsall: $VCVARS_2019_PS
-    TARGETNAME: $TARGETNAME_UNSTABLE
     TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
-    PY_MAJOR: $PY_MAJOR_UNSTABLE
-    PY_MINOR: $PY_MINOR_UNSTABLE
+    TARGETNAME: $TARGETNAME_UNSTABLE
 
 winBuildRelease:
   stage: build
@@ -177,12 +181,16 @@ winBuildRelease:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
+    PY_MAJOR: $PY_MAJOR_STABLE
+    PY_MINOR: $PY_MINOR_STABLE
     BUILDBATCH: "false"
     MAJOR_VERSION: $STABLE_MAJOR
     DEVTOOLS: $DEVTOOLS_Win_Stable
     JOM_PATH: $JOM_PATH_512
     QMAKE_PATH: $QMAKE_PATH_512
     VCvarsall: $VCVARS_2017_PS
+    TARGETDIRNAME: $TARGETDIRNAME_STABLE
+    TARGETNAME: $TARGETNAME_STABLE
  
 winBuildReleaseUnstable:
   stage: unstableBuild
@@ -194,16 +202,16 @@ winBuildReleaseUnstable:
     - job: devtoolsUpdateWindows
       optional: true
   variables:
+    PY_MAJOR: $PY_MAJOR_UNSTABLE
+    PY_MINOR: $PY_MINOR_UNSTABLE
     MAJOR_VERSION: $UNSTABLE_MAJOR
     BUILDBATCH: "true"
     DEVTOOLS: $DEVTOOLS_Win_Unstable
     JOM_PATH: $JOM_PATH_515
     QMAKE_PATH: $QMAKE_PATH_515
     VCvarsall: $VCVARS_2019_PS
-    TARGETNAME: $TARGETNAME_UNSTABLE
     TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
-    PY_MAJOR: $PY_MAJOR_UNSTABLE
-    PY_MINOR: $PY_MINOR_UNSTABLE
+    TARGETNAME: $TARGETNAME_UNSTABLE
 
 # build on Linux system
 .linuxDebugArtifacts:
@@ -238,10 +246,14 @@ linuxBuildDebug:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
+    PY_MAJOR: $PY_MAJOR_STABLE
+    PY_MINOR: $PY_MINOR_STABLE
     MAJOR_VERSION: $STABLE_MAJOR
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Stable
     QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
+    TARGETDIRNAME: $TARGETDIRNAME_STABLE
+    TARGETNAME: $TARGETNAME_STABLE
 
 linuxBuildDebugUnstable:
   stage: unstableBuild
@@ -253,15 +265,15 @@ linuxBuildDebugUnstable:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
+    PY_MAJOR: $PY_MAJOR_UNSTABLE
+    PY_MINOR: $PY_MINOR_UNSTABLE
     BUILDUNITTESTS: "true"
     BUILDBATCH: "false"
     MAJOR_VERSION: $UNSTABLE_MAJOR
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
     QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
-    TARGETNAME: $TARGETNAME_UNSTABLE
     TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
-    PY_MAJOR: $PY_MAJOR_UNSTABLE
-    PY_MINOR: $PY_MINOR_UNSTABLE
+    TARGETNAME: $TARGETNAME_UNSTABLE
 
 linuxBuildRelease:
   stage: build
@@ -273,10 +285,14 @@ linuxBuildRelease:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
+    PY_MAJOR: $PY_MAJOR_STABLE
+    PY_MINOR: $PY_MINOR_STABLE
     MAJOR_VERSION: $STABLE_MAJOR
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Stable
     QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
+    TARGETDIRNAME: $TARGETDIRNAME_STABLE
+    TARGETNAME: $TARGETNAME_STABLE
 
 linuxBuildReleaseUnstable:
   stage: unstableBuild
@@ -288,14 +304,14 @@ linuxBuildReleaseUnstable:
     - job: devtoolsUpdateLinux
       optional: true
   variables:
+    PY_MAJOR: $PY_MAJOR_UNSTABLE
+    PY_MINOR: $PY_MINOR_UNSTABLE
     MAJOR_VERSION: $UNSTABLE_MAJOR
     BUILDBATCH: "false"
     DEVTOOLS: $DEVTOOLS_Linux_Unstable
     QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
-    TARGETNAME: $TARGETNAME_UNSTABLE
     TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
-    PY_MAJOR: $PY_MAJOR_UNSTABLE
-    PY_MINOR: $PY_MINOR_UNSTABLE
+    TARGETNAME: $TARGETNAME_UNSTABLE
 
 # run tests using the binary built before
 testWin:
@@ -353,6 +369,9 @@ winPackageRelease:
     - .stable-release
   needs:
     - winBuildRelease
+  variables:
+    TARGETDIRNAME: $TARGETDIRNAME_STABLE
+    GT_MODULE_ID: $GT_MODULE_ID_STABLE
 
 winPackageDebug:
   stage: package
@@ -363,6 +382,8 @@ winPackageDebug:
     - winBuildDebug
   variables:
     BINDIR: binDebug/modules
+    TARGETDIRNAME: $TARGETDIRNAME_STABLE
+    GT_MODULE_ID: $GT_MODULE_ID_STABLE
 
 winPackageReleaseUnstable:
   stage: package
@@ -386,7 +407,7 @@ winPackageDebugUnstable:
     BINDIR: binDebug/modules
     TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
     GT_MODULE_ID: $GT_MODULE_ID_UNSTABLE
-    
+
 linuxPackageRelease:
   stage: package
   extends:
@@ -394,7 +415,10 @@ linuxPackageRelease:
     - .stable-release
   needs:
     - linuxBuildRelease
-    
+  variables:
+    TARGETDIRNAME: $TARGETDIRNAME_STABLE
+    GT_MODULE_ID: $GT_MODULE_ID_STABLE
+
 linuxPackageDebug:
   stage: package
   extends:
@@ -404,6 +428,8 @@ linuxPackageDebug:
     - linuxBuildDebug
   variables:
     BINDIR: binDebug/modules
+    TARGETDIRNAME: $TARGETDIRNAME_STABLE
+    GT_MODULE_ID: $GT_MODULE_ID_STABLE
 
 linuxPackageReleaseUnstable:
   stage: package
@@ -427,7 +453,7 @@ linuxPackageDebugUnstable:
     BINDIR: binDebug/modules
     TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
     GT_MODULE_ID: $GT_MODULE_ID_UNSTABLE
-    
+  
 packageXml:
   stage: package
   extends: .packageTemplate
@@ -542,4 +568,3 @@ badgesUnstable:
     - testWinUnstable
     - testLinuxUnstable
     - codingstyle
-
