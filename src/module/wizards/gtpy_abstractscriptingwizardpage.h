@@ -32,7 +32,8 @@ class GtpyScriptRunnable;
 /**
  * @brief The GtpyAbstractScriptingWizardPage class
  */
-class GtpyAbstractScriptingWizardPage : public GtProcessWizardPage
+class GT_PYTHON_EXPORT GtpyAbstractScriptingWizardPage :
+        public GtProcessWizardPage
 {
     Q_OBJECT
 
@@ -41,7 +42,7 @@ public:
      * @brief GtpyAbstractScriptingWizardPage
      * @param type python context type
      */
-    GtpyAbstractScriptingWizardPage(GtpyContextManager::Context type);
+    explicit GtpyAbstractScriptingWizardPage(GtpyContextManager::Context type);
 
     /**
      * @brief ~GtpyAbstractScriptingWizardPage
@@ -52,21 +53,21 @@ public:
      * @brief Will be called just before page is shown. Adds registered
      * packages to the Python context.
      */
-    virtual void initializePage() Q_DECL_OVERRIDE Q_DECL_FINAL;
+    virtual void initializePage() override final;
 
     /**
      * @brief Will be called just before page is closed. Removes all added
      * objects from the python context.
      * @return True if validation was successful.
      */
-    virtual bool validatePage() Q_DECL_OVERRIDE Q_DECL_FINAL;
+    virtual bool validatePage() override final;
 
 protected:
     /**
      * @brief Will be called after user pressed a key.
      * @param e Event which was send by pressing a key.
      */
-    virtual void keyPressEvent(QKeyEvent* e) Q_DECL_OVERRIDE;
+    virtual void keyPressEvent(QKeyEvent* e) override;
 
     /**
      * @brief Enables to create calculator instances into scripting environment.
