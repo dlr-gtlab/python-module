@@ -10,6 +10,8 @@
 #ifndef GTPY_TASKTREEVIEW_H
 #define GTPY_TASKTREEVIEW_H
 
+#include "gt_pythonmodule_exports.h"
+
 #include <QModelIndex>
 
 #include "gt_treeview.h"
@@ -17,7 +19,7 @@
 /**
  * @brief The GtpyTaskTreeView class
  */
-class GtpyTaskTreeView : public GtTreeView
+class GT_PYTHON_EXPORT GtpyTaskTreeView : public GtTreeView
 {
     Q_OBJECT
 
@@ -33,19 +35,19 @@ protected:
      * @brief Handles resize event.
      * @param event Event.
      */
-    void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;
+    void resizeEvent(QResizeEvent* event) override;
 
     /**
      * @brief Handles key press event.
      * @param event Event.
      */
-    void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
+    void keyPressEvent(QKeyEvent* event) override;
 
     /**
      * @brief Handles mouse press event.
      * @param event Event.
      */
-    void mousePressEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+    void mousePressEvent(QMouseEvent* event) override;
 
 signals:
     /// Delete Process Elements Signal

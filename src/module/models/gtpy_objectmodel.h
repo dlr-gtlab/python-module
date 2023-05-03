@@ -10,9 +10,11 @@
 #ifndef GTPYOBJECTMODEL_H
 #define GTPYOBJECTMODEL_H
 
+#include "gt_pythonmodule_exports.h"
+
 #include "gt_objectmodel.h"
 
-class GtpyObjectModel : public GtObjectModel
+class GT_PYTHON_EXPORT GtpyObjectModel : public GtObjectModel
 {
     Q_OBJECT
 public:

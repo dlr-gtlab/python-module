@@ -10,12 +10,14 @@
 #ifndef GTPYEDITORSETTINGS_H
 #define GTPYEDITORSETTINGS_H
 
+#include "gt_pythonmodule_exports.h"
+
 #include "gt_object.h"
 
 /**
  * @brief The GtpyEditorSettings class
  */
-class GtpyEditorSettings : public GtObject
+class GT_PYTHON_EXPORT GtpyEditorSettings : public GtObject
 {
     Q_OBJECT
 
@@ -24,7 +26,7 @@ public:
      * @brief GtpyEditorSettings
      * @param parent
      */
-    explicit GtpyEditorSettings(QObject* parent = Q_NULLPTR);
+    explicit GtpyEditorSettings(QObject* parent = nullptr);
 
     /**
      * @brief Returns whether tabs are replaced by spaces.

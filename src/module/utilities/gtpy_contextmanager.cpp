@@ -760,6 +760,12 @@ GtpyContextManager::resetContext(const GtpyContextManager::Context& type,
     defaultContextConfig(type, contextId, contextName);
 }
 
+PythonQtObjectPtr
+GtpyContextManager::contextPointer(int contextId) const
+{
+    return context(contextId);
+}
+
 long
 GtpyContextManager::currentPyThreadId()
 {

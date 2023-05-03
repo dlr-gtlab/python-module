@@ -10,8 +10,8 @@
 #include "gtpy_editorsettings.h"
 
 GtpyEditorSettings::GtpyEditorSettings(QObject* parent) :
-    m_tabSize(0),
-    m_replaceTabBySpaces(false)
+    m_replaceTabBySpaces(false),
+    m_tabSize(0)
 {
     setParent(parent);
 }

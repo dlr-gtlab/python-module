@@ -243,6 +243,15 @@ public:
                       int contextId = -1);
 
     /**
+     * @brief Returns the PythonQt object pointer of the context with the given
+     * contextId.
+     * @param contextId Id of the Python context to be returned.
+     * @return The PythonQt object pointer of the context with the given
+     * contextId.
+     */
+    PythonQtObjectPtr contextPointer(int contextId) const;
+
+    /**
     * @brief Returns the id of the current Python thread.
     * @return Id of the current Python thread.
     */

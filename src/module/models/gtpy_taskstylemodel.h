@@ -10,6 +10,8 @@
 #ifndef GTPY_TASKSTYLEMODEL_H
 #define GTPY_TASKSTYLEMODEL_H
 
+#include "gt_pythonmodule_exports.h"
+
 #include <QModelIndex>
 #include <QIdentityProxyModel>
 
@@ -18,7 +20,7 @@
 /**
  * @brief The GtpyTaskStyleModel class
  */
-class GtpyTaskStyleModel: public QIdentityProxyModel
+class GT_PYTHON_EXPORT GtpyTaskStyleModel: public QIdentityProxyModel
 {
     Q_OBJECT
 
@@ -27,7 +29,7 @@ public:
      * @brief GtpyTaskStyleModel
      * @param parent Parent object.
      */
-    explicit GtpyTaskStyleModel(QObject* parent = Q_NULLPTR);
+    explicit GtpyTaskStyleModel(QObject* parent = nullptr);
 
     /**
      * @brief data
@@ -36,7 +38,7 @@ public:
      * @return
      */
     virtual QVariant data(const QModelIndex& index,
-                          int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+                          int role = Qt::DisplayRole) const override;
 
     /**
      * @brief Sets the rootTask.
@@ -50,7 +52,7 @@ protected:
      * @param Model index
      * @return Item Flags
      */
-    Qt::ItemFlags flags(const QModelIndex& index) const Q_DECL_OVERRIDE;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     /**
      * @brief canDropMimeData
@@ -63,11 +65,11 @@ protected:
      */
     bool canDropMimeData(const QMimeData* data, Qt::DropAction action,
                          int row, int column,
-                         const QModelIndex& parent) const Q_DECL_OVERRIDE;
+                         const QModelIndex& parent) const override;
 
     bool moveRows(const QModelIndex& sourceParent, int sourceRow,
                   int count, const QModelIndex& destinationParent,
-                  int destinationChild) Q_DECL_OVERRIDE;
+                  int destinationChild) override;
 
     /**
      * @brief dropMimeData
@@ -80,7 +82,7 @@ protected:
      */
     bool dropMimeData(const QMimeData* data, Qt::DropAction action,
                       int row, int column,
-                      const QModelIndex& parent) Q_DECL_OVERRIDE;
+                      const QModelIndex& parent) override;
 
 private:
     /// Root task
