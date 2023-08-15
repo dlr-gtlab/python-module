@@ -267,19 +267,11 @@ public slots:
             const QString& objectClassName = QString());
 
     /**
-     * @brief find parent object
-     * @param obj : child object
-     * @return parent object
-     */
-    QObject* findParentObj(QObject* obj);
-
-
-    /**
      * @brief find parent object (GtObject)
      * @param obj : child object
      * @return parent object (GtObject)
      */
-    GtObject* findParentGtObj(GtObject* obj);
+    PyObject* findGtParent(GtObject* obj);
 
     /**
      * @brief findGtProperties returns all properties of a GtObject
