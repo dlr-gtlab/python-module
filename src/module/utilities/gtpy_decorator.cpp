@@ -752,6 +752,19 @@ GtpyDecorator::findGtChildren(GtObject* obj, const QString& childrenName,
     return retval;
 }
 
+PyObject*
+GtpyDecorator::findGtParent(GtObject* obj)
+{
+    if (!obj)
+    {
+        gtError() << __func__ << " -> Invalid object given!";
+
+        return nullptr;
+    }
+
+    return wrapGtObject(obj->findParent<GtObject*>());
+}
+
 QList<GtAbstractProperty*>
 GtpyDecorator::findGtProperties(GtObject* obj)
 {
