@@ -17,11 +17,13 @@
 #include "gt_objectmemento.h"
 #include "gt_abstractprocessprovider.h"
 
+#include "gtpy_transfer.h"
+
 #include "gtpy_scriptcalculatorwizardpage.h"
 
 GtpyScriptCalculatorWizardPage::GtpyScriptCalculatorWizardPage() :
     GtpyAbstractScriptingWizardPage(GtpyContextManager::ScriptEditorContext),
-    m_calc(Q_NULLPTR)
+    m_calc{nullptr}
 {
 
 }
@@ -36,21 +38,26 @@ GtpyScriptCalculatorWizardPage::initialization()
         return;
     }
 
-    if (m_calc != Q_NULLPTR)
+    if (m_calc)
     {
         delete m_calc;
     }
 
     m_calc = memento.restore<GtpyScriptCalculator*>(gtProcessFactory);
 
-    if (m_calc == Q_NULLPTR)
+    if (!m_calc)
     {
         return;
     }
 
     m_calc->setParent(this);
 
-    if (gtDataModel->objectByUuid(m_calc->uuid()) == Q_NULLPTR)
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+    gtpy::transfer::propStructToPython(m_contextId, m_calc->inputArgs());
+    gtpy::transfer::propStructToPython(m_contextId, m_calc->outputArgs());
+#endif
+
+    if (!gtDataModel->objectByUuid(m_calc->uuid()))
     {
         enableSaving(false);
     }
@@ -61,13 +68,12 @@ GtpyScriptCalculatorWizardPage::initialization()
 bool
 GtpyScriptCalculatorWizardPage::validation()
 {
-    if (m_calc == Q_NULLPTR)
+    if (!m_calc)
     {
         return false;
     }
 
     m_calc->setScript(editorText());
-
     provider()->setComponentData(m_calc->toMemento());
 
     return true;
@@ -76,7 +82,7 @@ GtpyScriptCalculatorWizardPage::validation()
 void
 GtpyScriptCalculatorWizardPage::saveScript()
 {
-    if (m_calc == Q_NULLPTR)
+    if (!m_calc)
     {
         return;
     }
@@ -90,9 +96,9 @@ GtpyScriptCalculatorWizardPage::saveScript()
         return;
     }
 
-    GtObject* obj = gtDataModel->objectByUuid(m_calc->uuid());
+    auto* obj = gtDataModel->objectByUuid(m_calc->uuid());
 
-    if (GtCalculator* calc = qobject_cast<GtCalculator*>(obj))
+    if (auto* calc = qobject_cast<GtCalculator*>(obj))
     {
         GtCommand command =
             gtApp->startCommand(gtApp->currentProject(),
@@ -106,20 +112,13 @@ GtpyScriptCalculatorWizardPage::saveScript()
 QString
 GtpyScriptCalculatorWizardPage::componentUuid() const
 {
-    QString uuid;
-
-    if (m_calc != Q_NULLPTR)
-    {
-        uuid = m_calc->uuid();
-    }
-
-    return uuid;
+    return m_calc ? m_calc->uuid() : QString();
 }
 
 void
 GtpyScriptCalculatorWizardPage::setComponentName(const QString& name)
 {
-    if (m_calc != Q_NULLPTR)
+    if (m_calc)
     {
         m_calc->setObjectName(name);
     }
@@ -128,22 +127,22 @@ GtpyScriptCalculatorWizardPage::setComponentName(const QString& name)
 GtpyEditorSettings*
 GtpyScriptCalculatorWizardPage::createSettings()
 {
-    GtpyEditorSettings* pref = Q_NULLPTR;
-
-    if (m_calc != Q_NULLPTR)
+    if (!m_calc)
     {
-        pref = new GtpyEditorSettings(this);
+        return nullptr;
+    }
 
-        if (m_calc->tabSize() <= 0)
-        {
-            pref->setTabSize(4);
-            pref->setReplaceTabBySpace(false);
-        }
-        else
-        {
-            pref->setTabSize(m_calc->tabSize());
-            pref->setReplaceTabBySpace(m_calc->replaceTabBySpaces());
-        }
+    auto* pref = new GtpyEditorSettings(this);
+
+    if (m_calc->tabSize() <= 0)
+    {
+        pref->setTabSize(4);
+        pref->setReplaceTabBySpace(false);
+    }
+    else
+    {
+        pref->setTabSize(m_calc->tabSize());
+        pref->setReplaceTabBySpace(m_calc->replaceTabBySpaces());
     }
 
     return pref;
@@ -152,7 +151,7 @@ GtpyScriptCalculatorWizardPage::createSettings()
 void
 GtpyScriptCalculatorWizardPage::saveSettings(GtpyEditorSettings* pref)
 {
-    if (pref != Q_NULLPTR && m_calc != Q_NULLPTR)
+    if (pref && m_calc)
     {
         m_calc->setTabSize(pref->tabSize());
         m_calc->setReplaceTabBySpaces(pref->replaceTabBySpace());

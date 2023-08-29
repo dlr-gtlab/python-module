@@ -154,6 +154,26 @@ public:
                      const QString& name, QObject* obj,
                      const bool saveName = true);
 
+
+    /**
+     * @brief Creates a new variable with the specified name and value in
+     * the context identified by contextId.
+     * @param contextId Python context identifier.
+     * @param name Name of the variable.
+     * @param value Value of the variable.
+     * @return True if adding the variable was successful.
+     */
+    bool addVariable(int contextId, const QString& name, const QVariant& value);
+
+    /**
+     * @brief Returns the value of the variable with the given name. It takes
+     * this value from the context identified by contextId.
+     * @param contextId Python context identifier.
+     * @param name Name of the variable.
+     * @return The value of the variable with the given name
+     */
+    QVariant getVariable(int contextId, const QString& name);
+
     /**
     * @brief Removes the object with the given name from the Python context
     * indicated by contextId.

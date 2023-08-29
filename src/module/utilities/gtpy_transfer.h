@@ -1,5 +1,5 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: gtpy_utilities.h
+ * Source File: gtpy_transfer.h
  * copyright 2009-2019 by DLR
  *
  *  Created on: 15.02.2023
@@ -12,21 +12,21 @@
 
 #include <QString>
 
+#include "gt_globals.h"
+
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+#include "gt_propertystructcontainer.h"
+#endif
+
 class GtObject;
 
 /**
- * Namespace for the utilities used in the GTlab Python module
+ * Namespace for functions that transfer objects to and from Python.
  */
-namespace gtpy {
-
-/**
- * @brief Removes special characters from the given objName so it can be used
- * as a variable name in Python.
- * @param objName Object name to be normalized.
- * @return The normalized object name.
- */
-QString normalizeObjectName(QString objName);
-
+namespace gtpy
+{
+namespace transfer
+{
 /**
  * @brief Adds the given GtObject to the Python context with the given id. If
  * varName is not empty, it will be the name of the object in Python.
@@ -35,8 +35,8 @@ QString normalizeObjectName(QString objName);
  * @param obj GtObject to be added to the Python context.
  * @param varName Name of the object in Python.
  */
-void gtObjectToPython(int contextId, GtObject* obj,
-                      const QString& varName = {});
+void gtObjectToPython(
+        int contextId, GtObject* obj, const QString& varName = {});
 
 /**
  * @brief Removes the object with the given varName from the Python context
@@ -55,14 +55,27 @@ void removeObjectFromPython(int contextId, const QString& varName);
  */
 void removeGtObjectFromPython(int contextId,  GtObject* obj);
 
-struct Package
-{
-    QString modId;
-    QString className;
-    QString objectName;
-};
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+/**
+ * @brief Creates a dict containing the values of the property struct container.
+ * @param contextId Id of the Python context to add the dict.
+ * @param container Property struct container.
+ */
+void propStructToPython(
+        int contextId, const GtPropertyStructContainer& container);
 
-void forEachPackage();
+/**
+ * @brief Takes the output dict from Python and puts its values into the
+ * property struct container.
+ * @param contextId Id of the Python context from which the dict is taken.
+ * @param container Property struct container.
+ */
+void propStructFromPython(
+        int contextId, GtPropertyStructContainer& container);
+
+#endif
+
+} // namespace transfer
 
 } // namespace gtpy
 

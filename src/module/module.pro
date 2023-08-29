@@ -53,36 +53,38 @@ CONFIG(debug, debug|release){
 }
 
 INCLUDEPATH += .\
-    calculators \
     collection \
     collection/browser \
     collection/browser/items \
     collection/itemwidget \
     collection/localwidget \
     collection/localwidget/items \
-    tasks \
-    post \
     extensions \
+    models \
+    post \
+    processcomponents \
     utilities \
     utilities/pythonextensions \
+    widgets \
     wizards \
-    wizards/script_calculator \
-    wizrads/python_task \
     wizards/editor_settings \
     wizards/editor_settings/pages \
-    models \
-    widgets
+    wizards/script_calculator \
+    wizrads/python_task
+
 
 DESTDIR = $${BUILD_DEST}
 
 HEADERS += \
+    collection/browser/gtpy_collectionbrowser.h \
+    collection/browser/gtpy_collectionbrowsermodel.h \
     collection/browser/gtpy_collectionbrowsersortmodel.h \
     collection/browser/items/gtpy_abstractbrowseritem.h \
     collection/browser/items/gtpy_browseritem.h \
     collection/browser/items/gtpy_collapsiblebrowseritem.h \
-    collection/browser/gtpy_collectionbrowser.h \
-    collection/browser/gtpy_collectionbrowsermodel.h \
     collection/browser/items/gtpy_rootbrowseritem.h \
+    collection/gtpy_collectionwidget.h \
+    collection/gtpy_scriptcollectionsettings.h \
     collection/itemwidget/gtpy_collectionitemwidget.h \
     collection/localwidget/gtpy_collectionlocalmodel.h \
     collection/localwidget/gtpy_collectionlocalwidget.h \
@@ -90,65 +92,67 @@ HEADERS += \
     collection/localwidget/items/gtpy_collapsiblelocalitem.h \
     collection/localwidget/items/gtpy_localitem.h \
     extensions/gtpy_pythonfunctions.h \
-    gt_python.h \
     gt_compat.h \
-    calculators/gtpy_scriptcalculator.h \
-    collection/gtpy_scriptcollectionsettings.h \
-    collection/gtpy_collectionwidget.h \
+    gt_python.h \
+    gt_pythonmodule_exports.h \
     gtpy_icons_compat.h \
     gtpy_stylesheet_compat.h \
+    models/gtpy_completermodel.h \
     models/gtpy_objectmodel.h \
+    models/gtpy_taskstylemodel.h \
     post/gtpy_pythonplotconfigdialog.h \
     post/gtpy_pythonplotdata.h \
     post/gtpy_pythonplotitem.h \
     post/gtpy_pythonplotwidget.h \
     post/gtpy_pythonsvgwidget.h \
+    processcomponents/gtpy_abstractscriptcomponent.h \
+    processcomponents/gtpy_scriptcalculator.h \
+    processcomponents/gtpy_task.h \
+    utilities/gtpy_calculatorfactory.h \
+    utilities/gtpy_codegenerator.h \
     utilities/gtpy_constants.h \
+    utilities/gtpy_contextmanager.h \
+    utilities/gtpy_decorator.h \
+    utilities/gtpy_gilscope.h \
     utilities/gtpy_globals.h \
+    utilities/gtpy_interruptrunnable.h \
     utilities/gtpy_packageiteration.h \
+    utilities/gtpy_processdatadistributor.h \
     utilities/gtpy_regexp.h \
-    utilities/gtpy_utilities.h \
+    utilities/gtpy_scriptrunnable.h \
+    utilities/gtpy_transfer.h \
+    utilities/pythonextensions/gtpy_createhelperfunction.h \
+    utilities/pythonextensions/gtpy_extendedwrapper.h \
+    utilities/pythonextensions/gtpy_importfunction.h \
     utilities/pythonextensions/gtpy_loggingmodule.h \
-    wizards/gtpy_abstractscriptingwizardpage.h \
-    widgets/gtpy_scripteditor.h \
+    utilities/pythonextensions/gtpy_propertysetter.h \
+    utilities/pythonextensions/gtpy_stdout.h \
     widgets/gtpy_completer.h \
-    models/gtpy_completermodel.h \
-    wizards/gtpy_wizardgeometries.h \
-    wizards/gtpy_wizardgeometryitem.h \
-    wizards/script_calculator/gtpy_scriptcalculatorwizardpage.h \
     widgets/gtpy_console.h \
-    tasks/gtpy_task.h \
-    models/gtpy_taskstylemodel.h \
+    widgets/gtpy_scripteditor.h \
     widgets/gtpy_taskdelegate.h \
     widgets/gtpy_tasktreeview.h \
-    wizards/python_task/gtpy_taskwizardpage.h \
-    utilities/gtpy_decorator.h \
-    utilities/gtpy_contextmanager.h \
-    utilities/gtpy_calculatorfactory.h \
-    gt_pythonmodule_exports.h \
-    utilities/gtpy_codegenerator.h \
-    utilities/gtpy_scriptrunnable.h \
-    utilities/gtpy_gilscope.h \
-    utilities/gtpy_interruptrunnable.h \
-    utilities/gtpy_processdatadistributor.h \
-    utilities/pythonextensions/gtpy_stdout.h \
-    utilities/pythonextensions/gtpy_extendedwrapper.h \
-    utilities/pythonextensions/gtpy_createhelperfunction.h \
-    utilities/pythonextensions/gtpy_importfunction.h \
-    utilities/pythonextensions/gtpy_propertysetter.h \
     wizards/editor_settings/gtpy_editorsettings.h \
     wizards/editor_settings/gtpy_editorsettingsdialog.h \
     wizards/editor_settings/pages/gtpy_abstractsettingspage.h \
-    wizards/editor_settings/pages/gtpy_generalpage.h
+    wizards/editor_settings/pages/gtpy_generalpage.h \
+    wizards/gtpy_abstractscriptingwizardpage.h \
+    wizards/gtpy_wizardgeometries.h \
+    wizards/gtpy_wizardgeometryitem.h \
+    wizards/python_task/gtpy_taskwizardpage.h \
+    wizards/script_calculator/gtpy_scriptcalculatorwizardpage.h
+
 
 SOURCES += \
+    collection/browser/gtpy_collectionbrowser.cpp \
+    collection/browser/gtpy_collectionbrowsermodel.cpp \
     collection/browser/gtpy_collectionbrowsersortmodel.cpp \
     collection/browser/items/gtpy_abstractbrowseritem.cpp \
     collection/browser/items/gtpy_browseritem.cpp \
     collection/browser/items/gtpy_collapsiblebrowseritem.cpp \
-    collection/browser/gtpy_collectionbrowser.cpp \
-    collection/browser/gtpy_collectionbrowsermodel.cpp \
     collection/browser/items/gtpy_rootbrowseritem.cpp \
+    collection/gtpy_collectionwidget.cpp \
+    collection/gtpy_scriptcollectionsettings.cpp \
     collection/itemwidget/gtpy_collectionitemwidget.cpp \
     collection/localwidget/gtpy_collectionlocalmodel.cpp \
     collection/localwidget/gtpy_collectionlocalwidget.cpp \
@@ -157,52 +161,49 @@ SOURCES += \
     collection/localwidget/items/gtpy_localitem.cpp \
     extensions/gtpy_pythonfunctions.cpp \
     gt_python.cpp \
-    calculators/gtpy_scriptcalculator.cpp \
-    collection/gtpy_scriptcollectionsettings.cpp \
-    collection/gtpy_collectionwidget.cpp \
+    models/gtpy_completermodel.cpp \
     models/gtpy_objectmodel.cpp \
+    models/gtpy_taskstylemodel.cpp \
     post/gtpy_pythonplotconfigdialog.cpp \
     post/gtpy_pythonplotdata.cpp \
     post/gtpy_pythonplotitem.cpp \
     post/gtpy_pythonplotwidget.cpp \
     post/gtpy_pythonsvgwidget.cpp \
-    utilities/gtpy_globals.cpp \
-    utilities/gtpy_regexp.cpp \
-    utilities/gtpy_utilities.cpp \
-    utilities/pythonextensions/gtpy_calculatorsmodule.cpp \
-    utilities/pythonextensions/gtpy_loggingmodule.cpp \
-    wizards/gtpy_abstractscriptingwizardpage.cpp \
-    widgets/gtpy_scripteditor.cpp \
-    widgets/gtpy_completer.cpp \
-    models/gtpy_completermodel.cpp \
-    wizards/gtpy_wizardgeometries.cpp \
-    wizards/gtpy_wizardgeometryitem.cpp \
-    wizards/script_calculator/gtpy_scriptcalculatorwizardpage.cpp \
-    widgets/gtpy_console.cpp \
-    tasks/gtpy_task.cpp \
-    models/gtpy_taskstylemodel.cpp \
-    widgets/gtpy_taskdelegate.cpp \
-    widgets/gtpy_tasktreeview.cpp \
-    wizards/python_task/gtpy_taskwizardpage.cpp \
-    utilities/gtpy_decorator.cpp \
-    utilities/gtpy_contextmanager.cpp \
+    processcomponents/gtpy_abstractscriptcomponent.cpp \
+    processcomponents/gtpy_scriptcalculator.cpp \
+    processcomponents/gtpy_task.cpp \
     utilities/gtpy_calculatorfactory.cpp \
     utilities/gtpy_codegenerator.cpp \
-    utilities/gtpy_scriptrunnable.cpp \
+    utilities/gtpy_contextmanager.cpp \
+    utilities/gtpy_decorator.cpp \
     utilities/gtpy_gilscope.cpp \
+    utilities/gtpy_globals.cpp \
     utilities/gtpy_interruptrunnable.cpp \
     utilities/gtpy_processdatadistributor.cpp \
-    utilities/pythonextensions/gtpy_stdout.cpp \
-    utilities/pythonextensions/gtpy_extendedwrapper.cpp \
+    utilities/gtpy_regexp.cpp \
+    utilities/gtpy_scriptrunnable.cpp \
+    utilities/gtpy_transfer.cpp \
+    utilities/pythonextensions/gtpy_calculatorsmodule.cpp \
     utilities/pythonextensions/gtpy_createhelperfunction.cpp \
+    utilities/pythonextensions/gtpy_extendedwrapper.cpp \
     utilities/pythonextensions/gtpy_importfunction.cpp \
+    utilities/pythonextensions/gtpy_loggingmodule.cpp \
     utilities/pythonextensions/gtpy_propertysetter.cpp \
+    utilities/pythonextensions/gtpy_stdout.cpp \
+    widgets/gtpy_completer.cpp \
+    widgets/gtpy_console.cpp \
+    widgets/gtpy_scripteditor.cpp \
+    widgets/gtpy_taskdelegate.cpp \
+    widgets/gtpy_tasktreeview.cpp \
     wizards/editor_settings/gtpy_editorsettings.cpp \
     wizards/editor_settings/gtpy_editorsettingsdialog.cpp \
     wizards/editor_settings/pages/gtpy_abstractsettingspage.cpp \
-    wizards/editor_settings/pages/gtpy_generalpage.cpp
-
-
+    wizards/editor_settings/pages/gtpy_generalpage.cpp \
+    wizards/gtpy_abstractscriptingwizardpage.cpp \
+    wizards/gtpy_wizardgeometries.cpp \
+    wizards/gtpy_wizardgeometryitem.cpp \
+    wizards/python_task/gtpy_taskwizardpage.cpp \
+    wizards/script_calculator/gtpy_scriptcalculatorwizardpage.cpp
 
 CONFIG(debug, debug|release){
     # GTLAB CORE
