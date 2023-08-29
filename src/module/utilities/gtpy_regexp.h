@@ -15,10 +15,10 @@
 /**
  * namespace for RegualrExpressions used in the GTlab Python Module
  */
-namespace gtpy {
-
-namespace re {
-
+namespace gtpy
+{
+namespace re
+{
 /**
  * @brief Everything except letters and numbers.
  * @return Returns a QRegExp instance.

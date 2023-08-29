@@ -11,16 +11,13 @@
 #define GTPY_SCRIPTCALCULATOR_H
 
 #include "gt_calculator.h"
-#include "gt_stringproperty.h"
-#include "gt_boolproperty.h"
-#include "gt_intproperty.h"
 
-class GtpyContextManager;
+#include "gtpy_abstractscriptcomponent.h"
 
 /**
  * @brief The GtpyScriptCalculator class
  */
-class GtpyScriptCalculator : public GtCalculator
+class GtpyScriptCalculator : public GtCalculator, public GtpyAbstractScriptComponent
 {
     Q_OBJECT
 
@@ -41,43 +38,6 @@ public:
      */
     bool run() override;
 
-    /**
-     * @brief Returns current script.
-     * @return Current script.
-     */
-    QString script() const;
-
-    /**
-     * @brief Sets new script.
-     * @param New script.
-     */
-    void setScript(QString script);
-
-    /**
-     * @brief Returns whether tabs are replaced by spaces.
-     * @return True if tabs are replaced by spaces.
-     */
-    bool replaceTabBySpaces() const;
-
-    /**
-     * @brief Sets whether tabs are replaced by spaces.
-     * @param replaceTabBySpaces If this parameter is true tabs will be
-     * replaced by spaces.
-     */
-    void setReplaceTabBySpaces(bool replaceTabBySpaces);
-
-    /**
-     * @brief Returns the tab size.
-     * @return Tab size
-     */
-    int tabSize() const;
-
-    /**
-     * @brief Sets the tab size to the given tabSize.
-     * @param tabSize Tab size value.
-     */
-    void setTabSize(int tabSize);
-
 private:
     /**
      * @brief If connection is true, it connects to the stateChanged
@@ -87,21 +47,12 @@ private:
      */
     void connectWithRootTask(bool connection);
 
-    /// Script.
-    GtStringProperty m_script;
-
-
-    /// Replace Tab By Spaces.
-    GtBoolProperty m_replaceTabBySpaces;
-
-    /// Tab size.
-    GtIntProperty m_tabSize;
-
-    /// Dynamic properties regarding project modules
-    QList<GtObjectPathProperty*> m_dynamicPathProps;
-
-    /// Python thread id
-    long m_pyThreadId;
+    /**
+     * @brief Returns the data package identified by the given object path.
+     * @param pkgPath Object path
+     * @return The data package identified by the given object path
+     */
+    GtPackage* dataPackage(const GtObjectPath& pkgPath) override;
 
 private slots:
     /**
@@ -116,7 +67,7 @@ private slots:
      * the evaluation of the script will be interrupted.
      * @param state State of the root task.
      */
-    void onTaskStateChanged(GtProcessComponent::STATE state);
+    void onTaskStateChanged(GtProcessComponent::STATE state) const;
 
 signals:
     void deletedFromDatamodel(const QString& uuid);

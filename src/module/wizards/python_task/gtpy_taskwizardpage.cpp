@@ -22,6 +22,7 @@
 #include "gtpy_codegenerator.h"
 #include "gtpy_scripteditor.h"
 #include "gtpy_objectmodel.h"
+#include "gtpy_transfer.h"
 
 // GTlab framework includes
 #include "gt_stylesheets.h"
@@ -147,6 +148,11 @@ GtpyTaskWizardPage::initialization()
     }
 
     m_task->setParent(this);
+
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+    gtpy::transfer::propStructToPython(m_contextId, m_task->inputArgs());
+    gtpy::transfer::propStructToPython(m_contextId, m_task->outputArgs());
+#endif
 
     if (!gtDataModel->objectByUuid(m_task->uuid()))
     {

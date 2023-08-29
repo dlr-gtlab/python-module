@@ -19,10 +19,10 @@
 /**
  * Namespace for the package utilities used in the GTlab Python module
  */
-namespace gtpy {
-
-namespace package {
-
+namespace gtpy
+{
+namespace package
+{
 /**
  * @brief The PackageInfo struct
  * Struct to store information about the GtPackages.

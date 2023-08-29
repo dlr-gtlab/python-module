@@ -497,6 +497,39 @@ GtpyContextManager::addGtObject(int contextId, const QString& name,
 }
 
 bool
+GtpyContextManager::addVariable(int contextId, const QString &name, const QVariant &value)
+{
+    PythonQtObjectPtr con = context(contextId);
+
+    if (!con)
+    {
+        return false;
+    }
+
+    GTPY_GIL_SCOPE
+
+    con.addVariable(name, value);
+
+    return true;
+}
+
+QVariant
+GtpyContextManager::getVariable(int contextId, const QString &name)
+{
+    PythonQtObjectPtr con = context(contextId);
+
+    if (!con)
+    {
+        return {};
+    }
+
+    GTPY_GIL_SCOPE
+
+    return con.getVariable(name);
+
+}
+
+bool
 GtpyContextManager::removeObject(int contextId, const QString& name)
 {
     GTPY_GIL_SCOPE

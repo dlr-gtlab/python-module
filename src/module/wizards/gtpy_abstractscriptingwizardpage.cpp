@@ -32,7 +32,7 @@
 #include "gtpy_wizardgeometries.h"
 #include "gtpy_editorsettingsdialog.h"
 #include "gtpy_packageiteration.h"
-#include "gtpy_utilities.h"
+#include "gtpy_transfer.h"
 
 // GTlab framework includes
 #include "gt_object.h"
@@ -896,7 +896,7 @@ GtpyAbstractScriptingWizardPage::loadPackages()
         {
             auto* clone = obj->clone();
             clone->setParent(this);
-            gtpy::gtObjectToPython(m_contextId, clone);
+            gtpy::transfer::gtObjectToPython(m_contextId, clone);
         }
     });
 }
