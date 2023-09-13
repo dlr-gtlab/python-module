@@ -60,7 +60,12 @@ GtpyTask::~GtpyTask()
 bool
 GtpyTask::runIteration()
 {
-    auto success = evalScritp(GtpyContextManager::TaskRunContext);
+    int contextId = GtpyContextManager::instance()->createNewContext(
+        GtpyContextManager::TaskRunContext, true);
+
+    ///Initialize context with data model objects
+    GtpyContextManager::instance()->addTaskValue(contextId, this);
+    auto success = evalScript(contextId);
 
     emit transferMonitoringProperties();
 

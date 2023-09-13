@@ -116,10 +116,10 @@ protected:
      * @brief Creates a context of the given type and adds all available
      * packages and the input and output property struct container to the
      * context. Finally, it starts the evaluation of the script.
-     * @param type Context type.
+     * @param contextId Id of the context where the script should be executed.
      * @return True, if the evaluation was successful.
      */
-    bool evalScritp(const GtpyContextManager::Context& type);
+    bool evalScript(int contextId);
 
 private:
     /**

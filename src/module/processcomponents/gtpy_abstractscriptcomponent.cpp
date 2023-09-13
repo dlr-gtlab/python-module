@@ -129,11 +129,8 @@ GtpyAbstractScriptComponent::outputArgs()
 #endif
 
 bool
-GtpyAbstractScriptComponent::evalScritp(const GtpyContextManager::Context& type)
+GtpyAbstractScriptComponent::evalScript(int contextId)
 {
-    int contextId = GtpyContextManager::instance()->createNewContext(
-                type, true);
-
     for (auto* pathProp : qAsConst(m_dynamicPathProps))
     {
         gtpy::transfer::gtObjectToPython(
