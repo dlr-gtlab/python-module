@@ -61,7 +61,10 @@ GtpyScriptCalculator::~GtpyScriptCalculator()
 bool
 GtpyScriptCalculator::run()
 {
-    return evalScritp(GtpyContextManager::CalculatorRunContext);
+    int contextId = GtpyContextManager::instance()->createNewContext(
+        GtpyContextManager::CalculatorRunContext, true);
+
+    return evalScript(contextId);
 }
 
 void
