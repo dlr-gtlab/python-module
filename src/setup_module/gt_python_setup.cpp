@@ -43,7 +43,7 @@ getSetting(const QString& settingId)
 GtVersionNumber
 GtPythonSetupModule::version()
 {
-    return GtVersionNumber(1, 4, 0);
+    return GtVersionNumber(1, 4, 1);
 }
 
 QString
