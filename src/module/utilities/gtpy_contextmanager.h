@@ -340,6 +340,14 @@ private:
 #endif
 
     /**
+     * @brief Creates a Python module from the given code and names it with
+     * the given moduleName.
+     * @param moduleName Name of the newly created Python module.
+     * @param code Code of the Python module.
+     */
+    void createCustomModule(const QString& moduleName, const QString& code);
+
+    /**
     * @brief Configures the python context indicated by contextId with the
     * functionality indicated by type
     * @param type Identifies the functionality of the context.

@@ -49,6 +49,7 @@
 #include "gtpy_importfunction.h"
 #include "gtpy_calculatorsmodule.h"
 #include "gtpy_pythonfunctions.h"
+#include "gtpy_matplotlib.h"
 
 #include "gtpy_contextmanager.h"
 
@@ -124,6 +125,12 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     m_pyThreadState = PyEval_SaveThread();
 
     GtpyCustomization::customizeSlotCalling();
+
+    createCustomModule(gtpy::matplotlib::backendName,
+                       gtpy::matplotlib::customBackend);
+    evalScript(GtpyContextManager::GlobalContext,
+               gtpy::matplotlib::setCustomBackend);
+
 }
 
 GtpyContextManager*
@@ -879,6 +886,15 @@ GtpyContextManager::threadDictMetaData()
     Py_DECREF(threadDict);
 
     return retval;
+}
+
+void
+GtpyContextManager::createCustomModule(
+        const QString& moduleName, const QString& code)
+{
+    GTPY_GIL_SCOPE
+
+    PythonQt::self()->createModuleFromScript(moduleName).evalScript(code);
 }
 
 void
