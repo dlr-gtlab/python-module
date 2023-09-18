@@ -49,7 +49,10 @@
 #include "gtpy_importfunction.h"
 #include "gtpy_calculatorsmodule.h"
 #include "gtpy_pythonfunctions.h"
+
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 #include "gtpy_matplotlib.h"
+#endif
 
 #include "gtpy_contextmanager.h"
 
@@ -126,11 +129,12 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
 
     GtpyCustomization::customizeSlotCalling();
 
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
     createCustomModule(gtpy::matplotlib::backendName,
                        gtpy::matplotlib::customBackend);
     evalScript(GtpyContextManager::GlobalContext,
                gtpy::matplotlib::setCustomBackend);
-
+#endif
 }
 
 GtpyContextManager*
