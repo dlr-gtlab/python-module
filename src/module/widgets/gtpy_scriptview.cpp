@@ -97,10 +97,10 @@ GtpyScriptView::event(QEvent* event)
 
 void
 GtpyScriptView::wheelEvent(QWheelEvent* event)
-{
+{    
     if (event->modifiers() == Qt::ControlModifier && !isReadOnly())
     {
-        if (event->delta() > 0)
+        if (event->angleDelta().y() > 0)
         {
             zoomIn(2);
         }
@@ -109,11 +109,12 @@ GtpyScriptView::wheelEvent(QWheelEvent* event)
             zoomOut(2);
         }
 
-        setTabSize(m_tabSize);
+        setTabStopDistance(m_tabSize *
+                           QFontMetrics(font()).horizontalAdvance(' '));
     }
     else
     {
-        QPlainTextEdit::wheelEvent(event);
+        GtCodeEditor::wheelEvent(event);
     }
 }
 
@@ -130,95 +131,90 @@ void
 GtpyScriptView::insertToCurrentCursorPos(const QString& text)
 {
     QTextCursor cursor = textCursor();
-
     cursor.clearSelection();
-
     cursor.insertText(text);
 }
 
-void
-GtpyScriptView::replaceIntoBlock(const QString& header,
-                                   const QString& caption,
-                                   const QString& newVal,
-                                   const QString& functionName,
-                                   const QString& pyObjName)
-{
-    if (header.isEmpty() || caption.isEmpty() || newVal.isEmpty() ||
-            functionName.isEmpty() || pyObjName.isEmpty())
-    {
-        return;
-    }
+//void
+//GtpyScriptView::replaceIntoBlock(const QString& header,
+//                                   const QString& caption,
+//                                   const QString& newVal,
+//                                   const QString& functionName,
+//                                   const QString& pyObjName)
+//{
+//    if (header.isEmpty() || caption.isEmpty() || newVal.isEmpty() ||
+//            functionName.isEmpty() || pyObjName.isEmpty())
+//    {
+//        return;
+//    }
 
-    QTextCursor startCursor = textCursor();
+//    QTextCursor startCursor = textCursor();
+//    startCursor.clearSelection();
+//    startCursor.movePosition(QTextCursor::Start);
+//    startCursor = document()->find(header, startCursor);
 
-    startCursor.clearSelection();
+//    if (startCursor.position() > -1)
+//    {
+//        QString selectedText;
 
-    startCursor.movePosition(QTextCursor::Start);
+//        bool moveDown = startCursor.movePosition(QTextCursor::Down);
 
-    startCursor = document()->find(header, startCursor);
+//        if (moveDown)
+//        {
+//            moveDown = startCursor.movePosition(QTextCursor::Down);
 
-    if (startCursor.position() > -1)
-    {
-        QString selectedText;
+//            while (moveDown)
+//            {
+//                startCursor.movePosition(QTextCursor::StartOfLine);
 
-        bool moveDown = startCursor.movePosition(QTextCursor::Down);
+//                startCursor.movePosition(QTextCursor::EndOfLine,
+//                                         QTextCursor::KeepAnchor);
 
-        if (moveDown)
-        {
-            moveDown = startCursor.movePosition(QTextCursor::Down);
+//                selectedText = startCursor.selectedText();
 
-            while (moveDown)
-            {
-                startCursor.movePosition(QTextCursor::StartOfLine);
+//                if (selectedText.contains(pyObjName + "." + functionName))
+//                {
+//                    //selectedText.trimmed();
 
-                startCursor.movePosition(QTextCursor::EndOfLine,
-                                         QTextCursor::KeepAnchor);
+//                    int startVal = selectedText.indexOf("(") + 1;
+//                    int endVal = selectedText.size() - 1;
 
-                selectedText = startCursor.selectedText();
+//                    selectedText.replace(startVal, endVal - startVal, newVal);
 
-                if (selectedText.contains(pyObjName + "." + functionName))
-                {
-                    //selectedText.trimmed();
+//                    startCursor.insertText(selectedText);
+//                    return;
+//                }
 
-                    int startVal = selectedText.indexOf("(") + 1;
-                    int endVal = selectedText.size() - 1;
+//                if (selectedText.contains(caption))
+//                {
+//                    break;
+//                }
 
-                    selectedText.replace(startVal, endVal - startVal, newVal);
+//                moveDown = startCursor.movePosition(QTextCursor::Down);
+//            }
 
-                    startCursor.insertText(selectedText);
-                    return;
-                }
+//            startCursor.clearSelection();
 
-                if (selectedText.contains(caption))
-                {
-                    break;
-                }
+//            if (moveDown)
+//            {
+//                startCursor.movePosition(QTextCursor::Up);
+//            }
 
-                moveDown = startCursor.movePosition(QTextCursor::Down);
-            }
+//            startCursor.movePosition(QTextCursor::EndOfLine);
 
-            startCursor.clearSelection();
+//            startCursor.insertText("\n");
 
-            if (moveDown)
-            {
-                startCursor.movePosition(QTextCursor::Up);
-            }
-
-            startCursor.movePosition(QTextCursor::EndOfLine);
-
-            startCursor.insertText("\n");
-
-            startCursor.insertText(functionCallPyCode(newVal, functionName,
-                                   pyObjName));
-        }
-    }
-}
+//            startCursor.insertText(functionCallPyCode(newVal, functionName,
+//                                   pyObjName));
+//        }
+//    }
+//}
 
 void
 GtpyScriptView::replaceBlockHeaders(const QString& oldHeader,
-                                      const QString& newHeader,
-                                      const QString& oldCaption,
-                                      const QString& newCaption)
+                                    const QString& newHeader,
+                                    const QString& oldCaption,
+                                    const QString& newCaption)
 {
     if (oldHeader.isEmpty() || oldCaption.isEmpty())
     {
@@ -226,15 +222,11 @@ GtpyScriptView::replaceBlockHeaders(const QString& oldHeader,
     }
 
     QTextCursor startCursor = textCursor();
-
     startCursor.clearSelection();
-
     startCursor.movePosition(QTextCursor::Start);
 
     startCursor = document()->find(oldHeader, startCursor);
-
     startCursor.movePosition(QTextCursor::StartOfLine);
-
     startCursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
 
     if (startCursor.hasSelection())
@@ -243,9 +235,7 @@ GtpyScriptView::replaceBlockHeaders(const QString& oldHeader,
     }
 
     QTextCursor endCursor = document()->find(oldCaption, startCursor);
-
     endCursor.movePosition(QTextCursor::StartOfLine);
-
     endCursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
 
     if (endCursor.hasSelection())
@@ -255,8 +245,8 @@ GtpyScriptView::replaceBlockHeaders(const QString& oldHeader,
 }
 
 void
-GtpyScriptView::searchAndReplace(const QRegExp& searchRegExp, const
-                                   QString& replaceBy, bool all)
+GtpyScriptView::searchAndReplace(const QRegExp& searchRegExp,
+                                 const QString& replaceBy, bool all)
 {
     if (searchRegExp.isEmpty() || !searchRegExp.isValid())
     {
@@ -264,13 +254,11 @@ GtpyScriptView::searchAndReplace(const QRegExp& searchRegExp, const
     }
 
     QTextCursor cursor = textCursor();
-
     cursor.clearSelection();
 
     if (all)
     {
         cursor.movePosition(QTextCursor::Start);
-
         cursor = document()->find(searchRegExp, cursor);
 
         while (!cursor.isNull())
@@ -351,11 +339,8 @@ void
 GtpyScriptView::setCursorPosition(int pos)
 {
     QTextCursor cursor = textCursor();
-
     cursor.setPosition(pos);
-
     setTextCursor(cursor);
-
     centerCursor();
 }
 
@@ -388,7 +373,6 @@ GtpyScriptView::replaceTabsBySpaces(bool enable)
         searchAndReplace("\t", spaces.repeated(m_tabSize));
     }
 }
-
 
 void
 GtpyScriptView::searchHighlighting(const QString& searchText,
@@ -1061,7 +1045,7 @@ void GtpyScriptView::handleCompletion()
 
 void GtpyScriptView::resetErrorMessage()
 {
-    m_errorMessage = QString();
+    m_errorMessage.clear();
 }
 
 bool GtpyScriptView::isCurrentLineCommentedOut()
