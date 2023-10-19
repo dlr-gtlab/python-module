@@ -50,6 +50,8 @@
 #define GTPY_PNG_ICON_triangleSmallLeft "arrowleftIcon.png"
 #define GTPY_PNG_ICON_triangleSmallRight "arrowrightIcon.png"
 #define GTPY_PNG_ICON_update "updateIcon_16.png"
+#define GTPY_PNG_ICON_undo "undoIcon_24.png"
+#define GTPY_PNG_ICON_redo "undoIcon_24.png"
 
 #endif
 
