@@ -58,18 +58,18 @@ public:
      */
     void insertToCurrentCursorPos(const QString& text);
 
-    /**
-     * @brief Replaces the value of function call of the function named
-     * functionName into the block delimited by header and caption.
-     * @param header Upper limit of the block.
-     * @param caption Lower limit of the block.
-     * @param newVal New value that has to set.
-     * @param functionName Name of function
-     * @param pyObjName Name of python object
-     */
-    void replaceIntoBlock(const QString& header, const QString& caption,
-                          const QString& newVal, const QString& functionName,
-                          const QString& pyObjName);
+//    /**
+//     * @brief Replaces the value of function call of the function named
+//     * functionName into the block delimited by header and caption.
+//     * @param header Upper limit of the block.
+//     * @param caption Lower limit of the block.
+//     * @param newVal New value that has to set.
+//     * @param functionName Name of function
+//     * @param pyObjName Name of python object
+//     */
+//    void replaceIntoBlock(const QString& header, const QString& caption,
+//                          const QString& newVal, const QString& functionName,
+//                          const QString& pyObjName);
 
     /**
      * @brief Replaces old header and old caption of a block with given new
