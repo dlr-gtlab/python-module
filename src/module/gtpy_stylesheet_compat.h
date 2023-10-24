@@ -11,10 +11,9 @@
 #define GTPY_STYLESHEET_COMPAT_H
 
 #include "gt_globals.h"
+#include "gt_stylesheets.h"
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-
-#include "gt_stylesheets.h"
 
 #define GTPY_STYLESHEET(x) gt::gui::stylesheet::x()
 
@@ -26,6 +25,7 @@
     "#frame {border-image: " \
     "url(:/pixmaps/startup-background.png)}"
 
+#define GTPY_STYLESHEET_standardLineEdit GtStyleSheets::standardLineEdit()
 #endif
 
 #endif // GTPY_STYLESHEET_COMPAT_H
