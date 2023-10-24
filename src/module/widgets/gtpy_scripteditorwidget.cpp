@@ -8,14 +8,14 @@
  */
 
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QPushButton>
-#include <QObject>
-
-#include "gtpy_scripteditor.h"
-#include "gtpy_icons_compat.h"
 
 #include "gt_searchwidget.h"
-#include "gt_stylesheets.h"
+
+#include "gtpy_scripteditor.h"
+#include "gtpy_replacewidget.h"
+#include "gtpy_icons_compat.h"
 
 #include "gtpy_scripteditorwidget.h"
 
@@ -23,10 +23,7 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
     QWidget(parent),
     m_editor{nullptr},
     m_undoButton{nullptr},
-    m_redoButton{nullptr},
-    m_backwardButton{nullptr},
-    m_forwardButton{nullptr},
-    m_searchWidget{nullptr}
+    m_redoButton{nullptr}
 {
     QVBoxLayout* mainLayout = new QVBoxLayout;
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -61,26 +58,8 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
 
     topLayout->addStretch(1);
 
-    m_searchWidget = new GtSearchWidget(this);
-    topLayout->addWidget(m_searchWidget);
-
-    m_backwardButton = new QPushButton;
-    m_backwardButton->setIcon(GTPY_ICON(triangleSmallLeft));
-    m_backwardButton->setToolTip(tr("Search backwards"));
-    m_backwardButton->setMaximumSize(QSize(15, 20));
-    m_backwardButton->setFlat(true);
-    m_backwardButton->setVisible(false);
-
-    topLayout->addWidget(m_backwardButton);
-
-    m_forwardButton = new QPushButton;
-    m_forwardButton->setIcon(GTPY_ICON(triangleSmallRight));
-    m_forwardButton->setToolTip(tr("Search forwards"));
-    m_forwardButton->setMaximumSize(QSize(15, 20));
-    m_forwardButton->setFlat(true);
-    m_forwardButton->setVisible(false);
-
-    topLayout->addWidget(m_forwardButton);
+    GtpyReplaceWidget* replaceWidget = new GtpyReplaceWidget(this);
+    topLayout->addWidget(replaceWidget);
 
     mainLayout->addLayout(topLayout);
     mainLayout->addLayout(editorLayout);
@@ -92,27 +71,28 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
             SLOT(setRedoButtonVisible(bool)));
     connect(m_editor, SIGNAL(undoAvailable(bool)), this,
             SLOT(setUndoButtonVisible(bool)));
-    connect(m_editor, SIGNAL(searchShortcutTriggered(QString)), this,
-            SLOT(setSearchedText(QString)));
+    connect(m_editor, SIGNAL(searchShortcutTriggered(QString)), replaceWidget,
+            SLOT(setSearchText(QString)));
+    connect(m_editor, SIGNAL(searchShortcutTriggered(QString)), replaceWidget,
+            SLOT(enableSearch()));
 
     /// connect redo/undo button
     connect(m_redoButton, SIGNAL(clicked(bool)), m_editor, SLOT(redo()));
     connect(m_undoButton, SIGNAL(clicked(bool)), m_editor, SLOT(undo()));
 
-    /// connect search widget
-    connect(m_searchWidget, SIGNAL(textEdited(QString)), m_editor,
+    /// connect serach and replace
+    connect(replaceWidget, SIGNAL(searchTextChanged(QString)), m_editor,
             SLOT(searchHighlighting(QString)));
-    connect(m_searchWidget, SIGNAL(textEdited(QString)), this,
-            SLOT(onSearchTextEdit()));
-    connect(m_searchWidget, SIGNAL(searchEnabled()), this,
+    connect(replaceWidget, SIGNAL(searchEnabled()), this,
             SLOT(onSearchEnabled()));
-    connect(m_searchWidget, SIGNAL(searchDisabled()), this,
+    connect(replaceWidget, SIGNAL(searchAndReplaceDisabled()), this,
             SLOT(onSearchDisabled()));
-    connect(m_searchWidget, SIGNAL(returnPressed()), this,
+    connect(replaceWidget, SIGNAL(searchLineReturnPressed()), this,
             SLOT(onSearchForward()));
-    connect(m_backwardButton, SIGNAL(clicked(bool)), this,
+
+    connect(replaceWidget, SIGNAL(backwardButtonClicked()), this,
             SLOT(onSearchBackward()));
-    connect(m_forwardButton, SIGNAL(clicked(bool)), this,
+    connect(replaceWidget, SIGNAL(forwardButtonClicked()), this,
             SLOT(onSearchForward()));
 }
 
@@ -123,40 +103,26 @@ GtpyScriptEditorWidget::editor() const
 }
 
 void
-GtpyScriptEditorWidget::enableSearchNavigation(bool enable)
-{
-    m_forwardButton->setEnabled(enable);
-    m_backwardButton->setEnabled(enable);
-}
-
-void
 GtpyScriptEditorWidget::setRedoButtonVisible(bool visible)
 {
-//    m_redoButton->setVisible(visible);
     m_redoButton->setEnabled(visible);
 }
 
 void
 GtpyScriptEditorWidget::setUndoButtonVisible(bool visible)
 {
-//    m_undoButton->setVisible(visible);
     m_undoButton->setEnabled(visible);
 }
 
 void
 GtpyScriptEditorWidget::onSearchEnabled()
 {
-    m_forwardButton->setVisible(true);
-    m_backwardButton->setVisible(true);
-    enableSearchNavigation(!m_searchWidget->text().isEmpty());
     m_editor->textSearchingActivated();
 }
 
 void
 GtpyScriptEditorWidget::onSearchDisabled()
 {
-    m_forwardButton->setVisible(false);
-    m_backwardButton->setVisible(false);
     m_editor->removeSearchHighlighting();
 }
 
@@ -170,18 +136,4 @@ void
 GtpyScriptEditorWidget::onSearchForward()
 {
     m_editor->moveCursorToNextFound();
-}
-
-void
-GtpyScriptEditorWidget::onSearchTextEdit()
-{
-    enableSearchNavigation(!m_searchWidget->text().isEmpty());
-}
-
-void
-GtpyScriptEditorWidget::setSearchedText(const QString& text)
-{
-    m_editor->searchAndReplace(text, "hello", true);
-    m_searchWidget->setText(text);
-    m_searchWidget->enableSearch();
 }
