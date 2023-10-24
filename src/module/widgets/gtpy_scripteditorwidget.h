@@ -31,11 +31,7 @@ private:
     GtpyScriptEditor* m_editor;
     QPushButton* m_undoButton;
     QPushButton* m_redoButton;
-    QPushButton* m_backwardButton;
-    QPushButton* m_forwardButton;
-    GtSearchWidget* m_searchWidget;
 
-    void enableSearchNavigation(bool enable);
 private slots:
 
     void setRedoButtonVisible(bool visible);
@@ -62,17 +58,6 @@ private slots:
      * @brief Instructs the editor to continue the current search.
      */
     void onSearchForward();
-
-    /**
-     * @brief Enables and disables forward and backward buttons.
-     */
-    void onSearchTextEdit();
-
-    /**
-     * @brief Sets text to search widget.
-     * @param text Text to be set on the search widget.
-     */
-    void setSearchedText(const QString& text);
 };
 
 #endif // GTPYSCRIPTEDITORWIDGET_H
