@@ -131,6 +131,7 @@ HEADERS += \
     utilities/pythonextensions/gtpy_stdout.h \
     widgets/gtpy_completer.h \
     widgets/gtpy_console.h \
+    widgets/gtpy_lineedit.h \
     widgets/gtpy_replacewidget.h \
     widgets/gtpy_scripteditor.h \
     widgets/gtpy_scripteditorwidget.h \
@@ -198,6 +199,7 @@ SOURCES += \
     utilities/pythonextensions/gtpy_stdout.cpp \
     widgets/gtpy_completer.cpp \
     widgets/gtpy_console.cpp \
+    widgets/gtpy_lineedit.cpp \
     widgets/gtpy_replacewidget.cpp \
     widgets/gtpy_scripteditor.cpp \
     widgets/gtpy_scripteditorwidget.cpp \

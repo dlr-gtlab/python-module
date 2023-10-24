@@ -12,10 +12,9 @@
 
 #include <QWidget>
 
-class GtLineEdit;
+class GtpyLineEdit;
 class QPushButton;
 class QLabel;
-
 
 class GtpyReplaceWidget : public QWidget
 {
@@ -56,18 +55,12 @@ public slots:
      */
     void disableSearchAndReplace();
 
-
-//    /**
-//     * @brief disableReplace
-//     */
-//    void disableReplace();
-
 private:
     /// Search line
-    GtLineEdit* m_searchLine;
+    GtpyLineEdit* m_searchLine;
 
     /// Search line
-    GtLineEdit* m_replaceLine;
+    GtpyLineEdit* m_replaceLine;
 
     /// Search button
     QPushButton* m_searchButton;

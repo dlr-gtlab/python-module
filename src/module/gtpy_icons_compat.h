@@ -53,6 +53,8 @@
 #define GTPY_PNG_ICON_undo "undoIcon_24.png"
 #define GTPY_PNG_ICON_redo "undoIcon_24.png"
 #define GTPY_PNG_ICON_swap "reloadIcon.png"
+#define GTPY_PNG_ICON_search "searchIcon_24.png"
+#define GTPY_PNG_ICON_backspaceFlipped "clearIcon2_16.png"
 
 #endif
 

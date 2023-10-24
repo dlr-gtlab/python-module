@@ -9,14 +9,11 @@
 
 #include <QHBoxLayout>
 #include <QPushButton>
-#include <QLabel>
-#include <QMouseEvent>
-#include <QDebug>
 
-#include "gt_lineedit.h"
-#include "gt_stylesheets.h"
+#include "gtpy_lineedit.h"
 
 #include "gtpy_icons_compat.h"
+#include "gtpy_stylesheet_compat.h"
 
 #include "gtpy_replacewidget.h"
 
@@ -52,13 +49,9 @@ GtpyReplaceWidget::GtpyReplaceWidget(QWidget* parent) : QWidget(parent),
     mainLayout->addWidget(m_clearButton);
 
     /// search line
-    m_searchLine = new GtLineEdit;
+    m_searchLine = new GtpyLineEdit;
     m_searchLine->setMaximumHeight(17);
-#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-    m_searchLine->setStyleSheet(gt::gui::stylesheet::standardLineEdit());
-#else
-    m_searchLine->setStyleSheet(GtStyleSheets::standardLineEdit());
-#endif
+    m_searchLine->setStyleSheet(GTPY_STYLESHEET(standardLineEdit));
     m_searchLine->setVisible(false);
 
     mainLayout->addWidget(m_searchLine);
@@ -84,13 +77,9 @@ GtpyReplaceWidget::GtpyReplaceWidget(QWidget* parent) : QWidget(parent),
     mainLayout->addWidget(m_forwardButton);
 
     /// search line
-    m_replaceLine = new GtLineEdit;
+    m_replaceLine = new GtpyLineEdit;
     m_replaceLine->setMaximumHeight(17);
-#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-    m_searchLine->setStyleSheet(gt::gui::stylesheet::standardLineEdit());
-#else
-    m_searchLine->setStyleSheet(GtStyleSheets::standardLineEdit());
-#endif
+    m_replaceLine->setStyleSheet(GTPY_STYLESHEET(standardLineEdit));
     m_replaceLine->setVisible(false);
 
     mainLayout->addWidget(m_replaceLine);
