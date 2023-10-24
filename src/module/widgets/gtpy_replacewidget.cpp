@@ -14,7 +14,6 @@
 #include <QDebug>
 
 #include "gt_lineedit.h"
-#include "gt_icons.h"
 #include "gt_stylesheets.h"
 
 #include "gtpy_icons_compat.h"
@@ -35,7 +34,7 @@ GtpyReplaceWidget::GtpyReplaceWidget(QWidget* parent) : QWidget(parent),
 
     /// search button
     m_searchButton = new QPushButton;
-    m_searchButton->setIcon(gt::gui::icon::search());
+    m_searchButton->setIcon(GTPY_ICON(search));
     m_searchButton->setMaximumSize(QSize(20, 20));
     m_searchButton->setFlat(true);
     m_searchButton->setToolTip(tr("Search"));
@@ -44,7 +43,7 @@ GtpyReplaceWidget::GtpyReplaceWidget(QWidget* parent) : QWidget(parent),
 
     /// clear button
     m_clearButton = new QPushButton;
-    m_clearButton->setIcon(gt::gui::icon::backspaceFlipped());
+    m_clearButton->setIcon(GTPY_ICON(backspaceFlipped));
     m_clearButton->setMaximumSize(QSize(20, 20));
     m_clearButton->setFlat(true);
     m_clearButton->setToolTip(tr("Clear Search"));
@@ -55,7 +54,11 @@ GtpyReplaceWidget::GtpyReplaceWidget(QWidget* parent) : QWidget(parent),
     /// search line
     m_searchLine = new GtLineEdit;
     m_searchLine->setMaximumHeight(17);
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
     m_searchLine->setStyleSheet(gt::gui::stylesheet::standardLineEdit());
+#else
+    m_searchLine->setStyleSheet(GtStyleSheets::standardLineEdit());
+#endif
     m_searchLine->setVisible(false);
 
     mainLayout->addWidget(m_searchLine);
@@ -83,7 +86,11 @@ GtpyReplaceWidget::GtpyReplaceWidget(QWidget* parent) : QWidget(parent),
     /// search line
     m_replaceLine = new GtLineEdit;
     m_replaceLine->setMaximumHeight(17);
-    m_replaceLine->setStyleSheet(gt::gui::stylesheet::standardLineEdit());
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+    m_searchLine->setStyleSheet(gt::gui::stylesheet::standardLineEdit());
+#else
+    m_searchLine->setStyleSheet(GtStyleSheets::standardLineEdit());
+#endif
     m_replaceLine->setVisible(false);
 
     mainLayout->addWidget(m_replaceLine);
