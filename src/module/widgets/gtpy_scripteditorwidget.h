@@ -34,8 +34,8 @@ private:
 
 private slots:
 
-    void setRedoButtonVisible(bool visible);
-    void setUndoButtonVisible(bool visible);
+    void setRedoButtonEnabled(bool visible);
+    void setUndoButtonEnabled(bool visible);
 
     /**
      * @brief Sets the search forward button and the search backward button
@@ -58,6 +58,8 @@ private slots:
      * @brief Instructs the editor to continue the current search.
      */
     void onSearchForward();
+
+    void onReplace(const QString& find, const QString& replaceBy);
 };
 
 #endif // GTPYSCRIPTEDITORWIDGET_H

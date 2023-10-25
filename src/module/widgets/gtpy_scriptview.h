@@ -58,18 +58,18 @@ public:
      */
     void insertToCurrentCursorPos(const QString& text);
 
-//    /**
-//     * @brief Replaces the value of function call of the function named
-//     * functionName into the block delimited by header and caption.
-//     * @param header Upper limit of the block.
-//     * @param caption Lower limit of the block.
-//     * @param newVal New value that has to set.
-//     * @param functionName Name of function
-//     * @param pyObjName Name of python object
-//     */
-//    void replaceIntoBlock(const QString& header, const QString& caption,
-//                          const QString& newVal, const QString& functionName,
-//                          const QString& pyObjName);
+    /**
+     * @brief Replaces the value of function call of the function named
+     * functionName into the block delimited by header and caption.
+     * @param header Upper limit of the block.
+     * @param caption Lower limit of the block.
+     * @param newVal New value that has to set.
+     * @param functionName Name of function
+     * @param pyObjName Name of python object
+     */
+    void replaceIntoBlock(const QString& header, const QString& caption,
+                          const QString& newVal, const QString& functionName,
+                          const QString& pyObjName);
 
     /**
      * @brief Replaces old header and old caption of a block with given new
@@ -340,15 +340,22 @@ private:
 
 signals:
     /**
-     * @brief Will emited if eval shortcut (ctrl+E) has been received.
+     * @brief Emitted when eval shortcut (ctrl+E) is pressed.
      */
     void evalShortcutTriggered();
 
     /**
-     * @brief Will emited if find shortcut (ctrl+F) has been received.
+     * @brief Emitted when find shortcut (ctrl+F) is pressed.
      * @param text Selected text.
      */
     void searchShortcutTriggered(const QString& text);
+
+    /**
+     * @brief Emitted when replace shortcut (ctrl+R) is pressed.
+     * @param text Selected text.
+     */
+    void replaceShortcutTriggered(const QString& text);
+
 
     void calculatorDropped(GtCalculator* calc);
 };

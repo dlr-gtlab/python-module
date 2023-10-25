@@ -11,7 +11,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 
-#include "gt_searchwidget.h"
+#include "gt_pyhighlighter.h"
 
 #include "gtpy_scripteditor.h"
 #include "gtpy_replacewidget.h"
@@ -25,17 +25,12 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
     m_undoButton{nullptr},
     m_redoButton{nullptr}
 {
-    QVBoxLayout* mainLayout = new QVBoxLayout;
+    ///  main layout
+    auto* mainLayout = new QVBoxLayout;
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
-    QVBoxLayout* editorLayout = new QVBoxLayout();
-
-    m_editor = new GtpyScriptEditor(contextId);
-
-    editorLayout->addWidget(m_editor);
-
-    QHBoxLayout* topLayout = new QHBoxLayout();
-
+    /// top layout
+    auto* topLayout = new QHBoxLayout();
     topLayout->setSpacing(0);
     topLayout->setMargin(0);
     topLayout->setContentsMargins(0, 0, 0, 0);
@@ -58,23 +53,39 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
 
     topLayout->addStretch(1);
 
-    GtpyReplaceWidget* replaceWidget = new GtpyReplaceWidget(this);
+    auto* replaceWidget = new GtpyReplaceWidget(this);
     topLayout->addWidget(replaceWidget);
 
+    /// script editor
+    m_editor = new GtpyScriptEditor(contextId);
+    m_editor->setStyleSheet("QPlainTextEdit {  border: 0px; }");
+
+    QTextOption defaultOps = m_editor->document()->defaultTextOption();
+    defaultOps.setFlags(defaultOps.flags() | QTextOption::ShowTabsAndSpaces);
+    m_editor->document()->setDefaultTextOption(defaultOps);
+
+    auto* highlighter = new GtPyHighlighter(m_editor->document());
+
+    Q_UNUSED(highlighter)
+
     mainLayout->addLayout(topLayout);
-    mainLayout->addLayout(editorLayout);
+    mainLayout->addWidget(m_editor);
 
     setLayout(mainLayout);
 
     /// conect editor
     connect(m_editor, SIGNAL(redoAvailable(bool)), this,
-            SLOT(setRedoButtonVisible(bool)));
+            SLOT(setRedoButtonEnabled(bool)));
     connect(m_editor, SIGNAL(undoAvailable(bool)), this,
-            SLOT(setUndoButtonVisible(bool)));
+            SLOT(setUndoButtonEnabled(bool)));
     connect(m_editor, SIGNAL(searchShortcutTriggered(QString)), replaceWidget,
             SLOT(setSearchText(QString)));
     connect(m_editor, SIGNAL(searchShortcutTriggered(QString)), replaceWidget,
             SLOT(enableSearch()));
+    connect(m_editor, SIGNAL(replaceShortcutTriggered(QString)), replaceWidget,
+            SLOT(setSearchText(QString)));
+    connect(m_editor, SIGNAL(replaceShortcutTriggered(QString)), replaceWidget,
+            SLOT(enableReplace()));
 
     /// connect redo/undo button
     connect(m_redoButton, SIGNAL(clicked(bool)), m_editor, SLOT(redo()));
@@ -89,11 +100,14 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
             SLOT(onSearchDisabled()));
     connect(replaceWidget, SIGNAL(searchLineReturnPressed()), this,
             SLOT(onSearchForward()));
-
     connect(replaceWidget, SIGNAL(backwardButtonClicked()), this,
             SLOT(onSearchBackward()));
     connect(replaceWidget, SIGNAL(forwardButtonClicked()), this,
             SLOT(onSearchForward()));
+
+    connect(replaceWidget, SIGNAL(replace(QString, QString)), this,
+            SLOT(onReplace(QString, QString)));
+
 }
 
 GtpyScriptEditor*
@@ -103,13 +117,13 @@ GtpyScriptEditorWidget::editor() const
 }
 
 void
-GtpyScriptEditorWidget::setRedoButtonVisible(bool visible)
+GtpyScriptEditorWidget::setRedoButtonEnabled(bool visible)
 {
     m_redoButton->setEnabled(visible);
 }
 
 void
-GtpyScriptEditorWidget::setUndoButtonVisible(bool visible)
+GtpyScriptEditorWidget::setUndoButtonEnabled(bool visible)
 {
     m_undoButton->setEnabled(visible);
 }
@@ -136,4 +150,11 @@ void
 GtpyScriptEditorWidget::onSearchForward()
 {
     m_editor->moveCursorToNextFound();
+}
+
+void
+GtpyScriptEditorWidget::onReplace(const QString& find, const QString& replaceBy)
+{
+    m_editor->searchAndReplace(find, replaceBy, false);
+    m_editor->searchHighlighting(find);
 }

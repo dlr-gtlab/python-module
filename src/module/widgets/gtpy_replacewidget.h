@@ -36,16 +36,18 @@ public:
     QString searchText() const;
 
     /**
-     * @brief Sets text to the search line edit.
-     * @param text Text to be set to the search line edit.
-     */
-    void setSearchText(const QString& text);
-
-    /**
      * @brief text
      * @return
      */
     QString replaceText() const;
+
+public slots:
+
+    /**
+     * @brief Sets text to the search line edit.
+     * @param text Text to be set to the search line edit.
+     */
+    void setSearchText(const QString& text);
 
     /**
      * @brief Sets text to the replace line edit.
@@ -53,7 +55,6 @@ public:
      */
     void setReplaceText(const QString& text);
 
-public slots:
     /**
      * @brief enableSearch
      */
@@ -136,11 +137,6 @@ signals:
      * @brief searchLineReturnPressed
      */
     void searchLineReturnPressed();
-
-    /**
-     * @brief replaceLineReturnPressed
-     */
-    void replaceLineReturnPressed();
 
     /**
      * @brief searchEnabled
