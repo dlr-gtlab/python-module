@@ -14,8 +14,10 @@
 
 class GtpyLineEdit;
 class QPushButton;
-class QLabel;
 
+/**
+ * @brief The GtpyReplaceWidget class
+ */
 class GtpyReplaceWidget : public QWidget
 {
     Q_OBJECT
@@ -31,15 +33,27 @@ public:
      * @brief text
      * @return
      */
-    QString searchText();
+    QString searchText() const;
 
-public slots:
     /**
-     * @brief Sets text to search line edit.
-     * @param text Text to be set to search line edit.
+     * @brief Sets text to the search line edit.
+     * @param text Text to be set to the search line edit.
      */
     void setSearchText(const QString& text);
 
+    /**
+     * @brief text
+     * @return
+     */
+    QString replaceText() const;
+
+    /**
+     * @brief Sets text to the replace line edit.
+     * @param text Text to be set to the replace line edit..
+     */
+    void setReplaceText(const QString& text);
+
+public slots:
     /**
      * @brief enableSearch
      */
@@ -55,11 +69,21 @@ public slots:
      */
     void disableSearchAndReplace();
 
+protected:
+
+    /**
+     * @brief eventFilter
+     * @param obj
+     * @param event
+     * @return
+     */
+    bool eventFilter(QObject* obj, QEvent* event) override;
+
 private:
     /// Search line
     GtpyLineEdit* m_searchLine;
 
-    /// Search line
+    /// Replace line
     GtpyLineEdit* m_replaceLine;
 
     /// Search button
@@ -71,20 +95,32 @@ private:
     /// Clear search button
     QPushButton* m_clearButton;
 
+    /// Search backward button
     QPushButton* m_backwardButton;
 
+    /// Search forward button
     QPushButton* m_forwardButton;
 
+    /**
+     * @brief enableSearchComponentes
+     */
     void enableSearchComponentes();
 
+    /**
+     * @brief enableSearchNavigation
+     */
     void enableSearchNavigation();
-private slots:
 
+private slots:
+    /**
+     * @brief onSearchTextChanged
+     */
     void onSearchTextChanged();
 
-    void onSearchLineFocusOut();
-
-    void onReplaceLineFocusOut();
+    /**
+     * @brief onReplaceClicked
+     */
+    void onReplaceClicked();
 signals:
     /**
      * @brief searchTextEdited
@@ -102,9 +138,9 @@ signals:
     void searchLineReturnPressed();
 
     /**
-     * @brief replace
+     * @brief replaceLineReturnPressed
      */
-    void replace(const QString&, const QString&);
+    void replaceLineReturnPressed();
 
     /**
      * @brief searchEnabled
@@ -112,26 +148,29 @@ signals:
     void searchEnabled();
 
     /**
+     * @brief replaceEnabled
+     */
+    void replaceEnabled();
+
+    /**
+     * @brief replace
+     */
+    void replace(const QString&, const QString&);
+
+    /**
      * @brief searchAndReplaceDisabled
      */
     void searchAndReplaceDisabled();
 
     /**
-     * @brief searchEnabled
+     * @brief backwardButtonClicked
      */
-    void replaceEnabled();
-
-    /**
-     * @brief searchDisabled
-     */
-    void replaceDisabled();
-
     void backwardButtonClicked();
 
+    /**
+     * @brief forwardButtonClicked
+     */
     void forwardButtonClicked();
-
-
-
 };
 
 #endif // GTPYREPLACEWIDGET_H

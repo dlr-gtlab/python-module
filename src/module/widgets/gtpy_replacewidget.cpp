@@ -9,6 +9,7 @@
 
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QEvent>
 
 #include "gtpy_lineedit.h"
 
@@ -25,7 +26,8 @@ GtpyReplaceWidget::GtpyReplaceWidget(QWidget* parent) : QWidget(parent),
     m_backwardButton{nullptr},
     m_forwardButton{nullptr}
 {
-    auto* mainLayout = new QHBoxLayout;
+    /// main layout
+    QHBoxLayout* mainLayout = new QHBoxLayout;
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
@@ -53,6 +55,8 @@ GtpyReplaceWidget::GtpyReplaceWidget(QWidget* parent) : QWidget(parent),
     m_searchLine->setMaximumHeight(17);
     m_searchLine->setStyleSheet(GTPY_STYLESHEET(standardLineEdit));
     m_searchLine->setVisible(false);
+    m_searchLine->setPlaceholderText(tr("Search for"));
+    m_searchLine->installEventFilter(this);
 
     mainLayout->addWidget(m_searchLine);
 
@@ -81,6 +85,8 @@ GtpyReplaceWidget::GtpyReplaceWidget(QWidget* parent) : QWidget(parent),
     m_replaceLine->setMaximumHeight(17);
     m_replaceLine->setStyleSheet(GTPY_STYLESHEET(standardLineEdit));
     m_replaceLine->setVisible(false);
+    m_replaceLine->setPlaceholderText(tr("Replace by"));
+    m_replaceLine->installEventFilter(this);
 
     mainLayout->addWidget(m_replaceLine);
 
@@ -90,28 +96,38 @@ GtpyReplaceWidget::GtpyReplaceWidget(QWidget* parent) : QWidget(parent),
     m_replaceButton->setMaximumSize(QSize(20, 20));
     m_replaceButton->setFlat(true);
     m_replaceButton->setToolTip(tr("Replace"));
+    m_replaceButton->installEventFilter(this);
+
     mainLayout->addWidget(m_replaceButton);
 
     mainLayout->addStretch(1);
 
     setLayout(mainLayout);
 
+    /// connect serach button
     connect(m_searchButton, SIGNAL(clicked(bool)), this, SLOT(enableSearch()));
+
+    /// connect clear button
     connect(m_clearButton, SIGNAL(clicked(bool)), this,
             SLOT(disableSearchAndReplace()));
+
+    /// connect replace button
     connect(m_replaceButton, SIGNAL(clicked(bool)), this,
-            SLOT(enableReplace()));
+            SLOT(onReplaceClicked()));
+
+    /// connect serach line
     connect(m_searchLine, SIGNAL(textEdited(QString)), this,
             SIGNAL(searchTextEdited(QString)));
     connect(m_searchLine, SIGNAL(textChanged(QString)), this,
             SLOT(onSearchTextChanged()));
     connect(m_searchLine, SIGNAL(returnPressed()), this,
             SIGNAL(searchLineReturnPressed()));
-    connect(m_searchLine, SIGNAL(clearFocusOut()), this,
-            SLOT(onSearchLineFocusOut()));
-    connect(m_replaceLine, SIGNAL(clearFocusOut()), this,
-            SLOT(onReplaceLineFocusOut()));
 
+    /// connect replace line
+    connect(m_replaceLine, SIGNAL(returnPressed()), this,
+            SLOT(onReplaceClicked()));
+
+    /// connect forward and backward button
     connect(m_backwardButton, SIGNAL(clicked(bool)), this,
             SIGNAL(backwardButtonClicked()));
     connect(m_forwardButton, SIGNAL(clicked(bool)), this,
@@ -119,7 +135,7 @@ GtpyReplaceWidget::GtpyReplaceWidget(QWidget* parent) : QWidget(parent),
 }
 
 QString
-GtpyReplaceWidget::searchText()
+GtpyReplaceWidget::searchText() const
 {
     return m_searchLine->text();
 }
@@ -128,6 +144,42 @@ void
 GtpyReplaceWidget::setSearchText(const QString& text)
 {
     m_searchLine->setText(text);
+}
+
+QString
+GtpyReplaceWidget::replaceText() const
+{
+    return m_replaceLine->text();
+}
+
+void
+GtpyReplaceWidget::setReplaceText(const QString& text)
+{
+    m_replaceLine->setText(text);
+}
+
+bool
+GtpyReplaceWidget::eventFilter(QObject* obj, QEvent* event)
+{
+    if (obj == m_replaceLine || obj == m_searchLine || obj == m_replaceButton)
+    {
+        if (event->type() == QEvent::FocusOut)
+        {
+            if (!m_clearButton->hasFocus())
+            {
+                if (m_replaceLine->text().isEmpty() &&
+                        m_searchLine->text().isEmpty() &&
+                        !m_replaceButton->hasFocus() &&
+                        !m_searchLine->hasFocus() &&
+                        !m_replaceLine->hasFocus())
+                {
+                    disableSearchAndReplace();
+                    return true;
+                }
+            }
+        }
+    }
+    return QWidget::eventFilter(obj, event);
 }
 
 void
@@ -142,7 +194,6 @@ GtpyReplaceWidget::enableReplace()
 {
     enableSearchComponentes();
     m_replaceLine->setVisible(true);
-
     emit replaceEnabled();
 }
 
@@ -153,12 +204,10 @@ GtpyReplaceWidget::disableSearchAndReplace()
     m_clearButton->setVisible(false);
     m_backwardButton->setVisible(false);
     m_forwardButton->setVisible(false);
-    m_searchLine->clear();
     m_searchLine->setVisible(false);
     m_replaceLine->setVisible(false);
-
-//    connect(m_replaceButton, SIGNAL(clicked(bool)), this,
-//            SLOT(enableReplace()));
+    m_searchLine->clear();
+    m_replaceLine->clear();
 
     emit searchAndReplaceDisabled();
 }
@@ -192,22 +241,9 @@ GtpyReplaceWidget::onSearchTextChanged()
 }
 
 void
-GtpyReplaceWidget::onSearchLineFocusOut()
+GtpyReplaceWidget::onReplaceClicked()
 {
-    if (!m_replaceLine->hasFocus() && m_replaceLine->text().isEmpty() &&
-            m_searchLine->text().isEmpty())
-    {
-        disableSearchAndReplace();
-    }
+    m_replaceLine->isVisible() ?
+                emit replace(m_searchLine->text(), m_replaceLine->text()) :
+                enableReplace();
 }
-
-void
-GtpyReplaceWidget::onReplaceLineFocusOut()
-{
-    if (!m_searchLine->hasFocus() && m_searchLine->text().isEmpty() &&
-            m_replaceLine->text().isEmpty())
-    {
-        disableSearchAndReplace();
-    }
-}
-
