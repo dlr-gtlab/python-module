@@ -52,24 +52,13 @@ public:
      */
     QString script();
 
+    void setScript(const QString& script);
+
     /**
      * @brief Inserts given text to current cursor position.
      * @param text Text to be inserted.
      */
     void insertToCurrentCursorPos(const QString& text);
-
-    /**
-     * @brief Replaces the value of function call of the function named
-     * functionName into the block delimited by header and caption.
-     * @param header Upper limit of the block.
-     * @param caption Lower limit of the block.
-     * @param newVal New value that has to set.
-     * @param functionName Name of function
-     * @param pyObjName Name of python object
-     */
-    void replaceIntoBlock(const QString& header, const QString& caption,
-                          const QString& newVal, const QString& functionName,
-                          const QString& pyObjName);
 
     /**
      * @brief Replaces old header and old caption of a block with given new
@@ -103,27 +92,27 @@ public:
     void searchAndReplace(const QString& searchFor, const QString& replaceBy,
                           bool all = true);
 
-    /**
-     * @brief Set drops accepted or not.
-     * @param accept Determines whether drops are accepted or not.
-     */
-    void acceptCalculatorDrops(bool accept);
+//    /**
+//     * @brief Set drops accepted or not.
+//     * @param accept Determines whether drops are accepted or not.
+//     */
+//    void acceptCalculatorDrops(bool accept);
 
-    /**
-     * @brief Returns current cursor postion.
-     * @return Current cursor position.
-     */
-    int cursorPosition();
+//    /**
+//     * @brief Returns current cursor postion.
+//     * @return Current cursor position.
+//     */
+//    int cursorPosition();
 
-    /**
-     * @brief Sets the cursor to the given position.
-     * @param pos New cursor position.
-     */
-    void setCursorPosition(int pos);
+//    /**
+//     * @brief Sets the cursor to the given position.
+//     * @param pos New cursor position.
+//     */
+//    void setCursorPosition(int pos);
 
-    int verticalSliderPos();
+//    int verticalSliderPos();
 
-    void setVerticalSliderPos(int pos);
+//    void setVerticalSliderPos(int pos);
 
     /**
      * @brief Sets the tab size to the given size.
@@ -133,24 +122,15 @@ public:
 
     void replaceTabsBySpaces(bool enable = true);
 
+
+
 public slots:
-    /**
-     * @brief Searchs for the given text and highlights this.
-     * @param searchText Text which should be searched.
-     * @param moveToNextFound Whether cursor should move to the next found.
-     */
-    void searchHighlighting(const QString& searchText,
-                            bool moveToNextFound = true);
+     void setTextToHighlight(const QString& textToHighlight);
 
     /**
      * @brief Removes the highlighting of a searched word or text part.
      */
     void removeSearchHighlighting();
-
-    /**
-     * @brief Sets m_SearchActivated to true.
-     */
-    void textSearchingActivated();
 
     /**
      * @brief Moves cursor to the next found of searching.
@@ -234,6 +214,8 @@ private slots:
      */
     void insertCompletion();
 
+    void onTextChanged();
+
 private:
     /// Pointer to cmpleter
     GtpyCompleter* m_cpl;
@@ -257,6 +239,19 @@ private:
     int m_tabSize;
 
     bool m_replaceTabBySpaces;
+
+
+
+    QString m_textToHighlight;
+
+    void highlightText(const QString &text, bool moveToNextFound = true);
+
+    QList<QTextEdit::ExtraSelection> findExtraSelection(
+            const QString& text, const QColor& color, QTextCursor cursor,
+            QTextDocument::FindFlags options = QTextDocument::FindFlags()) const;
+
+
+
 
     /**
      * @brief Returns the python code of a function call as string value.

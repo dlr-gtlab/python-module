@@ -15,7 +15,7 @@
 #include "gt_pythonmodule_exports.h"
 
 class QPushButton;
-class GtpyScriptEditor;
+class GtpyScriptView;
 class GtSearchWidget;
 
 class GT_PYTHON_EXPORT GtpyScriptEditorWidget : public QWidget
@@ -25,10 +25,12 @@ class GT_PYTHON_EXPORT GtpyScriptEditorWidget : public QWidget
 public:
     explicit GtpyScriptEditorWidget(int contextId, QWidget* parent = nullptr);
 
-    GtpyScriptEditor* editor() const;
+    GtpyScriptView* scriptView() const;
+
+    void setScript(const QString& script);
 
 private:
-    GtpyScriptEditor* m_editor;
+    GtpyScriptView* m_scriptView;
     QPushButton* m_undoButton;
     QPushButton* m_redoButton;
 
