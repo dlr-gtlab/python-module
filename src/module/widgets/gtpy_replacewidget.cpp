@@ -27,7 +27,7 @@ GtpyReplaceWidget::GtpyReplaceWidget(QWidget* parent) : QWidget(parent),
     m_forwardButton{nullptr}
 {
     /// main layout
-    QHBoxLayout* mainLayout = new QHBoxLayout;
+    auto* mainLayout = new QHBoxLayout;
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
@@ -140,16 +140,16 @@ GtpyReplaceWidget::searchText() const
     return m_searchLine->text();
 }
 
-void
-GtpyReplaceWidget::setSearchText(const QString& text)
-{
-    m_searchLine->setText(text);
-}
-
 QString
 GtpyReplaceWidget::replaceText() const
 {
     return m_replaceLine->text();
+}
+
+void
+GtpyReplaceWidget::setSearchText(const QString& text)
+{
+    m_searchLine->setText(text);
 }
 
 void
@@ -179,6 +179,7 @@ GtpyReplaceWidget::eventFilter(QObject* obj, QEvent* event)
             }
         }
     }
+
     return QWidget::eventFilter(obj, event);
 }
 
@@ -194,6 +195,12 @@ GtpyReplaceWidget::enableReplace()
 {
     enableSearchComponentes();
     m_replaceLine->setVisible(true);
+
+    if (!m_searchLine->text().isEmpty())
+    {
+        m_replaceLine->setFocus();
+    }
+
     emit replaceEnabled();
 }
 
