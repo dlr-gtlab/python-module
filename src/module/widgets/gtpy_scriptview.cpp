@@ -15,8 +15,6 @@
 #include <QMimeData>
 #include <QScrollBar>
 
-#include "gt_objectmemento.h"
-#include "gt_objectfactory.h"
 #include "gt_application.h"
 
 #include "gtpy_completer.h"
@@ -29,7 +27,6 @@
 
 GtpyScriptView::GtpyScriptView(int contextId, QWidget* parent) :
     GtCodeEditor(parent),
-    m_searchActivated{false},
     m_contextId{contextId},
     m_tabSize{4},
     m_replaceTabBySpaces{false}
@@ -95,7 +92,6 @@ GtpyScriptView::event(QEvent* event)
     }
 
     return QPlainTextEdit::event(event);
-
 }
 
 void
@@ -119,7 +115,6 @@ GtpyScriptView::wheelEvent(QWheelEvent* event)
     {
         GtCodeEditor::wheelEvent(event);
     }
-
 }
 
 QString
@@ -138,169 +133,50 @@ GtpyScriptView::setScript(const QString& script)
 }
 
 void
-GtpyScriptView::insertToCurrentCursorPos(const QString& text)
+GtpyScriptView::findAndReplace(const QString& find, const QString& replaceBy)
 {
-    QTextCursor cursor = textCursor();
-    cursor.clearSelection();
-    cursor.insertText(text);
-
-}
-
-void
-GtpyScriptView::replaceBlockHeaders(const QString& oldHeader,
-                                    const QString& newHeader,
-                                    const QString& oldCaption,
-                                    const QString& newCaption)
-{
-    if (oldHeader.isEmpty() || oldCaption.isEmpty())
-    {
-        return;
-    }
-
-    QTextCursor startCursor = textCursor();
-    startCursor.clearSelection();
-    startCursor.movePosition(QTextCursor::Start);
-
-    startCursor = document()->find(oldHeader, startCursor);
-    startCursor.movePosition(QTextCursor::StartOfLine);
-    startCursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
-
-    if (startCursor.hasSelection())
-    {
-        startCursor.insertText(newHeader);
-    }
-
-    QTextCursor endCursor = document()->find(oldCaption, startCursor);
-    endCursor.movePosition(QTextCursor::StartOfLine);
-    endCursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
-
-    if (endCursor.hasSelection())
-    {
-        endCursor.insertText(newCaption);
-    }
-}
-
-void
-GtpyScriptView::searchAndReplace(const QRegExp& searchRegExp,
-                                 const QString& replaceBy, bool all)
-{
-    if (searchRegExp.isEmpty() || !searchRegExp.isValid())
+    if (find.isEmpty())
     {
         return;
     }
 
     QTextCursor cursor = textCursor();
-    cursor.setPosition(cursor.selectionStart());
-    cursor.clearSelection();
+    int startPos = cursor.selectionStart() - find.size();
+    cursor.setPosition(startPos >= 0 ? startPos : 0);
 
-    if (all)
+    QTextCursor match = document()->find(find, cursor);
+
+    if (match.isNull())
     {
-        cursor.movePosition(QTextCursor::Start);
-        cursor = document()->find(searchRegExp, cursor);
-
-        while (!cursor.isNull())
-        {
-            if (cursor.hasSelection())
-            {
-                cursor.insertText(replaceBy);
-            }
-
-            cursor = document()->find(searchRegExp, cursor);
-        }
+        match = document()->find(find, cursor, QTextDocument::FindBackward);
     }
-    else
-    {
-        cursor = document()->find(searchRegExp, cursor);
 
-        if (cursor.hasSelection())
-        {
-            cursor.insertText(replaceBy);
-        }
-    }
+    replaceSelection(match, replaceBy);
 }
 
-
 void
-GtpyScriptView::searchAndReplace(const QString& searchFor,
-                                 const QString& replaceBy,
-                                 bool all)
+GtpyScriptView::findAndReplaceAll(const QString& find, const QString& replaceBy)
 {
-    if (searchFor.isEmpty() || replaceBy.isEmpty())
+    if (find.isEmpty())
     {
         return;
     }
 
     QTextCursor cursor = textCursor();
-    cursor.setPosition(cursor.selectionStart());
-    cursor.clearSelection();
+    cursor.movePosition(QTextCursor::Start);
 
-    if (all)
+    while (moveCursorToNextMatch(find, cursor))
     {
-        cursor.movePosition(QTextCursor::Start);
-
-        cursor = document()->find(searchFor, cursor);
-
-        while (!cursor.isNull())
-        {
-            if (cursor.hasSelection())
-            {
-                cursor.insertText(replaceBy);
-            }
-
-            cursor = document()->find(searchFor, cursor);
-        }
-    }
-    else
-    {
-        cursor = document()->find(searchFor, cursor);
-
-        if (cursor.hasSelection())
-        {
-            cursor.insertText(replaceBy);
-        }
+        replaceSelection(cursor, replaceBy);
     }
 }
 
-//void
-//GtpyScriptView::acceptCalculatorDrops(bool accept)
-//{
-//    setAcceptDrops(accept);
-//}
-
-//int
-//GtpyScriptView::cursorPosition()
-//{
-//    return textCursor().position();
-//}
-
-//void
-//GtpyScriptView::setCursorPosition(int pos)
-//{
-//    QTextCursor cursor = textCursor();
-
-//    cursor.setPosition(pos);
-
-//    setTextCursor(cursor);
-
-//    centerCursor();
-//}
-
-//int
-//GtpyScriptView::verticalSliderPos()
-//{
-//    return verticalScrollBar()->sliderPosition();
-//}
-
-//void
-//GtpyScriptView::setVerticalSliderPos(int pos)
-//{
-//    verticalScrollBar()->setSliderPosition(pos);
-//}
-
-void GtpyScriptView::setTabSize(int size)
+void
+GtpyScriptView::setTabSize(int size)
 {
     m_tabSize = size;
-    setTabStopDistance(font().pointSize() * m_tabSize);
+    setTabStopDistance(m_tabSize *
+                       QFontMetrics(font()).horizontalAdvance(' '));
 }
 
 void
@@ -311,163 +187,13 @@ GtpyScriptView::replaceTabsBySpaces(bool enable)
     if (m_replaceTabBySpaces)
     {
         QString spaces = " ";
-        searchAndReplace("\t", spaces.repeated(m_tabSize));
-    }
-}
-
-
-//void
-//GtpyScriptView::searchHighlighting(const QString& searchText,
-//                                   bool moveToNextFound)
-//{
-//    m_lastSearch = searchText;
-
-//    if (searchText.isEmpty() || isReadOnly())
-//    {
-//        removeSearchHighlighting();
-//        return;
-//    }
-
-//#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-//    auto color = !gtApp->inDarkMode() ?
-//                QColor{Qt::green}.lighter(160) :
-//                gt::gui::color::code_editor::highlightLine();
-//#else
-//    auto color = QColor{Qt::green}.lighter(160);
-//#endif
-
-//    QList<QTextEdit::ExtraSelection> extraSelections;
-
-//    // search forwards
-//    auto cursor = textCursor();
-//    cursor.movePosition(QTextCursor::StartOfLine);
-//    cursor = document()->find(searchText, cursor);
-
-//    while (!cursor.isNull())
-//    {
-//        QTextEdit::ExtraSelection selection;
-
-//        selection.format.setBackground(color);
-//        selection.cursor = cursor;
-//        extraSelections.append(selection);
-
-//        cursor = document()->find(searchText, cursor);
-//    }
-
-//    // search backwards
-//    cursor = textCursor();
-//    cursor.movePosition(QTextCursor::StartOfLine);
-//    cursor = document()->find(searchText, cursor, QTextDocument::FindBackward);
-
-//    while (!cursor.isNull())
-//    {
-//        QTextEdit::ExtraSelection selection;
-
-//        selection.format.setBackground(color);
-//        selection.cursor = cursor;
-//        extraSelections.append(selection);
-
-//        cursor = document()->find(searchText, cursor,
-//                                  QTextDocument::FindBackward);
-//    }
-
-//    if (moveToNextFound && !extraSelections.isEmpty())
-//    {
-//        setTextCursor(extraSelections.first().cursor);
-//    }
-
-//    setExtraSelections(extraSelections);
-
-//    lineHighlighting();
-//}
-
-void
-GtpyScriptView::removeSearchHighlighting()
-{
-    m_searchActivated = false;
-
-    QList<QTextEdit::ExtraSelection> selectionList = extraSelections();
-
-    if (!selectionList.isEmpty())
-    {
-        if (isCurrentLineHighlighted())
-        {
-            QTextEdit::ExtraSelection firstSelection = selectionList.first();
-            selectionList.clear();
-            selectionList << firstSelection;
-        }
-        else
-        {
-            selectionList.clear();
-        }
-    }
-
-    QTextCursor cursor = textCursor();
-    cursor.clearSelection();
-    setTextCursor(cursor);
-    setExtraSelections(selectionList);
-}
-
-//void
-//GtpyScriptView::textSearchingActivated()
-//{
-//    m_searchActivated = true;
-//}
-
-void
-GtpyScriptView::moveCursorToNextFound()
-{
-    QTextCursor cursor = textCursor();
-    cursor.clearSelection();
-
-    cursor = document()->find(m_lastSearch,
-                              cursor);
-
-    if (cursor.isNull())
-    {
-        cursor = document()->find(m_lastSearch);
-    }
-
-    if (!cursor.isNull())
-    {
-        setTextCursor(cursor);
-    }
-}
-
-void
-GtpyScriptView::moveCursorToLastFound()
-{
-    QTextCursor cursor = textCursor();
-
-    int startPos = cursor.selectionStart();
-    cursor.clearSelection();
-    cursor.setPosition(startPos);
-
-    cursor = document()->find(m_lastSearch, cursor,
-                              QTextDocument::FindBackward);
-
-    if (cursor.isNull())
-    {
-        cursor = textCursor();
-        cursor.movePosition(QTextCursor::End);
-        cursor = document()->find(m_lastSearch, cursor,
-                                  QTextDocument::FindBackward);
-    }
-
-    if (!cursor.isNull())
-    {
-        setTextCursor(cursor);
+        findAndReplace("\t", spaces.repeated(m_tabSize));
     }
 }
 
 void
 GtpyScriptView::keyPressEvent(QKeyEvent* event)
 {
-    if (m_cpl == Q_NULLPTR)
-    {
-        GtCodeEditor::keyPressEvent(event);
-    }
-
     const bool ctrlModifier = (event->modifiers() & Qt::ControlModifier);
     const bool shiftModifier = (event->modifiers() & Qt::ShiftModifier);
 
@@ -545,7 +271,7 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
                 cursor = textCursor();
                 text = cursor.selectedText();
                 emit searchShortcutTriggered(text);
-                setTextToHighlight(text);
+                setHighlightedText(text);
                 setTextCursor(cursor);
                 return;
 
@@ -553,7 +279,7 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
                 cursor = textCursor();
                 text = cursor.selectedText();
                 emit replaceShortcutTriggered(text);
-                setTextToHighlight(text);
+                setHighlightedText(text);
                 setTextCursor(cursor);
                 return;
 
@@ -706,80 +432,6 @@ GtpyScriptView::focusInEvent(QFocusEvent* event)
 }
 
 void
-GtpyScriptView::dragEnterEvent(QDragEnterEvent* event)
-{
-    bool valid = validateDrop(event->mimeData());
-
-    if (valid)
-    {
-        event->accept();
-    }
-    else
-    {
-        event->ignore();
-    }
-}
-
-void
-GtpyScriptView::dragMoveEvent(QDragMoveEvent* event)
-{
-    bool valid = validateDrop(event->mimeData());
-
-    if (valid)
-    {
-        event->accept();
-    }
-    else
-    {
-        event->ignore();
-    }
-}
-
-void
-GtpyScriptView::dropEvent(QDropEvent* event)
-{
-    QString gtObjectClassName = GtObject::staticMetaObject.className();
-
-    if (!event->mimeData()->formats().contains(gtObjectClassName))
-    {
-        event->ignore();
-        return;
-    }
-
-    const QString droppedContent = event->mimeData()->data(gtObjectClassName);
-
-    if (!droppedContent.isEmpty())
-    {
-        GtObjectMemento droppedM(droppedContent.toUtf8());
-
-        if (!droppedM.isNull())
-        {
-            QString gtCalculatorClassName =
-                GtCalculator::staticMetaObject.className();
-
-            bool castable = droppedM.canCastTo(
-                                gtCalculatorClassName, gtObjectFactory);
-
-            if (castable)
-            {
-                GtCalculator* calc =
-                    droppedM.restore<GtCalculator*>(gtObjectFactory,
-                                                    true);
-
-                if (calc)
-                {
-                    emit calculatorDropped(calc);
-                    event->accept();
-                    return;
-                }
-            }
-        }
-    }
-
-    event->ignore();
-}
-
-void
 GtpyScriptView::lineHighlighting()
 {
     if (!isReadOnly())
@@ -857,24 +509,19 @@ GtpyScriptView::resetErrorLine()
 void
 GtpyScriptView::insertCompletion()
 {
-    if (m_cpl == Q_NULLPTR)
+    if (m_cpl != nullptr)
     {
-        return;
+        QTextCursor tc = textCursor();
+        m_cpl->insertCompletion(tc);
+        setTextCursor(tc);
+        m_cpl->getPopup()->hide();
     }
-
-    QTextCursor tc = textCursor();
-
-    m_cpl->insertCompletion(tc);
-
-    setTextCursor(tc);
-
-    m_cpl->getPopup()->hide();
 }
 
 void
 GtpyScriptView::onTextChanged()
 {
-    highlightText(m_textToHighlight, false);
+    highlightText(m_highlightedText, false);
 }
 
 void
@@ -888,16 +535,29 @@ GtpyScriptView::highlightText(const QString& text, bool moveToNextFound)
     auto color = QColor{Qt::green}.lighter(160);
 #endif
 
-    auto cursor = textCursor();
-    cursor.movePosition(QTextCursor::StartOfLine);
+    QTextCursor cursor = textCursor();
 
-    auto extraSelections = findExtraSelection(text, color, cursor);
+    int startPos = cursor.selectionStart() - text.size();
+    cursor.setPosition(startPos >= 0 ? startPos : 0);
+
+    QList<QTextEdit::ExtraSelection> extraSelections =
+            findExtraSelection(text, color, cursor);
+
     extraSelections.append(findExtraSelection(text, color, cursor,
                                               QTextDocument::FindBackward));
 
-    if (moveToNextFound && !extraSelections.isEmpty())
+    if (moveToNextFound)
     {
-        setTextCursor(extraSelections.first().cursor);
+        if (extraSelections.isEmpty())
+        {
+            QTextCursor newCursor = textCursor();
+            newCursor.clearSelection();
+            setTextCursor(newCursor);
+        }
+        else
+        {
+            setTextCursor(extraSelections.first().cursor);
+        }
     }
 
     setExtraSelections(extraSelections);
@@ -913,12 +573,7 @@ GtpyScriptView::findExtraSelection(const QString& text, const QColor& color,
 {
     QList<QTextEdit::ExtraSelection> extraSelections;
 
-    auto findNextCursor = [&](){
-        cursor = document()->find(text, cursor, options);
-        return !cursor.isNull();
-    };
-
-    while (findNextCursor())
+    while (moveCursorToNextMatch(text, cursor, options))
     {
         QTextEdit::ExtraSelection selection;
         selection.format.setBackground(color);
@@ -929,11 +584,52 @@ GtpyScriptView::findExtraSelection(const QString& text, const QColor& color,
     return extraSelections;
 }
 
-void
-GtpyScriptView::setTextToHighlight(const QString& textToHighlight)
+bool
+GtpyScriptView::moveCursorToNextMatch(const QString& text, QTextCursor& cursor,
+                               QTextDocument::FindFlags options) const
 {
-    m_textToHighlight = textToHighlight;
-    highlightText(textToHighlight);
+    cursor = document()->find(text, cursor, options);
+    return !cursor.isNull();
+}
+
+void
+GtpyScriptView::replaceSelection(QTextCursor& cursor,
+                                 const QString& replaceBy) const
+{
+    if (cursor.hasSelection())
+    {
+        cursor.insertText(replaceBy);
+    }
+}
+
+void
+GtpyScriptView::setHighlightedText(const QString& text)
+{
+    m_highlightedText = text;
+    highlightText(m_highlightedText);
+}
+
+void
+GtpyScriptView::selectNextMatch(const QString& text, bool reverse)
+{
+    QTextCursor cursor = textCursor();
+    cursor = document()->find(text, cursor, reverse ?
+                                  QTextDocument::FindBackward :
+                                  QTextDocument::FindFlags());
+
+    if (cursor.isNull())
+    {
+        cursor = textCursor();
+        cursor.movePosition(reverse ? QTextCursor::End : QTextCursor::Start);
+        cursor = document()->find(text, cursor, reverse ?
+                                      QTextDocument::FindBackward :
+                                      QTextDocument::FindFlags());;
+    }
+
+    if (!cursor.isNull())
+    {
+        setTextCursor(cursor);
+    }
 }
 
 QString
@@ -1047,10 +743,12 @@ void GtpyScriptView::commentOutBlock()
 
 void GtpyScriptView::handleCompletion()
 {
-    QTextCursor c = this->textCursor();
-    QRect cr = cursorRect(c);
-
-    m_cpl->handleTabCompletion(c, cr);
+    if (m_cpl != nullptr)
+    {
+        QTextCursor cursor = textCursor();
+        QRect rect = cursorRect(cursor);
+        m_cpl->handleTabCompletion(cursor, rect);
+    }
 }
 
 void GtpyScriptView::resetErrorMessage()
@@ -1107,7 +805,6 @@ GtpyScriptView::removeCurrentLineHighlighting()
         if (!selectionList.isEmpty())
         {
             selectionList.removeFirst();
-
             setExtraSelections(selectionList);
         }
     }
@@ -1279,36 +976,4 @@ GtpyScriptView::indentSelectedLines(bool direction)
     return true;
 }
 
-bool
-GtpyScriptView::validateDrop(const QMimeData* droppedData)
-{
-    QString gtObjectClassName = GtObject::staticMetaObject.className();
 
-    if (!droppedData->formats().contains(gtObjectClassName))
-    {
-        return false;
-    }
-
-    const QString droppedContent = droppedData->data(gtObjectClassName);
-
-    if (!droppedContent.isEmpty())
-    {
-        GtObjectMemento droppedM(droppedContent.toUtf8());
-
-        if (!droppedM.isNull())
-        {
-            QString gtCalculatorClassName =
-                GtCalculator::staticMetaObject.className();
-
-            bool castable = droppedM.canCastTo(
-                                gtCalculatorClassName, gtObjectFactory);
-
-            if (castable)
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}

@@ -17,6 +17,7 @@
 class QPushButton;
 class GtpyScriptView;
 class GtSearchWidget;
+class GtpyReplaceWidget;
 
 class GT_PYTHON_EXPORT GtpyScriptEditorWidget : public QWidget
 {
@@ -33,23 +34,12 @@ private:
     GtpyScriptView* m_scriptView;
     QPushButton* m_undoButton;
     QPushButton* m_redoButton;
+    GtpyReplaceWidget* m_replaceWidget;
 
 private slots:
 
     void setRedoButtonEnabled(bool visible);
     void setUndoButtonEnabled(bool visible);
-
-    /**
-     * @brief Sets the search forward button and the search backward button
-     * visible. Notifies the editor that the search is enabled.
-     */
-    void onSearchEnabled();
-
-    /**
-     * @brief Sets the search forward button and the search backward button
-     * invisible. Notifies the editor that the search is disabled.
-     */
-    void onSearchDisabled();
 
     /**
      * @brief Instructs the editor to continue the current search backward.
@@ -62,6 +52,8 @@ private slots:
     void onSearchForward();
 
     void onReplace(const QString& find, const QString& replaceBy);
+
+    void onSearchAndReplaceDisabled();
 };
 
 #endif // GTPYSCRIPTEDITORWIDGET_H

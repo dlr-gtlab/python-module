@@ -23,7 +23,8 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
     QWidget(parent),
     m_scriptView{nullptr},
     m_undoButton{nullptr},
-    m_redoButton{nullptr}
+    m_redoButton{nullptr},
+    m_replaceWidget{nullptr}
 {
     ///  main layout
     auto* mainLayout = new QVBoxLayout;
@@ -53,8 +54,8 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
 
     topLayout->addStretch(1);
 
-    auto* replaceWidget = new GtpyReplaceWidget(this);
-    topLayout->addWidget(replaceWidget);
+    m_replaceWidget = new GtpyReplaceWidget(this);
+    topLayout->addWidget(m_replaceWidget);
 
     /// script editor
     m_scriptView = new GtpyScriptView(contextId);
@@ -78,13 +79,13 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
             SLOT(setRedoButtonEnabled(bool)));
     connect(m_scriptView, SIGNAL(undoAvailable(bool)), this,
             SLOT(setUndoButtonEnabled(bool)));
-    connect(m_scriptView, SIGNAL(searchShortcutTriggered(QString)), replaceWidget,
+    connect(m_scriptView, SIGNAL(searchShortcutTriggered(QString)), m_replaceWidget,
             SLOT(setSearchText(QString)));
-    connect(m_scriptView, SIGNAL(searchShortcutTriggered(QString)), replaceWidget,
+    connect(m_scriptView, SIGNAL(searchShortcutTriggered(QString)), m_replaceWidget,
             SLOT(enableSearch()));
-    connect(m_scriptView, SIGNAL(replaceShortcutTriggered(QString)), replaceWidget,
+    connect(m_scriptView, SIGNAL(replaceShortcutTriggered(QString)), m_replaceWidget,
             SLOT(setSearchText(QString)));
-    connect(m_scriptView, SIGNAL(replaceShortcutTriggered(QString)), replaceWidget,
+    connect(m_scriptView, SIGNAL(replaceShortcutTriggered(QString)), m_replaceWidget,
             SLOT(enableReplace()));
 
     /// connect redo/undo button
@@ -92,23 +93,17 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
     connect(m_undoButton, SIGNAL(clicked(bool)), m_scriptView, SLOT(undo()));
 
     /// connect serach and replace
-//    connect(replaceWidget, SIGNAL(searchTextChanged(QString)), m_scriptView,
-//            SLOT(searchHighlighting(QString)));
-    connect(replaceWidget, SIGNAL(searchTextChanged(QString)), m_scriptView,
-            SLOT(setTextToHighlight(QString)));
-
-//    connect(replaceWidget, SIGNAL(searchEnabled()), this,
-//            SLOT(onSearchEnabled()));
-    connect(replaceWidget, SIGNAL(searchAndReplaceDisabled()), this,
-            SLOT(onSearchDisabled()));
-    connect(replaceWidget, SIGNAL(searchLineReturnPressed()), this,
+    connect(m_replaceWidget, SIGNAL(searchTextChanged(QString)), m_scriptView,
+            SLOT(setHighlightedText(QString)));
+    connect(m_replaceWidget, SIGNAL(searchLineReturnPressed()), this,
             SLOT(onSearchForward()));
-    connect(replaceWidget, SIGNAL(backwardButtonClicked()), this,
+    connect(m_replaceWidget, SIGNAL(backwardButtonClicked()), this,
             SLOT(onSearchBackward()));
-    connect(replaceWidget, SIGNAL(forwardButtonClicked()), this,
+    connect(m_replaceWidget, SIGNAL(forwardButtonClicked()), this,
             SLOT(onSearchForward()));
-
-    connect(replaceWidget, SIGNAL(replace(QString, QString)), this,
+    connect(m_replaceWidget, SIGNAL(searchAndReplaceDisabled()), this,
+            SLOT(onSearchAndReplaceDisabled()));
+    connect(m_replaceWidget, SIGNAL(replace(QString, QString)), this,
             SLOT(onReplace(QString, QString)));
 
 }
@@ -138,32 +133,26 @@ GtpyScriptEditorWidget::setUndoButtonEnabled(bool visible)
 }
 
 void
-GtpyScriptEditorWidget::onSearchEnabled()
-{
-//    m_scriptView->textSearchingActivated();
-}
-
-void
-GtpyScriptEditorWidget::onSearchDisabled()
-{
-//    m_scriptView->removeSearchHighlighting();
-}
-
-void
 GtpyScriptEditorWidget::onSearchBackward()
 {
-    m_scriptView->moveCursorToLastFound();
+    m_scriptView->selectNextMatch(m_replaceWidget->searchText(), true);
 }
 
 void
 GtpyScriptEditorWidget::onSearchForward()
 {
-    m_scriptView->moveCursorToNextFound();
+    m_scriptView->selectNextMatch(m_replaceWidget->searchText());
 }
 
 void
 GtpyScriptEditorWidget::onReplace(const QString& find, const QString& replaceBy)
 {
-    m_scriptView->searchAndReplace(find, replaceBy, false);
-    m_scriptView->setTextToHighlight(find);
+    m_scriptView->findAndReplace(find, replaceBy);
+    m_scriptView->setHighlightedText(find);
+}
+
+void
+GtpyScriptEditorWidget::onSearchAndReplaceDisabled()
+{
+    m_scriptView->setHighlightedText("");
 }
