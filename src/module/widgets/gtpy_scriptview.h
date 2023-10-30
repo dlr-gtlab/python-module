@@ -182,12 +182,17 @@ private:
                                const QString& functionName,
                                const QString& pyObjName);
 
+    void commentOutLine();
+
+
     /**
      * @brief The line in which the cursor is currently located is
      * commented out or commented out. (Python comment character "#")
      * @param commentOut true if "#" has to insert
      */
     void commentLine(bool commentOut);
+
+    void commentSelectedLines();
 
     /**
      * @brief Comments out the selected block.
@@ -210,6 +215,8 @@ private:
      * @return True if current line is commented out.
      */
     bool isCurrentLineCommentedOut();
+
+    bool isCurrentLineCommentedOut(QTextCursor cursor);
 
     /**
      * @brief Checks whether the line in which the cursor is currently located
