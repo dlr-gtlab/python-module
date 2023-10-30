@@ -55,33 +55,6 @@ public:
     void setScript(const QString& script);
 
     /**
-     * @brief Inserts given text to current cursor position.
-     * @param text Text to be inserted.
-     */
-    void insertToCurrentCursorPos(const QString& text);
-
-    /**
-     * @brief Replaces old header and old caption of a block with given new
-     * header and new caption.
-     * @param oldHeader Old header string
-     * @param newHeader New header string
-     * @param oldCaption Old caption string
-     * @param newCaption New caption string
-     */
-    void replaceBlockHeaders(const QString& oldHeader, const QString& newHeader,
-                             const QString& oldCaption, const QString& newCaption);
-
-    /**
-     * @brief Searchs for the given regular expression and replaces it
-     * with replaceBy.
-     * @param searchRegExp Regular expression that should be matched.
-     * @param replaceBy Text to insert.
-     * @param all If it is true, all strings in the document will be replaced.
-     * Otherwise it only replaces the first one found.
-     */
-    void searchAndReplace(const QRegExp& searchRegExp, const QString& replaceBy,
-                          bool all = true);
-    /**
      * @brief Searchs for the given string searchFor and replaces it
      * with replaceBy.
      * @param searchFor Text to replace.
@@ -89,30 +62,9 @@ public:
      * @param all If it is true, all strings in the document will be replaced.
      * Otherwise it only replaces the first one found.
      */
-    void searchAndReplace(const QString& searchFor, const QString& replaceBy,
-                          bool all = true);
+    void findAndReplace(const QString& find, const QString& replaceBy);
 
-//    /**
-//     * @brief Set drops accepted or not.
-//     * @param accept Determines whether drops are accepted or not.
-//     */
-//    void acceptCalculatorDrops(bool accept);
-
-//    /**
-//     * @brief Returns current cursor postion.
-//     * @return Current cursor position.
-//     */
-//    int cursorPosition();
-
-//    /**
-//     * @brief Sets the cursor to the given position.
-//     * @param pos New cursor position.
-//     */
-//    void setCursorPosition(int pos);
-
-//    int verticalSliderPos();
-
-//    void setVerticalSliderPos(int pos);
+    void findAndReplaceAll(const QString& find, const QString& replaceBy);
 
     /**
      * @brief Sets the tab size to the given size.
@@ -122,25 +74,11 @@ public:
 
     void replaceTabsBySpaces(bool enable = true);
 
+    void selectNextMatch(const QString& text, bool reverse = false);
 
 
 public slots:
-     void setTextToHighlight(const QString& textToHighlight);
-
-    /**
-     * @brief Removes the highlighting of a searched word or text part.
-     */
-    void removeSearchHighlighting();
-
-    /**
-     * @brief Moves cursor to the next found of searching.
-     */
-    void moveCursorToNextFound();
-
-    /**
-     * @brief Moves cursor to the last found of searching.
-     */
-    void moveCursorToLastFound();
+     void setHighlightedText(const QString& text);
 
 protected:
     /**
@@ -162,25 +100,6 @@ protected:
      * @param event Event sent by getting the focus.
      */
     void focusInEvent(QFocusEvent* event) override;
-
-    /**
-     * @brief Accept the drag enter if the mimedata contains a calculator
-     * object.
-     * @param event Raised event.
-     */
-    virtual void dragEnterEvent(QDragEnterEvent* event) override;
-
-    /**
-     * @brief Accept the drag move if the mimedata contains a calculator object.
-     * @param event Raised event.
-     */
-    virtual void dragMoveEvent(QDragMoveEvent* event) override;
-
-    /**
-     * @brief Accept the drop if the mimedata contains a calculator object.
-     * @param event Raised event.
-     */
-    virtual void dropEvent(QDropEvent* event) override;
 
 private slots:
     /**
@@ -223,12 +142,6 @@ private:
     /// Number of error line
     int m_errorLine;
 
-    /// Whether the text search is activated
-    bool m_searchActivated;
-
-    /// Text that was last searched for
-    QString m_lastSearch;
-
     /// Error message
     QString m_errorMessage;
 
@@ -242,13 +155,18 @@ private:
 
 
 
-    QString m_textToHighlight;
+    QString m_highlightedText;
 
     void highlightText(const QString &text, bool moveToNextFound = true);
 
     QList<QTextEdit::ExtraSelection> findExtraSelection(
             const QString& text, const QColor& color, QTextCursor cursor,
             QTextDocument::FindFlags options = QTextDocument::FindFlags()) const;
+
+    bool moveCursorToNextMatch(const QString& text, QTextCursor& cursor,
+                        QTextDocument::FindFlags options = QTextDocument::FindFlags()) const;
+
+    void replaceSelection(QTextCursor &cursor, const QString& replaceBy) const;
 
 
 
@@ -326,12 +244,6 @@ private:
      */
     bool indentSelectedLines(bool direction);
 
-    /**
-     * @brief Validates if the given mimedata contains a calculator object.
-     * @param droppedData Dropped mimedata.
-     * @return True, if the given mimedata contains a calculator object.
-     */
-    bool validateDrop(const QMimeData* droppedData);
 
 signals:
     /**
