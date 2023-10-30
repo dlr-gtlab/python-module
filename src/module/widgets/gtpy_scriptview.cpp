@@ -14,6 +14,7 @@
 #include <QRegularExpression>
 #include <QMimeData>
 #include <QScrollBar>
+#include <QTextDocumentFragment>
 
 #include "gt_application.h"
 
@@ -194,8 +195,11 @@ GtpyScriptView::replaceTabsBySpaces(bool enable)
 void
 GtpyScriptView::keyPressEvent(QKeyEvent* event)
 {
-    const bool ctrlModifier = (event->modifiers() & Qt::ControlModifier);
-    const bool shiftModifier = (event->modifiers() & Qt::ShiftModifier);
+    if (m_cpl == nullptr)
+    {
+        GtCodeEditor::keyPressEvent(event);
+        return;
+    }
 
     QToolTip::showText(QPoint(), "");
 
@@ -205,33 +209,24 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
         {
             case Qt::Key_Enter:
             case Qt::Key_Return:
-
+            case Qt::Key_Tab:
                 insertCompletion();
                 event->accept();
                 return;
 
-            case Qt::Key_Escape:
-            case Qt::Key_Tab:
-            case Qt::Key_Left:
-                GtCodeEditor::keyPressEvent(event);
-                handleCompletion();
-                return;
-
             case Qt::Key_Right:
-                GtCodeEditor::keyPressEvent(event);
-                handleCompletion();
-                return;
-
-            case Qt::Key_Backtab:
-                event->ignore();
-                return;
-
-            case Qt::Key_Down:
+            case Qt::Key_Left:
+               GtCodeEditor::keyPressEvent(event);
+               handleCompletion();
+               return;
 
             default:
                 break;
         }
     }
+
+    const bool ctrlModifier = (event->modifiers() & Qt::ControlModifier);
+    const bool shiftModifier = (event->modifiers() & Qt::ShiftModifier);
 
     if (ctrlModifier && shiftModifier)
     {
@@ -239,16 +234,7 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
         {
             case Qt::Key_Apostrophe:
                 m_cpl->getPopup()->hide();
-
-                if (textCursor().selectedText().isEmpty())
-                {
-                    commentLine(!isCurrentLineCommentedOut());
-                }
-                else
-                {
-                    commentOutBlock();
-                }
-
+                commentSelectedLines();
                 return;
 
             default:
@@ -640,105 +626,45 @@ GtpyScriptView::functionCallPyCode(const QString& newVal,
     return pyObjName + "." + functionName + "(" + newVal + ")";
 }
 
-void GtpyScriptView::commentLine(bool commentOut)
+void
+GtpyScriptView::commentSelectedLines()
 {
     QTextCursor cursor = textCursor();
 
-    if (cursor.block().length() == 1)
-    {
-        return;
-    }
+    int startPos = cursor.selectionStart();
+    int endPos = cursor.selectionEnd();
 
-    QTextCursor temp = cursor;
-
+    cursor.setPosition(startPos);
     cursor.movePosition(QTextCursor::StartOfLine);
-    cursor.clearSelection();
 
-    if (!commentOut)
+    bool atStartOfLine = cursor.position() == startPos;
+
+    cursor.setPosition(endPos, QTextCursor::KeepAnchor);
+    cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+
+    QString selectedText =  cursor.selection().toPlainText().prepend("\n");
+
+    if (selectedText.contains("\n#"))
     {
-        cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
-
-        QString selection = cursor.selectedText();
-
-        if (selection == "#")
-        {
-            cursor.removeSelectedText();
-            cursor.clearSelection();
-        }
+        endPos -= selectedText.count("\n#");
+        startPos = atStartOfLine || !selectedText.startsWith("\n#") ?
+                    startPos : startPos - 1;
+        selectedText.replace("\n#", "\n");
     }
     else
     {
-        setTextCursor(cursor);
-        insertPlainText("#");
+        endPos += selectedText.count("\n");
+        startPos = atStartOfLine ? startPos : startPos + 1;
+        selectedText.replace("\n", "\n#");
     }
 
-    setTextCursor(temp);
-}
+    selectedText.remove(0, 1);
 
-void GtpyScriptView::commentOutBlock()
-{
-    QTextCursor cursor = textCursor();
-    QTextCursor temp = cursor;
+    cursor.insertText(selectedText);
+    cursor.setPosition(startPos);
+    cursor.setPosition(endPos, QTextCursor::KeepAnchor);
 
-    QString selectedText = cursor.selectedText();
-
-    if (selectedText.isEmpty())
-    {
-        return;
-    }
-
-    int start = cursor.selectionStart();
-    int end = cursor.selectionEnd();
-
-    cursor.movePosition(QTextCursor::End);
-
-    cursor.setPosition(start);
-    cursor.movePosition(QTextCursor::StartOfLine);
-
-    bool outCommenting = true;
-    bool lastLine = false;
-
-    while (end >= cursor.position() && outCommenting && !lastLine)
-    {
-        if (isCurrentLineCommentedOut())
-        {
-            outCommenting = false;
-        }
-
-        lastLine = !cursor.movePosition(QTextCursor::Down);
-        setTextCursor(cursor);
-    }
-
-    setTextCursor(temp);
-    cursor = textCursor();
-    cursor.setPosition(start);
-    cursor.movePosition(QTextCursor::StartOfLine);
-    cursor.clearSelection();
-
-    lastLine = false;
-
-    while (end >= cursor.position() && !lastLine)
-    {
-        if (cursor.block().length() > 1)
-        {
-            setTextCursor(cursor);
-            commentLine(outCommenting);
-
-            if (!outCommenting)
-            {
-                end--;
-            }
-            else
-            {
-                end++;
-            }
-        }
-
-        lastLine = !cursor.movePosition(QTextCursor::Down);
-        cursor.movePosition(QTextCursor::StartOfLine);
-    }
-
-    setTextCursor(temp);
+    setTextCursor(cursor);
 }
 
 void GtpyScriptView::handleCompletion()
@@ -756,26 +682,13 @@ void GtpyScriptView::resetErrorMessage()
     m_errorMessage = QString();
 }
 
-bool GtpyScriptView::isCurrentLineCommentedOut()
+bool
+GtpyScriptView::isCurrentLineCommentedOut()
 {
     QTextCursor cursor = textCursor();
-
-    if (cursor.block().length() == 1)
-    {
-        return false;
-    }
-
     cursor.movePosition(QTextCursor::StartOfLine);
     cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
-
-    QString selection = cursor.selectedText();
-
-    if (selection == "#")
-    {
-        return true;
-    }
-
-    return false;
+    return cursor.selectedText() == "#";
 }
 
 bool
