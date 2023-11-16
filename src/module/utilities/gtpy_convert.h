@@ -10,7 +10,7 @@
 #ifndef GTPYCONVERT_H
 #define GTPYCONVERT_H
 
-#include "gt_version.h"
+#include "gt_globals.h"
 
 #include <Python.h>
 
