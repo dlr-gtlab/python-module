@@ -225,7 +225,11 @@ CONFIG(debug, debug|release){
     }
 
     # THIRD PARTY
-    win32: LIBS += -lPythonQt-Qt5-Python$${PY_VERSION}_d
+    greaterThan(MAJOR_VERSION, 1) {
+        win32: LIBS += -lPythonQt-Qt5-Python$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}_d
+    } else {
+        win32: LIBS += -lPythonQt-Qt5-Python$${PY_MAJOR_VERSION}$${PY_MINOR_VERSION}_d
+    }
 
     unix {
         LIBS += -lPythonQt-Qt5-Python$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}
@@ -252,7 +256,12 @@ CONFIG(debug, debug|release){
     # GTLAB MODULES
 
     # THIRD PARTY
-    win32: LIBS += -lPythonQt-Qt5-Python$${PY_VERSION}
+    greaterThan(MAJOR_VERSION, 1) {
+        win32: LIBS += -lPythonQt-Qt5-Python$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}_d
+    } else {
+        win32: LIBS += -lPythonQt-Qt5-Python$${PY_MAJOR_VERSION}$${PY_MINOR_VERSION}_d
+    }
+
     unix {
         LIBS += -lPythonQt-Qt5-Python$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}
 
