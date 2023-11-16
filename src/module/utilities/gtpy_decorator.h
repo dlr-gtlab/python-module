@@ -224,6 +224,49 @@ public slots:
      */
     void deleteAllCalculators(GtTask* task);
 
+    /// GtTask functions
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+    /**
+     * @brief Decorates inputArgs() method of GtpyTask.
+     * @param task Pointer to GtpyTask
+     * @return The input arguments of the given component as Python dict.
+     */
+    PyObject* inputArgs(GtpyTask* task);
+
+    /**
+     * @brief Decorates inputArg() method of GtpyTask.
+     * @param task Pointer to GtpyTask
+     * @param argName Name of the argument whose value should be returned
+     * @return Value of the argument with the given name. If there is no
+     * argument with the given name, a std::runtime_error is thrown.
+     */
+    QVariant inputArg(GtpyTask* task, const QString& argName) const;
+
+    /**
+     * @brief Decorates setInputArg() method of GtpyTask.
+     * @param task Pointer to GtpyTask
+     * @param argName Name of the argument whose value should be set
+     * @param value The new value of the argument with the given name.
+     */
+    void setInputArg(GtpyTask* task, const QString& argName, const QVariant& value);
+
+    /**
+     * @brief Decorates outputArgs() method of GtpyTask.
+     * @param task Pointer to GtpyTask
+     * @return The output arguments of the given component as Python dict.
+     */
+    PyObject* outputArgs(GtpyTask* task);
+
+    /**
+     * @brief Decorates outputArg() method of GtpyTask.
+     * @param task Pointer to GtpyTask
+     * @param argName Name of the argument whose value should be returned
+     * @return Value of the argument with the given name. If there is no
+     * argument with the given name, a std::runtime_error is thrown.
+     */
+    QVariant outputArg(GtpyTask* task, const QString& argName) const;
+#endif
+
     ///-------> functions of GtProcessComponent <-------\\\
 
     /**
@@ -463,12 +506,14 @@ public slots:
     bool appendData(GtDataZone0D* dataZone, const QString& paramName,
                     const QString& unit, double value);
 #endif
+
+
 signals:
     /**
      * @brief sendPythonConsoleOutput signal for transmitting an output message
      * @param output output message as QString
      */
-    void sendErrorMessage(const QString& output);
+    void sendErrorMessage(const QString& output) const;
 };
 
 

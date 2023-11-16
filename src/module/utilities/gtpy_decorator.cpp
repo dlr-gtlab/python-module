@@ -28,6 +28,7 @@
 #include "gtpy_processdatadistributor.h"
 #include "gtpy_extendedwrapper.h"
 #include "gtpy_task.h"
+#include "gtpy_convert.h"
 
 #include "gtpy_decorator.h"
 
@@ -633,6 +634,69 @@ GtpyDecorator::deleteAllCalculators(GtTask* task)
 
     Py_END_ALLOW_THREADS
 }
+
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+PyObject*
+GtpyDecorator::inputArgs(GtpyTask* task)
+{
+    return gtpy::convert::fromPropertyStructContainer(task->inputArgs());
+}
+
+QVariant
+GtpyDecorator::inputArg(GtpyTask* task, const QString& argName) const
+{
+    QVariant value = task->inputArg(argName);
+
+    if (!value.isValid())
+    {
+        throw std::runtime_error(
+                    tr("\n\nKeyError: '%1'\n"
+                       "%2 has no input argument with the name '%1'")
+                    .arg(argName, task->objectName())
+                    .toStdString());
+    }
+
+    return value;
+}
+
+void
+GtpyDecorator::setInputArg(GtpyTask* task, const QString& argName,
+                           const QVariant& value)
+{
+    if (!task->setInputArg(argName, value))
+    {
+        throw std::runtime_error(
+                    tr("\n\nKeyError: '%1'\n"
+                       "%2 has no input argument with the name '%1'")
+                    .arg(argName, task->objectName())
+                    .toStdString());
+    }
+}
+
+PyObject*
+GtpyDecorator::outputArgs(GtpyTask* task)
+{
+    return gtpy::convert::fromPropertyStructContainer(task->outputArgs());
+}
+
+QVariant
+GtpyDecorator::outputArg(GtpyTask* task, const QString& argName) const
+{
+    QVariant value = task->outputArg(argName);
+
+    if (!value.isValid())
+    {
+        throw std::runtime_error(
+                    tr("\n\nKeyError: '%1'\n"
+                       "%2 has no output argument with the name '%1'")
+                    .arg(argName, task->objectName())
+                    .toStdString());
+    }
+
+    return value;
+}
+#endif
+
 
 bool
 GtpyDecorator::hasWarnings(GtProcessComponent* comp)
