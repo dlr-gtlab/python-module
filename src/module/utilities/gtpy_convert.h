@@ -14,7 +14,9 @@
 
 #include <Python.h>
 
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 #include "gt_propertystructcontainer.h"
+#endif
 
 namespace gtpy {
 
@@ -23,7 +25,7 @@ namespace convert {
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 PyObject*
 fromPropertyStructContainer(const GtPropertyStructContainer& con);
-#endif // GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+#endif
 
 } // namespace convert
 

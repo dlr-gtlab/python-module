@@ -7,12 +7,16 @@
  *  Tel.: +49 2203 601 2692
  */
 
+#include "gtpy_convert.h"
+
 #include "PythonQtConversion.h"
 
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 #include "gt_structproperty.h"
+#endif
 
 #include "gtpy_gilscope.h"
-#include "gtpy_convert.h"
+
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 
