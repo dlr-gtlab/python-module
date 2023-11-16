@@ -257,9 +257,9 @@ CONFIG(debug, debug|release){
 
     # THIRD PARTY
     greaterThan(MAJOR_VERSION, 1) {
-        win32: LIBS += -lPythonQt-Qt5-Python$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}_d
+        win32: LIBS += -lPythonQt-Qt5-Python$${PY_MAJOR_VERSION}.$${PY_MINOR_VERSION}
     } else {
-        win32: LIBS += -lPythonQt-Qt5-Python$${PY_MAJOR_VERSION}$${PY_MINOR_VERSION}_d
+        win32: LIBS += -lPythonQt-Qt5-Python$${PY_MAJOR_VERSION}$${PY_MINOR_VERSION}
     }
 
     unix {
