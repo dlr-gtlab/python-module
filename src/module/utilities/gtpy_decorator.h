@@ -557,7 +557,7 @@ signals:
      * @brief sendPythonConsoleOutput signal for transmitting an output message
      * @param output output message as QString
      */
-    void sendErrorMessage(const QString& output) const;
+    void sendErrorMessage(const QString& output);
 };
 
 
