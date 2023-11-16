@@ -26,6 +26,7 @@ class GtCalculator;
 class GtpyTask;
 class GtpyProcessDataDistributor;
 class GtProcessComponent;
+class GtpyScriptCalculator;
 
 #if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
 class GtDataZone0D;
@@ -209,6 +210,49 @@ public slots:
      */
     bool run(GtCalculator* calc);
 
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+    /**
+     * @brief Decorates inputArgs() method of GtpyScriptCalculator.
+     * @param calc Pointer to GtpyScriptCalculator
+     * @return The input arguments of the given component as Python dict.
+     */
+    PyObject* inputArgs(GtpyScriptCalculator* calc);
+
+    /**
+     * @brief Decorates inputArg() method of GtpyScriptCalculator.
+     * @param calc Pointer to GtpyScriptCalculator
+     * @param argName Name of the argument whose value should be returned
+     * @return Value of the argument with the given name. If there is no
+     * argument with the given name, a std::runtime_error is thrown.
+     */
+    QVariant inputArg(GtpyScriptCalculator* calc, const QString& argName) const;
+
+    /**
+     * @brief Decorates setInputArg() method of GtpyScriptCalculator.
+     * @param calc Pointer to GtpyScriptCalculator
+     * @param argName Name of the argument whose value should be set
+     * @param value The new value of the argument with the given name.
+     */
+    void setInputArg(GtpyScriptCalculator* calc, const QString& argName,
+                     const QVariant& value);
+
+    /**
+     * @brief Decorates outputArgs() method of GtpyScriptCalculator.
+     * @param calc Pointer to GtpyScriptCalculator
+     * @return The output arguments of the given component as Python dict.
+     */
+    PyObject* outputArgs(GtpyScriptCalculator* calc);
+
+    /**
+     * @brief Decorates outputArg() method of GtpyScriptCalculator.
+     * @param calc Pointer to GtpyScriptCalculator
+     * @param argName Name of the argument whose value should be returned
+     * @return Value of the argument with the given name. If there is no
+     * argument with the given name, a std::runtime_error is thrown.
+     */
+    QVariant outputArg(GtpyScriptCalculator* calc, const QString& argName) const;
+#endif
+
     ///-------> functions of GtTask <-------\\\
 
     /**
@@ -224,7 +268,6 @@ public slots:
      */
     void deleteAllCalculators(GtTask* task);
 
-    /// GtTask functions
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
     /**
      * @brief Decorates inputArgs() method of GtpyTask.
@@ -248,7 +291,8 @@ public slots:
      * @param argName Name of the argument whose value should be set
      * @param value The new value of the argument with the given name.
      */
-    void setInputArg(GtpyTask* task, const QString& argName, const QVariant& value);
+    void setInputArg(GtpyTask* task, const QString& argName,
+                     const QVariant& value);
 
     /**
      * @brief Decorates outputArgs() method of GtpyTask.

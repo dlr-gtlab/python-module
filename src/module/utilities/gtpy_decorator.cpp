@@ -28,6 +28,7 @@
 #include "gtpy_processdatadistributor.h"
 #include "gtpy_extendedwrapper.h"
 #include "gtpy_task.h"
+#include "gtpy_scriptcalculator.h"
 #include "gtpy_convert.h"
 
 #include "gtpy_decorator.h"
@@ -502,6 +503,68 @@ GtpyDecorator::run(GtCalculator* calc)
 
     return success;
 }
+
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+PyObject*
+GtpyDecorator::inputArgs(GtpyScriptCalculator* calc)
+{
+    return gtpy::convert::fromPropertyStructContainer(calc->inputArgs());
+}
+
+QVariant
+GtpyDecorator::inputArg(GtpyScriptCalculator* calc, const QString& argName) const
+{
+    QVariant value = calc->inputArg(argName);
+
+    if (!value.isValid())
+    {
+        throw std::runtime_error(
+                    tr("\n\nKeyError: '%1'\n"
+                       "%2 has no input argument with the name '%1'")
+                    .arg(argName, calc->objectName())
+                    .toStdString());
+    }
+
+    return value;
+}
+
+void
+GtpyDecorator::setInputArg(GtpyScriptCalculator* calc, const QString& argName,
+                           const QVariant& value)
+{
+    if (!calc->setInputArg(argName, value))
+    {
+        throw std::runtime_error(
+                    tr("\n\nKeyError: '%1'\n"
+                       "%2 has no input argument with the name '%1'")
+                    .arg(argName, calc->objectName())
+                    .toStdString());
+    }
+}
+
+PyObject*
+GtpyDecorator::outputArgs(GtpyScriptCalculator* calc)
+{
+    return gtpy::convert::fromPropertyStructContainer(calc->outputArgs());
+}
+
+QVariant
+GtpyDecorator::outputArg(GtpyScriptCalculator* calc, const QString& argName) const
+{
+    QVariant value = calc->outputArg(argName);
+
+    if (!value.isValid())
+    {
+        throw std::runtime_error(
+                    tr("\n\nKeyError: '%1'\n"
+                       "%2 has no output argument with the name '%1'")
+                    .arg(argName, calc->objectName())
+                    .toStdString());
+    }
+
+    return value;
+}
+#endif
 
 bool
 GtpyDecorator::run(GtTask* task)
