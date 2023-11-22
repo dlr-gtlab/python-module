@@ -52,8 +52,6 @@ private slots:
     void onSearchForward();
 
     void onReplace(const QString& find, const QString& replaceBy);
-
-    void onSearchAndReplaceDisabled();
 };
 
 #endif // GTPYSCRIPTEDITORWIDGET_H

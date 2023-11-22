@@ -29,7 +29,7 @@
 GtpyScriptView::GtpyScriptView(int contextId, QWidget* parent) :
     GtCodeEditor(parent),
     m_contextId{contextId},
-    m_tabSize{4},
+    m_indentSize{4},
     m_replaceTabBySpaces{false}
 {
     QFont sysFont;
@@ -46,7 +46,7 @@ GtpyScriptView::GtpyScriptView(int contextId, QWidget* parent) :
 
     setMouseTracking(true);
     setAcceptDrops(false);
-    setTabSize(m_tabSize);
+    setIndentSize(m_indentSize);
 
     QPalette p = palette();
     const QColor cHighlight = p.color(QPalette::Active, QPalette::Highlight);
@@ -72,6 +72,9 @@ GtpyScriptView::GtpyScriptView(int contextId, QWidget* parent) :
             SLOT(lineHighlighting()));
 
     connect(this, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
+
+//    connect(this, SIGNAL(searchShortcutTriggered(QString)), this,
+//            SLOT(setHighlightedText(QString)));
 }
 
 bool
@@ -109,7 +112,7 @@ GtpyScriptView::wheelEvent(QWheelEvent* event)
             zoomOut(2);
         }
 
-        setTabStopDistance(m_tabSize *
+        setTabStopDistance(m_indentSize *
                            QFontMetrics(font()).horizontalAdvance(' '));
     }
     else
@@ -133,63 +136,71 @@ GtpyScriptView::setScript(const QString& script)
     setPlainText(script);
 }
 
-void
-GtpyScriptView::findAndReplace(const QString& find, const QString& replaceBy)
+bool
+GtpyScriptView::findAndReplace(const QString& find, const QString& replaceBy,
+                               Qt::CaseSensitivity cs)
 {
-    if (find.isEmpty())
+    QTextDocument::FindFlags flags = (cs == Qt::CaseSensitive) ?
+                QTextDocument::FindCaseSensitively : QTextDocument::FindFlags();
+
+    /// Move the start position to make sure that the cursor is not already in
+    /// the middle of a valid find.
+    int startPos = textCursor().position() - find.size();
+
+    /// Find and replace the next match from the cursor position.
+    if (startPos > 0)
     {
-        return;
+        if (!findAndReplace(find, replaceBy, startPos, flags).isNull())
+        {
+            return true;
+        }
     }
 
-    QTextCursor cursor = textCursor();
-    int startPos = cursor.selectionStart() - find.size();
-    cursor.setPosition(startPos >= 0 ? startPos : 0);
-
-    QTextCursor match = document()->find(find, cursor);
-
-    if (match.isNull())
-    {
-        match = document()->find(find, cursor, QTextDocument::FindBackward);
-    }
-
-    replaceSelection(match, replaceBy);
+    /// Find and replace the next match from the beginning of the document.
+    return !findAndReplace(find, replaceBy, 0, flags).isNull();
 }
 
 void
-GtpyScriptView::findAndReplaceAll(const QString& find, const QString& replaceBy)
+GtpyScriptView::findAndReplaceAll(const QString& find, const QString& replaceBy,
+                                  Qt::CaseSensitivity cs)
 {
-    if (find.isEmpty())
-    {
-        return;
-    }
+    QRegExp expr(find);
+    expr.setPatternSyntax(QRegExp::FixedString);
+    expr.setCaseSensitivity(cs);
 
-    QTextCursor cursor = textCursor();
-    cursor.movePosition(QTextCursor::Start);
-
-    while (moveCursorToNextMatch(find, cursor))
-    {
-        replaceSelection(cursor, replaceBy);
-    }
+    findAndReplaceAll(expr, replaceBy);
 }
 
 void
-GtpyScriptView::setTabSize(int size)
+GtpyScriptView::setIndentSize(int size)
 {
-    m_tabSize = size;
-    setTabStopDistance(m_tabSize *
-                       QFontMetrics(font()).horizontalAdvance(' '));
+    m_indentSize = size;
+    setTabStopDistance(m_indentSize * QFontMetrics(font()).horizontalAdvance(' '));
 }
 
 void
-GtpyScriptView::replaceTabsBySpaces(bool enable)
+GtpyScriptView::replaceTabsBySpaces()
 {
-    m_replaceTabBySpaces = enable;
+    textCursor().beginEditBlock();
 
-    if (m_replaceTabBySpaces)
+    QTextCursor cursor = document()->find("\t", 0);
+
+    while (!cursor.isNull())
     {
-        QString spaces = " ";
-        findAndReplace("\t", spaces.repeated(m_tabSize));
+        int selectionEnd = cursor.selectionEnd();
+        cursor.setPosition(cursor.selectionStart());
+
+        /// Calculate the number of spaces that replace the tab
+        int tabSize = m_indentSize - cursor.positionInBlock() % m_indentSize;
+
+        cursor.setPosition(selectionEnd, QTextCursor::KeepAnchor);
+        cursor.insertText(QString{tabSize, ' '});
+
+        /// Find next tab
+        cursor = document()->find("\t", cursor.position());
     }
+
+    textCursor().endEditBlock();
 }
 
 void
@@ -243,9 +254,6 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
     }
     else if (ctrlModifier)
     {
-        QString text;
-        QTextCursor cursor;
-
         switch (event->key())
         {
             case Qt::Key_E:
@@ -254,19 +262,11 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
                 return;
 
             case Qt::Key_F:
-                cursor = textCursor();
-                text = cursor.selectedText();
-                emit searchShortcutTriggered(text);
-                setHighlightedText(text);
-                setTextCursor(cursor);
+                emit searchShortcutTriggered(textCursor().selectedText());
                 return;
 
             case Qt::Key_R:
-                cursor = textCursor();
-                text = cursor.selectedText();
-                emit replaceShortcutTriggered(text);
-                setHighlightedText(text);
-                setTextCursor(cursor);
+                emit replaceShortcutTriggered(textCursor().selectedText());
                 return;
 
             case Qt::Key_Space:
@@ -284,50 +284,15 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
     }
     else if (shiftModifier)
     {
-        QTextCursor cursor;
-
         switch (event->key())
         {
             case Qt::Key_QuoteDbl:
-
                 m_cpl->getPopup()->hide();
-
-                cursor = textCursor();
-
-                if (cursor.selectedText().isEmpty())
-                {
-                    GtCodeEditor::keyPressEvent(event);
-
-                    QTextCursor temp = cursor;
-
-                    cursor.movePosition(QTextCursor::StartOfLine,
-                                        QTextCursor::KeepAnchor);
-
-                    QString selectedText = cursor.selectedText();
-
-                    int qouteCount = selectedText.count("\"");
-
-                    if ((qouteCount % 2) != 0)
-                    {
-                        insertPlainText("\"");
-                        temp.movePosition(QTextCursor::PreviousCharacter);
-                        setTextCursor(temp);
-                    }
-                }
-                else
-                {
-                    QString selectedText = cursor.selectedText();
-
-                    selectedText = "\"" + selectedText + "\"";
-
-                    cursor.insertText(selectedText);
-                }
-
+                insertFramingCharacters("\"");
                 return;
 
             default:
                 break;
-
         }
     }
 
@@ -358,10 +323,10 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
 
                     int tabSize = cursor.selectedText().count();
 
-                    tabSize = tabSize % m_tabSize;
+                    tabSize = tabSize % m_indentSize;
 
                     QString spaces = " ";
-                    spaces = spaces.repeated(m_tabSize - tabSize);
+                    spaces = spaces.repeated(m_indentSize - tabSize);
 
                     cursor.setPosition(currentPos);
                     cursor.insertText(spaces);
@@ -507,11 +472,11 @@ GtpyScriptView::insertCompletion()
 void
 GtpyScriptView::onTextChanged()
 {
-    highlightText(m_highlightedText, false);
+    highlightText(m_highlightedText);
 }
 
 void
-GtpyScriptView::highlightText(const QString& text, bool moveToNextFound)
+GtpyScriptView::highlightText(const QString& text)
 {
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
     auto color = !gtApp->inDarkMode() ?
@@ -521,53 +486,12 @@ GtpyScriptView::highlightText(const QString& text, bool moveToNextFound)
     auto color = QColor{Qt::green}.lighter(160);
 #endif
 
-    QTextCursor cursor = textCursor();
-
-    int startPos = cursor.selectionStart() - text.size();
-    cursor.setPosition(startPos >= 0 ? startPos : 0);
-
     QList<QTextEdit::ExtraSelection> extraSelections =
-            findExtraSelection(text, color, cursor);
-
-    extraSelections.append(findExtraSelection(text, color, cursor,
-                                              QTextDocument::FindBackward));
-
-    if (moveToNextFound)
-    {
-        if (extraSelections.isEmpty())
-        {
-            QTextCursor newCursor = textCursor();
-            newCursor.clearSelection();
-            setTextCursor(newCursor);
-        }
-        else
-        {
-            setTextCursor(extraSelections.first().cursor);
-        }
-    }
+            findExtraSelections(text, color);
 
     setExtraSelections(extraSelections);
 
     lineHighlighting();
-}
-
-
-QList<QTextEdit::ExtraSelection>
-GtpyScriptView::findExtraSelection(const QString& text, const QColor& color,
-                                   QTextCursor cursor,
-                                   QTextDocument::FindFlags options) const
-{
-    QList<QTextEdit::ExtraSelection> extraSelections;
-
-    while (moveCursorToNextMatch(text, cursor, options))
-    {
-        QTextEdit::ExtraSelection selection;
-        selection.format.setBackground(color);
-        selection.cursor = cursor;
-        extraSelections.append(selection);
-    }
-
-    return extraSelections;
 }
 
 bool
@@ -593,27 +517,31 @@ GtpyScriptView::setHighlightedText(const QString& text)
 {
     m_highlightedText = text;
     highlightText(m_highlightedText);
+    qDebug() << "setHighlightedText";
+    selectNextMatch(m_highlightedText);
 }
 
 void
-GtpyScriptView::selectNextMatch(const QString& text, bool reverse)
+GtpyScriptView::selectNextMatch(const QString& text, bool reverse,
+                                Qt::CaseSensitivity cs)
 {
+    /// translates given options in QTextDocument::FindFlags
+    QTextDocument::FindFlags flags = reverse ?
+                QTextDocument::FindBackward : QTextDocument::FindFlags();
+    flags = (cs == Qt::CaseSensitive) ?
+                (flags | QTextDocument::FindCaseSensitively) : flags;
+
+    /// find next match
     QTextCursor cursor = textCursor();
-    cursor = document()->find(text, cursor, reverse ?
-                                  QTextDocument::FindBackward :
-                                  QTextDocument::FindFlags());
+    QTextCursor nextCursor = findNextCursor(text, cursor, flags);
 
-    if (cursor.isNull())
+    if (!nextCursor.isNull())
     {
-        cursor = textCursor();
-        cursor.movePosition(reverse ? QTextCursor::End : QTextCursor::Start);
-        cursor = document()->find(text, cursor, reverse ?
-                                      QTextDocument::FindBackward :
-                                      QTextDocument::FindFlags());;
+        setTextCursor(nextCursor);
     }
-
-    if (!cursor.isNull())
+    else
     {
+        cursor.setPosition(cursor.selectionStart());
         setTextCursor(cursor);
     }
 }
@@ -727,19 +655,19 @@ bool
 GtpyScriptView::indentNewLine(QKeyEvent* event)
 {
     QTextCursor cursor = textCursor();
-
-    cursor.movePosition(QTextCursor::StartOfLine,
-                        QTextCursor::KeepAnchor);
+    cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
 
     QString line = cursor.selectedText();
 
-    // match leading tabs
+    /// get leading whitespace characters
     QRegularExpression regExp(QStringLiteral("^\\s+"));
     QRegularExpressionMatch match = regExp.match(line);
 
     QString newLine = match.captured();
+    qDebug() << "newLine: "  << newLine << "!!!!";
 
-    // match wheter a definiton starts (e.g. def func():)
+    /// check if the last character in the current line is a :
+    /// (e.g. def func():)
     regExp.setPattern(QStringLiteral(":\\s*\\Z"));
     match  = regExp.match(line);
 
@@ -749,7 +677,7 @@ GtpyScriptView::indentNewLine(QKeyEvent* event)
         if (m_replaceTabBySpaces)
         {
             QString spaces = " ";
-            newLine += spaces.repeated(m_tabSize);
+            newLine += spaces.repeated(m_indentSize);
         }
         else
         {
@@ -841,7 +769,7 @@ GtpyScriptView::indentSelectedLines(bool direction)
     cursor.setPosition(selectionStart);
 
     QString tabSpaces = " ";
-    tabSpaces = tabSpaces.repeated(m_tabSize);
+    tabSpaces = tabSpaces.repeated(m_indentSize);
 
     cursor.beginEditBlock();
 
@@ -889,4 +817,137 @@ GtpyScriptView::indentSelectedLines(bool direction)
     return true;
 }
 
+QTextCursor
+GtpyScriptView::findAndReplace(const QString& find, const QString& replaceBy,
+                               int pos, FindFlags options)
+{
+    if (find == replaceBy)
+    {
+        return {};
+    }
 
+    QRegExp expr(find);
+    expr.setPatternSyntax(QRegExp::FixedString);
+    expr.setCaseSensitivity((options & QTextDocument::FindCaseSensitively) ?
+                                Qt::CaseSensitive : Qt::CaseInsensitive);
+
+    return findAndReplace(expr, replaceBy, pos, options);
+}
+
+QTextCursor
+GtpyScriptView::findAndReplace(const QRegExp& expr, const QString& replaceBy,
+                               int pos, FindFlags options)
+{
+    QTextCursor cursor = document()->find(expr, pos, options);
+
+    if (!cursor.isNull())
+    {
+        int startPos = cursor.selectionStart();
+        cursor.insertText(replaceBy);
+        cursor.setPosition(startPos);
+        cursor.setPosition(startPos + replaceBy.size(), QTextCursor::KeepAnchor);
+
+        setTextCursor(cursor);
+    }
+
+    return cursor;
+}
+
+void
+GtpyScriptView::findAndReplaceAll(const QRegExp& expr, const QString& replaceBy)
+{
+    textCursor().beginEditBlock();
+
+    /// Find first match in the script and replace it.
+    QTextCursor cursor = findAndReplace(expr, replaceBy, 0);
+
+    /// If a match is found and replaced, search for the next match.
+    while (!cursor.isNull())
+    {
+        cursor = findAndReplace(expr, replaceBy, cursor.position());
+    }
+
+    textCursor().endEditBlock();
+}
+
+QList<QTextEdit::ExtraSelection>
+GtpyScriptView::findExtraSelections(const QString& text,
+                                    const QColor& color) const
+{
+    QList<QTextEdit::ExtraSelection> extraSelections;
+
+    QTextCursor cursor = document()->find(text, 0);
+
+    while (!cursor.isNull())
+    {
+        QTextEdit::ExtraSelection selection;
+        selection.format.setBackground(color);
+        selection.cursor = cursor;
+        extraSelections.append(selection);
+
+        cursor = document()->find(text, cursor.selectionEnd());
+    }
+
+    return extraSelections;
+}
+
+QTextCursor
+GtpyScriptView::find(const QString& text, int pos, FindFlags options)
+{
+    if (options & QTextDocument::FindBackward)
+    {
+        pos = pos > document()->characterCount() ?
+                    document()->characterCount() : pos;
+    }
+    else
+    {
+        /// ensure that a match is found even if the cursor is positioned in the
+        /// middle of a match
+        pos = pos - text.length() + 1;
+        pos = pos < 0 ? 0 : pos;
+    }
+
+    return document()->find(text, pos, options);
+}
+
+QTextCursor
+GtpyScriptView::findNextCursor(const QString& text, const QTextCursor& cursor,
+                               FindFlags options)
+{
+    int pos = ((cursor.selectedText() == text) &&
+                (options & QTextDocument::FindBackward)) ?
+                cursor.selectionStart() : cursor.position();
+
+    QTextCursor match = find(text, pos, options);
+
+    if (match.isNull())
+    {
+        match = (options & QTextDocument::FindBackward) ?
+                    find(text, document()->characterCount(), options):
+                    find(text, 0, options);
+    }
+
+    return match;
+}
+void
+GtpyScriptView::insertFramingCharacters(const QString& character)
+{
+    QTextCursor cursor = textCursor();
+    QString selectedText = cursor.selectedText();
+
+    if (selectedText.isEmpty())
+    {
+        insertPlainText(character);
+        cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+
+        if ((cursor.selectedText().count(character) % 2) != 0)
+        {
+            insertPlainText(character);
+            moveCursor(QTextCursor::PreviousCharacter);
+        }
+    }
+    else
+    {
+        cursor.insertText(selectedText.prepend(character).append(character));
+    }
+}

@@ -101,11 +101,8 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
             SLOT(onSearchBackward()));
     connect(m_replaceWidget, SIGNAL(forwardButtonClicked()), this,
             SLOT(onSearchForward()));
-    connect(m_replaceWidget, SIGNAL(searchAndReplaceDisabled()), this,
-            SLOT(onSearchAndReplaceDisabled()));
     connect(m_replaceWidget, SIGNAL(replace(QString, QString)), this,
             SLOT(onReplace(QString, QString)));
-
 }
 
 GtpyScriptView*
@@ -148,11 +145,5 @@ void
 GtpyScriptEditorWidget::onReplace(const QString& find, const QString& replaceBy)
 {
     m_scriptView->findAndReplace(find, replaceBy);
-    m_scriptView->setHighlightedText(find);
-}
-
-void
-GtpyScriptEditorWidget::onSearchAndReplaceDisabled()
-{
-    m_scriptView->setHighlightedText("");
+    m_scriptView->selectNextMatch(m_replaceWidget->searchText());
 }

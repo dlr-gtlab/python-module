@@ -12,7 +12,6 @@
 
 #include "gt_pythonmodule_exports.h"
 
-#include "gt_calculator.h"
 #include "gt_codeeditor.h"
 
 class GtpyCompleter;
@@ -62,20 +61,22 @@ public:
      * @param all If it is true, all strings in the document will be replaced.
      * Otherwise it only replaces the first one found.
      */
-    void findAndReplace(const QString& find, const QString& replaceBy);
+    bool findAndReplace(const QString& find, const QString& replaceBy,
+                        Qt::CaseSensitivity cs = Qt::CaseSensitive);
 
-    void findAndReplaceAll(const QString& find, const QString& replaceBy);
+    void findAndReplaceAll(const QString& find, const QString& replaceBy,
+                           Qt::CaseSensitivity cs = Qt::CaseSensitive);
 
     /**
      * @brief Sets the tab size to the given size.
      * @param size Tab size
      */
-    void setTabSize(int size);
+    void setIndentSize(int size);
 
-    void replaceTabsBySpaces(bool enable = true);
+    void replaceTabsBySpaces();
 
-    void selectNextMatch(const QString& text, bool reverse = false);
-
+    void selectNextMatch(const QString& text, bool reverse = false,
+                         Qt::CaseSensitivity cs = Qt::CaseSensitive);
 
 public slots:
      void setHighlightedText(const QString& text);
@@ -149,27 +150,18 @@ private:
     int m_contextId;
 
     /// Tab size
-    int m_tabSize;
+    int m_indentSize;
 
     bool m_replaceTabBySpaces;
 
-
-
     QString m_highlightedText;
 
-    void highlightText(const QString &text, bool moveToNextFound = true);
-
-    QList<QTextEdit::ExtraSelection> findExtraSelection(
-            const QString& text, const QColor& color, QTextCursor cursor,
-            QTextDocument::FindFlags options = QTextDocument::FindFlags()) const;
+    void highlightText(const QString& text);
 
     bool moveCursorToNextMatch(const QString& text, QTextCursor& cursor,
                         QTextDocument::FindFlags options = QTextDocument::FindFlags()) const;
 
     void replaceSelection(QTextCursor &cursor, const QString& replaceBy) const;
-
-
-
 
     /**
      * @brief Returns the python code of a function call as string value.
@@ -182,22 +174,7 @@ private:
                                const QString& functionName,
                                const QString& pyObjName);
 
-    void commentOutLine();
-
-
-    /**
-     * @brief The line in which the cursor is currently located is
-     * commented out or commented out. (Python comment character "#")
-     * @param commentOut true if "#" has to insert
-     */
-    void commentLine(bool commentOut);
-
     void commentSelectedLines();
-
-    /**
-     * @brief Comments out the selected block.
-     */
-    void commentOutBlock();
 
     /**
      * @brief Calls completer to handle completion.
@@ -215,8 +192,6 @@ private:
      * @return True if current line is commented out.
      */
     bool isCurrentLineCommentedOut();
-
-    bool isCurrentLineCommentedOut(QTextCursor cursor);
 
     /**
      * @brief Checks whether the line in which the cursor is currently located
@@ -251,6 +226,24 @@ private:
      */
     bool indentSelectedLines(bool direction);
 
+    using FindFlags = QTextDocument::FindFlags;
+    QTextCursor findAndReplace(const QString& find, const QString& replaceBy,
+                               int pos, FindFlags options = FindFlags());
+
+    QTextCursor findAndReplace(const QRegExp& expr, const QString& replaceBy,
+                               int pos, FindFlags options = FindFlags());
+
+    void findAndReplaceAll(const QRegExp& expr, const QString& replaceBy);
+
+    QList<QTextEdit::ExtraSelection> findExtraSelections(
+            const QString& text, const QColor& color) const;
+
+    QTextCursor find(const QString& text, int pos, FindFlags options = FindFlags());
+
+    QTextCursor findNextCursor(const QString& text, const QTextCursor& cursor,
+                               FindFlags options = FindFlags());
+
+    void insertFramingCharacters(const QString& character);
 
 signals:
     /**
@@ -269,9 +262,6 @@ signals:
      * @param text Selected text.
      */
     void replaceShortcutTriggered(const QString& text);
-
-
-    void calculatorDropped(GtCalculator* calc);
 };
 
 #endif // GTPYSCRIPTVIEW_H
