@@ -158,9 +158,6 @@ private:
 
     void highlightText(const QString& text);
 
-    bool moveCursorToNextMatch(const QString& text, QTextCursor& cursor,
-                        QTextDocument::FindFlags options = QTextDocument::FindFlags()) const;
-
     void replaceSelection(QTextCursor &cursor, const QString& replaceBy) const;
 
     /**
@@ -238,7 +235,7 @@ private:
     QList<QTextEdit::ExtraSelection> findExtraSelections(
             const QString& text, const QColor& color) const;
 
-    QTextCursor find(const QString& text, int pos, FindFlags options = FindFlags());
+    QTextCursor find(const QString& text, int pos, FindFlags options = FindFlags()) const;
 
     QTextCursor findNextCursor(const QString& text, const QTextCursor& cursor,
                                FindFlags options = FindFlags());

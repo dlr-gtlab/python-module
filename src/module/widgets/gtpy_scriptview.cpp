@@ -494,14 +494,6 @@ GtpyScriptView::highlightText(const QString& text)
     lineHighlighting();
 }
 
-bool
-GtpyScriptView::moveCursorToNextMatch(const QString& text, QTextCursor& cursor,
-                               QTextDocument::FindFlags options) const
-{
-    cursor = document()->find(text, cursor, options);
-    return !cursor.isNull();
-}
-
 void
 GtpyScriptView::replaceSelection(QTextCursor& cursor,
                                  const QString& replaceBy) const
@@ -517,7 +509,6 @@ GtpyScriptView::setHighlightedText(const QString& text)
 {
     m_highlightedText = text;
     highlightText(m_highlightedText);
-    qDebug() << "setHighlightedText";
     selectNextMatch(m_highlightedText);
 }
 
@@ -876,7 +867,7 @@ GtpyScriptView::findExtraSelections(const QString& text,
 {
     QList<QTextEdit::ExtraSelection> extraSelections;
 
-    QTextCursor cursor = document()->find(text, 0);
+    QTextCursor cursor = find(text, 0);
 
     while (!cursor.isNull())
     {
@@ -885,26 +876,27 @@ GtpyScriptView::findExtraSelections(const QString& text,
         selection.cursor = cursor;
         extraSelections.append(selection);
 
-        cursor = document()->find(text, cursor.selectionEnd());
+        cursor = find(text, cursor.selectionEnd());
     }
 
     return extraSelections;
 }
 
 QTextCursor
-GtpyScriptView::find(const QString& text, int pos, FindFlags options)
+GtpyScriptView::find(const QString& text, int pos, FindFlags options) const
 {
-    if (options & QTextDocument::FindBackward)
+    /// ensure that a match is found even if the cursor is positioned in the
+    /// middle of a match
+    pos = (options & QTextDocument::FindBackward) ?
+                pos : pos - text.length() + 1;
+
+    if (pos < 0)
     {
-        pos = pos > document()->characterCount() ?
-                    document()->characterCount() : pos;
-    }
-    else
-    {
-        /// ensure that a match is found even if the cursor is positioned in the
-        /// middle of a match
-        pos = pos - text.length() + 1;
         pos = pos < 0 ? 0 : pos;
+    }
+    else if (pos >= document()->characterCount())
+    {
+        pos = document()->characterCount() - 1;
     }
 
     return document()->find(text, pos, options);
@@ -914,6 +906,7 @@ QTextCursor
 GtpyScriptView::findNextCursor(const QString& text, const QTextCursor& cursor,
                                FindFlags options)
 {
+    /// determine the correct starting position
     int pos = ((cursor.selectedText() == text) &&
                 (options & QTextDocument::FindBackward)) ?
                 cursor.selectionStart() : cursor.position();
@@ -929,6 +922,7 @@ GtpyScriptView::findNextCursor(const QString& text, const QTextCursor& cursor,
 
     return match;
 }
+
 void
 GtpyScriptView::insertFramingCharacters(const QString& character)
 {
