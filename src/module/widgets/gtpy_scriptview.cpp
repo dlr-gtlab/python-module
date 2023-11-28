@@ -26,6 +26,24 @@
 
 #include "gtpy_scriptview.h"
 
+namespace {
+
+int
+lineFromMessage(const QString& message)
+{
+    static QRegularExpression re{R"((?<="<string>", line )\d+)"};
+    QRegularExpressionMatch match = re.match(message);
+
+    if (!match.hasMatch())
+    {
+        return -1;
+    }
+
+    return match.captured().toInt() - 1;
+}
+
+}
+
 GtpyScriptView::GtpyScriptView(int contextId, QWidget* parent) :
     GtCodeEditor(parent),
     m_contextId{contextId},
@@ -57,12 +75,23 @@ GtpyScriptView::GtpyScriptView(int contextId, QWidget* parent) :
     p.setColor(QPalette::Inactive, QPalette::HighlightedText, cHighlightText);
     setPalette(p);
 
-    connect(GtpyContextManager::instance(), SIGNAL(errorCodeLine(int, int)),
-            this, SLOT(highlightErrorLine(int, int)));
+    /// current line highlighting
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+    auto lineColor = gt::gui::color::code_editor::highlightLine();
+    if (gtApp->inDarkMode())
+        lineColor.setAlpha(100);
+    m_lineHighlight.format.setBackground(lineColor);
+#else
+        selection.format.setBackground(QColor{Qt::yellow}.lighter(160));
+#endif
+    m_lineHighlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+
+    /// error line highlighting
+    m_errorHighlight.format.setBackground(QColor{Qt::red}.lighter(160));
+    m_errorHighlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+
     connect(GtpyContextManager::instance(), SIGNAL(errorMessage(QString, int)),
             this, SLOT(appendErrorMessage(QString, int)));
-    connect(this, SIGNAL(cursorPositionChanged()), this,
-            SLOT(resetErrorLine()));
     connect(m_cpl, SIGNAL(activated(QModelIndex)), this,
             SLOT(insertCompletion()));
 
@@ -72,27 +101,27 @@ GtpyScriptView::GtpyScriptView(int contextId, QWidget* parent) :
             SLOT(lineHighlighting()));
 
     connect(this, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
-
-//    connect(this, SIGNAL(searchShortcutTriggered(QString)), this,
-//            SLOT(setHighlightedText(QString)));
 }
 
 bool
 GtpyScriptView::event(QEvent* event)
 {
-    if (m_errorLine > -1 && event->type() == QEvent::ToolTip)
+    if (event->type() == QEvent::ToolTip)
     {
-        QHelpEvent* helpEvent = static_cast<QHelpEvent*>(event);
-        QTextCursor helpCursor = cursorForPosition(helpEvent->pos());
-
-        if (helpCursor.block().position() == textCursor().block().position())
+        if (!m_errorHighlight.cursor.isNull())
         {
-            QToolTip::setFont(QFontDatabase::systemFont(
-                                  QFontDatabase::FixedFont));
-            QToolTip::showText(helpEvent->globalPos(),
-                               m_errorMessage.isEmpty() ?
-                                   "Error" : m_errorMessage.trimmed());
+            QHelpEvent* helpEvent = static_cast<QHelpEvent*>(event);
+
+            if (cursorForPosition(helpEvent->pos()).block().position() ==
+                    m_errorHighlight.cursor.block().position())
+            {
+                QToolTip::setFont(QFontDatabase::systemFont(
+                                      QFontDatabase::FixedFont));
+                QToolTip::showText(helpEvent->globalPos(),
+                                   m_errorMessage.trimmed());
+            }
         }
+
     }
 
     return QPlainTextEdit::event(event);
@@ -124,9 +153,6 @@ GtpyScriptView::wheelEvent(QWheelEvent* event)
 QString
 GtpyScriptView::script()
 {
-    resetErrorLine();
-    resetErrorMessage();
-
     return toPlainText();
 }
 
@@ -259,6 +285,7 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
             case Qt::Key_E:
                 emit evalShortcutTriggered();
                 m_cpl->getPopup()->hide();
+                resetErrorHighlighting();
                 return;
 
             case Qt::Key_F:
@@ -369,7 +396,8 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
 void
 GtpyScriptView::focusOutEvent(QFocusEvent* event)
 {
-    removeCurrentLineHighlighting();
+    m_lineHighlight.cursor = {};
+    setExtraSelections();
 
     GtCodeEditor::focusOutEvent(event);
 }
@@ -387,58 +415,25 @@ GtpyScriptView::lineHighlighting()
 {
     if (!isReadOnly())
     {
-        removeCurrentLineHighlighting();
+        m_lineHighlight.cursor = textCursor();
+        m_lineHighlight.cursor.clearSelection();
 
-        QList<QTextEdit::ExtraSelection> selectionList = extraSelections();
+        resetErrorHighlighting();
 
-        QTextEdit::ExtraSelection selection;
-
-#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-        auto lineColor = gt::gui::color::code_editor::highlightLine();
-        if (gtApp->inDarkMode())
-            lineColor.setAlpha(100);
-        selection.format.setBackground(lineColor);
-#else
-        selection.format.setBackground(QColor{Qt::yellow}.lighter(160));
-#endif
-        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-        selection.cursor = textCursor();
-        selection.cursor.clearSelection();
-        selectionList.prepend(selection);
-
-        setExtraSelections(selectionList);
+        setExtraSelections();
     }
 }
 
 void
-GtpyScriptView::highlightErrorLine(int codeLine, int contextId)
+GtpyScriptView::highlightErrorLine(int codeLine)
 {
-    if (contextId == m_contextId)
+    if (!isReadOnly())
     {
-        QList<QTextEdit::ExtraSelection> extraSelections;
+        m_errorHighlight.cursor = QTextCursor{
+                document()->findBlockByLineNumber(codeLine)};
+        m_lineHighlight.cursor = {};
 
-        if (!isReadOnly())
-        {
-            QTextEdit::ExtraSelection selection;
-
-            QColor lineColor = QColor(Qt::red).lighter(160);
-
-            selection.format.setBackground(lineColor);
-            selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-
-            QTextCursor cr(document()->findBlockByLineNumber(codeLine - 1));
-            cr.movePosition(QTextCursor::EndOfLine);
-
-            selection.cursor = cr;
-            selection.cursor.clearSelection();
-            extraSelections.append(selection);
-
-            setTextCursor(cr);
-
-            m_errorLine = codeLine;
-        }
-
-        setExtraSelections(extraSelections);
+        setExtraSelections();
     }
 }
 
@@ -447,14 +442,23 @@ GtpyScriptView::appendErrorMessage(const QString& message, int contextId)
 {
     if (contextId == m_contextId)
     {
-        m_errorMessage = m_errorMessage + message;
+        m_errorMessage += message;
+
+        int line = lineFromMessage(message);
+
+        if (line > -1)
+        {
+            highlightErrorLine(line);
+        }
     }
 }
 
 void
-GtpyScriptView::resetErrorLine()
+GtpyScriptView::resetErrorHighlighting()
 {
-    m_errorLine = -1;
+    m_errorHighlight.cursor = {};
+    m_errorMessage = "";
+    setExtraSelections();
 }
 
 void
@@ -486,12 +490,21 @@ GtpyScriptView::highlightText(const QString& text)
     auto color = QColor{Qt::green}.lighter(160);
 #endif
 
-    QList<QTextEdit::ExtraSelection> extraSelections =
-            findExtraSelections(text, color);
+    m_searchHighlights.clear();
 
-    setExtraSelections(extraSelections);
+    QTextCursor cursor = find(text, 0);
 
-    lineHighlighting();
+    while (!cursor.isNull())
+    {
+        QTextEdit::ExtraSelection selection;
+        selection.format.setBackground(color);
+        selection.cursor = cursor;
+        m_searchHighlights.append(selection);
+
+        cursor = find(text, cursor.selectionEnd());
+    }
+
+    setExtraSelections();
 }
 
 void
@@ -596,11 +609,6 @@ void GtpyScriptView::handleCompletion()
     }
 }
 
-void GtpyScriptView::resetErrorMessage()
-{
-    m_errorMessage = QString();
-}
-
 bool
 GtpyScriptView::isCurrentLineCommentedOut()
 {
@@ -608,38 +616,6 @@ GtpyScriptView::isCurrentLineCommentedOut()
     cursor.movePosition(QTextCursor::StartOfLine);
     cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
     return cursor.selectedText() == "#";
-}
-
-bool
-GtpyScriptView::isCurrentLineHighlighted()
-{
-    QList<QTextEdit::ExtraSelection> selectionList = extraSelections();
-
-    if (selectionList.isEmpty())
-    {
-        return false;
-    }
-
-    QTextEdit::ExtraSelection firstSelection = selectionList.first();
-    QVariant fullWidth = firstSelection.format.property(
-                             QTextFormat::FullWidthSelection);
-
-    return fullWidth.toBool();
-}
-
-void
-GtpyScriptView::removeCurrentLineHighlighting()
-{
-    if (isCurrentLineHighlighted())
-    {
-        QList<QTextEdit::ExtraSelection> selectionList = extraSelections();
-
-        if (!selectionList.isEmpty())
-        {
-            selectionList.removeFirst();
-            setExtraSelections(selectionList);
-        }
-    }
 }
 
 bool
@@ -808,6 +784,14 @@ GtpyScriptView::indentSelectedLines(bool direction)
     return true;
 }
 
+void
+GtpyScriptView::setExtraSelections()
+{
+    QList<QTextEdit::ExtraSelection> es{m_lineHighlight, m_errorHighlight};
+    es.append(m_searchHighlights);
+    GtCodeEditor::setExtraSelections(es);
+}
+
 QTextCursor
 GtpyScriptView::findAndReplace(const QString& find, const QString& replaceBy,
                                int pos, FindFlags options)
@@ -859,27 +843,6 @@ GtpyScriptView::findAndReplaceAll(const QRegExp& expr, const QString& replaceBy)
     }
 
     textCursor().endEditBlock();
-}
-
-QList<QTextEdit::ExtraSelection>
-GtpyScriptView::findExtraSelections(const QString& text,
-                                    const QColor& color) const
-{
-    QList<QTextEdit::ExtraSelection> extraSelections;
-
-    QTextCursor cursor = find(text, 0);
-
-    while (!cursor.isNull())
-    {
-        QTextEdit::ExtraSelection selection;
-        selection.format.setBackground(color);
-        selection.cursor = cursor;
-        extraSelections.append(selection);
-
-        cursor = find(text, cursor.selectionEnd());
-    }
-
-    return extraSelections;
 }
 
 QTextCursor

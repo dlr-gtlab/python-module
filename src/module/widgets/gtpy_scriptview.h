@@ -110,11 +110,9 @@ private slots:
 
     /**
      * @brief Highlights the given line as error line (red).
-     * @param codeLine number of line which should be highligted
-     * @param contextId Id of the context in which the error has been triggered.
-     */
-    void highlightErrorLine(int codeLine,
-                            int contextId);
+     * @param codeLine the line number to be highlighted
+    */
+    void highlightErrorLine(int codeLine);
 
     /**
      * @brief Receives the error messages.
@@ -123,10 +121,7 @@ private slots:
      */
     void appendErrorMessage(const QString& message, int contextId);
 
-    /**
-     * @brief Sets the number of error line to invalid value (-1).
-     */
-    void resetErrorLine();
+    void resetErrorHighlighting();
 
     /**
      * @brief Inserts the selected completion into the text editor.
@@ -137,14 +132,20 @@ private slots:
     void onTextChanged();
 
 private:
+
+    QTextEdit::ExtraSelection m_lineHighlight;
+
+    QTextEdit::ExtraSelection m_errorHighlight;
+
+    QList<QTextEdit::ExtraSelection> m_searchHighlights;
+
     /// Pointer to cmpleter
     GtpyCompleter* m_cpl;
 
-    /// Number of error line
-    int m_errorLine;
-
     /// Error message
     QString m_errorMessage;
+
+    QString m_highlightedText;
 
     /// Python Context id
     int m_contextId;
@@ -153,8 +154,6 @@ private:
     int m_indentSize;
 
     bool m_replaceTabBySpaces;
-
-    QString m_highlightedText;
 
     void highlightText(const QString& text);
 
@@ -179,28 +178,11 @@ private:
     void handleCompletion();
 
     /**
-     * @brief Sets error message variable to empty string.
-     */
-    void resetErrorMessage();
-
-    /**
      * @brief Checks whether the line in which the cursor is currently located
      *  is commented out.
      * @return True if current line is commented out.
      */
     bool isCurrentLineCommentedOut();
-
-    /**
-     * @brief Checks whether the line in which the cursor is currently located
-     * is highlighted.
-     * @return True if current line is highlighted.
-     */
-    bool isCurrentLineHighlighted();
-
-    /**
-     * @brief Removes the highlighting of the current line.
-     */
-    void removeCurrentLineHighlighting();
 
     /**
      * @brief indents a new line
@@ -223,6 +205,8 @@ private:
      */
     bool indentSelectedLines(bool direction);
 
+    void setExtraSelections();
+
     using FindFlags = QTextDocument::FindFlags;
     QTextCursor findAndReplace(const QString& find, const QString& replaceBy,
                                int pos, FindFlags options = FindFlags());
@@ -231,9 +215,6 @@ private:
                                int pos, FindFlags options = FindFlags());
 
     void findAndReplaceAll(const QRegExp& expr, const QString& replaceBy);
-
-    QList<QTextEdit::ExtraSelection> findExtraSelections(
-            const QString& text, const QColor& color) const;
 
     QTextCursor find(const QString& text, int pos, FindFlags options = FindFlags()) const;
 
