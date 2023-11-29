@@ -208,18 +208,19 @@ private:
     void setExtraSelections();
 
     using FindFlags = QTextDocument::FindFlags;
-    QTextCursor findAndReplace(const QString& find, const QString& replaceBy,
-                               int pos, FindFlags options = FindFlags());
+    QTextCursor find(const QString& text, int pos,
+                     FindFlags options = FindFlags()) const;
 
-    QTextCursor findAndReplace(const QRegExp& expr, const QString& replaceBy,
-                               int pos, FindFlags options = FindFlags());
+    QTextCursor findAndReplace(const QRegularExpression& expr,
+                               const QString& replaceBy, int pos,
+                               FindFlags options = FindFlags());
 
-    void findAndReplaceAll(const QRegExp& expr, const QString& replaceBy);
-
-    QTextCursor find(const QString& text, int pos, FindFlags options = FindFlags()) const;
+    void findAndReplaceAll(const QRegularExpression& expr,
+                           const QString& replaceBy,
+                           FindFlags options = FindFlags());
 
     QTextCursor findNextCursor(const QString& text, const QTextCursor& cursor,
-                               FindFlags options = FindFlags());
+                               FindFlags options = FindFlags()) const;
 
     void insertFramingCharacters(const QString& character);
 

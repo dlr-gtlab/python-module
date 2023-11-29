@@ -82,7 +82,7 @@ GtpyScriptView::GtpyScriptView(int contextId, QWidget* parent) :
         lineColor.setAlpha(100);
     m_lineHighlight.format.setBackground(lineColor);
 #else
-        selection.format.setBackground(QColor{Qt::yellow}.lighter(160));
+    m_lineHighlight.format.setBackground(QColor{Qt::yellow}.lighter(160));
 #endif
     m_lineHighlight.format.setProperty(QTextFormat::FullWidthSelection, true);
 
@@ -142,12 +142,11 @@ GtpyScriptView::wheelEvent(QWheelEvent* event)
         }
 
         setTabStopDistance(m_indentSize *
-                           QFontMetrics(font()).horizontalAdvance(' '));
+                           QFontMetrics{font()}.horizontalAdvance(' '));
+        return;
     }
-    else
-    {
-        GtCodeEditor::wheelEvent(event);
-    }
+
+    GtCodeEditor::wheelEvent(event);
 }
 
 QString
@@ -166,6 +165,11 @@ bool
 GtpyScriptView::findAndReplace(const QString& find, const QString& replaceBy,
                                Qt::CaseSensitivity cs)
 {
+    if (find == replaceBy)
+    {
+        return true;
+    }
+
     QTextDocument::FindFlags flags = (cs == Qt::CaseSensitive) ?
                 QTextDocument::FindCaseSensitively : QTextDocument::FindFlags();
 
@@ -173,28 +177,33 @@ GtpyScriptView::findAndReplace(const QString& find, const QString& replaceBy,
     /// the middle of a valid find.
     int startPos = textCursor().position() - find.size();
 
+    QRegularExpression expr{find};
+
     /// Find and replace the next match from the cursor position.
     if (startPos > 0)
     {
-        if (!findAndReplace(find, replaceBy, startPos, flags).isNull())
+        if (!findAndReplace(expr, replaceBy, startPos, flags).isNull())
         {
             return true;
         }
     }
 
     /// Find and replace the next match from the beginning of the document.
-    return !findAndReplace(find, replaceBy, 0, flags).isNull();
+    return !findAndReplace(expr, replaceBy, 0, flags).isNull();
 }
 
 void
 GtpyScriptView::findAndReplaceAll(const QString& find, const QString& replaceBy,
                                   Qt::CaseSensitivity cs)
 {
-    QRegExp expr(find);
-    expr.setPatternSyntax(QRegExp::FixedString);
-    expr.setCaseSensitivity(cs);
+    if (find == replaceBy)
+    {
+        return;
+    }
 
-    findAndReplaceAll(expr, replaceBy);
+    QTextDocument::FindFlags flags = (cs == Qt::CaseSensitive) ?
+                QTextDocument::FindCaseSensitively : QTextDocument::FindFlags();
+    findAndReplaceAll(QRegularExpression{find}, replaceBy, flags);
 }
 
 void
@@ -793,59 +802,6 @@ GtpyScriptView::setExtraSelections()
 }
 
 QTextCursor
-GtpyScriptView::findAndReplace(const QString& find, const QString& replaceBy,
-                               int pos, FindFlags options)
-{
-    if (find == replaceBy)
-    {
-        return {};
-    }
-
-    QRegExp expr(find);
-    expr.setPatternSyntax(QRegExp::FixedString);
-    expr.setCaseSensitivity((options & QTextDocument::FindCaseSensitively) ?
-                                Qt::CaseSensitive : Qt::CaseInsensitive);
-
-    return findAndReplace(expr, replaceBy, pos, options);
-}
-
-QTextCursor
-GtpyScriptView::findAndReplace(const QRegExp& expr, const QString& replaceBy,
-                               int pos, FindFlags options)
-{
-    QTextCursor cursor = document()->find(expr, pos, options);
-
-    if (!cursor.isNull())
-    {
-        int startPos = cursor.selectionStart();
-        cursor.insertText(replaceBy);
-        cursor.setPosition(startPos);
-        cursor.setPosition(startPos + replaceBy.size(), QTextCursor::KeepAnchor);
-
-        setTextCursor(cursor);
-    }
-
-    return cursor;
-}
-
-void
-GtpyScriptView::findAndReplaceAll(const QRegExp& expr, const QString& replaceBy)
-{
-    textCursor().beginEditBlock();
-
-    /// Find first match in the script and replace it.
-    QTextCursor cursor = findAndReplace(expr, replaceBy, 0);
-
-    /// If a match is found and replaced, search for the next match.
-    while (!cursor.isNull())
-    {
-        cursor = findAndReplace(expr, replaceBy, cursor.position());
-    }
-
-    textCursor().endEditBlock();
-}
-
-QTextCursor
 GtpyScriptView::find(const QString& text, int pos, FindFlags options) const
 {
     /// ensure that a match is found even if the cursor is positioned in the
@@ -866,8 +822,46 @@ GtpyScriptView::find(const QString& text, int pos, FindFlags options) const
 }
 
 QTextCursor
-GtpyScriptView::findNextCursor(const QString& text, const QTextCursor& cursor,
+GtpyScriptView::findAndReplace(const QRegularExpression& expr,
+                               const QString& replaceBy, int pos,
                                FindFlags options)
+{
+    QTextCursor cursor = document()->find(expr, pos, options);
+
+    if (!cursor.isNull())
+    {
+        int startPos = cursor.selectionStart();
+        cursor.insertText(replaceBy);
+        cursor.setPosition(startPos);
+        cursor.setPosition(startPos + replaceBy.size(), QTextCursor::KeepAnchor);
+
+        setTextCursor(cursor);
+    }
+
+    return cursor;
+}
+
+void
+GtpyScriptView::findAndReplaceAll(const QRegularExpression& expr,
+                                  const QString& replaceBy, FindFlags options)
+{
+    textCursor().beginEditBlock();
+
+    /// Find first match in the script and replace it.
+    QTextCursor cursor = findAndReplace(expr, replaceBy, 0);
+
+    /// If a match is found and replaced, search for the next match.
+    while (!cursor.isNull())
+    {
+        cursor = findAndReplace(expr, replaceBy, cursor.position(), options);
+    }
+
+    textCursor().endEditBlock();
+}
+
+QTextCursor
+GtpyScriptView::findNextCursor(const QString& text, const QTextCursor& cursor,
+                               FindFlags options) const
 {
     /// determine the correct starting position
     int pos = ((cursor.selectedText() == text) &&
