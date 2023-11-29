@@ -28,7 +28,7 @@ public:
 
     GtpyScriptView* scriptView() const;
 
-    void setScript(const QString& script);
+    void setScript(const QString& script) const;
 
 private:
     GtpyScriptView* m_scriptView;
@@ -38,20 +38,22 @@ private:
 
 private slots:
 
-    void setRedoButtonEnabled(bool visible);
-    void setUndoButtonEnabled(bool visible);
+    void setRedoButtonEnabled(bool visible) const;
+    void setUndoButtonEnabled(bool visible) const;
 
     /**
      * @brief Instructs the editor to continue the current search backward.
      */
-    void onSearchBackward();
+    void onSearchBackward() const;
 
     /**
      * @brief Instructs the editor to continue the current search.
      */
-    void onSearchForward();
+    void onSearchForward() const;
 
-    void onReplace(const QString& find, const QString& replaceBy);
+    void onReplace(const QString& find, const QString& replaceBy) const;
+
+    void onSearchTextChanged(const QString& text) const;
 };
 
 #endif // GTPYSCRIPTEDITORWIDGET_H

@@ -121,7 +121,6 @@ GtpyScriptView::event(QEvent* event)
                                    m_errorMessage.trimmed());
             }
         }
-
     }
 
     return QPlainTextEdit::event(event);
@@ -247,7 +246,7 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
         return;
     }
 
-    QToolTip::showText(QPoint(), "");
+    QToolTip::hideText();
 
     if (m_cpl->getPopup()->isVisible())
     {
@@ -485,53 +484,7 @@ GtpyScriptView::insertCompletion()
 void
 GtpyScriptView::onTextChanged()
 {
-    highlightText(m_highlightedText);
-}
-
-void
-GtpyScriptView::highlightText(const QString& text)
-{
-#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-    auto color = !gtApp->inDarkMode() ?
-                QColor{Qt::green}.lighter(160) :
-                gt::gui::color::code_editor::highlightLine();
-#else
-    auto color = QColor{Qt::green}.lighter(160);
-#endif
-
-    m_searchHighlights.clear();
-
-    QTextCursor cursor = find(text, 0);
-
-    while (!cursor.isNull())
-    {
-        QTextEdit::ExtraSelection selection;
-        selection.format.setBackground(color);
-        selection.cursor = cursor;
-        m_searchHighlights.append(selection);
-
-        cursor = find(text, cursor.selectionEnd());
-    }
-
-    setExtraSelections();
-}
-
-void
-GtpyScriptView::replaceSelection(QTextCursor& cursor,
-                                 const QString& replaceBy) const
-{
-    if (cursor.hasSelection())
-    {
-        cursor.insertText(replaceBy);
-    }
-}
-
-void
-GtpyScriptView::setHighlightedText(const QString& text)
-{
-    m_highlightedText = text;
-    highlightText(m_highlightedText);
-    selectNextMatch(m_highlightedText);
+    highlightText(m_highlighted);
 }
 
 void
@@ -559,12 +512,12 @@ GtpyScriptView::selectNextMatch(const QString& text, bool reverse,
     }
 }
 
-QString
-GtpyScriptView::functionCallPyCode(const QString& newVal,
-                                     const QString& functionName,
-                                     const QString& pyObjName)
+void
+GtpyScriptView::setHighlight(const Highlight& highlight)
 {
-    return pyObjName + "." + functionName + "(" + newVal + ")";
+    m_highlighted = highlight;
+    highlightText(m_highlighted);
+    selectNextMatch(m_highlighted.text, false, m_highlighted.cs);
 }
 
 void
@@ -811,7 +764,7 @@ GtpyScriptView::find(const QString& text, int pos, FindFlags options) const
 
     if (pos < 0)
     {
-        pos = pos < 0 ? 0 : pos;
+        pos = 0;
     }
     else if (pos >= document()->characterCount())
     {
@@ -878,6 +831,37 @@ GtpyScriptView::findNextCursor(const QString& text, const QTextCursor& cursor,
     }
 
     return match;
+}
+
+void
+GtpyScriptView::highlightText(const Highlight& highlight)
+{
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+    auto color = !gtApp->inDarkMode() ?
+                QColor{Qt::green}.lighter(160) :
+                gt::gui::color::code_editor::highlightLine();
+#else
+    auto color = QColor{Qt::green}.lighter(160);
+#endif
+
+    m_searchHighlights.clear();
+
+    FindFlags flags = (highlight.cs == Qt::CaseSensitive) ?
+                QTextDocument::FindCaseSensitively : QTextDocument::FindFlags();
+
+    QTextCursor cursor = find(highlight.text, 0, flags);
+
+    while (!cursor.isNull())
+    {
+        QTextEdit::ExtraSelection selection;
+        selection.format.setBackground(color);
+        selection.cursor = cursor;
+        m_searchHighlights.append(selection);
+
+        cursor = find(highlight.text, cursor.selectionEnd(), flags);
+    }
+
+    setExtraSelections();
 }
 
 void

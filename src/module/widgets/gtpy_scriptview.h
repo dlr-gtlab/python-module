@@ -24,6 +24,11 @@ class GT_PYTHON_EXPORT GtpyScriptView : public GtCodeEditor
     Q_OBJECT
 
 public:
+    struct Highlight {
+        QString text;
+        Qt::CaseSensitivity cs{Qt::CaseSensitive};
+    };
+
     /**
      * @brief GtpyScriptView
      * @param contextId Id of the context in which the scripts written in the
@@ -78,8 +83,7 @@ public:
     void selectNextMatch(const QString& text, bool reverse = false,
                          Qt::CaseSensitivity cs = Qt::CaseSensitive);
 
-public slots:
-     void setHighlightedText(const QString& text);
+     void setHighlight(const Highlight& highlight);
 
 protected:
     /**
@@ -89,7 +93,7 @@ protected:
     void keyPressEvent(QKeyEvent* event) override;
 
     /**
-     * @brief Called when the editor loses the focus. Deletes the highlithing of
+     * @brief Called when the editor loses the focus. Deletes the highlighting of
      * the current line.
      * @param event Event sent by losing the focus.
      */
@@ -132,7 +136,6 @@ private slots:
     void onTextChanged();
 
 private:
-
     QTextEdit::ExtraSelection m_lineHighlight;
 
     QTextEdit::ExtraSelection m_errorHighlight;
@@ -145,7 +148,7 @@ private:
     /// Error message
     QString m_errorMessage;
 
-    QString m_highlightedText;
+    Highlight m_highlighted;
 
     /// Python Context id
     int m_contextId;
@@ -154,21 +157,6 @@ private:
     int m_indentSize;
 
     bool m_replaceTabBySpaces;
-
-    void highlightText(const QString& text);
-
-    void replaceSelection(QTextCursor &cursor, const QString& replaceBy) const;
-
-    /**
-     * @brief Returns the python code of a function call as string value.
-     * @param newVal Value that to be set.
-     * @param functionName Name of the called function.
-     * @param pyObjName Name of the object that holds the function.
-     * @return Python code as string value.
-     */
-    QString functionCallPyCode(const QString& newVal,
-                               const QString& functionName,
-                               const QString& pyObjName);
 
     void commentSelectedLines();
 
@@ -221,6 +209,8 @@ private:
 
     QTextCursor findNextCursor(const QString& text, const QTextCursor& cursor,
                                FindFlags options = FindFlags()) const;
+
+    void highlightText(const Highlight& highlight);
 
     void insertFramingCharacters(const QString& character);
 

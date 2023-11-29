@@ -66,7 +66,6 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
     m_scriptView->document()->setDefaultTextOption(defaultOps);
 
     auto* highlighter = new GtPyHighlighter(m_scriptView->document());
-
     Q_UNUSED(highlighter)
 
     mainLayout->addLayout(topLayout);
@@ -93,8 +92,8 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
     connect(m_undoButton, SIGNAL(clicked(bool)), m_scriptView, SLOT(undo()));
 
     /// connect serach and replace
-    connect(m_replaceWidget, SIGNAL(searchTextChanged(QString)), m_scriptView,
-            SLOT(setHighlightedText(QString)));
+    connect(m_replaceWidget, SIGNAL(searchTextChanged(QString)), this,
+            SLOT(onSearchTextChanged(QString)));
     connect(m_replaceWidget, SIGNAL(searchLineReturnPressed()), this,
             SLOT(onSearchForward()));
     connect(m_replaceWidget, SIGNAL(backwardButtonClicked()), this,
@@ -112,38 +111,44 @@ GtpyScriptEditorWidget::scriptView() const
 }
 
 void
-GtpyScriptEditorWidget::setScript(const QString& script)
+GtpyScriptEditorWidget::setScript(const QString& script) const
 {
     m_scriptView->setScript(script);
 }
 
 void
-GtpyScriptEditorWidget::setRedoButtonEnabled(bool visible)
+GtpyScriptEditorWidget::setRedoButtonEnabled(bool visible) const
 {
     m_redoButton->setEnabled(visible);
 }
 
 void
-GtpyScriptEditorWidget::setUndoButtonEnabled(bool visible)
+GtpyScriptEditorWidget::setUndoButtonEnabled(bool visible) const
 {
     m_undoButton->setEnabled(visible);
 }
 
 void
-GtpyScriptEditorWidget::onSearchBackward()
+GtpyScriptEditorWidget::onSearchBackward() const
 {
     m_scriptView->selectNextMatch(m_replaceWidget->searchText(), true);
 }
 
 void
-GtpyScriptEditorWidget::onSearchForward()
+GtpyScriptEditorWidget::onSearchForward() const
 {
     m_scriptView->selectNextMatch(m_replaceWidget->searchText());
 }
 
 void
-GtpyScriptEditorWidget::onReplace(const QString& find, const QString& replaceBy)
+GtpyScriptEditorWidget::onReplace(const QString& find, const QString& replaceBy) const
 {
     m_scriptView->findAndReplace(find, replaceBy);
     m_scriptView->selectNextMatch(m_replaceWidget->searchText());
+}
+
+void
+GtpyScriptEditorWidget::onSearchTextChanged(const QString& text) const
+{
+    m_scriptView->setHighlight({text, Qt::CaseSensitive});
 }
