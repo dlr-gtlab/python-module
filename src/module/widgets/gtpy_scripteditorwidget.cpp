@@ -135,10 +135,10 @@ GtpyScriptEditorWidget::keyPressEvent(QKeyEvent* event)
 void
 GtpyScriptEditorWidget::setSearchText() const
 {
-//    if (m_scriptView->hasSelection())
-//    {
-//        m_replaceWidget->setSearchText(m_scriptView->selectedText());
-//    }
+    if (m_scriptView->hasSelection())
+    {
+        m_replaceWidget->setSearchText(m_scriptView->selectedText());
+    }
 }
 
 void

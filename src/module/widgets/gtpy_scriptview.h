@@ -83,7 +83,11 @@ public:
     void selectNextMatch(const QString& text, bool reverse = false,
                          Qt::CaseSensitivity cs = Qt::CaseSensitive);
 
-     void setHighlight(const Highlight& highlight);
+    void setHighlight(const Highlight& highlight);
+
+    QString selectedText() const;
+
+    bool hasSelection() const;
 
 protected:
     /**
@@ -142,13 +146,13 @@ private:
 
     QList<QTextEdit::ExtraSelection> m_searchHighlights;
 
-    /// Pointer to cmpleter
-    GtpyCompleter* m_cpl;
+    Highlight m_highlighted;
 
     /// Error message
     QString m_errorMessage;
 
-    Highlight m_highlighted;
+    /// Pointer to cmpleter
+    GtpyCompleter* m_cpl;
 
     /// Python Context id
     int m_contextId;
@@ -172,12 +176,8 @@ private:
      */
     bool isCurrentLineCommentedOut();
 
-    /**
-     * @brief indents a new line
-     * @param keyPressEvent
-     * @return true if key event was evaluated, false if not
-     */
-    bool indentNewLine(QKeyEvent* event);
+    QString currentLineIndent();
+
     /**
      * @brief Checks whether the current selection should get indented when
      * pressing e.g. 'tab'
@@ -219,18 +219,6 @@ signals:
      * @brief Emitted when eval shortcut (ctrl+E) is pressed.
      */
     void evalShortcutTriggered();
-
-    /**
-     * @brief Emitted when find shortcut (ctrl+F) is pressed.
-     * @param text Selected text.
-     */
-    void searchShortcutTriggered(const QString& text);
-
-    /**
-     * @brief Emitted when replace shortcut (ctrl+R) is pressed.
-     * @param text Selected text.
-     */
-    void replaceShortcutTriggered(const QString& text);
 };
 
 #endif // GTPYSCRIPTVIEW_H

@@ -46,6 +46,7 @@ lineFromMessage(const QString& message)
 
 GtpyScriptView::GtpyScriptView(int contextId, QWidget* parent) :
     GtCodeEditor(parent),
+    m_cpl{nullptr},
     m_contextId{contextId},
     m_indentSize{4},
     m_replaceTabBySpaces{false}
@@ -221,13 +222,10 @@ GtpyScriptView::replaceTabsBySpaces()
 
     while (!cursor.isNull())
     {
-        int selectionEnd = cursor.selectionEnd();
-        cursor.setPosition(cursor.selectionStart());
-
         /// Calculate the number of spaces that replace the tab
-        int tabSize = m_indentSize - cursor.positionInBlock() % m_indentSize;
+        int tabSize = m_indentSize -
+                (cursor.positionInBlock() - 1) % m_indentSize;
 
-        cursor.setPosition(selectionEnd, QTextCursor::KeepAnchor);
         cursor.insertText(QString{tabSize, ' '});
 
         /// Find next tab
@@ -240,94 +238,70 @@ GtpyScriptView::replaceTabsBySpaces()
 void
 GtpyScriptView::keyPressEvent(QKeyEvent* event)
 {
-    if (m_cpl == nullptr)
-    {
-        GtCodeEditor::keyPressEvent(event);
-        return;
-    }
-
     QToolTip::hideText();
 
     if (m_cpl->getPopup()->isVisible())
     {
         switch (event->key())
         {
-            case Qt::Key_Enter:
-            case Qt::Key_Return:
-            case Qt::Key_Tab:
-                insertCompletion();
-                event->accept();
-                return;
+        case Qt::Key_Enter:
+        case Qt::Key_Return:
+        case Qt::Key_Tab:
+            insertCompletion();
+            event->accept();
+            return;
 
-            case Qt::Key_Right:
-            case Qt::Key_Left:
-               GtCodeEditor::keyPressEvent(event);
-               handleCompletion();
-               return;
+        case Qt::Key_Right:
+        case Qt::Key_Left:
+            GtCodeEditor::keyPressEvent(event);
+            handleCompletion();
+            return;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 
-    const bool ctrlModifier = (event->modifiers() & Qt::ControlModifier);
-    const bool shiftModifier = (event->modifiers() & Qt::ShiftModifier);
 
-    if (ctrlModifier && shiftModifier)
+    if (event->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier))
     {
         switch (event->key())
         {
-            case Qt::Key_Apostrophe:
-                m_cpl->getPopup()->hide();
-                commentSelectedLines();
-                return;
+        case Qt::Key_Apostrophe:
+            commentSelectedLines();
+            return;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
-    else if (ctrlModifier)
+    else if (event->modifiers() == Qt::ControlModifier)
     {
         switch (event->key())
         {
-            case Qt::Key_E:
-                emit evalShortcutTriggered();
-                m_cpl->getPopup()->hide();
-                resetErrorHighlighting();
-                return;
+        case Qt::Key_Space:
+            if (!isCurrentLineCommentedOut())
+                handleCompletion();
+            return;
 
-            case Qt::Key_F:
-                emit searchShortcutTriggered(textCursor().selectedText());
-                return;
-
-            case Qt::Key_R:
-                emit replaceShortcutTriggered(textCursor().selectedText());
-                return;
-
-            case Qt::Key_Space:
-
-                if (!isCurrentLineCommentedOut())
-                {
-                    handleCompletion();
-                }
-
-                return;
-
-            default:
-                break;
+        default:
+            break;
         }
     }
-    else if (shiftModifier)
+    else if (event->modifiers() == Qt::ShiftModifier)
     {
         switch (event->key())
         {
-            case Qt::Key_QuoteDbl:
-                m_cpl->getPopup()->hide();
-                insertFramingCharacters("\"");
-                return;
+        case Qt::Key_QuoteDbl:
+            insertFramingCharacters("\"");
+            return;
 
-            default:
-                break;
+        case Qt::Key_Apostrophe:
+            insertFramingCharacters("\'");
+            return;
+
+        default:
+            break;
         }
     }
 
@@ -335,13 +309,9 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
     {
         /* indent new line */
         case Qt::Key_Return:
-
-            if (!indentNewLine(event))
-            {
-                GtCodeEditor::keyPressEvent(event);
-            }
-
-            break;
+            GtCodeEditor::keyPressEvent(event);
+            insertPlainText(currentLineIndent());
+            return;
 
         /* indent selection with tab to the rigth */
         case Qt::Key_Tab:
@@ -389,6 +359,8 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
     }
 
     QString text = event->text();
+
+    const bool ctrlModifier = (event->modifiers() & Qt::ControlModifier);
 
     if (!text.isEmpty() && !isCurrentLineCommentedOut()
             && !ctrlModifier)
@@ -474,9 +446,9 @@ GtpyScriptView::insertCompletion()
 {
     if (m_cpl != nullptr)
     {
-        QTextCursor tc = textCursor();
-        m_cpl->insertCompletion(tc);
-        setTextCursor(tc);
+        QTextCursor cursor = textCursor();
+        m_cpl->insertCompletion(cursor);
+        setTextCursor(cursor);
         m_cpl->getPopup()->hide();
     }
 }
@@ -520,6 +492,18 @@ GtpyScriptView::setHighlight(const Highlight& highlight)
     selectNextMatch(m_highlighted.text, false, m_highlighted.cs);
 }
 
+QString
+GtpyScriptView::selectedText() const
+{
+    return textCursor().selectedText();
+}
+
+bool
+GtpyScriptView::hasSelection() const
+{
+    return textCursor().hasSelection();
+}
+
 void
 GtpyScriptView::commentSelectedLines()
 {
@@ -531,7 +515,7 @@ GtpyScriptView::commentSelectedLines()
     cursor.setPosition(startPos);
     cursor.movePosition(QTextCursor::StartOfLine);
 
-    bool atStartOfLine = cursor.position() == startPos;
+    bool atStartOfLine = (cursor.position() == startPos);
 
     cursor.setPosition(endPos, QTextCursor::KeepAnchor);
     cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
@@ -575,56 +559,34 @@ bool
 GtpyScriptView::isCurrentLineCommentedOut()
 {
     QTextCursor cursor = textCursor();
-    cursor.movePosition(QTextCursor::StartOfLine);
-    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
-    return cursor.selectedText() == "#";
+    cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+    return cursor.selectedText().contains("#");
 }
 
-bool
-GtpyScriptView::indentNewLine(QKeyEvent* event)
+QString
+GtpyScriptView::currentLineIndent()
 {
     QTextCursor cursor = textCursor();
-    cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
-
-    QString line = cursor.selectedText();
+    cursor.movePosition(QTextCursor::Up);
+    cursor.movePosition(QTextCursor::StartOfLine);
+    cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
 
     /// get leading whitespace characters
-    QRegularExpression regExp(QStringLiteral("^\\s+"));
-    QRegularExpressionMatch match = regExp.match(line);
+    static QRegularExpression indentRegExp{R"(^\s+)"};
+    QString indent = indentRegExp.match(cursor.selectedText()).captured();
 
-    QString newLine = match.captured();
-    qDebug() << "newLine: "  << newLine << "!!!!";
-
-    /// check if the last character in the current line is a :
+    /// check if the last character in the current line is a colon
     /// (e.g. def func():)
-    regExp.setPattern(QStringLiteral(":\\s*\\Z"));
-    match  = regExp.match(line);
+    static QRegularExpression colonRegExp{R"(:\s*\Z)"};
+    QRegularExpressionMatch match = colonRegExp.match(cursor.selectedText());
 
-    // append tab
     if (match.hasMatch())
     {
-        if (m_replaceTabBySpaces)
-        {
-            QString spaces = " ";
-            newLine += spaces.repeated(m_indentSize);
-        }
-        else
-        {
-            newLine += QStringLiteral("\t");
-        }
+        indent.append(m_replaceTabBySpaces ?
+                          QString{" "}.repeated(m_indentSize) : "\t");
     }
 
-    if (newLine.isEmpty())
-    {
-        return false;
-    }
-
-    GtCodeEditor::keyPressEvent(event);
-
-    cursor = textCursor();
-    cursor.insertText(newLine);
-
-    return true;
+    return indent;
 }
 
 bool
@@ -783,11 +745,7 @@ GtpyScriptView::findAndReplace(const QRegularExpression& expr,
 
     if (!cursor.isNull())
     {
-        int startPos = cursor.selectionStart();
         cursor.insertText(replaceBy);
-        cursor.setPosition(startPos);
-        cursor.setPosition(startPos + replaceBy.size(), QTextCursor::KeepAnchor);
-
         setTextCursor(cursor);
     }
 
@@ -816,16 +774,19 @@ QTextCursor
 GtpyScriptView::findNextCursor(const QString& text, const QTextCursor& cursor,
                                FindFlags options) const
 {
+    QString selectedText = cursor.selectedText();
+    bool findBackward = (options & QTextDocument::FindBackward);
+
     /// determine the correct starting position
-    int pos = ((cursor.selectedText() == text) &&
-                (options & QTextDocument::FindBackward)) ?
+    int pos = ((selectedText == text && findBackward) ||
+               ((selectedText != text) && selectedText.startsWith(text))) ?
                 cursor.selectionStart() : cursor.position();
 
     QTextCursor match = find(text, pos, options);
 
     if (match.isNull())
     {
-        match = (options & QTextDocument::FindBackward) ?
+        match = findBackward ?
                     find(text, document()->characterCount(), options):
                     find(text, 0, options);
     }
@@ -868,9 +829,8 @@ void
 GtpyScriptView::insertFramingCharacters(const QString& character)
 {
     QTextCursor cursor = textCursor();
-    QString selectedText = cursor.selectedText();
 
-    if (selectedText.isEmpty())
+    if (!cursor.hasSelection())
     {
         insertPlainText(character);
         cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
@@ -883,6 +843,8 @@ GtpyScriptView::insertFramingCharacters(const QString& character)
     }
     else
     {
-        cursor.insertText(selectedText.prepend(character).append(character));
+        cursor.insertText(cursor.selectedText()
+                          .prepend(character)
+                          .append(character));
     }
 }
