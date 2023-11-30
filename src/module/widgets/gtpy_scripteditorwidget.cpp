@@ -78,14 +78,6 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
             SLOT(setRedoButtonEnabled(bool)));
     connect(m_scriptView, SIGNAL(undoAvailable(bool)), this,
             SLOT(setUndoButtonEnabled(bool)));
-    connect(m_scriptView, SIGNAL(searchShortcutTriggered(QString)), m_replaceWidget,
-            SLOT(setSearchText(QString)));
-    connect(m_scriptView, SIGNAL(searchShortcutTriggered(QString)), m_replaceWidget,
-            SLOT(enableSearch()));
-    connect(m_scriptView, SIGNAL(replaceShortcutTriggered(QString)), m_replaceWidget,
-            SLOT(setSearchText(QString)));
-    connect(m_scriptView, SIGNAL(replaceShortcutTriggered(QString)), m_replaceWidget,
-            SLOT(enableReplace()));
 
     /// connect redo/undo button
     connect(m_redoButton, SIGNAL(clicked(bool)), m_scriptView, SLOT(redo()));
@@ -114,6 +106,39 @@ void
 GtpyScriptEditorWidget::setScript(const QString& script) const
 {
     m_scriptView->setScript(script);
+}
+
+void
+GtpyScriptEditorWidget::keyPressEvent(QKeyEvent* event)
+{
+    if (event->modifiers() == Qt::ControlModifier)
+    {
+        switch (event->key())
+        {
+            case Qt::Key_F:
+                onFindShortcut();
+                break;
+            case Qt::Key_R:
+                onReplaceShortcut();
+                break;
+            case Qt::Key_E:
+                emit evaluationTriggered();
+                break;
+            default:
+                break;
+        }
+    }
+
+    QWidget::keyPressEvent(event);
+}
+
+void
+GtpyScriptEditorWidget::setSearchText() const
+{
+//    if (m_scriptView->hasSelection())
+//    {
+//        m_replaceWidget->setSearchText(m_scriptView->selectedText());
+//    }
 }
 
 void
@@ -151,4 +176,18 @@ void
 GtpyScriptEditorWidget::onSearchTextChanged(const QString& text) const
 {
     m_scriptView->setHighlight({text, Qt::CaseSensitive});
+}
+
+void
+GtpyScriptEditorWidget::onFindShortcut() const
+{
+    setSearchText();
+    m_replaceWidget->enableSearch();
+}
+
+void
+GtpyScriptEditorWidget::onReplaceShortcut() const
+{
+    setSearchText();
+    m_replaceWidget->enableReplace();
 }

@@ -30,12 +30,16 @@ public:
 
     void setScript(const QString& script) const;
 
+protected:
+    void keyPressEvent(QKeyEvent* event) override;
+
 private:
     GtpyScriptView* m_scriptView;
     QPushButton* m_undoButton;
     QPushButton* m_redoButton;
     GtpyReplaceWidget* m_replaceWidget;
 
+    void setSearchText() const;
 private slots:
 
     void setRedoButtonEnabled(bool visible) const;
@@ -54,6 +58,13 @@ private slots:
     void onReplace(const QString& find, const QString& replaceBy) const;
 
     void onSearchTextChanged(const QString& text) const;
+
+    void onFindShortcut() const;
+
+    void onReplaceShortcut() const;
+
+signals:
+    void evaluationTriggered();
 };
 
 #endif // GTPYSCRIPTEDITORWIDGET_H
