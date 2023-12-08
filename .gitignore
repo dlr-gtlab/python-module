@@ -1,13 +1,9 @@
-Makefile*
-build/
+build*/
 lib/
 include/
 debug/
 release/
-local_settings.pri
-!features/local_settings.pri
 !tests/build/
-*.pro.user
 *.autosave
-.qmake.stash
 .qtc_clangd/
+CMakeLists.txt.user
