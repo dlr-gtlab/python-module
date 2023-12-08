@@ -1,0 +1,25 @@
+include(CMakeFindDependencyMacro)
+
+find_dependency(Qt5 COMPONENTS Core Widgets Xml)
+
+# support for monobuilds
+
+if (NOT TARGET GTlab::Core)
+  find_dependency(GTlab)
+endif()
+
+if (NOT TARGET PythonQt::PythonQt)
+  find_dependency(PythonQt)
+endif()
+
+# - Config file for the GTlabPython package
+include("${CMAKE_CURRENT_LIST_DIR}/GTlabPython-targets.cmake")
+
+# create alias
+if (NOT TARGET GTlab::Python)
+    add_library(GTlab::Python INTERFACE IMPORTED)
+
+    set_target_properties(GTlab::Python PROPERTIES
+      INTERFACE_LINK_LIBRARIES "GTlabPython"
+    )
+endif()
