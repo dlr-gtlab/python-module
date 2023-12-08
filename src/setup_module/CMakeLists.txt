@@ -31,6 +31,8 @@ set(SOURCES
     gtps_pythoninterpreter.cpp
     gtps_pythonpreferencepage.cpp
     gtps_systemsettings.cpp
+    resources.qrc
+    gtps_pythonpreferencepage.ui
 )
 
 add_gtlab_module(GTlabPythonSetup SOURCES ${HEADERS} ${SOURCES}
