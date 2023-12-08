@@ -6,6 +6,12 @@
 #
 ######################################################################
 
+# only for GTlab 2.x
+
+if (GTlab_VERSION_MAJOR LESS 2)
+    return()
+endif()
+
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
@@ -39,7 +45,4 @@ target_include_directories(GTlabPythonSetup PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/.>
 )
 
-target_link_libraries(GTlabPythonSetup
-    PRIVATE
-    GTlab::Gui
-)
+target_link_libraries(GTlabPythonSetup PRIVATE GTlab::Gui)

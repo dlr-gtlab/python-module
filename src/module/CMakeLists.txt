@@ -159,6 +159,7 @@ add_library(GTlab::Python ALIAS GTlabPython)
 target_compile_definitions(GTlabPython PRIVATE
     GT_PYTHON_DLL
     GT_LOG_USE_QT_BINDINGS
+    PYTHON_LIBRARY="$<TARGET_FILE_NAME:Python3::Python>"
 )
 
 set(INSTALL_SUBDIR python${Python3_VERSION_SUFFIX})
@@ -195,11 +196,15 @@ target_link_libraries(GTlabPython
     Qt5::Svg
     GTlab::Logging
     GTlab::Core
-    GTlab::Gui
     PUBLIC
     PythonQt::PythonQt
-
 )
+
+if (GTlab_VERSION_MAJOR GREATER_EQUAL 2)
+    target_link_libraries(GTlabPython PRIVATE GTlab::Gui)
+else()
+    target_link_libraries(GTlabPython PRIVATE GTlab::Mdi GTlab::Calculators GTlab::Numerics)
+endif()
 
 install (TARGETS GTlabPython
   EXPORT GTlabPython-targets

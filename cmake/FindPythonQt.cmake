@@ -5,10 +5,12 @@ find_dependency(Python3 COMPONENTS Development)
 find_path(PythonQt_INCLUDE_DIR NAMES PythonQt.h PATH_SUFFIXES include)
 
 set (PYTHONQT_LIBNAME_SUFFIX ${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})
+set (PYTHONQT_LIBNAME_SUFFIX_ALT ${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
 
 # Look for the library (sorted from most current/relevant entry to least).
 find_library(PythonQt_LIBRARY NAMES
     PythonQt-Qt5-Python${PYTHONQT_LIBNAME_SUFFIX}
+    PythonQt-Qt5-Python${PYTHONQT_LIBNAME_SUFFIX_ALT}
     PATH_SUFFIXES lib
 )
 

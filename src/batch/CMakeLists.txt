@@ -26,6 +26,11 @@ target_link_libraries(GTlabPythonConsole
     PRIVATE
     Qt5::Widgets
     Qt5::Xml
-    GTlab::Gui
     GTlab::Python
 )
+
+if (GTlab_VERSION_MAJOR GREATER_EQUAL 2)
+    target_link_libraries(GTlabPythonConsole PRIVATE GTlab::Gui)
+else()
+    target_link_libraries(GTlabPythonConsole PRIVATE GTlab::Mdi)
+endif()

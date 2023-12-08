@@ -17,12 +17,15 @@ find_package(Python3 REQUIRED COMPONENTS Development)
 set(Python3_VERSION_SUFFIX "${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
 
 include(GTlab)
-
 gtlab_standard_setup()
 enable_gtlab_devtools()
 
 if(NOT TARGET GTlab::Core)
     find_package(GTlab REQUIRED)
+endif()
+
+if (NOT TARGET GTlab::Numerics)
+  find_package(GTlabNumerics REQUIRED)
 endif()
 
 find_package(PythonQt REQUIRED)
@@ -49,7 +52,7 @@ endif ()
 if (BUILD_UNITTESTS AND BUILD_WITH_COVERAGE)
     setup_target_for_coverage_lcov(
             NAME test-coverage
-            EXECUTABLE GTlabDataAnalyticsUnitTests
+            EXECUTABLE GTlabPythonUnitTest
             EXCLUDE "tests/*" "build*" "/usr/*" "/opt/*" "/home/gitlab-runner/*"
             BASE_DIRECTORY "${PROJECT_SOURCE_DIR}")
 endif()
