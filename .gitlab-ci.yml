@@ -1,570 +1,250 @@
-########################################################
-############# GTlab Pipeline Version 2.1.0 #############
-########################################################
-# This is a slight changed version
-# - PYVERSION variable to support the build using different Python versions
-# - the Python version is appended to the build and test job names
-# - debug build is not possible because PythonQt is not available as debug build
+#################################################################
+############### GTlab Standard Pipeline Version 2.1.0 ###########
+#################################################################
 
-# These variables are defined in the CI project settings:
-#  CATEGORY: 03_core_modules
-#  PROFILENAME: gtlab_python.pro
-#  UNITTESTSNAME: GTlabUnitTest
 
-# These variables are defined in the AT-TWK group settings:
-#   DEVTOOLS_Linux_Stable
-#   DEVTOOLS_Linux_Unstable
-#   DEVTOOLS_Win_Stable 
-#   DEVTOOLS_Win_Unstable
-#   WIN_PYTHON
-#   STABLE_MAJOR
-#   STABLE_MINOR
-#   UNSTABLE_MAJOR
-#   UNSTABLE_MINOR
-
-# Environment variables to use in the pipeline globally
+# Variables that are defined globally for the pipeline
 variables:
   PIPELINEVERSION: "2.1.0"
   GIT_SUBMODULE_STRATEGY: none
   
   # Regulare expression pattern
   # enclose the branch name with ^ and $
-  # separete several branch names with |
-  # e.g. /^main_1_0$|^main_1_1$/
+  # separete severl branch names with |
+  # e.g. /^main$|^main_1_0$/
   STABLE_BRANCHES: /^master$/
   
-  PY_MAJOR_STABLE: 3
-  PY_MINOR_STABLE: 7
-  
-  PY_MAJOR_UNSTABLE: 3
-  PY_MINOR_UNSTABLE: 9
-  
-  TARGETNAME_STABLE: GTlabPython$PY_MAJOR_STABLE$PY_MINOR_STABLE
-  TARGETNAME_UNSTABLE: GTlabPython$PY_MAJOR_UNSTABLE$PY_MINOR_UNSTABLE
-  
-  TARGETDIRNAME_STABLE: python$PY_MAJOR_STABLE$PY_MINOR_STABLE
-  TARGETDIRNAME_UNSTABLE: python$PY_MAJOR_UNSTABLE$PY_MINOR_UNSTABLE
-  
-  GT_MODULE_ID_STABLE: "Python Module (Python $PY_MAJOR_STABLE.$PY_MINOR_STABLE)"
-  GT_MODULE_ID_UNSTABLE: "Python Module (Python $PY_MAJOR_UNSTABLE.$PY_MINOR_UNSTABLE)"
 
-  TARGETNAME_SETUP_MODULE: GTlabPythonSetup
-
-  # Name of the unstable branch (if it exists)
-  #UNSTABLE_BRANCH: unstable_master
-
-# inlcude some templates from this file
 include:
   - project: 'at-twk/gitlab-templates'
-    file: '/ci-templates/.ci-templates-2-1.yml'
-    
+    file: '/ci-templates/.ci-templates-cmake-1.0.yml'
+
 stages:
   - update
   - build
   - test
   - regressionTest
-  - unstableBuild
-  - unstableTest
-  - package
+  - build_2.0
+  - test_2.0
   - deploy
   - codequality
+  - package
   - badges
 
-findCodeBaseStatus:
-  stage: .pre
-  extends: 
-    - .only-tags-parent
-    - .findCodeBaseStatusTemplate
-  tags:
-    - Win10
-
-triggerDeployment:
-  stage: deploy
-  extends: .only-tags-parent
-  trigger:
-    include: .gitlab-ci.yml
-    forward:
-      pipeline_variables: true
-    strategy: depend
-  variables:
-    STABLE_BASE: $BUILD_STABLE_BASE
-
-# DevTools update
-devtoolsUpdateWindows:
-  stage: update
-  extends: .devToolsUpdateWindows
-
-devtoolsUpdateLinux:
-  stage: update
-  extends: .devToolsUpdateLinux
 
 # build on Windows system
-.winDebugArtifacts:
-  artifacts:
-    paths:
-      - lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE-d.dll
-      - lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE-d.lib
-      #- lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE-d.pdb
-      - lib\$TARGETDIRNAME\$TARGETNAME-d.dll
-      - lib\$TARGETDIRNAME\$TARGETNAME-d.lib
-      #- lib\$TARGETDIRNAME\$TARGETNAME-d.pdb
-      - include\$TARGETDIRNAME\
-      - build\$UNITTESTSNAME.exe
-      - build\$UNITTESTSNAME.pdb
-    expire_in: 1 week
-    when: always
+windowsBuildDebug_2.0:
+  stage: build_2.0
+  extends: 
+    - .build-win_20
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2019-dbg -DGTLAB_DEVTOOLS_DIR="$env:GTLAB_DEV_TOOLS" -DBUILD_UNITTESTS=ON
+    - cmake --build build --target install
 
-.winReleaseArtifacts:
-  artifacts:
-    paths:
-      - lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE.dll
-      - lib\$TARGETDIRNAME\$TARGETNAME_SETUP_MODULE.lib
-      - lib\$TARGETDIRNAME\$TARGETNAME.dll
-      - lib\$TARGETDIRNAME\$TARGETNAME.lib
-      - include\$TARGETDIRNAME\
-      - build\$UNITTESTSNAME.exe
-      - build\$UNITTESTSNAME.pdb
-      - buildLog.txt
-    expire_in: 1 week
-    when: always
-    
-winBuildDebug:
+windowsBuildRelease_1.7:
   stage: build
   extends: 
-    - .stable-debug
-    - .buildWinDebug
-    - .winReleaseArtifacts
-  needs:
-    - job: devtoolsUpdateWindows
-      optional: true
+    - .build-win_17
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-msvc2017 -DGTLAB_DEVTOOLS_DIR="$env:GTLAB_DEV_TOOLS" -DPython3_LIBRARY="$env:PYTHON_DIR"/libs/python37.lib -DPython3_INCLUDE_DIR="$env:PYTHON_DIR"/include
+    - cmake --build build --target install
   variables:
-    PY_MAJOR: $PY_MAJOR_STABLE
-    PY_MINOR: $PY_MINOR_STABLE
-    MAJOR_VERSION: $STABLE_MAJOR
-    BUILDBATCH: "true"
-    BUILDMODE: release
-    DEVTOOLS: $DEVTOOLS_Win_Stable
-    JOM_PATH: $JOM_PATH_512
-    QMAKE_PATH: $QMAKE_PATH_512
-    VCvarsall: $VCVARS_2017_PS
-    TARGETDIRNAME: $TARGETDIRNAME_STABLE
-    TARGETNAME: $TARGETNAME_STABLE
+    PYTHON_DIR: C:\devel\GTlab-DevTools\stable\1_7\ThirdPartyLibraries\Python\Python_37
+
+windowsBuildRelease_2.0:
+  stage: build_2.0
+  extends: 
+    - .build-win_20
+    - .run-master-and-tags
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-msvc2019 -DGTLAB_DEVTOOLS_DIR="$env:GTLAB_DEV_TOOLS"
+    - cmake --build build --target install
     
-winBuildDebugUnstable:
-  stage: unstableBuild
-  extends: 
-    - .unstable-debug
-    - .buildWinDebug
-    - .winDebugArtifacts
-  needs:
-    - job: devtoolsUpdateWindows
-      optional: true
-  variables:
-    PY_MAJOR: $PY_MAJOR_UNSTABLE
-    PY_MINOR: $PY_MINOR_UNSTABLE
-    MAJOR_VERSION: $UNSTABLE_MAJOR
-    BUILDBATCH: "true"
-    DEVTOOLS: $DEVTOOLS_Win_Unstable
-    JOM_PATH: $JOM_PATH_515
-    QMAKE_PATH: $QMAKE_PATH_515
-    VCvarsall: $VCVARS_2019_PS
-    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
-    TARGETNAME: $TARGETNAME_UNSTABLE
-
-winBuildRelease:
-  stage: build
-  extends: 
-    - .stable-release
-    - .buildWinRelease
-    - .winReleaseArtifacts
-  needs:
-    - job: devtoolsUpdateWindows
-      optional: true
-  variables:
-    PY_MAJOR: $PY_MAJOR_STABLE
-    PY_MINOR: $PY_MINOR_STABLE
-    BUILDBATCH: "false"
-    MAJOR_VERSION: $STABLE_MAJOR
-    DEVTOOLS: $DEVTOOLS_Win_Stable
-    JOM_PATH: $JOM_PATH_512
-    QMAKE_PATH: $QMAKE_PATH_512
-    VCvarsall: $VCVARS_2017_PS
-    TARGETDIRNAME: $TARGETDIRNAME_STABLE
-    TARGETNAME: $TARGETNAME_STABLE
- 
-winBuildReleaseUnstable:
-  stage: unstableBuild
-  extends: 
-    - .unstable-release
-    - .buildWinRelease
-    - .winReleaseArtifacts
-  needs:
-    - job: devtoolsUpdateWindows
-      optional: true
-  variables:
-    PY_MAJOR: $PY_MAJOR_UNSTABLE
-    PY_MINOR: $PY_MINOR_UNSTABLE
-    MAJOR_VERSION: $UNSTABLE_MAJOR
-    BUILDBATCH: "true"
-    DEVTOOLS: $DEVTOOLS_Win_Unstable
-    JOM_PATH: $JOM_PATH_515
-    QMAKE_PATH: $QMAKE_PATH_515
-    VCvarsall: $VCVARS_2019_PS
-    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
-    TARGETNAME: $TARGETNAME_UNSTABLE
-
 # build on Linux system
-.linuxDebugArtifacts:
-  artifacts:
-    paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME_SETUP_MODULE-d.so*
-      - lib/$TARGETDIRNAME/lib$TARGETNAME-d.so*
-      - include/$TARGETDIRNAME/
-      - build/$UNITTESTSNAME
-      - linuxBuild.txt
-    when: always
-    expire_in: 1 week
-    
-.linuxReleaseArtifacts:
-  artifacts:
-    paths:
-      - lib/$TARGETDIRNAME/lib$TARGETNAME_SETUP_MODULE.so*
-      - lib/$TARGETDIRNAME/lib$TARGETNAME.so*
-      - include/$TARGETDIRNAME/
-      - meta/
-      - examples/
-    when: always
-    expire_in: 1 week
-    
-linuxBuildDebug:
+linuxBuildDebug_1.7:
   stage: build
   extends: 
-    - .stable-debug
-    - .buildLinuxDebug
-    - .linuxDebugArtifacts
-  needs:
-    - job: devtoolsUpdateLinux
-      optional: true
+    - .build-linux_17
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-linux-dbg -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS  -DBUILD_UNITTESTS=ON -DPython3_LIBRARY=$PYTHON_DIR/libs/libpython3.7m.so -DPython3_INCLUDE_DIR=$PYTHON_DIR/include/
+    - cmake --build build --target install
   variables:
-    PY_MAJOR: $PY_MAJOR_STABLE
-    PY_MINOR: $PY_MINOR_STABLE
-    MAJOR_VERSION: $STABLE_MAJOR
-    BUILDBATCH: "false"
-    DEVTOOLS: $DEVTOOLS_Linux_Stable
-    QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
-    TARGETDIRNAME: $TARGETDIRNAME_STABLE
-    TARGETNAME: $TARGETNAME_STABLE
+    PYTHON_DIR: /home/gitlab-runner/GTlab-Devtools/stable/1_7/ThirdPartyLibraries/Python/Python_37/
 
-linuxBuildDebugUnstable:
-  stage: unstableBuild
+linuxBuildDebug_2.0:
+  stage: build_2.0
   extends: 
-    - .unstable-debug
-    - .buildLinuxDebug 
-    - .linuxDebugArtifacts
-  needs:
-    - job: devtoolsUpdateLinux
-      optional: true
-  variables:
-    PY_MAJOR: $PY_MAJOR_UNSTABLE
-    PY_MINOR: $PY_MINOR_UNSTABLE
-    BUILDUNITTESTS: "true"
-    BUILDBATCH: "false"
-    MAJOR_VERSION: $UNSTABLE_MAJOR
-    DEVTOOLS: $DEVTOOLS_Linux_Unstable
-    QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
-    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
-    TARGETNAME: $TARGETNAME_UNSTABLE
-
-linuxBuildRelease:
+    - .build-linux_20
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-linux-dbg -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS  -DBUILD_UNITTESTS=ON
+    - cmake --build build --target install
+ 
+linuxBuildRelease_1.7:
   stage: build
   extends: 
-    - .stable-release
-    - .buildLinuxRelease 
-    - .linuxReleaseArtifacts
-  needs:
-    - job: devtoolsUpdateLinux
-      optional: true
+    - .build-linux_17
+    - .run-master-and-tags
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-linux -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS  -DPython3_LIBRARY=$PYTHON_DIR/libs/libpython3.7m.so -DPython3_INCLUDE_DIR=$PYTHON_DIR/include/
+    - cmake --build build --target install
   variables:
-    PY_MAJOR: $PY_MAJOR_STABLE
-    PY_MINOR: $PY_MINOR_STABLE
-    MAJOR_VERSION: $STABLE_MAJOR
-    BUILDBATCH: "false"
-    DEVTOOLS: $DEVTOOLS_Linux_Stable
-    QMAKE_EXECUTABLE: /opt/Qt/5.12.5/gcc_64/bin/qmake
-    TARGETDIRNAME: $TARGETDIRNAME_STABLE
-    TARGETNAME: $TARGETNAME_STABLE
+    PYTHON_DIR: /home/gitlab-runner/GTlab-Devtools/stable/1_7/ThirdPartyLibraries/Python/Python_37/
 
-linuxBuildReleaseUnstable:
-  stage: unstableBuild
+linuxBuildRelease_2.0:
+  stage: build_2.0
   extends: 
-    - .unstable-release
-    - .buildLinuxRelease 
-    - .linuxReleaseArtifacts
-  needs:
-    - job: devtoolsUpdateLinux
-      optional: true
-  variables:
-    PY_MAJOR: $PY_MAJOR_UNSTABLE
-    PY_MINOR: $PY_MINOR_UNSTABLE
-    MAJOR_VERSION: $UNSTABLE_MAJOR
-    BUILDBATCH: "false"
-    DEVTOOLS: $DEVTOOLS_Linux_Unstable
-    QMAKE_EXECUTABLE: /opt/Qt/5.15.2/gcc_64/bin/qmake
-    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
-    TARGETNAME: $TARGETNAME_UNSTABLE
+    - .build-linux_20
+    - .run-master-and-tags
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-linux -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS 
+    - cmake --build build --target install
 
 # run tests using the binary built before
-testWin:
+.testWin:
   stage: test
   extends: 
     - .stable-debug
     - .winTestTemplate
-  script:
-    - .\tests\unittests\runUnittestsQt512.bat
-    - get-content CoverageReport*\index.html
   needs: 
-    - winBuildDebug
+    - windowsBuildRelease_1.7
+  dependencies: 
+    - windowsBuildRelease_1.7
   variables:
     DEVTOOLS: $DEVTOOLS_Win_Stable
 
-testWinUnstable:
-  stage: unstableTest
-  extends:
-    - .unstable-debug  
-    - .winTestTemplate
+testWin_2.0:
+  stage: test_2.0
+  tags: ["windows", "docker"]
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-win
+  needs: ["windowsBuildDebug_2.0"]
+  before_script:
+    - '& $env:GTLAB_UPDATE_TOOL up --confirm-command; $null'
   script:
-    - .\tests\unittests\runUnittestsQt515.bat
-    - get-content CoverageReport*\index.html
-  needs: 
-    - winBuildDebugUnstable
-  variables:
-    DEVTOOLS: $DEVTOOLS_Win_Unstable  
+    - $env:path = "$env:GTLAB_DEV_TOOLS\binDebug;$env:path"
+    - cd build
+    - .\GTlabPythonUnitTest.exe --gtest_output=xml:unittests.xml
+  artifacts:
+    paths:
+      - "build/unittests.xml"
+    expire_in: 1 week
+    reports:
+      junit: build/unittests.xml
 
-testLinux:
-  stage: test
-  extends: 
-    - .stable-debug
-    - .linuxTestTemplate
-  needs: 
-    - linuxBuildDebug
-  variables:
-    DEVTOOLS: $DEVTOOLS_Linux_Stable    
-
-testLinuxUnstable:
-  stage: unstableTest
-  extends: 
-    - .unstable-debug
-    - .linuxTestTemplate
-  needs: 
-    - linuxBuildDebugUnstable
-  variables:
-    DEVTOOLS: $DEVTOOLS_Linux_Unstable
-    LINUX_QT_DIR: /opt/Qt/5.15.2/gcc_64
-
-# run package jobs
-winPackageRelease:
-  stage: package
-  extends:
-    - .pkgTemplate
-    - .stable-release
-  needs:
-    - winBuildRelease
-  variables:
-    TARGETDIRNAME: $TARGETDIRNAME_STABLE
-    GT_MODULE_ID: $GT_MODULE_ID_STABLE
-
-winPackageDebug:
-  stage: package
-  extends:
-    - .pkgTemplate
-    - .stable-debug
-  needs:
-    - winBuildDebug
-  variables:
-    BINDIR: binDebug/modules
-    TARGETDIRNAME: $TARGETDIRNAME_STABLE
-    GT_MODULE_ID: $GT_MODULE_ID_STABLE
-
-winPackageReleaseUnstable:
-  stage: package
-  extends:
-    - .pkgTemplate
-    - .unstable-release
-  needs:
-    - winBuildReleaseUnstable
-  variables:
-    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
-    GT_MODULE_ID: $GT_MODULE_ID_UNSTABLE
-
-winPackageDebugUnstable:
-  stage: package
-  extends:
-    - .pkgTemplate
-    - .unstable-debug
-  needs:
-    - winBuildDebugUnstable
-  variables:
-    BINDIR: binDebug/modules
-    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
-    GT_MODULE_ID: $GT_MODULE_ID_UNSTABLE
-
-linuxPackageRelease:
-  stage: package
-  extends:
-    - .pkgTemplate
-    - .stable-release
-  needs:
-    - linuxBuildRelease
-  variables:
-    TARGETDIRNAME: $TARGETDIRNAME_STABLE
-    GT_MODULE_ID: $GT_MODULE_ID_STABLE
-
-linuxPackageDebug:
-  stage: package
-  extends:
-    - .pkgTemplate
-    - .stable-debug
-  needs:
-    - linuxBuildDebug
-  variables:
-    BINDIR: binDebug/modules
-    TARGETDIRNAME: $TARGETDIRNAME_STABLE
-    GT_MODULE_ID: $GT_MODULE_ID_STABLE
-
-linuxPackageReleaseUnstable:
-  stage: package
-  extends:
-    - .pkgTemplate
-    - .unstable-release
-  needs:
-    - linuxBuildReleaseUnstable
-  variables:
-    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
-    GT_MODULE_ID: $GT_MODULE_ID_UNSTABLE
-
-linuxPackageDebugUnstable:
-  stage: package
-  extends:
-    - .pkgTemplate
-    - .unstable-debug
-  needs:
-    - linuxBuildDebugUnstable
-  variables:
-    BINDIR: binDebug/modules
-    TARGETDIRNAME: $TARGETDIRNAME_UNSTABLE
-    GT_MODULE_ID: $GT_MODULE_ID_UNSTABLE
-  
-packageXml:
-  stage: package
-  extends: .packageTemplate
-
-# deployment
-.stable-tag:
-  rules:
-    - if: $CI_COMMIT_TAG != null && $STABLE_BASE != null && $STABLE_BASE == "True"
-
-.unstable-tag:
-  rules:
-    - if: $CI_COMMIT_TAG != null && $UNSTABLE_BRANCH == null && $STABLE_BASE != null && $STABLE_BASE == "True"
-    - if: $CI_COMMIT_TAG != null && $UNSTABLE_BRANCH != null && $STABLE_BASE != null && $STABLE_BASE == "False"
-
-.deploy:
+testLinux_2.0:
+  stage: test_2.0
+  tags: ["linux", "docker"]
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster
+  needs: ["linuxBuildDebug_2.0"]
+  before_script:
+    # update to latest dev tools
+    - '"$GTLAB_UPDATE_TOOL" up --confirm-command'
   script:
-    - robocopy pkg C:\deployment\$PLATFORMNAME\$CATEGORY\$CI_PROJECT_NAME\$RELEASESTATUS\$CI_COMMIT_TAG /MIR; if ($lastexitcode -lt 4) { $global:LASTEXITCODE = $null }
+    - cd build
+    - LD_LIBRARY_PATH="$GTLAB_DEV_TOOLS/binDebug" ./GTlabPythonUnitTest --gtest_output=xml:unittests.xml
   variables:
-    PLATFORMNAME: windows
-    RELEASESTATUS: stable
+    GIT_SUBMODULE_STRATEGY: "none"
+  artifacts:
+    paths:
+      - "build/unittests.xml"
+    expire_in: 1 week
+    reports:
+      junit: build/unittests.xml  
 
-winDeployStable:
-  stage: deploy
-  extends:
-    - .stable-tag
-    - .deploy
-  tags:
-    - Win10
-  needs:
-    - winPackageDebug
-    - winPackageRelease
+code-coverage:
+  stage: codequality
+  tags: ["linux", "docker"]
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster
+  extends: 
+    - .build-linux_20
+  script:
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS -DBUILD_UNITTESTS=ON -DBUILD_WITH_COVERAGE=ON
+    - cd build
+    - LD_LIBRARY_PATH="$GTLAB_DEV_TOOLS/binDebug" ninja test-coverage
+    - mv test-coverage ..
+  coverage: '/^\s{2}lines\.+:\s+(\d+.\d+\%)/'
   variables:
-    PLATFORMNAME: windows
-    RELEASESTATUS: stable
-
-winDeployUnstable:
-  stage: deploy
-  extends:
-    - .unstable-tag
-    - .deploy
-  tags:
-    - Win10
-  needs:
-    - winPackageDebugUnstable
-    - winPackageReleaseUnstable
-  variables:
-    PLATFORMNAME: windows
-    RELEASESTATUS: unstable
-
-linuxDeployStable:
-  stage: deploy
-  extends:
-    - .stable-tag
-    - .deploy
-  tags:
-    - Win10
-  needs:
-    - linuxPackageDebug
-    - linuxPackageRelease
-  variables:
-    PLATFORMNAME: linux
-    RELEASESTATUS: stable
-
-linuxDeployUnstable:
-  stage: deploy
-  extends:
-    - .unstable-tag
-    - .deploy
-  tags:
-    - Win10
-  needs:
-    - linuxPackageDebugUnstable
-    - linuxPackageReleaseUnstable
-  variables:
-    PLATFORMNAME: linux
-    RELEASESTATUS: unstable
+    GIT_SUBMODULE_STRATEGY: "none"
+  artifacts:
+    expose_as: 'TestCoverage'
+    name: "TestCoverage-$CI_COMMIT_REF_NAME"
+    paths:
+      - "test-coverage"
 
 # code quality
 codingstyle:
   stage: codequality
   extends: .codingStyleTemplate
-
+ 
 cppcheck:
   stage: codequality
-  extends: .cppCheckReportTemplate
+  extends: .cppCheckTemplate
+  allow_failure: true
 
 pages:
   stage: badges
   extends: .pageTemplate
 
+.package:
+  stage: package
+  tags: ["docker", "linux"]
+  extends: [".run-master-and-tags"]
+  image: debian:buster
+  script:
+    - cp -r install-$toolchain-dbg/* install-$toolchain
+    - mv install-$toolchain gtlabpython-$toolchain
+    - tar czf gtlabpython-$toolchain.tar.gz gtlabpython-$toolchain
+  artifacts:
+    name: "gtlabpython-$toolchain"
+    paths: ["gtlabpython-$toolchain.tar.gz"]
+  variables:
+    toolchain: msvc2019
+    GIT_STRATEGY: "none"
+
+package-win_2.0:
+  extends: [".package"]
+  needs: ["windowsBuildDebug_2.0", "windowsBuildRelease_2.0"]
+  variables:
+    toolchain: msvc2019
+
+package-win_1.7:
+  extends: [".package"]
+  needs: ["windowsBuildRelease_1.7"]
+  variables:
+    toolchain: msvc2017
+
+package-linux_2.0:
+  extends: [".package"]
+  needs: ["linuxBuildDebug_2.0", "linuxBuildRelease_2.0"]
+  variables:
+    toolchain: linux
+
+package-linux_1.7:
+  extends: [".package"]
+  needs: ["linuxBuildDebug_1.7", "linuxBuildRelease_1.7"]
+  variables:
+    toolchain: linux
+
+
 # badges
-badges:
+badges_1.7:
   stage: badges
   extends: 
     - .stable-only-master
     - .badgeTemplate
   dependencies:
-    - winBuildDebug
-    - linuxBuildDebug
-    - testWin
-    - testLinux
+    - windowsBuildRelease_1.7
+    - linuxBuildDebug_1.7
     - codingstyle
 
-badgesUnstable:
+badges_2.0:
   stage: badges
   extends: 
     - .unstable-only-master
     - .badgeTemplate
   dependencies:
-    - winBuildDebugUnstable
-    - linuxBuildDebugUnstable
-    - testWinUnstable
-    - testLinuxUnstable
+    - windowsBuildDebug_2.0
+    - linuxBuildDebug_2.0
+    - testWin_2.0
+    - testLinux_2.0
     - codingstyle
+
