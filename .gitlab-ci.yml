@@ -207,10 +207,21 @@ package-win_2.0:
     toolchain: msvc2019
 
 package-win_1.7:
-  extends: [".package"]
+  stage: package
+  tags: ["docker", "linux"]
+  extends: [".run-master-and-tags"]
   needs: ["windowsBuildRelease_1.7"]
+  image: debian:buster
+  script:
+    - mv install-$toolchain gtlabpython-$toolchain
+    - tar czf gtlabpython-$toolchain.tar.gz gtlabpython-$toolchain
+  artifacts:
+    name: "gtlabpython-$toolchain"
+    paths: ["gtlabpython-$toolchain.tar.gz"]
   variables:
     toolchain: msvc2017
+    GIT_STRATEGY: "none"
+
 
 package-linux_2.0:
   extends: [".package"]
