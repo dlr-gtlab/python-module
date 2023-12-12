@@ -48,6 +48,7 @@ set(HEADERS
     utilities/gtpy_contextmanager.h
     utilities/gtpy_decorator.h
     utilities/gtpy_gilscope.h
+    utilities/gtpy_threadscope.h
     utilities/gtpy_globals.h
     utilities/gtpy_interruptrunnable.h
     utilities/gtpy_matplotlib.h
