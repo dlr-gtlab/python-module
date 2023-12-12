@@ -30,6 +30,7 @@
 #include "gtpy_task.h"
 #include "gtpy_scriptcalculator.h"
 #include "gtpy_convert.h"
+#include "gtpy_threadscope.h"
 
 #include "gtpy_decorator.h"
 
@@ -433,9 +434,14 @@ GtpyDecorator::runProcess(GtProject* pro, const QString& processId,
         return false;
     }
 
-    // execute process
-    GtCoreProcessExecutor executor;
-    executor.runTask(process);
+    {
+        // The executor runs python tasks in a different thread, so we need to call this first
+        auto _ = GtpyThreadScope();
+
+        // execute process
+        GtCoreProcessExecutor executor;
+        executor.runTask(process);
+    }
 
     if (process->currentState() != GtProcessComponent::FINISHED)
     {
