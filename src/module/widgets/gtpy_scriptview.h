@@ -162,7 +162,7 @@ private:
 
     bool m_replaceTabBySpaces;
 
-    void commentSelectedLines();
+    void commentSelectedLines(QTextCursor cursor);
 
     /**
      * @brief Calls completer to handle completion.
@@ -174,24 +174,9 @@ private:
      *  is commented out.
      * @return True if current line is commented out.
      */
-    bool isCurrentLineCommentedOut();
+    bool isCurrentLineCommentedOut(QTextCursor cursor) const;
 
-    QString currentLineIndent();
-
-    /**
-     * @brief Checks whether the current selection should get indented when
-     * pressing e.g. 'tab'
-     * @return True if selection should get indented, false if it should get
-     * replaced with 'tab'
-     */
-    bool isSelectionIndentable();
-
-    /**
-     * @brief indents selected lines to the right or the left depending on param
-     * @param direction, true = right, false = left
-     * @return true if lines were indented, false if not
-     */
-    bool indentSelectedLines(bool direction);
+    QString currentLineIndent(QTextCursor cursor) const;
 
     void setExtraSelections();
 
@@ -214,11 +199,11 @@ private:
 
     void insertFramingCharacters(const QString& character);
 
-signals:
-    /**
-     * @brief Emitted when eval shortcut (ctrl+E) is pressed.
-     */
-    void evalShortcutTriggered();
+    QString indentCharacters() const;
+
+    bool insertIndent(QTextCursor cursor);
+
+    bool removeIndent(QTextCursor cursor);
 };
 
 #endif // GTPYSCRIPTVIEW_H
