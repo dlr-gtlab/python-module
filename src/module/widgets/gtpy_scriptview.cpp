@@ -568,7 +568,6 @@ GtpyScriptView::isCurrentLineCommentedOut(QTextCursor cursor) const
 QString
 GtpyScriptView::currentLineIndent(QTextCursor cursor) const
 {
-//    QTextCursor cursorCopy{cursor};
     cursor.movePosition(QTextCursor::Up);
     cursor.select(QTextCursor::LineUnderCursor);
 
