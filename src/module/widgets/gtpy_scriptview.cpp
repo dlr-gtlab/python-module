@@ -584,7 +584,7 @@ QTextCursor
 GtpyScriptView::findNextCursor(const QString& text, const QTextCursor& cursor,
                                FindFlags options) const
 {
-    QString selectedText = cursor.selectedText();
+    QString selectedText{cursor.selectedText()};
     bool findBackward = (options & QTextDocument::FindBackward);
 
     /// determine the correct starting position
@@ -675,10 +675,10 @@ GtpyScriptView::insertIndent(QTextCursor cursor)
     if (selectedText.count(QChar::ParagraphSeparator) == 0)
     {
         cursor.select(QTextCursor::LineUnderCursor);
-        QString line{cursor.selectedText()};
+        bool hasSelection = cursor.hasSelection();
 
         /// check if the entire text of the line is selected
-        if (selectedText != line)
+        if (selectedText != cursor.selectedText())
         {
             return false;
         }
@@ -687,7 +687,7 @@ GtpyScriptView::insertIndent(QTextCursor cursor)
         cursor.insertText(indent);
 
         /// check if the line was not empty before indentation
-        if(!line.isEmpty())
+        if(hasSelection)
         {
             cursor.select(QTextCursor::LineUnderCursor);
             setTextCursor(cursor);
@@ -706,7 +706,7 @@ GtpyScriptView::insertIndent(QTextCursor cursor)
 bool
 GtpyScriptView::removeIndent(QTextCursor cursor)
 {
-    QString selectedText = cursor.selectedText();
+    QString selectedText{cursor.selectedText()};
 
     /// check if only one line is selected
     if (selectedText.count(QChar::ParagraphSeparator) == 0)
