@@ -10,6 +10,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QPointer>
 
 #include "gt_pyhighlighter.h"
 
@@ -19,12 +20,26 @@
 
 #include "gtpy_scripteditorwidget.h"
 
+struct GtpyScriptEditorWidget::Impl
+{
+    /// Script view
+    QPointer<GtpyScriptView> m_scriptView{nullptr};
+
+    /// Undo button
+    QPointer<QPushButton> m_undoButton{nullptr};
+
+    /// Redo button
+    QPointer<QPushButton> m_redoButton{nullptr};
+
+    /// Replace widget
+    QPointer<GtpyReplaceWidget> m_replaceWidget{nullptr};
+
+    void setSearchText();
+};
+
 GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
     QWidget(parent),
-    m_scriptView{nullptr},
-    m_undoButton{nullptr},
-    m_redoButton{nullptr},
-    m_replaceWidget{nullptr}
+    m_pimpl{std::make_unique<GtpyScriptEditorWidget::Impl>()}
 {
     ///  main layout
     auto* mainLayout = new QVBoxLayout;
@@ -36,76 +51,80 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
     topLayout->setMargin(0);
     topLayout->setContentsMargins(0, 0, 0, 0);
 
-    m_undoButton = new QPushButton;
-    m_undoButton->setIcon(GTPY_ICON(undo));
-    m_undoButton->setToolTip(tr("Undo"));
-    m_undoButton->setFlat(true);
-    m_undoButton->setEnabled(false);
+    m_pimpl->m_undoButton = new QPushButton;
+    m_pimpl->m_undoButton->setIcon(GTPY_ICON(undo));
+    m_pimpl->m_undoButton->setToolTip(tr("Undo"));
+    m_pimpl->m_undoButton->setFlat(true);
+    m_pimpl->m_undoButton->setEnabled(false);
 
-    topLayout->addWidget(m_undoButton);
+    topLayout->addWidget(m_pimpl->m_undoButton);
 
-    m_redoButton = new QPushButton;
-    m_redoButton->setIcon(GTPY_ICON(redo));
-    m_redoButton->setToolTip(tr("Redo"));
-    m_redoButton->setFlat(true);
-    m_redoButton->setEnabled(false);
+    m_pimpl->m_redoButton = new QPushButton;
+    m_pimpl->m_redoButton->setIcon(GTPY_ICON(redo));
+    m_pimpl->m_redoButton->setToolTip(tr("Redo"));
+    m_pimpl->m_redoButton->setFlat(true);
+    m_pimpl->m_redoButton->setEnabled(false);
 
-    topLayout->addWidget(m_redoButton);
+    topLayout->addWidget(m_pimpl->m_redoButton);
 
     topLayout->addStretch(1);
 
-    m_replaceWidget = new GtpyReplaceWidget(this);
-    topLayout->addWidget(m_replaceWidget);
+    m_pimpl->m_replaceWidget = new GtpyReplaceWidget(this);
+    topLayout->addWidget(m_pimpl->m_replaceWidget);
 
     /// script editor
-    m_scriptView = new GtpyScriptView(contextId);
-    m_scriptView->setStyleSheet("QPlainTextEdit {  border: 0px; }");
+    m_pimpl->m_scriptView = new GtpyScriptView(contextId);
+    m_pimpl->m_scriptView->setStyleSheet("QPlainTextEdit {  border: 0px; }");
 
-    QTextOption defaultOps = m_scriptView->document()->defaultTextOption();
+    QTextOption defaultOps = m_pimpl->m_scriptView->document()->defaultTextOption();
     defaultOps.setFlags(defaultOps.flags() | QTextOption::ShowTabsAndSpaces);
-    m_scriptView->document()->setDefaultTextOption(defaultOps);
+    m_pimpl->m_scriptView->document()->setDefaultTextOption(defaultOps);
 
-    auto* highlighter = new GtPyHighlighter(m_scriptView->document());
+    auto* highlighter = new GtPyHighlighter(m_pimpl->m_scriptView->document());
     Q_UNUSED(highlighter)
 
     mainLayout->addLayout(topLayout);
-    mainLayout->addWidget(m_scriptView);
+    mainLayout->addWidget(m_pimpl->m_scriptView);
 
     setLayout(mainLayout);
 
     /// conect editor
-    connect(m_scriptView, SIGNAL(redoAvailable(bool)), this,
+    connect(m_pimpl->m_scriptView, SIGNAL(redoAvailable(bool)), this,
             SLOT(setRedoButtonEnabled(bool)));
-    connect(m_scriptView, SIGNAL(undoAvailable(bool)), this,
+    connect(m_pimpl->m_scriptView, SIGNAL(undoAvailable(bool)), this,
             SLOT(setUndoButtonEnabled(bool)));
 
     /// connect redo/undo button
-    connect(m_redoButton, SIGNAL(clicked(bool)), m_scriptView, SLOT(redo()));
-    connect(m_undoButton, SIGNAL(clicked(bool)), m_scriptView, SLOT(undo()));
+    connect(m_pimpl->m_redoButton, SIGNAL(clicked(bool)), m_pimpl->m_scriptView,
+            SLOT(redo()));
+    connect(m_pimpl->m_undoButton, SIGNAL(clicked(bool)), m_pimpl->m_scriptView,
+            SLOT(undo()));
 
     /// connect serach and replace
-    connect(m_replaceWidget, SIGNAL(searchTextChanged(QString)), this,
+    connect(m_pimpl->m_replaceWidget, SIGNAL(searchTextChanged(QString)), this,
             SLOT(onSearchTextChanged(QString)));
-    connect(m_replaceWidget, SIGNAL(searchLineReturnPressed()), this,
+    connect(m_pimpl->m_replaceWidget, SIGNAL(searchLineReturnPressed()), this,
             SLOT(onSearchForward()));
-    connect(m_replaceWidget, SIGNAL(backwardButtonClicked()), this,
+    connect(m_pimpl->m_replaceWidget, SIGNAL(backwardButtonClicked()), this,
             SLOT(onSearchBackward()));
-    connect(m_replaceWidget, SIGNAL(forwardButtonClicked()), this,
+    connect(m_pimpl->m_replaceWidget, SIGNAL(forwardButtonClicked()), this,
             SLOT(onSearchForward()));
-    connect(m_replaceWidget, SIGNAL(replace(QString, QString)), this,
+    connect(m_pimpl->m_replaceWidget, SIGNAL(replace(QString, QString)), this,
             SLOT(onReplace(QString, QString)));
 }
 
-GtpyScriptView*
-GtpyScriptEditorWidget::scriptView() const
-{
-    return m_scriptView;
-}
+GtpyScriptEditorWidget::~GtpyScriptEditorWidget() = default;
 
 void
 GtpyScriptEditorWidget::setScript(const QString& script) const
 {
-    m_scriptView->setScript(script);
+    m_pimpl->m_scriptView->setScript(script);
+}
+
+QString
+GtpyScriptEditorWidget::script() const
+{
+    return m_pimpl->m_scriptView->script();
 }
 
 void
@@ -133,61 +152,65 @@ GtpyScriptEditorWidget::keyPressEvent(QKeyEvent* event)
 }
 
 void
-GtpyScriptEditorWidget::setSearchText() const
+GtpyScriptEditorWidget::setRedoButtonEnabled(bool enable) const
 {
-    if (m_scriptView->hasSelection())
-    {
-        m_replaceWidget->setSearchText(m_scriptView->selectedText());
-    }
+    m_pimpl->m_redoButton->setEnabled(enable);
 }
 
 void
-GtpyScriptEditorWidget::setRedoButtonEnabled(bool visible) const
+GtpyScriptEditorWidget::setUndoButtonEnabled(bool enable) const
 {
-    m_redoButton->setEnabled(visible);
-}
-
-void
-GtpyScriptEditorWidget::setUndoButtonEnabled(bool visible) const
-{
-    m_undoButton->setEnabled(visible);
+    m_pimpl->m_undoButton->setEnabled(enable);
 }
 
 void
 GtpyScriptEditorWidget::onSearchBackward() const
 {
-    m_scriptView->selectNextMatch(m_replaceWidget->searchText(), true);
+    m_pimpl->m_scriptView->selectNextMatch(
+                m_pimpl->m_replaceWidget->searchText(), true);
 }
 
 void
 GtpyScriptEditorWidget::onSearchForward() const
 {
-    m_scriptView->selectNextMatch(m_replaceWidget->searchText());
+    m_pimpl->m_scriptView->selectNextMatch(
+                m_pimpl->m_replaceWidget->searchText());
 }
 
 void
-GtpyScriptEditorWidget::onReplace(const QString& find, const QString& replaceBy) const
+GtpyScriptEditorWidget::onReplace(const QString& find,
+                                  const QString& replaceBy) const
 {
-    m_scriptView->findAndReplace(find, replaceBy);
-    m_scriptView->selectNextMatch(m_replaceWidget->searchText());
+    m_pimpl->m_scriptView->findAndReplace(find, replaceBy);
+    m_pimpl->m_scriptView->selectNextMatch(
+                m_pimpl->m_replaceWidget->searchText());
 }
 
 void
 GtpyScriptEditorWidget::onSearchTextChanged(const QString& text) const
 {
-    m_scriptView->setHighlight({text, Qt::CaseSensitive});
+    m_pimpl->m_scriptView->setHighlight({text, Qt::CaseSensitive});
 }
 
 void
 GtpyScriptEditorWidget::onFindShortcut() const
 {
-    setSearchText();
-    m_replaceWidget->enableSearch();
+    m_pimpl->setSearchText();
+    m_pimpl->m_replaceWidget->enableSearch();
 }
 
 void
 GtpyScriptEditorWidget::onReplaceShortcut() const
 {
-    setSearchText();
-    m_replaceWidget->enableReplace();
+    m_pimpl->setSearchText();
+    m_pimpl->m_replaceWidget->enableReplace();
+}
+
+void
+GtpyScriptEditorWidget::Impl::setSearchText()
+{
+    if (m_scriptView->hasSelection())
+    {
+        m_replaceWidget->setSearchText(m_scriptView->selectedText());
+    }
 }
