@@ -671,8 +671,14 @@ GtpyScriptView::insertIndent(QTextCursor cursor)
     {
         cursor.insertText(indent);
     }
-    /// check if only one line is selected
-    else if (selectedText.count(QChar::ParagraphSeparator) == 0)
+    /// check if multiple lines are selected
+    else if (selectedText.count(QChar::ParagraphSeparator) > 0)
+    {
+        iterateSelectedLines(cursor, [&indent](QTextCursor& c){
+            c.insertText(indent);
+        });
+    }
+    else
     {
         QTextCursor cursorCopy{cursor};
         cursorCopy.select(QTextCursor::LineUnderCursor);
@@ -688,12 +694,6 @@ GtpyScriptView::insertIndent(QTextCursor cursor)
         cursorCopy.insertText(indent);
         cursorCopy.select(QTextCursor::LineUnderCursor);
         setTextCursor(cursorCopy);
-    }
-    else
-    {
-        iterateSelectedLines(cursor, [&indent](QTextCursor& c){
-            c.insertText(indent);
-        });
     }
 }
 
