@@ -279,9 +279,8 @@ private:
      * all lines that the cursor selects. It returns true if the indent
      * was successful.
      * @param cursor The text cursor that selects the lines to be indented.
-     * @return True if the indent was successful.
      */
-    bool insertIndent(QTextCursor cursor);
+    void insertIndent(QTextCursor cursor);
 
     /**
      * @brief Removes an indent from the line in which the cursor is located

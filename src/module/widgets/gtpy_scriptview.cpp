@@ -76,7 +76,7 @@ GtpyScriptView::GtpyScriptView(int contextId, QWidget* parent) :
     m_cpl{nullptr},
     m_contextId{contextId},
     m_indentSize{4},
-    m_replaceTabBySpaces{false}
+    m_replaceTabBySpaces{true}
 {
     QFont sysFont;
 #ifdef Q_OS_LINUX
@@ -353,13 +353,8 @@ GtpyScriptView::keyPressEvent(QKeyEvent* event)
 
         /// indent selected text
         case Qt::Key_Tab:
-
-            if (insertIndent(textCursor()))
-            {
-                return;
-            }
-
-            break;
+            insertIndent(textCursor());
+            return;
 
         default:
             break;
@@ -665,33 +660,34 @@ GtpyScriptView::indentCharacters() const
     return m_replaceTabBySpaces ? QString{" "}.repeated(m_indentSize) : "\t";
 }
 
-bool
+void
 GtpyScriptView::insertIndent(QTextCursor cursor)
 {
     QString selectedText{cursor.selectedText()};
     QString indent{indentCharacters()};
 
-    /// check if only one line is selected
-    if (selectedText.count(QChar::ParagraphSeparator) == 0)
+    /// check if cursor has no selection
+    if (selectedText.isEmpty())
     {
-        cursor.select(QTextCursor::LineUnderCursor);
-        bool hasSelection = cursor.hasSelection();
-
-        /// check if the entire text of the line is selected
-        if (selectedText != cursor.selectedText())
-        {
-            return false;
-        }
-
-        cursor.movePosition(QTextCursor::StartOfLine);
         cursor.insertText(indent);
+    }
+    /// check if only one line is selected
+    else if (selectedText.count(QChar::ParagraphSeparator) == 0)
+    {
+        QTextCursor cursorCopy{cursor};
+        cursorCopy.select(QTextCursor::LineUnderCursor);
 
-        /// check if the line was not empty before indentation
-        if(hasSelection)
+        /// check if not the entire text of the line is selected
+        if (selectedText != cursorCopy.selectedText())
         {
-            cursor.select(QTextCursor::LineUnderCursor);
-            setTextCursor(cursor);
+            cursor.insertText(indent);
+            return;
         }
+
+        cursorCopy.movePosition(QTextCursor::StartOfLine);
+        cursorCopy.insertText(indent);
+        cursorCopy.select(QTextCursor::LineUnderCursor);
+        setTextCursor(cursorCopy);
     }
     else
     {
@@ -699,8 +695,6 @@ GtpyScriptView::insertIndent(QTextCursor cursor)
             c.insertText(indent);
         });
     }
-
-    return true;
 }
 
 bool

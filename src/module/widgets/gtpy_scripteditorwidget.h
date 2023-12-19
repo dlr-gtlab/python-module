@@ -60,6 +60,8 @@ private:
     struct Impl;
     std::unique_ptr<Impl> m_pimpl;
 
+    void setSearchText() const;
+
 private slots:
 
     /**

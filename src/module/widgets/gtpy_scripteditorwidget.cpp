@@ -33,8 +33,6 @@ struct GtpyScriptEditorWidget::Impl
 
     /// Replace widget
     QPointer<GtpyReplaceWidget> m_replaceWidget{nullptr};
-
-    void setSearchText();
 };
 
 GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
@@ -152,6 +150,16 @@ GtpyScriptEditorWidget::keyPressEvent(QKeyEvent* event)
 }
 
 void
+GtpyScriptEditorWidget::setSearchText() const
+{
+    if (m_pimpl->m_scriptView->hasSelection())
+    {
+        m_pimpl->m_replaceWidget->setSearchText(
+                    m_pimpl->m_scriptView->selectedText());
+    }
+}
+
+void
 GtpyScriptEditorWidget::setRedoButtonEnabled(bool enable) const
 {
     m_pimpl->m_redoButton->setEnabled(enable);
@@ -195,22 +203,13 @@ GtpyScriptEditorWidget::onSearchTextChanged(const QString& text) const
 void
 GtpyScriptEditorWidget::onFindShortcut() const
 {
-    m_pimpl->setSearchText();
+    setSearchText();
     m_pimpl->m_replaceWidget->enableSearch();
 }
 
 void
 GtpyScriptEditorWidget::onReplaceShortcut() const
 {
-    m_pimpl->setSearchText();
+    setSearchText();
     m_pimpl->m_replaceWidget->enableReplace();
-}
-
-void
-GtpyScriptEditorWidget::Impl::setSearchText()
-{
-    if (m_scriptView->hasSelection())
-    {
-        m_replaceWidget->setSearchText(m_scriptView->selectedText());
-    }
 }
