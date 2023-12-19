@@ -10,6 +10,8 @@
 #ifndef GTPYSCRIPTEDITORWIDGET_H
 #define GTPYSCRIPTEDITORWIDGET_H
 
+#include <memory>
+
 #include <QWidget>
 
 #include "gt_pythonmodule_exports.h"
