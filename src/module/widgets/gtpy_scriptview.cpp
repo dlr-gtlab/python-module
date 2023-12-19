@@ -392,80 +392,11 @@ GtpyScriptView::focusInEvent(QFocusEvent* event)
 }
 
 void
-GtpyScriptView::lineHighlighting()
-{
-    if (!isReadOnly())
-    {
-        m_lineHighlight.cursor = textCursor();
-        m_lineHighlight.cursor.clearSelection();
-
-        resetErrorHighlighting();
-
-        setExtraSelections();
-    }
-}
-
-void
-GtpyScriptView::highlightErrorLine(int codeLine)
-{
-    if (!isReadOnly())
-    {
-        m_errorHighlight.cursor = QTextCursor{
-                document()->findBlockByLineNumber(codeLine)};
-        m_lineHighlight.cursor = {};
-
-        setExtraSelections();
-    }
-}
-
-void
-GtpyScriptView::appendErrorMessage(const QString& message, int contextId)
-{
-    if (contextId == m_contextId)
-    {
-        m_errorMessage += message;
-
-        int line = lineFromMessage(message);
-
-        if (line > -1)
-        {
-            highlightErrorLine(line);
-        }
-    }
-}
-
-void
-GtpyScriptView::resetErrorHighlighting()
-{
-    m_errorHighlight.cursor = {};
-    m_errorMessage = "";
-    setExtraSelections();
-}
-
-void
-GtpyScriptView::insertCompletion()
-{
-    if (m_cpl != nullptr)
-    {
-        QTextCursor cursor = textCursor();
-        m_cpl->insertCompletion(cursor);
-        setTextCursor(cursor);
-        m_cpl->getPopup()->hide();
-    }
-}
-
-void
-GtpyScriptView::onTextChanged()
-{
-    highlightText(m_highlighted);
-}
-
-void
-GtpyScriptView::selectNextMatch(const QString& text, bool reverse,
+GtpyScriptView::selectNextMatch(const QString& text, bool backward,
                                 Qt::CaseSensitivity cs)
 {
     /// translates given options in QTextDocument::FindFlags
-    QTextDocument::FindFlags flags = reverse ?
+    QTextDocument::FindFlags flags = backward ?
                 QTextDocument::FindBackward : QTextDocument::FindFlags();
     flags = (cs == Qt::CaseSensitive) ?
                 (flags | QTextDocument::FindCaseSensitively) : flags;
@@ -737,16 +668,17 @@ GtpyScriptView::indentCharacters() const
 bool
 GtpyScriptView::insertIndent(QTextCursor cursor)
 {
-    QString selectedText = cursor.selectedText();
-    QString indent = indentCharacters();
+    QString selectedText{cursor.selectedText()};
+    QString indent{indentCharacters()};
 
     /// check if only one line is selected
     if (selectedText.count(QChar::ParagraphSeparator) == 0)
     {
         cursor.select(QTextCursor::LineUnderCursor);
+        QString line{cursor.selectedText()};
 
         /// check if the entire text of the line is selected
-        if (selectedText != cursor.selectedText())
+        if (selectedText != line)
         {
             return false;
         }
@@ -755,7 +687,7 @@ GtpyScriptView::insertIndent(QTextCursor cursor)
         cursor.insertText(indent);
 
         /// check if the line was not empty before indentation
-        if(!selectedText.isEmpty())
+        if(!line.isEmpty())
         {
             cursor.select(QTextCursor::LineUnderCursor);
             setTextCursor(cursor);
@@ -810,4 +742,73 @@ GtpyScriptView::removeIndent(QTextCursor cursor)
     };
 
     return iterateSelectedLines(cursor, removeLineIndet);
+}
+
+void
+GtpyScriptView::lineHighlighting()
+{
+    if (!isReadOnly())
+    {
+        m_lineHighlight.cursor = textCursor();
+        m_lineHighlight.cursor.clearSelection();
+
+        resetErrorHighlighting();
+
+        setExtraSelections();
+    }
+}
+
+void
+GtpyScriptView::highlightErrorLine(int codeLine)
+{
+    if (!isReadOnly())
+    {
+        m_errorHighlight.cursor = QTextCursor{
+                document()->findBlockByLineNumber(codeLine)};
+        m_lineHighlight.cursor = {};
+
+        setExtraSelections();
+    }
+}
+
+void
+GtpyScriptView::appendErrorMessage(const QString& message, int contextId)
+{
+    if (contextId == m_contextId)
+    {
+        m_errorMessage += message;
+
+        int line = lineFromMessage(message);
+
+        if (line > -1)
+        {
+            highlightErrorLine(line);
+        }
+    }
+}
+
+void
+GtpyScriptView::resetErrorHighlighting()
+{
+    m_errorHighlight.cursor = {};
+    m_errorMessage = "";
+    setExtraSelections();
+}
+
+void
+GtpyScriptView::insertCompletion()
+{
+    if (m_cpl != nullptr)
+    {
+        QTextCursor cursor = textCursor();
+        m_cpl->insertCompletion(cursor);
+        setTextCursor(cursor);
+        m_cpl->getPopup()->hide();
+    }
+}
+
+void
+GtpyScriptView::onTextChanged()
+{
+    highlightText(m_highlighted);
 }
