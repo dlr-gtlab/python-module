@@ -216,7 +216,7 @@ public slots:
      * @param calc Pointer to GtpyScriptCalculator
      * @return The input arguments of the given component as Python dict.
      */
-    PyObject* inputArgs(GtpyScriptCalculator* calc);
+    PyObject* inputArgs(GtpyScriptCalculator* calc) const;
 
     /**
      * @brief Decorates inputArg() method of GtpyScriptCalculator.
@@ -241,7 +241,7 @@ public slots:
      * @param calc Pointer to GtpyScriptCalculator
      * @return The output arguments of the given component as Python dict.
      */
-    PyObject* outputArgs(GtpyScriptCalculator* calc);
+    PyObject* outputArgs(GtpyScriptCalculator* calc) const;
 
     /**
      * @brief Decorates outputArg() method of GtpyScriptCalculator.
@@ -274,7 +274,7 @@ public slots:
      * @param task Pointer to GtpyTask
      * @return The input arguments of the given component as Python dict.
      */
-    PyObject* inputArgs(GtpyTask* task);
+    PyObject* inputArgs(GtpyTask* task) const;
 
     /**
      * @brief Decorates inputArg() method of GtpyTask.
@@ -299,7 +299,7 @@ public slots:
      * @param task Pointer to GtpyTask
      * @return The output arguments of the given component as Python dict.
      */
-    PyObject* outputArgs(GtpyTask* task);
+    PyObject* outputArgs(GtpyTask* task) const;
 
     /**
      * @brief Decorates outputArg() method of GtpyTask.

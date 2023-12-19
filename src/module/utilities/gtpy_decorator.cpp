@@ -506,7 +506,7 @@ GtpyDecorator::run(GtCalculator* calc)
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 PyObject*
-GtpyDecorator::inputArgs(GtpyScriptCalculator* calc)
+GtpyDecorator::inputArgs(GtpyScriptCalculator* calc) const
 {
     return gtpy::convert::fromPropertyStructContainer(calc->inputArgs());
 }
@@ -543,7 +543,7 @@ GtpyDecorator::setInputArg(GtpyScriptCalculator* calc, const QString& argName,
 }
 
 PyObject*
-GtpyDecorator::outputArgs(GtpyScriptCalculator* calc)
+GtpyDecorator::outputArgs(GtpyScriptCalculator* calc) const
 {
     return gtpy::convert::fromPropertyStructContainer(calc->outputArgs());
 }
@@ -700,7 +700,7 @@ GtpyDecorator::deleteAllCalculators(GtTask* task)
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 PyObject*
-GtpyDecorator::inputArgs(GtpyTask* task)
+GtpyDecorator::inputArgs(GtpyTask* task) const
 {
     return gtpy::convert::fromPropertyStructContainer(task->inputArgs());
 }
@@ -737,7 +737,7 @@ GtpyDecorator::setInputArg(GtpyTask* task, const QString& argName,
 }
 
 PyObject*
-GtpyDecorator::outputArgs(GtpyTask* task)
+GtpyDecorator::outputArgs(GtpyTask* task) const
 {
     return gtpy::convert::fromPropertyStructContainer(task->outputArgs());
 }
