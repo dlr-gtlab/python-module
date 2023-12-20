@@ -23,6 +23,17 @@ namespace gtpy {
 namespace convert {
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+/**
+ * @brief Converts the passed GtPropertyStructContainer into a Python dict
+ * and returns it. The entries in the GtPropertyStructContainer require a
+ * member named 'name' and a member named 'value'. In Python dict, the name
+ * is used as a key to identify the corresponding value. The dict is an
+ * independent instance and changes to it do not affect
+ * the GtPropertyStructContainer.
+ * @param con GtPropertyStructContainer to convert.
+ * @return Python dict with name and value pairs from the passed
+ * GtPropertyStructContainer.
+ */
 PyObject*
 fromPropertyStructContainer(const GtPropertyStructContainer& con);
 #endif
