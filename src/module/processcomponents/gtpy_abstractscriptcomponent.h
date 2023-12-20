@@ -10,11 +10,10 @@
 #ifndef GTPYCOMPONENTASSISTANT_H
 #define GTPYCOMPONENTASSISTANT_H
 
+#include "gt_globals.h"
 #include "gt_stringproperty.h"
 #include "gt_intproperty.h"
 #include "gt_boolproperty.h"
-
-#include "gtpy_contextmanager.h"
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 #include "gt_propertystructcontainer.h"
@@ -74,13 +73,38 @@ public:
      * @brief Returns the input arguments as property struct container.
      * @return Input arguments property struct container.
      */
-    const GtPropertyStructContainer& inputArgs();
+    const GtPropertyStructContainer& inputArgs() const;
+
+    /**
+     * @brief Returns the input argument identified by the given argName.
+     * @param argName Name of the input argument for which the value should be
+     * returned.
+     * @return The value of the input arguement identified by argName.
+     */
+    QVariant inputArg(const QString& argName) const;
+
+    /**
+     * @brief Sets the value of the input argument identified by the given
+     * argName to the given value.
+     * @param argName Name of the input argument for which the value should be
+     * set.
+     * @param value New argument value.
+     */
+    bool setInputArg(const QString& argName, const QVariant& value);
 
     /**
      * @brief Returns the output arguments as property struct container.
      * @return Output arguments property struct container.
      */
-    const GtPropertyStructContainer& outputArgs();
+    const GtPropertyStructContainer& outputArgs() const;
+
+    /**
+     * @brief Returns the output argument identified by the given argName.
+     * @param argName Name of the output argument for which the value should be
+     * returned.
+     * @return The value of the output arguement identified by argName.
+     */
+    QVariant outputArg(const QString& argName) const;
 #endif
 
 protected:

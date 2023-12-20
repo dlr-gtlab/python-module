@@ -7,7 +7,8 @@
  *  Tel.: +49 2203 601 2692
  */
 
-#include "gt_globals.h"
+#include "gtpy_abstractscriptcomponent.h"
+
 #include "gt_package.h"
 #include "gt_objectpath.h"
 #include "gt_objectpathproperty.h"
@@ -20,8 +21,48 @@
 #endif
 
 #include "gtpy_transfer.h"
+#include "gtpy_contextmanager.h"
 
-#include "gtpy_abstractscriptcomponent.h"
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+
+namespace {
+
+bool
+setStructContainerValue(GtPropertyStructContainer& con, const QString& argName,
+                        const QVariant& value)
+{
+    auto entry = std::find_if(con.begin(), con.end(),
+                              [&argName](const GtPropertyStructInstance& entry){
+        return entry.getMemberVal<QString>("name") == argName;
+    });
+
+    if (entry == con.end())
+    {
+        return false;
+    }
+
+    return entry->setMemberVal("value", value);
+}
+
+QVariant
+structContainerValue(const GtPropertyStructContainer& con, const QString& argName)
+{
+    auto entry = std::find_if(con.begin(), con.end(),
+                              [&argName](const GtPropertyStructInstance& entry){
+        return entry.getMemberVal<QString>("name") == argName;
+    });
+
+    if (entry == con.end())
+    {
+        return {};
+    }
+
+    return entry->getMemberValToVariant("value");
+}
+
+}
+
+#endif
 
 GtpyAbstractScriptComponent::GtpyAbstractScriptComponent() :
     m_pyThreadId{-1},
@@ -116,15 +157,34 @@ GtpyAbstractScriptComponent::setTabSize(int tabSize)
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 const GtPropertyStructContainer&
-GtpyAbstractScriptComponent::inputArgs()
+GtpyAbstractScriptComponent::inputArgs() const
 {
     return m_inputArgs;
 }
 
+QVariant
+GtpyAbstractScriptComponent::inputArg(const QString& argName) const
+{
+    return structContainerValue(m_inputArgs, argName);
+}
+
+bool
+GtpyAbstractScriptComponent::setInputArg(
+        const QString& argName, const QVariant& value)
+{
+    return setStructContainerValue(m_inputArgs, argName, value);
+}
+
 const GtPropertyStructContainer&
-GtpyAbstractScriptComponent::outputArgs()
+GtpyAbstractScriptComponent::outputArgs() const
 {
     return m_outputArgs;
+}
+
+QVariant
+GtpyAbstractScriptComponent::outputArg(const QString& argName) const
+{
+    return structContainerValue(m_outputArgs, argName);
 }
 #endif
 
@@ -169,4 +229,4 @@ GtpyAbstractScriptComponent::evalScript(int contextId)
     gtInfo() << "...done!";
 
     return success;
-};
+}
