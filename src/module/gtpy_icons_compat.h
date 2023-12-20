@@ -50,6 +50,11 @@
 #define GTPY_PNG_ICON_triangleSmallLeft "arrowleftIcon.png"
 #define GTPY_PNG_ICON_triangleSmallRight "arrowrightIcon.png"
 #define GTPY_PNG_ICON_update "updateIcon_16.png"
+#define GTPY_PNG_ICON_undo "undoIcon_24.png"
+#define GTPY_PNG_ICON_redo "undoIcon_24.png"
+#define GTPY_PNG_ICON_swap "reloadIcon.png"
+#define GTPY_PNG_ICON_search "searchIcon_24.png"
+#define GTPY_PNG_ICON_backspaceFlipped "clearIcon2_16.png"
 
 #endif
 

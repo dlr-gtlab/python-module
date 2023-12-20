@@ -66,7 +66,11 @@ set(HEADERS
     utilities/pythonextensions/gtpy_stdout.h
     widgets/gtpy_completer.h
     widgets/gtpy_console.h
+    widgets/gtpy_lineedit.h
+    widgets/gtpy_replacewidget.h
     widgets/gtpy_scripteditor.h
+    widgets/gtpy_scripteditorwidget.h
+    widgets/gtpy_scriptview.h
     widgets/gtpy_taskdelegate.h
     widgets/gtpy_tasktreeview.h
     wizards/editor_settings/gtpy_editorsettings.h
@@ -131,7 +135,11 @@ set(SOURCES
     utilities/pythonextensions/gtpy_stdout.cpp
     widgets/gtpy_completer.cpp
     widgets/gtpy_console.cpp
+    widgets/gtpy_lineedit.cpp
+    widgets/gtpy_replacewidget.cpp
     widgets/gtpy_scripteditor.cpp
+    widgets/gtpy_scripteditorwidget.cpp
+    widgets/gtpy_scriptview.cpp
     widgets/gtpy_taskdelegate.cpp
     widgets/gtpy_tasktreeview.cpp
     wizards/editor_settings/gtpy_editorsettings.cpp
