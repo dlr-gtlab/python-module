@@ -508,7 +508,7 @@ GtpyContextManager::addGtObject(int contextId, const QString& name,
 }
 
 bool
-GtpyContextManager::addVariable(int contextId, const QString &name, const QVariant &value)
+GtpyContextManager::addVariable(int contextId, const QString& name, const QVariant& value)
 {
     PythonQtObjectPtr con = context(contextId);
 
@@ -537,7 +537,6 @@ GtpyContextManager::getVariable(int contextId, const QString &name)
     GTPY_GIL_SCOPE
 
     return con.getVariable(name);
-
 }
 
 bool
