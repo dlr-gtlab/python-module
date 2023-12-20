@@ -7,7 +7,7 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-project(GTlab-Python VERSION 1.4.2)
+project(GTlab-Python VERSION 1.5.0)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 

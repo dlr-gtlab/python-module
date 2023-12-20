@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2023-12-20
+### Fixed
+ - Deadlock when calling Python Calculator via Python Console - #251
+ 
+### Changed
+ - Builds against PythonQt 3.4.2 - #246
+ - Changed build system to cmake
+ 
+### Added
+ - New script editor widget that provides redo/undo buttons and find and replace functionality. - #240
+ - Input and output arguments of any Python task or calculator are accessible from Python scripts. - #249
+ 
 ## [1.4.2] - 2023-09-18
 
 ### Added
