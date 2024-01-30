@@ -10,12 +10,18 @@
 #ifndef GTPYCONTEXT_H
 #define GTPYCONTEXT_H
 
+#include "PythonQtObjectPtr.h"
 #include "gtpy_contextinit.h"
 
 class GtpyContext
 {
 public:
     GtpyContext(gtpy::context::Type type);
+    ~GtpyContext();
+
+private:
+    QString m_moduleName;
+    PythonQtObjectPtr m_module{nullptr};
 };
 
 #endif // GTPYCONTEXT_H
