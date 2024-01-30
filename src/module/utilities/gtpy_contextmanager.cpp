@@ -1824,8 +1824,10 @@ GtpyContextManager::introspectObject(PyObject* object) const
                     }
                     else
                     {
-                        if (!objName.contains(
-                                    QRegExp(QStringLiteral("^[a-zA-Z0-9_]*$"))))
+                        static QRegularExpression regexp{
+                            "^[a-zA-Z_][a-zA-Z0-9_]*$"};
+
+                        if (!objName.contains(regexp))
                         {
                             QString funcName = m_decorator->getFunctionName(
                                                    FIND_GT_CHILD_TAG);
