@@ -13,6 +13,8 @@
 #include <functional>
 #include <map>
 
+#include "PythonQtObjectPtr.h"
+
 namespace gtpy {
 
 namespace context {
@@ -29,11 +31,11 @@ enum Type {
 
 namespace init {
 
-void batchContext();
+void batchContext(PythonQtObjectPtr&);
 
-void taskRunContext();
+void taskRunContext(PythonQtObjectPtr& con);
 
-using InitFunc = std::function<void()>;
+using InitFunc = std::function<void(PythonQtObjectPtr&)>;
 InitFunc routine(Type type);
 
 } // namespace init

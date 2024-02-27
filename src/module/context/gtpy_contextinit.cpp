@@ -8,8 +8,9 @@
  */
 
 #include <QDebug>
+#include <QObject>
 
-#include "PythonQtObjectPtr.h"
+#include "gt_logging.h"
 
 #include "gtpy_constants.h"
 #include "gtpy_gilscope.h"
@@ -27,6 +28,13 @@ fromAimportB(QString a, QString b)
 void
 evalCode(PythonQtObjectPtr& con, const QString& code)
 {
+    if (con.isNull())
+    {
+        gtDebug() << "Python code cannot be evaluated. "
+                     "The given context is a nullptr.";
+        return;
+    }
+
     GTPY_GIL_SCOPE
 
     con.evalScript(code);
@@ -36,9 +44,9 @@ void
 importDefaultModules(PythonQtObjectPtr& con)
 {
     QString code = fromAimportB(
-                gtpy::constants::modules::GTOBJECTWRAPPERMODULEC,
-                gtpy::constants::classes::GTPYEXTENDEDWRAPPER);
-    code += fromAimportB("PythonQt", gtpy::constants::modules::GTCLASSES);
+                gtpy::constants::modules::GT_OBJECT_WRAPPER_MODULE_C,
+                gtpy::constants::classes::GTPY_EXTENDED_WRAPPER);
+    code += fromAimportB("PythonQt", gtpy::constants::modules::GT_CLASSES);
     code += fromAimportB("PythonQt", "QtCore");
 
     evalCode(con, code);
@@ -48,7 +56,7 @@ void
 importLoggingFuncs(PythonQtObjectPtr& con)
 {
     auto fromGtLoggingImport = [](const QString& funcName){
-        return fromAimportB(gtpy::constants::modules::GTLOGGING, funcName);
+        return fromAimportB(gtpy::constants::modules::GT_LOGGING, funcName);
     };
 
     QString code = fromGtLoggingImport("gtDebug");
@@ -61,9 +69,20 @@ importLoggingFuncs(PythonQtObjectPtr& con)
 }
 
 void
+importCalculatorModule(PythonQtObjectPtr& con)
+{
+    QString code{"__import__.%1()"};
+    code.arg(gtpy::constants::funcs::IMPORT_GT_CALCS);
+
+    GTPY_GIL_SCOPE
+
+    con.evalScript(code);
+}
+
+void
 logToAppConsole(PythonQtObjectPtr& con, bool toAppConsole = true)
 {
-    QString code{gtpy::constants::attr::LOGTOAPPCONSOLE};
+    QString code{gtpy::constants::attr::LOG_TO_APP_CONSOLE};
 
     if (toAppConsole)
         code += " = True\n";
@@ -76,15 +95,18 @@ logToAppConsole(PythonQtObjectPtr& con, bool toAppConsole = true)
 }
 
 void
-gtpy::context::init::batchContext()
+gtpy::context::init::batchContext(PythonQtObjectPtr&)
 {
     qDebug() << "init batchContext";
 }
 
 void
-gtpy::context::init::taskRunContext()
+gtpy::context::init::taskRunContext(PythonQtObjectPtr& con)
 {
-    qDebug() << "init taskRunContext";
+    importDefaultModules(con);
+    importLoggingFuncs(con);
+    logToAppConsole(con);
+    importCalculatorModule(con);
 }
 
 std::map<gtpy::context::Type, gtpy::context::init::InitFunc> initRoutineMap = {
