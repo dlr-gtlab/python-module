@@ -21,7 +21,7 @@ public:
 
 private:
     QString m_moduleName;
-    PythonQtObjectPtr m_module{nullptr};
+    PythonQtObjectPtr m_module;
 };
 
 #endif // GTPYCONTEXT_H

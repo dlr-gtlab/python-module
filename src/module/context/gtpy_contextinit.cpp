@@ -9,8 +9,71 @@
 
 #include <QDebug>
 
+#include "PythonQtObjectPtr.h"
+
+#include "gtpy_constants.h"
+#include "gtpy_gilscope.h"
+
 #include "gtpy_contextinit.h"
 
+namespace {
+
+QString
+fromAimportB(QString a, QString b)
+{
+    return QString{"from %1 import %2\n"}.arg(a, b);
+}
+
+void
+evalCode(PythonQtObjectPtr& con, const QString& code)
+{
+    GTPY_GIL_SCOPE
+
+    con.evalScript(code);
+}
+
+void
+importDefaultModules(PythonQtObjectPtr& con)
+{
+    QString code = fromAimportB(
+                gtpy::constants::modules::GTOBJECTWRAPPERMODULEC,
+                gtpy::constants::classes::GTPYEXTENDEDWRAPPER);
+    code += fromAimportB("PythonQt", gtpy::constants::modules::GTCLASSES);
+    code += fromAimportB("PythonQt", "QtCore");
+
+    evalCode(con, code);
+}
+
+void
+importLoggingFuncs(PythonQtObjectPtr& con)
+{
+    auto fromGtLoggingImport = [](const QString& funcName){
+        return fromAimportB(gtpy::constants::modules::GTLOGGING, funcName);
+    };
+
+    QString code = fromGtLoggingImport("gtDebug");
+    code += fromGtLoggingImport("gtInfo");
+    code += fromGtLoggingImport("gtError");
+    code += fromGtLoggingImport("gtFatal");
+    code += fromGtLoggingImport("gtWarning");
+
+    evalCode(con, code);
+}
+
+void
+logToAppConsole(PythonQtObjectPtr& con, bool toAppConsole = true)
+{
+    QString code{gtpy::constants::attr::LOGTOAPPCONSOLE};
+
+    if (toAppConsole)
+        code += " = True\n";
+    else
+        code += " = False\n";
+
+    evalCode(con, code);
+}
+
+}
 
 void
 gtpy::context::init::batchContext()
