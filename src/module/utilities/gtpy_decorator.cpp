@@ -114,6 +114,31 @@ GtpyDecorator::wrapGtObject(GtObject* obj)
     return wrapped;
 }
 
+PyObject*
+GtpyDecorator::wrapGtObject(std::unique_ptr<GtObject>&& obj)
+{
+    if (!obj)
+    {
+        return nullptr;
+    }
+
+    auto pyObj = wrapGtObject(obj.get());
+
+    // C++ is still owner of pyObj. Now make Python the owner
+    // wrapGtObject actually returns a GtpyExtendedWrapper
+    GtpyExtendedWrapper* self = (GtpyExtendedWrapper*)(pyObj);
+
+    // transfer ownership to python, since nothing own
+    // this clone anymore
+    if (self->_obj)
+    {
+        self->_obj->passOwnershipToPython();
+        obj.release();
+    }
+
+    return pyObj;
+}
+
 void
 GtpyDecorator::init(GtCoreApplication* app, const QString& id)
 {
@@ -1055,6 +1080,16 @@ GtpyDecorator::objectByUUID(GtObject* obj, const QString& uuid)
     Q_UNUSED(obj)
 
     return wrapGtObject(obj->getObjectByUuid(uuid));
+}
+
+PyObject*
+GtpyDecorator::clone(GtObject *obj)
+{
+    if (!obj) return nullptr;
+
+    // the clone is a new object, we transfer ownership to python
+    std::unique_ptr<GtObject> cloned_obj(obj->clone());
+    return wrapGtObject(std::move(cloned_obj));
 }
 
 QString

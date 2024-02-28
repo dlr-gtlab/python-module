@@ -15,6 +15,8 @@
 #include <QObject>
 #include <QVariant>
 
+#include <memory>
+
 #include "gt_globals.h"
 
 class GtCoreApplication;
@@ -84,6 +86,15 @@ public:
     static GtObject* pyObjectToGtObject(PythonQtObjectPtr obj);
 
     static PyObject* wrapGtObject(GtObject* obj);
+
+    /**
+     * @brief Creates a Python object from obj and transfers ownership to
+     *        Python.
+     *
+     * @param obj Object to be returned to python
+     * @return
+     */
+    static PyObject* wrapGtObject(std::unique_ptr<GtObject>&& obj);
 
 public slots:
 
@@ -409,6 +420,16 @@ public slots:
      * @return object with the given uuid
      */
     PyObject* objectByUUID(GtObject* obj, const QString& uuid);
+
+    /**
+     * @brief Clones the given object
+     *
+     * A new object is returned, the ownership is transferred to python.
+     *
+     * @param obj The object to be cloned
+     * @return    A new object
+     */
+    PyObject* clone(GtObject* obj);
 
     /**
      * @brief Decorator function to calcHash function of GtObject.
