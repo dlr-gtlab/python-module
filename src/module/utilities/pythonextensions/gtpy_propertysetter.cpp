@@ -223,6 +223,25 @@ GtpyPropertySetter_New(QString const& propId, PyObject* self, PyObject* module)
     return (PyObject*)op;
 }
 
+static int
+GtpyPropertySetter_traverse(GtpyPropertySetterObject *self, visitproc visit, void *arg)
+{
+    Py_VISIT(self->m_propId);
+    Py_VISIT(self->m_self);
+    Py_VISIT(self->m_module);
+
+    return  0;
+}
+
+static int
+GtpyPropertySetter_clear(GtpyPropertySetterObject *self)
+{
+    Py_CLEAR(self->m_propId);
+    Py_CLEAR(self->m_self);
+    Py_CLEAR(self->m_module);
+    return 0;
+}
+
 PyTypeObject
 GtpyPropertySetter_Type =
 {
@@ -251,8 +270,8 @@ GtpyPropertySetter_Type =
     0,          /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,/* tp_flags */
     0,          /* tp_doc */
-    0,//(traverseproc)meth_traverse,    /* tp_traverse */
-    0,          /* tp_clear */
+    (traverseproc) GtpyPropertySetter_traverse, /* tp_traverse */
+    (inquiry)GtpyPropertySetter_clear,          /* tp_clear */
     (richcmpfunc)meth_richcompare,          /* tp_richcompare */
     0,          /* tp_weaklistoffset */
     0,          /* tp_iter */
