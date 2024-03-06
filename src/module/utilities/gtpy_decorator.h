@@ -370,7 +370,37 @@ public slots:
      * @return parent object (GtObject)
      */
     PyObject* findGtParent(GtObject* obj);
+#if GT_VERSION >= 0x020000
+    /**
+     * @brief getPropertyContainerVal
+     * Find a struct container property and return a value of
+     * a defined propety
+     * @param obj - parent object of the struct propety
+     * @param id of the property struct container
+     * @param index of the element of the items of the container
+     * @param memberId of the property to call
+     * @return the value as a variant
+     *
+     * Example call in python:
+     *  task.getPropertyContainerVal("args_input", 0, "name")
+     */
+    QVariant getPropertyContainerVal (GtObject* obj, const QString& id,
+                                    int index, const QString& memberId);
 
+    /**
+     * @brief setPropertyContainerVal
+     * Find a struct container property and sets a value of
+     * a defined propety
+     * @param obj - parent object of the struct propety
+     * @param id of the property struct container
+     * @param index of the element of the items of the container
+     * @param memberId of the property to call
+     * @param val - value to set
+     * @return true in case of success, else false
+     */
+    bool setPropertyContainerVal(GtObject* obj, QString const& id, int index,
+                                 QString const& memberId, const QVariant& val);
+#endif
     /**
      * @brief findGtProperties returns all properties of a GtObject
      * @param obj pointer to GtObject

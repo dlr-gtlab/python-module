@@ -21,6 +21,10 @@
 #include "gt_calculator.h"
 #include "gt_objectlinkproperty.h"
 #include "gt_abstractrunnable.h"
+#if GT_VERSION >= 0x020000
+#include "gt_structproperty.h"
+#include "gt_propertystructcontainer.h"
+#endif
 #if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
 #include "gt_datazone0d.h"
 #endif
@@ -922,14 +926,60 @@ GtpyDecorator::findGtParent(GtObject* obj)
 
     return wrapGtObject(obj->findParent<GtObject*>());
 }
+#if GT_VERSION >= 0x020000
+QVariant
+GtpyDecorator::getPropertyContainerVal(GtObject* obj, QString const& id,
+                                       int index, QString const& memberId)
+{
+    if (!obj)
+    {
+        gtError() << __func__ << " -> Invalid object given!";
+        return {};
+    }
 
+    GtPropertyStructContainer* s = obj->findPropertyContainer(id);
+
+    if (!s)
+    {
+        gtError() << __func__ << " -> PropertyStruct container of "
+                                 "object not fund!";
+        return {};
+    }
+
+    GtPropertyStructInstance& structCon = s->at(index);
+
+    return structCon.getMemberValToVariant(memberId);
+}
+
+bool
+GtpyDecorator::setPropertyContainerVal(GtObject* obj, const QString& id,
+                                       int index, const QString& memberId,
+                                       const QVariant& val)
+{
+    if (!obj)
+    {
+        gtError() << __func__ << " -> Invalid object given!";
+        return false;
+    }
+
+    GtPropertyStructContainer* s = obj->findPropertyContainer(id);
+
+    if (!s)
+    {
+        gtError() << __func__ << " -> PropertyStruct container of "
+                                 "object not fund!";
+        return false;
+    }
+
+    GtPropertyStructInstance& structCon = s->at(index);
+
+    return structCon.setMemberVal(memberId, val);
+}
+#endif
 QList<GtAbstractProperty*>
 GtpyDecorator::findGtProperties(GtObject* obj)
 {
-    if (obj == Q_NULLPTR)
-    {
-        return QList<GtAbstractProperty*>();
-    }
+    if (!obj) return {};
 
     return obj->fullPropertyList();
 }
