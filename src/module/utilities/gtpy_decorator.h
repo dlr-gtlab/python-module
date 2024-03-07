@@ -365,6 +365,16 @@ public slots:
             const QString& objectClassName = QString());
 
     /**
+     * @brief findGtChildrenByClass returns the children of type GtObject
+     * of the given class name
+     * @param obj pointer to GtObject
+     * @param objectClassName : class name filter
+     * @return See GtObject class documentation.
+     */
+    QList<PyObject*> findGtChildrenByClass(GtObject* obj,
+            const QString& objectClassName);
+
+    /**
      * @brief find parent object (GtObject)
      * @param obj : child object
      * @return parent object (GtObject)

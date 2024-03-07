@@ -914,6 +914,13 @@ GtpyDecorator::findGtChildren(GtObject* obj, const QString& childrenName,
     return retval;
 }
 
+QList<PyObject *>
+GtpyDecorator::findGtChildrenByClass(GtObject* obj,
+                                     const QString& objectClassName)
+{
+    return findGtChildren(obj, QString(), objectClassName);
+}
+
 PyObject*
 GtpyDecorator::findGtParent(GtObject* obj)
 {
