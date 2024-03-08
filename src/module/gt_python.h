@@ -10,6 +10,8 @@
 #ifndef GTPYTHON_H
 #define GTPYTHON_H
 
+#include "gt_pythonmodule_exports.h"
+
 #include "gt_moduleinterface.h"
 #include "gt_processinterface.h"
 #include "gt_mdiinterface.h"
@@ -186,5 +188,17 @@ private:
     QWidget* findWidget(QStringList path, QWidget* parent = nullptr);
 
 };
+
+namespace PythonExecution
+{
+
+/**
+ * @brief Runs a standalone python interpreter given the file passed in args
+ * @param args The first parameter is the file to execute
+ * @return 0 on success, -1 otherwise
+ */
+GT_PYTHON_EXPORT int runPythonInterpreter(const QStringList& args);
+
+}
 
 #endif // GTPYTHON_H
