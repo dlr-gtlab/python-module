@@ -19,6 +19,7 @@
 #include "gtpy_contextmanager.h"
 #include "gt_globals.h"
 #include "gt_versionnumber.h"
+#include "gt_python.h"
 
 using namespace std;
 
@@ -92,34 +93,9 @@ int main(int argc, char* argv[])
     // save to system environment (temporary)
     app.saveSystemEnvironment();
 
-    GtpyContextManager* python = GtpyContextManager::instance();
-
-    if (python)
-    {
-        python->initContexts();
-    }
-
     QStringList args = qApp->arguments();
+    args.removeAt(0);
 
-    if (args.size() < 2)
-    {
-        cout << "ERROR: invalid arguments!" << endl;
-        return -1;
-    }
+    return PythonExecution::runPythonInterpreter(args);
 
-    QString scriptContent = parseScriptFile(args[1]);
-
-    if (scriptContent.isEmpty())
-    {
-        cout << "ERROR: empty script file!" << endl;
-        return -1;
-    }
-
-    if (python)
-    {
-        python->evalScript(GtpyContextManager::BatchContext, scriptContent,
-                           true);
-    }
-
-    return 0;
 }

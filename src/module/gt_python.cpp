@@ -321,7 +321,7 @@ parseScriptFile(QFile& file)
 }
 
 int
-execPython(const QStringList& args)
+runPythonInterpreter(const QStringList& args)
 {
     if (args.isEmpty())
     {
@@ -329,12 +329,6 @@ execPython(const QStringList& args)
     }
 
     QFile f(args.first());
-
-    gtInfo() << "Start Python Script Execution for file" << args.first();
-    GtpyContextManager* python = GtpyContextManager::instance();
-
-    python->initContexts();
-
     QString scriptContent = parseScriptFile(f);
 
     if (scriptContent.isEmpty())
@@ -343,20 +337,26 @@ execPython(const QStringList& args)
         return -1;
     }
 
-    if (python)
-    {
-        bool success = python->evalScript(GtpyContextManager::BatchContext,
-                                          scriptContent, true);
+    gtInfo() << "Start Python Script Execution for file" << args.first();
+    GtpyContextManager* python = GtpyContextManager::instance();
+    assert(python);
 
-        if (success)
-        {
-            return 0;
-        }
-    }
+    python->initContexts();
 
-    return -1;
+    // print errors to console
+    QObject::connect(python,
+                     &GtpyContextManager::errorMessage,
+                     GtpyContextManager::instance(),
+                     [](const QString& message, int contextId){
+        std::cerr << message.toStdString();
+    });
+
+    bool success = python->evalScript(GtpyContextManager::BatchContext,
+                                      scriptContent, true);
+    return success ? 0 : -1;
 }
-}
+
+} // namespace PythonExecution
 
 #if GT_VERSION >= 0x020000
 QList<GtCommandLineFunction>
@@ -365,7 +365,7 @@ GtPythonModule::commandLineFunctions() const
     QList<GtCommandLineArgument> args;
     args.append(GtCommandLineArgument{"<file>", "python file to execute"});
     auto fun = gt::makeCommandLineFunction(
-                "python", PythonExecution::execPython,
+                "python", PythonExecution::runPythonInterpreter,
                 "Executes python").setArgs(args);
 
     return {fun};
