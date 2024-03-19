@@ -16,6 +16,7 @@
 #include "gtpy_decorator.h"
 
 #include "gtpy_createhelperfunction.h"
+#include "gtpypp.h"
 
 using namespace GtpyExtendedWrapperModule;
 
@@ -37,15 +38,18 @@ meth_dealloc(GtpyCreateHelperFunctionObject* m)
     Py_TYPE(m)->tp_free((PyObject*)m);
 }
 
-static PyObject*
-GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args,
+static PyObjectAPIReturn
+GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args_py,
                               PyObject* /*kw*/)
 {
     GtpyCreateHelperFunctionObject* f = (GtpyCreateHelperFunctionObject*)func;
 
     QString objectName;
 
-    Py_ssize_t argc = PyTuple_Size(args);
+    if (!args_py) return nullptr;
+
+    auto args = PyPPObject::Borrow(args_py);
+    Py_ssize_t argc = PyPPTuple_Size(args);
 
     if (!f->m_helperName || !PyString_Check(f->m_helperName))
     {
@@ -60,26 +64,20 @@ GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args,
 
     if (argc == 1)
     {
-        PyObject* firstArg = PyTuple_GetItem(args, 0);
+        auto firstArg = PyPPTuple_GetItem(args, 0);
 
-        Py_INCREF(firstArg);
-
-        if (!PyString_Check(firstArg))
+        if (!PyPPUnicode_Check(firstArg))
         {
             QString error = "create" + helperName +
                             "(objName) accepts only a argument of type string";
 
             PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
-
-            Py_DECREF(firstArg);
             return Q_NULLPTR;
         }
         else
         {
-            objectName = PyString_AsString(firstArg);
+            objectName = PyPPString_AsQString(firstArg);
         }
-
-        Py_DECREF(firstArg);
     }
     else if (argc > 1 || argc < 1)
     {
@@ -96,31 +94,16 @@ GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args,
         objectName = helperName;
     }
 
-    if (f->m_self->ob_type == &GtpyExtendedWrapper_Type)
+    auto gtObj = GtpyDecorator::pyObjectToGtObject(f->m_self);
+    if (gtObj)
     {
-        GtpyExtendedWrapper* self = (GtpyExtendedWrapper*)f->m_self;
+        GtObject* helper = gtCalculatorHelperFactory->
+                           newCalculatorHelper(helperName,
+                                               objectName, gtObj);
 
-        if (self && self->_obj)
-        {
-            Py_INCREF(self);
-
-            GtObject* gtObj = qobject_cast<GtObject*>(self->_obj->_obj);
-
-            if (gtObj)
-            {
-                GtObject* helper = gtCalculatorHelperFactory->
-                                   newCalculatorHelper(helperName,
-                                                       objectName, gtObj);
-                Py_DECREF(self);
-
-                PyObject* test = GtpyDecorator::wrapGtObject(helper);
-
-                return test;
-            }
-
-            Py_DECREF(self);
-        }
+        return GtpyDecorator::wrapGtObject(helper).release();
     }
+
 
     QString error = "Invalid GtpyExtendedWrapper instance";
     PyErr_SetString(PyExc_ValueError, error.toLatin1().data());
@@ -128,14 +111,14 @@ GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args,
     return Q_NULLPTR;
 }
 
-PyObject*
-GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* args,
+PyObjectAPIReturn
+GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* argsPy,
                              PyObject* /*kwds*/)
 {
-    GtpyCreateHelperFunctionObject* self;
-    self = (GtpyCreateHelperFunctionObject*)type->tp_alloc(type, 0);
+    auto self = PyPPObjectT<GtpyCreateHelperFunctionObject>::NewRef(
+        (GtpyCreateHelperFunctionObject*)type->tp_alloc(type, 0));
 
-    if (!args)
+    if (!argsPy)
     {
         QString error =  "Missing required positional arguments: "
                          "GtpyCreateHelperFunction_New(self, helperName)";
@@ -145,7 +128,8 @@ GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* args,
         return Q_NULLPTR;
     }
 
-    int argsCount = PyTuple_Size(args);
+    auto args = PyPPObject::Borrow(argsPy);
+    int argsCount = PyPPTuple_Size(args);
 
     if (argsCount < 2)
     {
@@ -157,7 +141,7 @@ GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* args,
         return Q_NULLPTR;
     }
 
-    PyObject* arg = PyTuple_GetItem(args, 0);
+    auto arg = PyPPTuple_GetItem(args, 0);
 
     if (!arg)
     {
@@ -169,22 +153,20 @@ GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* args,
         return Q_NULLPTR;
     }
 
-    Py_INCREF(arg);
 
-    if (!PyString_Check(arg))
+    if (!PyPPUnicode_Check(arg))
     {
         QString error =  "GtpyCreateHelperFunction_New(helperName, self) --> "
                          "Helper class name has to be a string";
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        Py_DECREF(arg);
         return Q_NULLPTR;
     }
 
-    self->m_helperName = arg;
+    self->m_helperName = arg.release();
 
-    PyObject* secArg = PyTuple_GetItem(args, 1);
+    auto secArg = PyPPTuple_GetItem(args, 1);
 
     if (!secArg)
     {
@@ -196,8 +178,6 @@ GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* args,
         return Q_NULLPTR;
     }
 
-    Py_INCREF(secArg);
-
     if (secArg->ob_type != &GtpyExtendedWrapper_Type)
     {
         QString error =  "GtpyCreateHelperFunction_New(helperName, self) --> "
@@ -206,13 +186,12 @@ GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* args,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        Py_DECREF(secArg);
         return Q_NULLPTR;
     }
 
-    self->m_self = secArg;
+    self->m_self = secArg.release();
 
-    return (PyObject*)self;
+    return (PyObjectAPIReturn)self.release();
 }
 
 PyTypeObject

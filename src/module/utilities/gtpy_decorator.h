@@ -17,7 +17,10 @@
 
 #include <memory>
 
-#include "gt_globals.h"
+#include <gt_globals.h>
+#include "gtpypp.h"
+#include "gtpy_globals.h"
+#include "gt_pythonmodule_exports.h"
 
 class GtCoreApplication;
 class GtProject;
@@ -60,7 +63,7 @@ class GtDataZone0D;
  * @brief The GtPythonDecorators class
  * makes C++ functions callable for python scripts.
  */
-class GtpyDecorator: public QObject
+class GT_PYTHON_EXPORT GtpyDecorator: public QObject
 {
     Q_OBJECT
 
@@ -85,7 +88,7 @@ public:
      */
     static GtObject* pyObjectToGtObject(PythonQtObjectPtr obj);
 
-    static PyObject* wrapGtObject(GtObject* obj);
+    static PyPPObject wrapGtObject(GtObject* obj);
 
     /**
      * @brief Creates a Python object from obj and transfers ownership to
@@ -94,7 +97,7 @@ public:
      * @param obj Object to be returned to python
      * @return
      */
-    static PyObject* wrapGtObject(std::unique_ptr<GtObject>&& obj);
+    static PyPPObject wrapGtObject(std::unique_ptr<GtObject>&& obj);
 
 public slots:
 
@@ -154,14 +157,14 @@ public slots:
      * @param projectId id of the project that should be opened
      * @return the opened project
      */
-    PyObject* openProject(GtCoreApplication* app, const QString& projectId);
+    PyObjectAPIReturn openProject(GtCoreApplication* app, const QString& projectId);
 
     /**
      * @brief currentProject returns the current project
      * @param app pointer to GtCoreApplication
      * @return the current project
      */
-    PyObject* currentProject(GtCoreApplication* app);
+    PyObjectAPIReturn currentProject(GtCoreApplication* app);
 
     ///-------> functions of GtProject <-------\\\
 
@@ -202,7 +205,7 @@ public slots:
      * @param processId id of process that should be returned
      * @return the process with the given id
      */
-    PyObject* findProcess(GtProject* pro, const QString& processId);
+    PyObjectAPIReturn findProcess(GtProject* pro, const QString& processId);
 
     /**
      * @brief close close the project
@@ -227,7 +230,7 @@ public slots:
      * @param calc Pointer to GtpyScriptCalculator
      * @return The input arguments of the given component as Python dict.
      */
-    PyObject* inputArgs(GtpyScriptCalculator* calc) const;
+    PyObjectAPIReturn inputArgs(GtpyScriptCalculator* calc) const;
 
     /**
      * @brief Decorates inputArg() method of GtpyScriptCalculator.
@@ -252,7 +255,7 @@ public slots:
      * @param calc Pointer to GtpyScriptCalculator
      * @return The output arguments of the given component as Python dict.
      */
-    PyObject* outputArgs(GtpyScriptCalculator* calc) const;
+    PyObjectAPIReturn outputArgs(GtpyScriptCalculator* calc) const;
 
     /**
      * @brief Decorates outputArg() method of GtpyScriptCalculator.
@@ -285,7 +288,7 @@ public slots:
      * @param task Pointer to GtpyTask
      * @return The input arguments of the given component as Python dict.
      */
-    PyObject* inputArgs(GtpyTask* task) const;
+    PyObjectAPIReturn inputArgs(GtpyTask* task) const;
 
     /**
      * @brief Decorates inputArg() method of GtpyTask.
@@ -310,7 +313,7 @@ public slots:
      * @param task Pointer to GtpyTask
      * @return The output arguments of the given component as Python dict.
      */
-    PyObject* outputArgs(GtpyTask* task) const;
+    PyObjectAPIReturn outputArgs(GtpyTask* task) const;
 
     /**
      * @brief Decorates outputArg() method of GtpyTask.
@@ -338,7 +341,7 @@ public slots:
 
     void delete_GtpyProcessDataDistributor(GtpyProcessDataDistributor* obj);
 
-    PyObject* taskElement(GtpyProcessDataDistributor* obj, const QString& name);
+    PyObjectAPIReturn taskElement(GtpyProcessDataDistributor* obj, const QString& name);
 
     ///-------> functions of GtObject <-------\\\
 
@@ -349,7 +352,7 @@ public slots:
      * @param childName name of child that should be found
      * @return See GtObject class documentation.
      */
-    FIND_GT_CHILD PyObject* findGtChild(GtObject* obj,
+    FIND_GT_CHILD PyObjectAPIReturn findGtChild(GtObject* obj,
                                         const QString& childName);
 
     /**
@@ -360,7 +363,7 @@ public slots:
      * @param objectClassName : class name filter
      * @return See GtObject class documentation.
      */
-    FIND_GT_CHILDREN QList<PyObject*> findGtChildren(GtObject* obj,
+    FIND_GT_CHILDREN QList<PyObjectAPIReturn> findGtChildren(GtObject* obj,
             const QString& childrenName = QString(),
             const QString& objectClassName = QString());
 
@@ -371,7 +374,7 @@ public slots:
      * @param objectClassName : class name filter
      * @return See GtObject class documentation.
      */
-    QList<PyObject*> findGtChildrenByClass(GtObject* obj,
+    QList<PyObjectAPIReturn> findGtChildrenByClass(GtObject* obj,
             const QString& objectClassName);
 
     /**
@@ -379,7 +382,8 @@ public slots:
      * @param obj : child object
      * @return parent object (GtObject)
      */
-    PyObject* findGtParent(GtObject* obj);
+    PyObjectAPIReturn findGtParent(GtObject* obj);
+
 #if GT_VERSION >= 0x020000
     /**
      * @brief getPropertyContainerVal
@@ -459,7 +463,7 @@ public slots:
      * @param uuid : univerally unique identifier
      * @return object with the given uuid
      */
-    PyObject* objectByUUID(GtObject* obj, const QString& uuid);
+    PyObjectAPIReturn objectByUUID(GtObject* obj, const QString& uuid);
 
     /**
      * @brief Clones the given object
@@ -469,7 +473,7 @@ public slots:
      * @param obj The object to be cloned
      * @return    A new object
      */
-    PyObject* clone(GtObject* obj);
+    PyObjectAPIReturn clone(GtObject* obj);
 
     /**
      * @brief Decorator function to calcHash function of GtObject.

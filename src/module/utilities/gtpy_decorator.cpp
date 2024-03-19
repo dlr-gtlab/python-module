@@ -89,48 +89,43 @@ GtpyDecorator::pyObjectToGtObject(PythonQtObjectPtr obj)
     return gtObj;
 }
 
-PyObject*
+PyPPObject
 GtpyDecorator::wrapGtObject(GtObject* obj)
 {
     if (!obj)
     {
-        return Q_NULLPTR;
+        return {};
     }
 
-    PyObject* pyQtWrapper = PythonQt::priv()->wrapQObject(obj);
+    auto pyQtWrapper = PyPPObject::fromQObject(obj);
 
     if (pyQtWrapper && pyQtWrapper->ob_type->tp_base !=
             &PythonQtInstanceWrapper_Type)
     {
-        Py_XDECREF(pyQtWrapper);
-        return Q_NULLPTR;
+        return {};
     }
 
-    PyObject* childArg = PyTuple_New(1);
+    auto childArg = PyPPTuple_New(1);
 
-    PyTuple_SetItem(childArg, 0, pyQtWrapper);
+    PyPPTuple_SetItem(childArg, 0, std::move(pyQtWrapper));
 
-    PyObject* wrapped = GtpyExtendedWrapper_Type.tp_new(
-                            &GtpyExtendedWrapper_Type, childArg, Q_NULLPTR);
-
-    Py_DECREF(childArg);
-
-    return wrapped;
+    return PyPPObject::NewRef(GtpyExtendedWrapper_Type.tp_new(
+        &GtpyExtendedWrapper_Type, childArg.get(), Q_NULLPTR));
 }
 
-PyObject*
+PyPPObject
 GtpyDecorator::wrapGtObject(std::unique_ptr<GtObject>&& obj)
 {
     if (!obj)
     {
-        return nullptr;
+        return {};
     }
 
     auto pyObj = wrapGtObject(obj.get());
 
     // C++ is still owner of pyObj. Now make Python the owner
     // wrapGtObject actually returns a GtpyExtendedWrapper
-    GtpyExtendedWrapper* self = (GtpyExtendedWrapper*)(pyObj);
+    GtpyExtendedWrapper* self = (GtpyExtendedWrapper*)(pyObj.get());
 
     // transfer ownership to python, since nothing own
     // this clone anymore
@@ -282,7 +277,7 @@ GtpyDecorator::switchSession(GtCoreApplication* app, const QString& id)
     app->switchSession(id);
 }
 
-PyObject* GtpyDecorator::openProject(GtCoreApplication* app,
+PyObjectAPIReturn GtpyDecorator::openProject(GtCoreApplication* app,
                                      const QString& projectId)
 {
     if (app == Q_NULLPTR)
@@ -342,10 +337,10 @@ PyObject* GtpyDecorator::openProject(GtCoreApplication* app,
 
     qDebug() << "project opened!";
 
-    return wrapGtObject(project);
+    return wrapGtObject(project).release();
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyDecorator::currentProject(GtCoreApplication* app)
 {
     if (app == Q_NULLPTR)
@@ -360,7 +355,7 @@ GtpyDecorator::currentProject(GtCoreApplication* app)
         return Q_NULLPTR;
     }
 
-    return wrapGtObject(app->currentProject());
+    return wrapGtObject(app->currentProject()).release();
 }
 
 const QString
@@ -508,7 +503,7 @@ GtpyDecorator::runProcess(GtProject* pro, const QString& processId,
     return true;
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyDecorator::findProcess(GtProject* pro, const QString& processId)
 {
     if (pro == Q_NULLPTR || processId.isEmpty())
@@ -516,7 +511,7 @@ GtpyDecorator::findProcess(GtProject* pro, const QString& processId)
         return Q_NULLPTR;
     }
 
-    return wrapGtObject(pro->findProcess(processId));
+    return wrapGtObject(pro->findProcess(processId)).release();
 }
 
 bool
@@ -540,10 +535,10 @@ GtpyDecorator::run(GtCalculator* calc)
 }
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-PyObject*
+PyObjectAPIReturn
 GtpyDecorator::inputArgs(GtpyScriptCalculator* calc) const
 {
-    return gtpy::convert::fromPropertyStructContainer(calc->inputArgs());
+    return gtpy::convert::fromPropertyStructContainer(calc->inputArgs()).release();
 }
 
 QVariant
@@ -577,10 +572,10 @@ GtpyDecorator::setInputArg(GtpyScriptCalculator* calc, const QString& argName,
     }
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyDecorator::outputArgs(GtpyScriptCalculator* calc) const
 {
-    return gtpy::convert::fromPropertyStructContainer(calc->outputArgs());
+    return gtpy::convert::fromPropertyStructContainer(calc->outputArgs()).release();
 }
 
 QVariant
@@ -723,7 +718,7 @@ GtpyDecorator::deleteAllCalculators(GtTask* task)
 
     int lastIndex = calcs.size() - 1;
 
-    for (lastIndex; lastIndex >= 0; lastIndex--)
+    for (; lastIndex >= 0; lastIndex--)
     {
         GtProcessComponent* calc = calcs.at(lastIndex);
         calcs.removeAt(lastIndex);
@@ -734,10 +729,10 @@ GtpyDecorator::deleteAllCalculators(GtTask* task)
 }
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-PyObject*
+PyObjectAPIReturn
 GtpyDecorator::inputArgs(GtpyTask* task) const
 {
-    return gtpy::convert::fromPropertyStructContainer(task->inputArgs());
+    return gtpy::convert::fromPropertyStructContainer(task->inputArgs()).release();
 }
 
 QVariant
@@ -771,10 +766,10 @@ GtpyDecorator::setInputArg(GtpyTask* task, const QString& argName,
     }
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyDecorator::outputArgs(GtpyTask* task) const
 {
-    return gtpy::convert::fromPropertyStructContainer(task->outputArgs());
+    return gtpy::convert::fromPropertyStructContainer(task->outputArgs()).release();
 }
 
 QVariant
@@ -837,16 +832,16 @@ GtpyDecorator::delete_GtpyProcessDataDistributor(
     delete obj;
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyDecorator::taskElement(
     GtpyProcessDataDistributor* obj, const QString& name)
 {
     GtTask* task = obj->taskElement(name);
 
-    return wrapGtObject(task);
+    return wrapGtObject(task).release();
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyDecorator::findGtChild(GtObject* obj, const QString& childName)
 {
     if (obj == Q_NULLPTR || childName.isEmpty())
@@ -855,16 +850,16 @@ GtpyDecorator::findGtChild(GtObject* obj, const QString& childName)
     }
 
     GtObject* child = obj->findDirectChild<GtObject*>(childName);
-    return wrapGtObject(child);
+    return wrapGtObject(child).release();
 }
 
-QList<PyObject*>
+QList<PyObjectAPIReturn>
 GtpyDecorator::findGtChildren(GtObject* obj, const QString& childrenName,
                               const QString& objectClassName)
 {
     if (obj == Q_NULLPTR)
     {
-        return QList<PyObject*>();
+        return QList<PyObjectAPIReturn>();
     }
 
     QList<GtObject*> children;
@@ -904,24 +899,24 @@ GtpyDecorator::findGtChildren(GtObject* obj, const QString& childrenName,
         }
     }
 
-    QList<PyObject*> retval;
+    QList<PyObjectAPIReturn> retval;
 
     foreach (GtObject* child, children)
     {
-        retval.append(wrapGtObject(child));
+        retval.append(wrapGtObject(child).release());
     }
 
     return retval;
 }
 
-QList<PyObject *>
+QList<PyObjectAPIReturn>
 GtpyDecorator::findGtChildrenByClass(GtObject* obj,
                                      const QString& objectClassName)
 {
     return findGtChildren(obj, QString(), objectClassName);
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyDecorator::findGtParent(GtObject* obj)
 {
     if (!obj)
@@ -931,7 +926,7 @@ GtpyDecorator::findGtParent(GtObject* obj)
         return nullptr;
     }
 
-    return wrapGtObject(obj->findParent<GtObject*>());
+    return wrapGtObject(obj->findParent<GtObject*>()).release();
 }
 #if GT_VERSION >= 0x020000
 QVariant
@@ -1131,22 +1126,22 @@ GtpyDecorator::uuid(GtObject* obj)
     return obj->uuid();
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyDecorator::objectByUUID(GtObject* obj, const QString& uuid)
 {
     Q_UNUSED(obj)
 
-    return wrapGtObject(obj->getObjectByUuid(uuid));
+    return wrapGtObject(obj->getObjectByUuid(uuid)).release();
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyDecorator::clone(GtObject *obj)
 {
     if (!obj) return nullptr;
 
     // the clone is a new object, we transfer ownership to python
     std::unique_ptr<GtObject> cloned_obj(obj->clone());
-    return wrapGtObject(std::move(cloned_obj));
+    return wrapGtObject(std::move(cloned_obj)).release();
 }
 
 QString

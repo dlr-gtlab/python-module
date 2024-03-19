@@ -14,6 +14,13 @@
 
 #include "PythonQtPythonInclude.h"
 
+/**
+ * @brief This helper type used for to make function calls lile
+ * `myObject->setMyProperty(value)` work.
+ *
+ * The extended wrapper creates a temporary instance of this type,
+ * which basically wrap the call setXXX.
+ */
 extern PyTypeObject GtpyPropertySetter_Type;
 
 PyObject*

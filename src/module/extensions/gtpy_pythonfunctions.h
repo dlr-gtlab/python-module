@@ -15,6 +15,7 @@
 #include "PythonQtPythonInclude.h"
 
 #include "gtpy_constants.h"
+#include "gtpy_globals.h"
 
 namespace gtpy
 {
@@ -25,7 +26,7 @@ namespace extension
 namespace func
 {
 
-PyObject* projectPath(PyObject* self);
+PyObjectAPIReturn projectPath(PyObject* self);
 
 static PyMethodDef PROJECT_PATH_F_DEF[] =
 {
@@ -40,11 +41,11 @@ static PyMethodDef PROJECT_PATH_F_DEF[] =
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 
-PyObject* sharedFunc(PyObject* self, PyObject* args, PyObject* keywds);
+PyObjectAPIReturn sharedFunc(PyObject* self, PyObject* args, PyObject* keywds);
 
-PyObject* callSharedFunc(PyObject* self, PyObject* args, PyObject* keywds);
+PyObjectAPIReturn callSharedFunc(PyObject* self, PyObject* args, PyObject* keywds);
 
-PyObject* sharedFuncIds(PyObject* self);
+PyObjectAPIReturn sharedFuncIds(PyObject* self);
 
 static PyMethodDef SHARED_FUNC_F_DEF[] =
 {

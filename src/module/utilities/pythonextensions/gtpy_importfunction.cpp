@@ -11,6 +11,7 @@
 #include "gtpy_calculatorsmodule.h"
 
 #include "gtpy_importfunction.h"
+#include "gtpypp.h"
 
 static void
 GtpyMyImport_dealloc(GtpyMyImport* self)
@@ -25,7 +26,7 @@ GtpyMyImport_dealloc(GtpyMyImport* self)
 }
 
 
-static PyObject*
+static PyObjectAPIReturn
 GtpyMyImport_new(PyTypeObject* type, PyObject* /*args*/,
                  PyObject* /*kwds*/)
 {
@@ -37,33 +38,18 @@ GtpyMyImport_new(PyTypeObject* type, PyObject* /*args*/,
 }
 
 static bool
-checkModuleName(PyObject* args, const QString& moduleName)
+checkModuleName(PyObject* argsPy, const QString& moduleName)
 {
-    bool retval = false;
+    auto args = PyPPObject::Borrow(argsPy);
+    if (!args || !PyPPTuple_Check(args)) return false;
 
-    if (args && PyTuple_Check(args))
-    {
-        Py_INCREF(args);
+    auto name = PyPPTuple_GetItem(args, 0);
+    if (!name || !PyPPUnicode_Check(name)) return false;
 
-        PyObject* name = PyTuple_GetItem(args, 0);
+    QString nameStr = PyPPString_AsQString(name);
+    if (nameStr != moduleName) return false;
 
-        if (name && PyString_Check(name))
-        {
-            Py_INCREF(name);
-            QString nameStr = PyString_AsString(name);
-
-            if (nameStr == moduleName)
-            {
-                retval = true;
-            }
-
-            Py_DECREF(name);
-        }
-
-        Py_DECREF(args);
-    }
-
-    return retval;
+    return true;
 }
 
 static bool
@@ -87,7 +73,7 @@ isImportAllowed(PyObject* args)
     return true;
 }
 
-static PyObject*
+static PyObjectAPIReturn
 GtpyMyImport_Call(PyObject* func, PyObject* args,
                   PyObject* kwds)
 {
@@ -110,18 +96,15 @@ GtpyMyImport_Call(PyObject* func, PyObject* args,
             return Q_NULLPTR;
         }
 
-        PyObject* mod = PyObject_Call(f->defaultImp, args, kwds);
+        auto mod = PyPPObject_Call(PyPPObject::Borrow(f->defaultImp.object()),
+                                  PyPPObject::Borrow(args),
+                                  PyPPObject::Borrow(kwds));
 
-        if (mod == Q_NULLPTR)
-        {
-            return Q_NULLPTR;
-        }
-
-        return mod;
+        return mod.release();
     }
 }
 
-static PyObject*
+static PyObjectAPIReturn
 meth_importGtCalculators(PyObject* self)
 {
     GtpyMyImport* f = (GtpyMyImport*)self;
@@ -138,36 +121,26 @@ meth_importGtCalculators(PyObject* self)
     }
     else
     {
-        PyObject* argsTuple = PyTuple_New(1);
+        auto argsTuple = PyPPTuple_New(1);
 
-        PyTuple_SetItem(argsTuple, 0, QSTRING_AS_PYSTRING(
-                            GtpyGlobals::MODULE_GtCalculators));
+        PyPPTuple_SetItem(argsTuple, 0, PyPPObject::fromQString(GtpyGlobals::MODULE_GtCalculators));
 
-        PyObject* mod = PyObject_Call(f->defaultImp, argsTuple, Q_NULLPTR);
+        auto mod = PyPPObject_Call(PyPPObject::Borrow(f->defaultImp), argsTuple);
 
-        if (mod == Q_NULLPTR)
+        if (!mod)
         {
             return Q_NULLPTR;
         }
 
-        PyObject* globals = PyEval_GetGlobals();
+        auto globals = PyPPEval_GetGlobals();
 
-        if (globals)
+        if (globals && PyPPDict_Check(globals))
         {
-            Py_INCREF(globals);
-
-            if (PyDict_Check(globals))
-            {
-                PyDict_Merge(globals, PyModule_GetDict(mod), 0);
-
-                PyDict_SetItem(globals, QSTRING_AS_PYSTRING(
-                                   GtpyGlobals::MODULE_GtCalculators), mod);
-            }
-
-            Py_DECREF(globals);
+            PyPPDict_Merge(globals, PyPPModule_GetDict(mod), 0);
+            PyPPDict_SetItem(globals, PyPPObject::fromQString(GtpyGlobals::MODULE_GtCalculators), mod);
         }
 
-        return mod;
+        return mod.release();
     }
 }
 

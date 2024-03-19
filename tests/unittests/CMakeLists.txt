@@ -14,8 +14,13 @@ endif()
 
 add_executable(GTlabPythonUnitTest
     main.cpp
+    test_helper.h
+    test_variantconvert.cpp
 )
 
-target_link_libraries(GTlabPythonUnitTest PRIVATE GTlab::Python gtest Qt5::Core)
+target_compile_definitions(GTlabPythonUnitTest
+    PRIVATE GT_MODULE_ID="Python Unit Tests"
+)
 
+target_link_libraries(GTlabPythonUnitTest PRIVATE GTlab::Core GTlab::Python gtest Qt5::Core)
 

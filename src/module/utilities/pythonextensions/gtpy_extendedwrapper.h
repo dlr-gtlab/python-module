@@ -17,16 +17,20 @@
 
 #include "gtpy_globals.h"
 
+#include <gt_object.h>
+
 namespace GtpyExtendedWrapperModule
 {
 extern PyTypeObject GtpyExtendedWrapper_Type;
 
-typedef struct
+/// Python wrapper the the GTObject
+struct GtpyExtendedWrapper
 {
     PyObject_HEAD
     PythonQtInstanceWrapper* _obj;
 
-} GtpyExtendedWrapper;
+    QObject* getObject() const;
+};
 
 #ifdef PY3K
 static PyModuleDef
