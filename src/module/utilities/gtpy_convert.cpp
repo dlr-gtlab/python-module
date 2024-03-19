@@ -20,12 +20,12 @@
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 
-PyObject*
+PyPPObject
 gtpy::convert::fromPropertyStructContainer(const GtPropertyStructContainer& con)
 {
     GTPY_GIL_SCOPE
 
-    PyObject* result = PyDict_New();
+    auto result = PyPPDict_New();
 
     /// iterate through the container entries
     for (const auto& entry : con)
@@ -40,13 +40,10 @@ gtpy::convert::fromPropertyStructContainer(const GtPropertyStructContainer& con)
             if (ok)
             {
                 /// convert value to PyObject*
-                auto* valObj = PythonQtConv::QVariantToPyObject(val);
+                auto valObj = PyPPObject::fromQVariant(val);
 
                 /// sets name and val to the result dict
-                PyDict_SetItemString(result, name.toUtf8().data(), valObj);
-
-                /// decrement the reference count for valObj
-                Py_DECREF(valObj);
+                PyPPDict_SetItem(result, name.toUtf8().data(), valObj);
             }
         }
     }

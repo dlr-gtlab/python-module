@@ -174,6 +174,8 @@ public:
      * @return baic meta information about the module
      */
     QList<GtCommandLineFunction> commandLineFunctions() const override;
+
+    QList<gt::SharedFunction> sharedFunctions() const override;
 #endif
 
 private:

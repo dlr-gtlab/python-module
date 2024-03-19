@@ -19,6 +19,7 @@
 #include "gtpy_decorator.h"
 
 #include "gtpy_extendedwrapper.h"
+#include "gtpypp.h"
 
 using namespace GtpyExtendedWrapperModule;
 
@@ -40,38 +41,28 @@ pointerAdress(QObject* obj)
 
 static ternaryfunc pythonqt_slot_call = nullptr;
 
-PyObject*
-PythonQtSlotFunction_MyCall(PyObject* func, PyObject* args, PyObject* kw)
+PyObjectAPIReturn
+PythonQtSlotFunction_MyCall(PyObject* func, PyObject* argsPy, PyObject* kw)
 {
-    if (PyTuple_Check(args))
+    auto args = PyPPObject::Borrow(argsPy);
+    if (PyPPTuple_Check(args))
     {
-        int size = PyTuple_Size(args);
+        int size = PyPPTuple_Size(args);
 
         for (int i = 0; i < size; i++)
         {
-            PyObject* arg = PyTuple_GetItem(args, i);
+            auto arg = PyPPTuple_GetItem(args, i);
 
-            if (arg)
-            {
-                Py_INCREF(arg);
+            if (!arg || !PyPPObject_TypeCheck(arg, &GtpyExtendedWrapper_Type)) continue;
 
-                if (PyObject_TypeCheck(arg, &GtpyExtendedWrapper_Type))
-                {
-                    GtpyExtendedWrapper* wrapper = (GtpyExtendedWrapper*)arg;
+            GtpyExtendedWrapper* wrapper = (GtpyExtendedWrapper*)arg.get();
+            auto wrappedObj = PyPPObject::Borrow((PyObject*)wrapper->_obj);
+            PyPPTuple_SetItem(args, i, std::move(wrappedObj));
 
-                    PyObject* wrappedObj = (PyObject*)wrapper->_obj;
-
-                    Py_INCREF(wrappedObj);
-
-                    PyTuple_SetItem(args, i, wrappedObj);
-                }
-
-                Py_DECREF(arg);
-            }
         }
     }
 
-    return pythonqt_slot_call(func, args, kw);
+    return pythonqt_slot_call(func, args.get(), kw);
 }
 
 void
@@ -93,15 +84,15 @@ GtpyExtendedWrapper_dealloc(GtpyExtendedWrapper* self)
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
-static PyObject*
-GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* args,
+static PyObjectAPIReturn
+GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* argsIn,
                         PyObject* /*kwds*/)
 {
     GtpyExtendedWrapper* self;
 
     self = (GtpyExtendedWrapper*)type->tp_alloc(type, 0);
 
-    if (!args)
+    if (!argsIn)
     {
         QString error =  "__init__(self, GtObject) missing 1 "
                          "required positional argument: "
@@ -113,7 +104,8 @@ GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* args,
         return nullptr;
     }
 
-    int argsCount = PyTuple_Size(args);
+    auto args = PyPPObject::Borrow(argsIn);
+    int argsCount = PyPPTuple_Size(args);
 
     if (argsCount < 1)
     {
@@ -139,29 +131,25 @@ GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* args,
         return nullptr;
     }
 
-    PyObject* obj = PyTuple_GetItem(args, 0);
+    auto obj = PyPPTuple_GetItem(args, 0);
 
     if (obj && (obj->ob_type->tp_base == &PythonQtInstanceWrapper_Type ||
                 obj->ob_type == &PythonQtInstanceWrapper_Type))
     {
-        PythonQtInstanceWrapper* pyQtwrapper =
-            static_cast<PythonQtInstanceWrapper*>((void*)obj);
+        // transfer owner to pyQtwrapper
+        auto pyQtwrapper = PyPPObjectT<PythonQtInstanceWrapper>::NewRef(
+            static_cast<PythonQtInstanceWrapper*>((void*)obj.release()));
 
-        if (pyQtwrapper)
+
+        assert(pyQtwrapper);
+
+        if (pyQtwrapper->_obj)
         {
-            QPointer<QObject> wrappedObj = pyQtwrapper->_obj;
-
-            if (static_cast<GtObject*>(wrappedObj.data()))
-            {
-                self->_obj = pyQtwrapper;
-                Py_INCREF(self->_obj);
-            }
+            self->_obj = pyQtwrapper.release();
         }
     }
 
-    PyObject* retval = (PyObject*)self;
-
-    return retval;
+    return (PyObjectAPIReturn)self;
 }
 
 int
@@ -171,7 +159,7 @@ GtpyExtendedWrapper_init(GtpyExtendedWrapper* /*self*/, PyObject* /*args*/,
     return 0;
 }
 
-static PyObject*
+static PyObjectAPIReturn
 GtpyExtendedWrapper_richcompare(GtpyExtendedWrapper* self,
                                 PyObject* other, int code)
 {
@@ -179,40 +167,36 @@ GtpyExtendedWrapper_richcompare(GtpyExtendedWrapper* self,
             other, code);
 }
 
-static PyObject*
+static PyObjectAPIReturn
 object___dir__(PyObject* self/*, PyObject* Py_UNUSED(ignored)*/)
 {
     GtpyExtendedWrapper* wrapper = (GtpyExtendedWrapper*)self;
 
-    PyObject* result = nullptr;
-    PyObject* dict = nullptr;
-    PyObject* wrappedKeys = nullptr;
+    PyPPObject result;
 
-    dict = PyObject_GetAttrString(self, "__dict__");
+    auto dict = PyPPObject_GetAttr(PyPPObject::Borrow(self), "__dict__");
 
-    if (dict && PyDict_Check(dict))
+    if (dict && PyPPDict_Check(dict))
     {
-        result = PyDict_Keys(dict);
+        result = PyPPDict_Keys(dict);
     }
 
     if (!result)
     {
-        result = PyList_New(0);
+        result = PyPPList_New(0);
     }
 
-    wrappedKeys = PyObject_Dir((PyObject*)wrapper->_obj);
+    auto wrappedKeys = PyPPObject_Dir(PyPPObject::Borrow((PyObject*)wrapper->_obj));
 
     if (wrappedKeys)
     {
-        int count = PyList_Size(wrappedKeys);
-        PyObject* key = nullptr;
+        int count = PyPPList_Size(wrappedKeys);
+
 
         for (int i = 0; i < count; i++)
         {
-            key = PyList_GetItem(wrappedKeys, i);
-            Py_XINCREF(key);
-            PyList_Append(result, key);
-            Py_XDECREF(key);
+            auto key = PyPPList_GetItem(wrappedKeys, i);
+            PyPPList_Append(result, key);
         }
     }
 
@@ -224,15 +208,12 @@ object___dir__(PyObject* self/*, PyObject* Py_UNUSED(ignored)*/)
     {
         QString temp = "create" + helperName;
 
-        PyList_Append(result, PyString_FromString(temp.toStdString().data()));
+        PyPPList_Append(result, PyPPObject::fromQString(temp));
     }
 
-    PyList_Sort(result);
+    PyPPList_Sort(result);
 
-    Py_XDECREF(dict);
-    Py_XDECREF(wrappedKeys);
-
-    return result;
+    return result.release();
 }
 
 static PyMethodDef
@@ -373,33 +354,33 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
 
     // Get attribute object of GtpyExtendedWrapper
     PyErr_Clear();
-    PyObject* attr = PyObject_GenericGetAttr(obj, name);
+    auto attr = PyPPObject_GenericGetAttr(PyPPObject::Borrow(obj), PyPPObject::Borrow(name));
     PyErr_Clear();
 
     // If __dict__ is called fill dict with GtProperties
     if (strName == "__dict__")
     {
-        PyObject* dict = nullptr;
+        PyPPObject dict;
 
         // Create a dict object
-        if (!attr || !PyDict_Check(attr))
+        if (!attr || !PyPPDict_Check(attr))
         {
-            dict = PyDict_New();
+            dict = PyPPDict_New();
         }
         else
         {
-            dict = PyDict_Copy(attr);
+            dict = PyPPDict_Copy(attr);
         }
 
         // Get the __dict__ of the wrapped object and merge it with the
         // created dict
-        PyObject* pyQtWrapperDict = PyObject_GetAttr(
-                    (PyObject*)wrapper->_obj, name);
+        auto pyQtWrapperDict = PyPPObject_GetAttr(
+            PyPPObject::Borrow((PyObject*)wrapper->_obj), PyPPObject::Borrow(name));
         PyErr_Clear();
 
         if (pyQtWrapperDict)
         {
-            PyDict_Merge(dict, pyQtWrapperDict, false);
+            PyPPDict_Merge(dict, pyQtWrapperDict, false);
         }
 
         // Add the GtProperty instances to the dict
@@ -410,24 +391,20 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
             {
                 QString propId{pyValidGtPropertyId(prop->ident())};
 
-                if (PyObject* o = PyObject_GetAttrString(
-                            obj, propId.toLatin1().data()))
+                if (auto o = PyPPObject_GetAttr(PyPPObject::Borrow(obj), propId.toLatin1().data()))
                 {
-                    PyDict_SetItemString(dict, propId.toLatin1().data(), o);
-                    Py_DECREF(o);
+                    PyPPDict_SetItem(dict, propId.toLatin1().data(), o);
                 }
             }
         }
 
-        Py_XDECREF(pyQtWrapperDict);
-        Py_XDECREF(attr);
-        return dict;
+        return dict.release();
     }
 
     // Return the attribute of GtpyExtendedWrapper if it is valid
     if (attr)
     {
-        return attr;
+        return attr.release();
     }
 
     // If the attribute is a child object, it will be wrapped and returned
@@ -436,20 +413,15 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
     {
         if (child->objectName() == strName)
         {
-            PyObject* pyQtWrapper = PythonQt::priv()->wrapQObject(child);
+            auto pyQtWrapper = PyPPObject::NewRef(PythonQt::priv()->wrapQObject(child));
 
             if (pyQtWrapper)
             {
-                PyObject* childArg = PyTuple_New(1);
-                PyTuple_SetItem(childArg, 0, pyQtWrapper);
+                auto childArg = PyPPTuple_New(1);
+                PyPPTuple_SetItem(childArg, 0, std::move(pyQtWrapper));
 
                 // Create a new GtpyExtendedWrapper object
-                PyObject* childObj = PyObject_CallObject(
-                            (PyObject*) &GtpyExtendedWrapper_Type, childArg);
-
-                Py_DECREF(childArg);
-
-                return childObj;
+                return PyObject_CallObject((PyObject*) &GtpyExtendedWrapper_Type, childArg.get());
             }
         }
     }
@@ -476,9 +448,7 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
             {
                 if (propId == strName)
                 {
-                    PyObject* propVal = PythonQtConv::QVariantToPyObject(
-                                            prop->valueToVariant());
-                    return propVal;
+                    return PyPPObject::fromQVariant(prop->valueToVariant()).release();
                 }
 
                 if (strName.startsWith("set"))
@@ -512,23 +482,15 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
 
         if (strName == createHelperName)
         {
-            PyObject* childArg = PyTuple_New(2);
+            auto childArg = PyPPTuple_New(2);
 
-            PyTuple_SetItem(childArg, 0, PyString_FromString(
-                                helperName.toStdString().data()));
+            PyPPTuple_SetItem(childArg, 0, PyPPObject::fromQString(helperName));
+            PyPPTuple_SetItem(childArg, 1, PyPPObject::Borrow(obj));
 
-            Py_INCREF(obj);
-            PyTuple_SetItem(childArg, 1, obj);
-
-//            PyObject* createHelper = GtpyCreateHelperFunction_Type.tp_new(
+//          return GtpyCreateHelperFunction_Type.tp_new(
 //                                   &GtpyCreateHelperFunction_Type, childArg,
 //                                   nullptr);
-            PyObject* createHelper = PyObject_CallObject(
-                        (PyObject*) &GtpyCreateHelperFunction_Type, childArg);
-
-            Py_DECREF(childArg);
-
-            return createHelper;
+            return PyObject_CallObject((PyObject*) &GtpyCreateHelperFunction_Type, childArg.get());
         }
     }
 
@@ -539,7 +501,7 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
     return nullptr;
 }
 
-static PyObject*
+static PyObjectAPIReturn
 GtpyExtendedWrapper_repr(PyObject* self)
 {
     GtpyExtendedWrapper* wrapper = (GtpyExtendedWrapper*)self;
@@ -552,7 +514,7 @@ GtpyExtendedWrapper_hash(GtpyExtendedWrapper* self)
     return PythonQtInstanceWrapper_Type.tp_hash((PyObject*)self->_obj);
 }
 
-static PyObject*
+static PyObjectAPIReturn
 GtpyExtendedWrapper_str(PyObject* self)
 {
     GtpyExtendedWrapper* wrapper = (GtpyExtendedWrapper*)self;
@@ -672,3 +634,9 @@ GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type =
     GtpyExtendedWrapper_new, /* tp_new */
 
 };
+
+QObject* GtpyExtendedWrapper::getObject() const
+{
+    if (!_obj) return nullptr;
+    return _obj->_obj;
+}

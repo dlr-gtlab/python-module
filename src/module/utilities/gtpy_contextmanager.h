@@ -23,6 +23,7 @@
 
 #include "gtpy_gilscope.h"
 #include "gtpy_globals.h"
+#include "gtpypp.h"
 
 class GtObject;
 class GtTask;
@@ -382,7 +383,7 @@ private:
      * @param def The module definition.
      * @return A new reference of the extension module.
      */
-    PyObject* initExtensionModule(const QString& moduleName, PyModuleDef* def);
+    PyPPObject initExtensionModule(const QString& moduleName, PyModuleDef* def);
 #else
     /**
      * @brief Initializes the extension module and assigns it the static
@@ -392,7 +393,7 @@ private:
      * @param methods Definition of the static methods.
      * @return A new reference of the extension module.
      */
-    PyObject* initExtensionModule(const QString& moduleName,
+    PyPPObject initExtensionModule(const QString& moduleName,
                                   PyMethodDef* methods);
 #endif
 
@@ -798,31 +799,24 @@ private:
 
         QMap<Key, Val>& map = *((QMap<Key, Val>*) inMap);
 
-        PyObject* result = PyDict_New();
+        auto result = PyPPDict_New();
 
         //QMap<Key, Val>::const_iterator    t;
         //t = map.constBegin();
         QList<Key> keys = map.keys();
 
-        PyObject* key = Q_NULLPTR;
-        PyObject* val = Q_NULLPTR;
-
         //for ( ; t != map.constEnd(); t++)
         foreach (Key k, keys)
         {
             // converts key and value to QVariant and then to PyObject*
-            key = PythonQtConv::QVariantToPyObject(QVariant(k));
-            val = PythonQtConv::QVariantToPyObject(QVariant(map.value(k)));
+            auto key = PyPPObject::fromQVariant(QVariant(k));
+            auto val = PyPPObject::fromQVariant(QVariant(map.value(k)));
 
             // sets key and val to the result dict
-            PyDict_SetItem(result, key, val);
-
-            // decrement the reference count for key and val
-            Py_DECREF(key);
-            Py_DECREF(val);
+            PyPPDict_SetItem(result, key, val);
         }
 
-        return result;
+        return result.release();
     }
 
     /**
@@ -833,56 +827,38 @@ private:
     * @return Whether the conversion was successful or not.
     */
     template <typename Key, typename Val>
-    static bool pythonToMap(PyObject* obj, void* outMap)
+    static bool pythonToMap(PyObject* objIn, void* outMap)
     {
         GTPY_GIL_SCOPE
 
-        bool success = false;
+        auto obj = PyPPObject::Borrow(objIn);
 
-        if (PyMapping_Check(obj))
+
+        if (!PyPPMapping_Check(obj)) return false;
+
+        QString tempFunc = "items";
+        QByteArray ba = tempFunc.toLocal8Bit();
+        char* func = ba.data();
+
+        auto items = PyPPObject_CallMethod(obj, func, NULL);
+        if (!items) return false;
+
+        QMap<Key, Val>& map = *((QMap<Key, Val>*) outMap);
+        int count = PyPPList_Size(items);
+
+        for (int i = 0; i < count; i++)
         {
-            QString tempFunc = "items";
-            QByteArray ba = tempFunc.toLocal8Bit();
-            char* func = ba.data();
+            auto pyTuple = PyPPList_GetItem(items, i);
+            auto pyKey = PyPPTuple_GetItem(pyTuple, 0);
+            auto pyValue = PyPPTuple_GetItem(pyTuple, 1);
 
-            PyObject* items = PyObject_CallMethod(obj, func, NULL);
+            QVariant key = PyPPObject_AsQVariant(pyKey);
+            QVariant val = PyPPObject_AsQVariant(pyValue);
 
-            if (items)
-            {
-                QMap<Key, Val>& map = *((QMap<Key, Val>*) outMap);
-                int count = PyList_Size(items);
-
-                PyObject* pyValue = Q_NULLPTR;
-                PyObject* pyKey = Q_NULLPTR;
-                PyObject* pyTuple = Q_NULLPTR;
-
-                for (int i = 0; i < count; i++)
-                {
-                    pyTuple = PyList_GetItem(items, i);
-                    pyKey = PyTuple_GetItem(pyTuple, 0);
-                    pyValue = PyTuple_GetItem(pyTuple, 1);
-
-                    Py_XINCREF(pyTuple);
-                    Py_XINCREF(pyKey);
-                    Py_XINCREF(pyKey);
-
-                    QVariant key = PythonQtConv::PyObjToQVariant(pyKey);
-                    QVariant val = PythonQtConv::PyObjToQVariant(pyValue);
-
-                    map.insert(key.value<Key>(), val.value<Val>());
-
-                    Py_XDECREF(pyTuple);
-                    Py_XDECREF(pyKey);
-                    Py_XDECREF(pyKey);
-                }
-
-                Py_DECREF(items);
-
-                success = true;
-            }
+            map.insert(key.value<Key>(), val.value<Val>());
         }
 
-        return success;
+        return true;
     }
 
 };

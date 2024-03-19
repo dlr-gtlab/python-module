@@ -19,6 +19,7 @@
 #endif
 
 #include "gtpy_pythonfunctions.h"
+#include "gtpypp.h"
 
 PyObject*
 gtpy::extension::func::projectPath(PyObject* /*self*/)
@@ -37,7 +38,7 @@ gtpy::extension::func::projectPath(PyObject* /*self*/)
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 
-PyObject*
+PyObjectAPIReturn
 gtpy::extension::func::sharedFunc(PyObject* /*self*/, PyObject* args,
                                   PyObject* keywds)
 {
@@ -78,25 +79,23 @@ gtpy::extension::func::sharedFunc(PyObject* /*self*/, PyObject* args,
                         PyEval_GetGlobals(), nullptr);
 }
 
-PyObject*
+PyObjectAPIReturn
 gtpy::extension::func::callSharedFunc(PyObject* /*self*/, PyObject* args,
                                       PyObject* keywds)
 {
     const char* moduleId;
     const char* functionId;
-    PyObject* argTuple = nullptr;
+    PyObject* argTupleIn = nullptr;
 
     static const char* kwlist[] = {"module_id", "function_id", "args", nullptr};
 
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "ssO!",
                                      const_cast<char**>(kwlist),
                                      &moduleId, &functionId,
-                                     &PyTuple_Type, &argTuple))
+                                     &PyTuple_Type, &argTupleIn))
     {
         return nullptr;
     }
-
-    Py_INCREF(argTuple);
 
     auto func = gt::interface::getSharedFunction(moduleId, functionId);
 
@@ -110,14 +109,24 @@ gtpy::extension::func::callSharedFunc(PyObject* /*self*/, PyObject* args,
         return nullptr;
     }
 
-    auto argList = PythonQtConv::PyObjToQVariant(argTuple).toList();
-    Py_DECREF(argTuple);
+    const auto argTuple = PyPPObject::Borrow(argTupleIn);
+    assert(PyPPTuple_Check(argTuple));
 
-    PyObject* res = nullptr;
+    // Convert args to variants
+    QVariantList funcArgs;
+    for (int i = 0; i <  PyPPTuple_Size(argTuple); i++)
+    {
+        funcArgs.append(PyPPObject_AsQVariant(PyPPTuple_GetItem(argTuple, i)));
+    }
 
     try
     {
-        res = PythonQtConv::QVariantListToPyObject(func(argList));
+        // call the shared function
+        return PythonQtConv::QVariantListToPyObject(func(funcArgs));
+    }
+    catch (const std::runtime_error& err)
+    {
+        PyErr_SetString(PyExc_TypeError, err.what());
     }
     catch (...)
     {
@@ -128,38 +137,32 @@ gtpy::extension::func::callSharedFunc(PyObject* /*self*/, PyObject* args,
         PyErr_SetString(PyExc_TypeError, e.toLatin1().constData());
     }
 
-    return res;
+    return nullptr;
 }
 
-PyObject*
+PyObjectAPIReturn
 gtpy::extension::func::sharedFuncIds(PyObject* /*self*/)
 {
     auto ids = gt::interface::sharedFunctionIDs();
-    auto list = PyList_New(0);
+    auto list = PyPPList_New(0);
 
     using FuncId = gt::interface::SharedFunctionID;
     for (const FuncId& id : qAsConst(ids))
     {
         /// convert the ids to PyObject pointers
-        auto modId = PythonQtConv::QStringToPyObject(id.moduleId);
-        auto funcId = PythonQtConv::QStringToPyObject(id.functionId);
+        auto modId = PyPPObject::fromQString(id.moduleId);
+        auto funcId = PyPPObject::fromQString(id.functionId);
 
         /// set ids to a new dictionary
-        auto dict = PyDict_New();
-        PyDict_SetItemString(dict, "module_id", modId);
-        PyDict_SetItemString(dict, "function_id", funcId);
+        auto dict = PyPPDict_New();
+        PyPPDict_SetItem(dict, "module_id", modId);
+        PyPPDict_SetItem(dict, "function_id", funcId);
 
         /// append dict to list
-        PyList_Append(list, dict);
-
-        /// decrement the object counter, because PyDict_SetItemString and
-        /// PyList_Append do not steal the value reference
-        Py_DECREF(modId);
-        Py_DECREF(funcId);
-        Py_DECREF(dict);
+        PyPPList_Append(list, dict);
     }
 
-    return list;
+    return list.release();
 }
 
 #endif

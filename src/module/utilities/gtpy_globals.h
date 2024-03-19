@@ -17,6 +17,8 @@
 
 #define MODULE_GTCALCULATORS "GtCalculators"
 
+#define PyObjectAPIReturn PyObject*
+
 namespace GtpyGlobals
 {
 ///Environment Variables

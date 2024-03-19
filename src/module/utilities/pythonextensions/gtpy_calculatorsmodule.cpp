@@ -23,140 +23,85 @@
 #include "gtpy_gilscope.h"
 
 #include "gtpy_calculatorsmodule.h"
+#include "gtpypp.h"
 
 using namespace GtpyCalculatorsModule;
 
 static GtTask*
 findValue__task()
 {
-    GtTask* parentTask = Q_NULLPTR;
 
-    PyObject* globals = PyEval_GetGlobals();
+    auto globals = PyPPEval_GetGlobals();
+    if (!globals || !PyPPDict_Check(globals)) return nullptr;
 
-    if (globals)
+    auto taskVar = PyPPDict_GetItem(globals,
+                        GtpyGlobals::ATTR_task.
+                        toStdString().data());
+
+    if(!taskVar) return nullptr;
+
+    if (taskVar->ob_type->tp_base == &PythonQtInstanceWrapper_Type)
     {
-        Py_INCREF(globals);
+        PythonQtInstanceWrapper* wrapper =
+            (PythonQtInstanceWrapper*)taskVar.get();
 
-        if (PyDict_Check(globals))
+        if (wrapper && wrapper->_obj)
         {
-            PyObject* taskVar = PyDict_GetItemString(globals,
-                                GtpyGlobals::ATTR_task.
-                                toStdString().data());
-
-            if (taskVar)
-            {
-                Py_INCREF(taskVar);
-
-                if (taskVar->ob_type->tp_base == &PythonQtInstanceWrapper_Type)
-                {
-                    PythonQtInstanceWrapper* wrapper =
-                        (PythonQtInstanceWrapper*)taskVar;
-
-                    if (wrapper && wrapper->_obj)
-                    {
-                        parentTask = qobject_cast<GtTask*>(wrapper->_obj);
-                    }
-                }
-                else
-                {
-                    GtObject* taskObj = GtpyDecorator::pyObjectToGtObject(
-                                            taskVar);
-                    parentTask = qobject_cast<GtTask*>(taskObj);
-                }
-
-                Py_DECREF(taskVar);
-            }
+            return qobject_cast<GtTask*>(wrapper->_obj);
         }
-
-        Py_DECREF(globals);
+    }
+    else
+    {
+        GtObject* taskObj = GtpyDecorator::pyObjectToGtObject(
+            taskVar.get());
+        return qobject_cast<GtTask*>(taskObj);
     }
 
-    return parentTask;
+    return nullptr;
 }
 
 static GtTask*
 findTaskFromHigherFrame()
 {
+
+    auto inspect = PyPPImport_ImportModule("inspect");
+
+    auto dict = PyPPModule_GetDict(inspect);
+    if (!dict) return nullptr;
+
+
+    auto func = PyPPDict_GetItem(dict, "currentframe");
+    if (!func || !PyPPCallable_Check(func)) return nullptr;
+
+
     GtTask* parentTask = Q_NULLPTR;
 
-    PythonQtObjectPtr inspect;
-    inspect.setNewRef(PyImport_ImportModule("inspect"));
-
-    PyObject* dict = PyModule_GetDict(inspect);
-
-    if (dict)
+    auto fram = PyPPObject_Call(func, PyPPTuple_New(0));
+    for (;fram; fram = PyPPObject_GetAttr(fram, "f_back"))
     {
-        Py_INCREF(dict);
+        auto frameGlobals = PyPPObject_GetAttr(fram, "f_globals");
+        if (!frameGlobals || !PyPPDict_Check(frameGlobals)) continue;
 
-        PyObject* func = PyDict_GetItemString(dict, "currentframe");
+        auto taskVar = PyPPDict_GetItem(frameGlobals, GtpyGlobals::ATTR_task.toStdString().data());
+        if (!taskVar) continue;
 
-        if (func)
+        if (taskVar->ob_type->tp_base ==
+                &PythonQtInstanceWrapper_Type)
         {
-            Py_INCREF(func);
+            PythonQtInstanceWrapper* wrapper =
+                (PythonQtInstanceWrapper*)taskVar.get();
 
-            if (PyCallable_Check(func))
+            if (wrapper && wrapper->_obj)
             {
-                PyObject* fram = PyObject_Call(func, PyTuple_New(0), NULL);
-                PyObject* backFram = Q_NULLPTR;
-
-                while (fram != Py_None)
-                {
-                    PyObject* frameGlobals = PyObject_GetAttrString(
-                                                 fram, "f_globals");
-
-                    if (frameGlobals)
-                    {
-                        if (PyDict_Check(frameGlobals))
-                        {
-                            PyObject* taskVar =
-                                PyDict_GetItemString(frameGlobals,
-                                                     GtpyGlobals::ATTR_task.
-                                                     toStdString().data());
-
-                            if (taskVar)
-                            {
-                                Py_INCREF(taskVar);
-
-                                if (taskVar->ob_type->tp_base ==
-                                        &PythonQtInstanceWrapper_Type)
-                                {
-                                    PythonQtInstanceWrapper* wrapper =
-                                        (PythonQtInstanceWrapper*)taskVar;
-
-                                    if (wrapper && wrapper->_obj)
-                                    {
-                                        parentTask = qobject_cast<GtTask*>(
-                                                         wrapper->_obj);
-                                    }
-                                }
-                                else
-                                {
-                                    GtObject* taskObj =
-                                        GtpyDecorator::pyObjectToGtObject(
-                                            taskVar);
-                                    parentTask = qobject_cast<GtTask*>(taskObj);
-                                }
-
-                                Py_DECREF(taskVar);
-                            }
-                        }
-
-                        Py_DECREF(frameGlobals);
-                    }
-
-                    backFram = PyObject_GetAttrString(fram,
-                                                      "f_back");
-
-                    Py_DECREF(fram);
-
-                    fram = backFram;
-                }
+                parentTask = qobject_cast<GtTask*>(
+                                 wrapper->_obj);
             }
-
-            Py_DECREF(func);
         }
-
-        Py_DECREF(dict);
+        else
+        {
+            GtObject* taskObj = GtpyDecorator::pyObjectToGtObject(taskVar.get());
+            parentTask = qobject_cast<GtTask*>(taskObj);
+        }
     }
 
     return parentTask;
@@ -210,7 +155,7 @@ calcClassName(GtpyCreateCalculator* func)
     return className;
 }
 
-static PyObject*
+static PyObjectAPIReturn
 GtpyCreateCalculator_new(PyTypeObject* type, PyObject* args,
                          PyObject* /*kwds*/)
 {
@@ -224,7 +169,7 @@ GtpyCreateCalculator_new(PyTypeObject* type, PyObject* args,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     int argsCount = PyTuple_Size(args);
@@ -236,7 +181,7 @@ GtpyCreateCalculator_new(PyTypeObject* type, PyObject* args,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
     else if (argsCount > 1)
     {
@@ -246,10 +191,10 @@ GtpyCreateCalculator_new(PyTypeObject* type, PyObject* args,
 
         PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
-    PyObject* arg = PyTuple_GetItem(args, 0);
+    auto arg = PyPPTuple_GetItem(PyPPObject::Borrow(args), 0);
 
     if (!arg)
     {
@@ -258,24 +203,20 @@ GtpyCreateCalculator_new(PyTypeObject* type, PyObject* args,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
-    Py_INCREF(arg);
-
-    if (!PyString_Check(arg))
+    if (!PyPPUnicode_Check(arg))
     {
         QString error =  "Calculator class name has to be a string";
-
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        Py_DECREF(arg);
-        return Q_NULLPTR;
+        return nullptr;
     }
 
-    self->m_calcClassName = arg;
+    self->m_calcClassName = arg.release();
 
-    return (PyObject*)self;
+    return (PyObjectAPIReturn)self;
 }
 
 static void
@@ -290,8 +231,8 @@ GtpyCreateCalculator_dealloc(GtpyCreateCalculator* self)
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
-static PyObject*
-GtpyCreateCalculator_Call(PyObject* func, PyObject* args,
+static PyObjectAPIReturn
+GtpyCreateCalculator_Call(PyObject* func, PyObject* args_py,
                           PyObject* /*kwds*/)
 {
     GtpyCreateCalculator* f = (GtpyCreateCalculator*)func;
@@ -308,11 +249,14 @@ GtpyCreateCalculator_Call(PyObject* func, PyObject* args,
         return Q_NULLPTR;
     }
 
+    auto args = PyPPObject::Borrow(args_py);
+
     QString objName;
 
+    //@TODO : Potential bug, what if objName is stays empty?, i.e. if args is NULL?
     if (args)
     {
-        int argsCount = PyTuple_Size(args);
+        int argsCount = PyPPTuple_Size(args);
 
         if (argsCount > 1)
         {
@@ -328,26 +272,22 @@ GtpyCreateCalculator_Call(PyObject* func, PyObject* args,
 
         if (argsCount == 1)
         {
-            PyObject* arg = PyTuple_GetItem(args, 0);
+            auto arg = PyPPTuple_GetItem(args, 0);
 
             if (arg)
             {
-                Py_INCREF(arg);
 
-                if (!PyString_Check(arg))
+                if (!PyPPUnicode_Check(arg))
                 {
                     QString error = calcClassName(f) + "(name) --> "
                                     "object name has to be a string";
 
                     PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-                    Py_DECREF(arg);
                     return Q_NULLPTR;
                 }
 
-                objName = PyString_AsString(arg);
-
-                Py_DECREF(arg);
+                objName = PyPPString_AsQString(arg);
             }
         }
     }
@@ -357,9 +297,7 @@ GtpyCreateCalculator_Call(PyObject* func, PyObject* args,
     GtCalculator* calc =
         fac.createCalculator(calcClassName(f), objName, parentTask);
 
-    PyObject* obj = GtpyDecorator::wrapGtObject(calc);
-
-    return obj;
+    return GtpyDecorator::wrapGtObject(calc).release();
 }
 
 PyTypeObject
@@ -405,9 +343,9 @@ GtpyCalculatorsModule::GtpyCreateCalculator_Type =
     GtpyCreateCalculator_new,                 /* tp_new */
 };
 
-PyObject*
+PyObjectAPIReturn
 GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
-        PyObject* args)
+        PyObject* args_py)
 {
     GTPY_GIL_SCOPE
 
@@ -423,7 +361,7 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
         return Q_NULLPTR;
     }
 
-    if (!args)
+    if (!args_py)
     {
         QString error =  "findGtTask(name) missing 1 "
                          "required positional argument: name of an "
@@ -434,7 +372,9 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
         return Q_NULLPTR;
     }
 
-    int argsCount = PyTuple_Size(args);
+
+    auto args = PyPPObject::Borrow(args_py);
+    int argsCount = PyPPTuple_Size(args);
 
     if (argsCount < 1)
     {
@@ -457,7 +397,7 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
         return Q_NULLPTR;
     }
 
-    PyObject* arg = PyTuple_GetItem(args, 0);
+    auto arg = PyPPTuple_GetItem(args, 0);
 
     if (!arg)
     {
@@ -466,25 +406,18 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
                          "existing task";
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
-
         return Q_NULLPTR;
     }
 
-    Py_INCREF(arg);
-
-    if (!PyString_Check(arg))
+    if (!PyPPUnicode_Check(arg))
     {
         QString error =  "findGtTask(name) --> name has to be a string";
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
-
-        Py_DECREF(arg);
         return Q_NULLPTR;
     }
 
-    QString taskName = PyString_AsString(arg);
-
-    Py_DECREF(arg);
+    QString taskName = PyPPString_AsQString(arg);
 
     GtpyProcessDataDistributor distributor(parentTask);
 
@@ -499,14 +432,14 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
         return Q_NULLPTR;
     }
 
-    return GtpyDecorator::wrapGtObject(task);
+    return GtpyDecorator::wrapGtObject(task).release();
 }
 
 void
 GtpyCalculatorsModule::createCalcConstructors()
 {
-    PythonQtObjectPtr mod =
-        PyImport_ImportModule(
+    auto mod =
+        PyPPImport_ImportModule(
             QSTRING_TO_CHAR_PTR(GtpyGlobals::MODULE_GtCalculators));
 
     if (!mod)
@@ -526,18 +459,14 @@ GtpyCalculatorsModule::createCalcConstructors()
         QString className = QString::fromUtf8(
                                 calcData->metaData().className());
 
-        PyObject* argsTuple = PyTuple_New(1);
+        auto argsTuple = PyPPTuple_New(1);
 
-        PyTuple_SetItem(argsTuple, 0, PyString_FromString(
-                            className.toStdString().data()));
+        PyPPTuple_SetItem(argsTuple, 0, PyPPObject::fromQString(className));
 
-        PythonQtObjectPtr calcConstructor = GtpyCreateCalculator_Type.tp_new(
-                                                &GtpyCreateCalculator_Type,
-                                                argsTuple, NULL);
+        auto calcConstructor = PyPPObject::NewRef(
+            GtpyCreateCalculator_Type.tp_new(&GtpyCreateCalculator_Type, argsTuple.get(), NULL));
 
-        Py_DECREF(argsTuple);
-
-        PyModule_AddObject(mod, className.toStdString().data(),
-                           calcConstructor);
+        PyPPModule_AddObject(mod, className.toStdString().data(),
+                             std::move(calcConstructor));
     }
 }

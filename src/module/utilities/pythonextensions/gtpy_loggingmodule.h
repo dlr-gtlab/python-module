@@ -39,19 +39,19 @@ typedef struct
     PyObject* m_outputType;
 } GtpyPyLogger;
 
-extern PyObject*
+extern PyObjectAPIReturn
 gtDebug_C_function();
 
-extern PyObject*
+extern PyObjectAPIReturn
 gtInfo_C_function();
 
-extern PyObject*
+extern PyObjectAPIReturn
 gtError_C_function();
 
-extern PyObject*
+extern PyObjectAPIReturn
 gtFatal_C_function();
 
-extern PyObject*
+extern PyObjectAPIReturn
 gtWarning_C_function();
 
 static PyMethodDef

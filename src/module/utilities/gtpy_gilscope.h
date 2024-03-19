@@ -11,6 +11,7 @@
 #define GTPY_THREADSUPPORT_H
 
 #include "PythonQtPythonInclude.h"
+#include "gt_pythonmodule_exports.h"
 
 #include <QObject>
 
@@ -19,7 +20,7 @@
 /**
  * @brief The GtpyGilScope class
  */
-class GtpyGilScope : public QObject
+class GT_PYTHON_EXPORT GtpyGilScope : public QObject
 {
     Q_OBJECT
 

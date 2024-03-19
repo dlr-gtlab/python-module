@@ -120,7 +120,7 @@ testWin_2.0:
   before_script:
     - '& $env:GTLAB_UPDATE_TOOL up --confirm-command; $null'
   script:
-    - $env:path = "$env:GTLAB_DEV_TOOLS\binDebug;$env:path"
+    - $env:path = "$env:PYTHON3_HOME;$env:GTLAB_DEV_TOOLS\binDebug;$env:path"
     - cd build
     - .\GTlabPythonUnitTest.exe --gtest_output=xml:unittests.xml
   artifacts:

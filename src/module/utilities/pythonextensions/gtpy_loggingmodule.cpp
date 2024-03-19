@@ -8,6 +8,7 @@
  */
 
 #include "gtpy_loggingmodule.h"
+#include "gtpypp.h"
 
 using namespace GtpyLoggingModule;
 
@@ -23,14 +24,14 @@ GtpyPyLogger_dealloc(GtpyPyLogger* self)
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
-static PyObject*
-GtpyPyLogger_new(PyTypeObject* type, PyObject* args,
+static PyObjectAPIReturn
+GtpyPyLogger_new(PyTypeObject* type, PyObject* argsPy,
                  PyObject* /*kwds*/)
 {
     GtpyPyLogger* self;
     self = (GtpyPyLogger*)type->tp_alloc(type, 0);
 
-    if (!args)
+    if (!argsPy)
     {
         QString error =  "__init__(self, OutputType) missing 1 "
                          "required positional argument: int";
@@ -40,7 +41,9 @@ GtpyPyLogger_new(PyTypeObject* type, PyObject* args,
         return Q_NULLPTR;
     }
 
-    int argsCount = PyTuple_Size(args);
+
+    const auto args = PyPPObject::Borrow(argsPy);
+    const auto argsCount = PyPPTuple_Size(args);
 
     if (argsCount < 1)
     {
@@ -63,29 +66,27 @@ GtpyPyLogger_new(PyTypeObject* type, PyObject* args,
         return Q_NULLPTR;
     }
 
-    PyObject* outputType = PyTuple_GetItem(args, 0);
+    auto outputType = PyPPTuple_GetItem(args, 0);
 
     if (outputType)
     {
-        Py_INCREF(outputType);
-
-        if (!PyInt_Check(outputType))
+        if (!PyPPLong_Check(outputType))
         {
-            Py_DECREF(outputType);
-
             QString error = "__init__(self, OutputType) given OutputType is no "
                             "int value!";
 
             PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
+
+            // @TODO potential bug. shouldnt this return nullptr?
         }
 
-        self->m_outputType = outputType;
+        self->m_outputType = outputType.release();
     }
 
-    return (PyObject*)self;
+    return (PyObjectAPIReturn)self;
 }
 
-PyObject*
+PyObjectAPIReturn
 newLoggerInstance(OutputType outputType)
 {
     //    if (PyType_Ready(&GtpyPyLogger_Type) < 0)
@@ -93,42 +94,40 @@ newLoggerInstance(OutputType outputType)
     //        gtError() << "could not initialize GtpyPyLogger_Type";
     //    }
 
-    PyObject* argsTuple = PyTuple_New(1);
-    PyTuple_SetItem(argsTuple, 0, PyInt_FromLong(outputType));
+    auto argsTuple = PyPPTuple_New(1);
+    PyPPTuple_SetItem(argsTuple, 0, PyPPObject::fromLong(outputType));
 
-    PyObject* logger = GtpyPyLogger_Type.tp_new(&GtpyPyLogger_Type, argsTuple,
-                       NULL);
+    auto logger = PyPPObject::NewRef(
+        GtpyPyLogger_Type.tp_new(&GtpyPyLogger_Type, argsTuple.get(), NULL));
 
-    Py_DECREF(argsTuple);
-
-    return logger;
+    return logger.release();
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyLoggingModule::gtDebug_C_function()
 {
     return newLoggerInstance(DEBUG);
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyLoggingModule::gtInfo_C_function()
 {
     return newLoggerInstance(INFO);
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyLoggingModule::gtError_C_function()
 {
     return newLoggerInstance(ERROR);
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyLoggingModule::gtFatal_C_function()
 {
     return newLoggerInstance(FATAL);
 }
 
-PyObject*
+PyObjectAPIReturn
 GtpyLoggingModule::gtWarning_C_function()
 {
     return newLoggerInstance(WARNING);
@@ -137,53 +136,20 @@ GtpyLoggingModule::gtWarning_C_function()
 static void
 printOutput(QString message)
 {
-    PyObject* globals = PyEval_GetGlobals();
+    auto globals = PyPPEval_GetGlobals();
+    if (!globals || !PyPPDict_Check(globals)) return;
 
-    if (globals)
-    {
-        Py_INCREF(globals);
+    auto builtinsDict = PyPPDict_GetItem(globals, "__builtins__");
+    if (!builtinsDict || !PyPPDict_Check(builtinsDict)) return;
 
-        if (PyDict_Check(globals))
-        {
-            PyObject* builtinsDict = PyDict_GetItemString(globals,
-                                     "__builtins__");
-
-            if (builtinsDict)
-            {
-                Py_INCREF(builtinsDict);
-
-                if (PyDict_Check(builtinsDict))
-                {
-                    PyObject* print = PyDict_GetItemString(builtinsDict,
-                                                           "print");
-
-                    if (print)
-                    {
-                        Py_INCREF(print);
-
-                        if (PyCallable_Check(print))
-                        {
-                            PyObject* argsTuple = PyTuple_New(1);
-                            PyTuple_SetItem(argsTuple, 0,
-                                            QSTRING_AS_PYSTRING(message));
-
-                            PyObject_Call(print, argsTuple, NULL);
-
-                            Py_DECREF(argsTuple);
-                        }
-
-                        Py_DECREF(print);
-                    }
-                }
-
-                Py_DECREF(builtinsDict);
-            }
-        }
-
-        Py_DECREF(globals);
-    }
+    auto print = PyPPDict_GetItem(builtinsDict, "print");
+    if (!print || !PyPPCallable_Check(print)) return;
 
 
+    auto argsTuple = PyPPTuple_New(1);
+    PyPPTuple_SetItem(argsTuple, 0, PyPPObject::fromQString(message));
+
+    PyPPObject_Call(print, argsTuple);
 
     //    PyObject* builtins = PyImport_ImportModule("builtins");
 
@@ -230,7 +196,7 @@ printOutput(QString message)
     //    }
 }
 
-static PyObject*
+static PyObjectAPIReturn
 GtpyPyLogger_lshift(PyObject* self, PyObject* arg)
 {
     if (self == Q_NULLPTR || arg == Q_NULLPTR)
@@ -240,50 +206,32 @@ GtpyPyLogger_lshift(PyObject* self, PyObject* arg)
 
     GtpyPyLogger* logger = (GtpyPyLogger*)self;
 
-    PyObject* output = Q_NULLPTR;
 
-    if (!PyString_Check(arg))
+    auto output = PyPPObject::Borrow(arg);
+
+    if (!PyPPUnicode_Check(output))
     {
-        output = PyObject_Repr(arg);
-    }
-    else
-    {
-        output = arg;
-        Py_INCREF(output);
+        output = PyPPObject_Repr(output);
     }
 
-    QString message(PyString_AsString(output));
+    QString message(PyPPString_AsQString(output));
 
     int outputType = PyInt_AsLong(logger->m_outputType);
 
     bool outputToAppConsol = false;
 
-    PyObject* globals = PyEval_GetGlobals();
+    auto globals = PyPPEval_GetGlobals();
 
-    if (globals)
+    if (globals && PyPPDict_Check(globals))
     {
-        Py_INCREF(globals);
+        auto appOutputObj = PyPPDict_GetItem(globals,
+                                 QSTRING_TO_CHAR_PTR(
+                                     GtpyGlobals::ATTR_outputToApp));
 
-        if (PyDict_Check(globals))
+        if (appOutputObj && PyPPBool_Check(appOutputObj))
         {
-            PyObject* appOutputObj = PyDict_GetItemString(globals,
-                                     QSTRING_TO_CHAR_PTR(
-                                         GtpyGlobals::ATTR_outputToApp));
-
-            if (appOutputObj)
-            {
-                Py_INCREF(appOutputObj);
-
-                if (PyBool_Check(appOutputObj))
-                {
-                    outputToAppConsol = (bool)PyLong_AsLong(appOutputObj);
-                }
-
-                Py_DECREF(appOutputObj);
-            }
+            outputToAppConsol = (bool)PyPPLong_AsLong(appOutputObj);
         }
-
-        Py_DECREF(globals);
     }
 
     switch (outputType)
@@ -348,9 +296,6 @@ GtpyPyLogger_lshift(PyObject* self, PyObject* arg)
             printOutput(message.prepend("[DEBUG] "));
             break;
     }
-
-    Py_DECREF(output);
-    output = Q_NULLPTR;
 
     Py_RETURN_NONE;
 }

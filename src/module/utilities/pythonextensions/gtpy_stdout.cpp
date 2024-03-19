@@ -11,8 +11,9 @@
 #include "gtpy_globals.h"
 
 #include "gtpy_stdout.h"
+#include "gtpypp.h"
 
-static PyObject*
+static PyObjectAPIReturn
 GtpyStdOutRedirect_new(PyTypeObject* type, PyObject* /*args*/,
                        PyObject* /*kwds*/)
 {
@@ -26,55 +27,43 @@ GtpyStdOutRedirect_new(PyTypeObject* type, PyObject* /*args*/,
     return (PyObject*)self;
 }
 
-static PyObject*
+static PyObjectAPIReturn
 GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 {
     GTPY_GIL_SCOPE
 
-    PyObject* threadDict = PyThreadState_GetDict();
+    auto threadDict = PyPPThreadState_GetDict();
 
     if (!threadDict)
     {
         return Py_BuildValue("");
     }
 
-    Py_INCREF(threadDict);
 
-    PyObject* valItem = PyDict_GetItem(threadDict, PyString_FromString(
-                                           GtpyGlobals::CONTEXT_KEY));
+    auto valItem = PyPPDict_GetItem(threadDict, GtpyGlobals::CONTEXT_KEY);
     QString contextName;
 
-    if (valItem && PyString_Check(valItem))
+    if (valItem && PyPPUnicode_Check(valItem))
     {
-        Py_INCREF(valItem);
-        const char* val = PyString_AsString(valItem);
-        contextName = QString(val);
-        Py_DECREF(valItem);
+        contextName = PyPPString_AsQString(valItem);
     }
 
-    PyObject* outputItem = PyDict_GetItem(threadDict, PyString_FromString(
-            GtpyGlobals::OUTPUT_KEY));
+    auto outputItem = PyPPDict_GetItem(threadDict, GtpyGlobals::OUTPUT_KEY);
 
     bool output = false;
 
-    if (outputItem && PyLong_Check(outputItem))
+    if (outputItem && PyPPLong_Check(outputItem))
     {
-        Py_INCREF(outputItem);
-        output = (bool)PyLong_AsLong(outputItem);
-        Py_DECREF(outputItem);
+        output = (bool)PyPPLong_AsLong(outputItem);
     }
 
-    PyObject* errorItem = PyDict_GetItem(threadDict, PyString_FromString(
-            GtpyGlobals::ERROR_KEY));
+    auto errorItem = PyPPDict_GetItem(threadDict, GtpyGlobals::ERROR_KEY);
 
     bool error = false;
 
-    if (errorItem && PyLong_Check(errorItem))
+    if (errorItem && PyPPLong_Check(errorItem))
     {
-        Py_INCREF(errorItem);
-        error = (bool)PyLong_AsLong(errorItem);
-
-        Py_DECREF(errorItem);
+        error = (bool)PyPPLong_AsLong(errorItem);
     }
 
     GtpyStdOutRedirect* s = (GtpyStdOutRedirect*)self;
@@ -85,16 +74,14 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
         if (PyTuple_GET_SIZE(args) >= 1)
         {
-            PyObject* obj = PyTuple_GET_ITEM(args, 0);
+            auto obj = PyPPTuple_GetItem(PyPPObject::Borrow(args), 0);
 
-            Py_XINCREF(obj);
-
-            if (PyUnicode_Check(obj))
+            if (PyPPUnicode_Check(obj))
             {
 #ifdef PY3K
-                message = QString::fromUtf8(PyUnicode_AsUTF8(obj));
+                message = PyPPString_AsQString(obj);
 #else
-                PyObject* tmp = PyUnicode_AsUTF8String(obj);
+                PyObject* tmp = PyUnicode_AsUTF8String(obj.get());
 
                 if (tmp)
                 {
@@ -103,8 +90,6 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
                 }
                 else
                 {
-                    Py_XDECREF(obj);
-                    Py_DECREF(threadDict);
                     return NULL;
                 }
 
@@ -116,15 +101,12 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
                 if (!PyArg_ParseTuple(args, "s", &string))
                 {
-                    Py_XDECREF(obj);
-                    Py_DECREF(threadDict);
                     return NULL;
                 }
 
                 message = QString::fromLatin1(string);
             }
 
-            Py_XDECREF(obj);
         }
 
         if (s->softspace > 0)
@@ -136,18 +118,17 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
         (*s->callback)(contextName, output, error, message);
     }
 
-    Py_DECREF(threadDict);
 
     return Py_BuildValue("");
 }
 
-static PyObject*
+static PyObjectAPIReturn
 GtpyStdOutRedirect_flush(PyObject* /*self*/, PyObject* /*args*/)
 {
     return Py_BuildValue("");
 }
 
-static PyObject*
+static PyObjectAPIReturn
 GtpyStdOutRedirect_isatty(PyObject* /*self*/, PyObject* /*args*/)
 {
     Py_INCREF(Py_False);

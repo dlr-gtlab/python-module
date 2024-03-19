@@ -13,6 +13,7 @@
 #include "gt_globals.h"
 
 #include <Python.h>
+#include "gtpypp.h"
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 #include "gt_propertystructcontainer.h"
@@ -34,7 +35,7 @@ namespace convert {
  * @return Python dict with name and value pairs from the passed
  * GtPropertyStructContainer.
  */
-PyObject*
+PyPPObject
 fromPropertyStructContainer(const GtPropertyStructContainer& con);
 #endif
 

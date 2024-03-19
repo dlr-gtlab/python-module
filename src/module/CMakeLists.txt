@@ -65,6 +65,7 @@ set(HEADERS
     utilities/pythonextensions/gtpy_loggingmodule.h
     utilities/pythonextensions/gtpy_propertysetter.h
     utilities/pythonextensions/gtpy_stdout.h
+    utilities/gtpypp.h
     widgets/gtpy_completer.h
     widgets/gtpy_console.h
     widgets/gtpy_lineedit.h

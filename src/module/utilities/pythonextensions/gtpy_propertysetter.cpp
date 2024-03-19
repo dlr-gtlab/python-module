@@ -208,9 +208,7 @@ GtpyPropertySetter_New(QString const& propId, PyObject* self, PyObject* module)
         }
     }
 
-    PyObject* id = PyString_FromString(propId.toStdString().data());
-    Py_XINCREF(id);
-    op->m_propId = id;
+    op->m_propId = PyPPObject::fromQString(propId).release();
 
     Py_XINCREF(self);
     op->m_self = self;

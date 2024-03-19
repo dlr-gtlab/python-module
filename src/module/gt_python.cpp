@@ -19,6 +19,7 @@
 #include "gt_logging.h"
 
 #if GT_VERSION >= 0x020000
+#include "gt_functionalinterface.h"
 #include "gt_commandlinefunction.h"
 #endif
 
@@ -296,6 +297,28 @@ GtPythonModule::accessConnection()
 {
     return GT_METADATA(GtAccessDataConnection);
 }
+
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+QList<gt::SharedFunction> GtPythonModule::sharedFunctions() const
+{
+    auto result = QList<gt::SharedFunction>();
+
+    // add some shared methods for testing
+    if(gtApp->devMode())
+    {
+        result.append(gt::interface::makeSharedFunction("get_object_name", [](GtObject* o) ->QString {
+            if (!o) return "";
+            return o->objectName();
+        }));
+
+        result.append(gt::interface::makeSharedFunction("add", [](double a, double b) {
+            return a+b;
+        }));
+    }
+
+    return result;
+}
+#endif
 
 namespace PythonExecution
 {
