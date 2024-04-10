@@ -88,7 +88,24 @@ public:
      */
     static GtObject* pyObjectToGtObject(PythonQtObjectPtr obj);
 
-    static PyPPObject wrapGtObject(GtObject* obj);
+    enum Ownership
+    {
+        CPP,         // The object's lifetime is managed by C++
+        Python,      // The object's lifetime is managed by Python
+        ForcePython  // The object should be managed by Python, even though the object is part of a C++ tree
+    };
+
+    /**
+     * @brief Creates a python objecz from a GtObject
+     *
+     * Note, this function assumes, that the ownership remains at the C++ side,
+     * except the ownership argument is changed
+     *
+     * @param obj bject to be returned to python
+     * @param forcePythonOwnership
+     * @return
+     */
+    static PyPPObject wrapGtObject(GtObject* obj, Ownership owner = CPP);
 
     /**
      * @brief Creates a Python object from obj and transfers ownership to

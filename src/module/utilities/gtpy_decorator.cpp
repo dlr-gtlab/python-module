@@ -90,7 +90,7 @@ GtpyDecorator::pyObjectToGtObject(PythonQtObjectPtr obj)
 }
 
 PyPPObject
-GtpyDecorator::wrapGtObject(GtObject* obj)
+GtpyDecorator::wrapGtObject(GtObject* obj, Ownership owner)
 {
     if (!obj)
     {
@@ -109,8 +109,22 @@ GtpyDecorator::wrapGtObject(GtObject* obj)
 
     PyPPTuple_SetItem(childArg, 0, std::move(pyQtWrapper));
 
-    return PyPPObject::NewRef(GtpyExtendedWrapper_Type.tp_new(
+    auto retval = PyPPObject::NewRef(GtpyExtendedWrapper_Type.tp_new(
         &GtpyExtendedWrapper_Type, childArg.get(), Q_NULLPTR));
+
+    GtpyExtendedWrapper* self = (GtpyExtendedWrapper*)(retval.get());
+
+    if (owner == Python || owner == ForcePython)
+    {
+        if (self->_obj) self->_obj->passOwnershipToPython();
+    }
+    if (owner == ForcePython)
+    {
+        self->forcePythonOwnership = true;
+    }
+
+    return retval;
+
 }
 
 PyPPObject
@@ -121,19 +135,9 @@ GtpyDecorator::wrapGtObject(std::unique_ptr<GtObject>&& obj)
         return {};
     }
 
-    auto pyObj = wrapGtObject(obj.get());
-
-    // C++ is still owner of pyObj. Now make Python the owner
-    // wrapGtObject actually returns a GtpyExtendedWrapper
-    GtpyExtendedWrapper* self = (GtpyExtendedWrapper*)(pyObj.get());
-
-    // transfer ownership to python, since nothing own
-    // this clone anymore
-    if (self->_obj)
-    {
-        self->_obj->passOwnershipToPython();
-        obj.release();
-    }
+    auto pyObj = wrapGtObject(obj.get(), Python);
+    // Python is now the owner, remove it from CPP
+    if (pyObj) obj.release();
 
     return pyObj;
 }

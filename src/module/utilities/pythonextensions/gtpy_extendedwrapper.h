@@ -29,6 +29,11 @@ struct GtpyExtendedWrapper
     PyObject_HEAD
     PythonQtInstanceWrapper* _obj;
 
+    /// there are (rare) sitations, were you want to force the
+    /// deletion of a object via python ownership, even when
+    /// the object is part of a c++ tree
+    bool forcePythonOwnership = {false};
+
     QObject* getObject() const;
 };
 

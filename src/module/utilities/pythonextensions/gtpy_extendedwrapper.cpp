@@ -77,6 +77,11 @@ GtpyExtendedWrapper_dealloc(GtpyExtendedWrapper* self)
 {
     if (self->_obj)
     {
+        if (self->forcePythonOwnership && self->_obj->_obj)
+        {
+            self->_obj->_obj->deleteLater();
+        }
+
         Py_DECREF(self->_obj);
         self->_obj = nullptr;
     }
@@ -88,9 +93,7 @@ static PyObjectAPIReturn
 GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* argsIn,
                         PyObject* /*kwds*/)
 {
-    GtpyExtendedWrapper* self;
 
-    self = (GtpyExtendedWrapper*)type->tp_alloc(type, 0);
 
     if (!argsIn)
     {
@@ -103,6 +106,9 @@ GtpyExtendedWrapper_new(PyTypeObject* type, PyObject* argsIn,
 
         return nullptr;
     }
+
+    GtpyExtendedWrapper* self = (GtpyExtendedWrapper*)type->tp_alloc(type, 0);
+    self->forcePythonOwnership = false;
 
     auto args = PyPPObject::Borrow(argsIn);
     int argsCount = PyPPTuple_Size(args);

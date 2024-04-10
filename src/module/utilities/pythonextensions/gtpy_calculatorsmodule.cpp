@@ -21,6 +21,7 @@
 #include "gtpy_calculatorfactory.h"
 #include "gtpy_decorator.h"
 #include "gtpy_gilscope.h"
+#include "gtpy_extendedwrapper.h"
 
 #include "gtpy_calculatorsmodule.h"
 #include "gtpypp.h"
@@ -432,7 +433,7 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
         return Q_NULLPTR;
     }
 
-    return GtpyDecorator::wrapGtObject(task).release();
+    return GtpyDecorator::wrapGtObject(task, GtpyDecorator::ForcePython).release();
 }
 
 void
