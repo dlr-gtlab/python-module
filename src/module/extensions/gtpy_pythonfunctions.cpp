@@ -13,6 +13,7 @@
 
 #include "gt_project.h"
 #include "gt_application.h"
+#include "gt_versionnumber.h"
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 #include "gt_sharedfunction.h"
@@ -34,6 +35,48 @@ gtpy::extension::func::projectPath(PyObject* /*self*/)
     }
 
     return PythonQtConv::QStringToPyObject(pro->path());
+}
+
+/**
+ * @brief return footprint of GTlab
+ * @param only_active : true -> shows all active modules within the project
+ *                      false ->shows all available modules within GTlab
+ * @return map of module names and versions
+ */
+PyObjectAPIReturn
+gtpy::extension::func::footprint(PyObject* self, PyObject* args, PyObject* kwargs)
+{
+
+    // Define the arguments and their default values
+    static const char* kwlist[] = {"only_active", nullptr};
+
+    // Parse the arguments
+    int onlyActive = 1; // Default value
+
+    // Parse the arguments
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|p:footprint",
+                                     const_cast<char**>(kwlist), &onlyActive)) {
+        return NULL;
+    }
+
+    auto versionMap = PyPPDict_New();
+    PyPPDict_SetItem(versionMap, "Core", PyPPObject::fromQString(
+                                         GtVersionNumber(GT_VERSION_MAJOR,
+                                                         GT_VERSION_MINOR,
+                                                         GT_VERSION_PATCH).toString()));
+
+    const auto modules = onlyActive > 0 ?
+                         gtApp->moduleDatamodelInterfaceIds() :
+                         gtApp->moduleIds();
+
+    for (const auto& mod : modules)
+    {
+        PyPPDict_SetItem(versionMap,
+                         PyPPObject::fromQString(mod),
+                         PyPPObject::fromQString(gtApp->moduleVersion(mod).toString()));
+    }
+
+    return versionMap.release();
 }
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)

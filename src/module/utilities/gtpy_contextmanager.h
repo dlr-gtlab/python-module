@@ -785,6 +785,22 @@ public:
     static bool convertToQMapStringInt(PyObject* obj, void* outMap,
                                        int /*metaTypeId*/, bool /*strict*/);
 
+    /**
+    * @brief Converts QMap<QString, int> instances to a Python object.
+    * @param inObject QMap instance.
+    * @return Given QMap instance as Python object.
+    */
+    static PyObject* convertFromQMapStringQString(const void* inObject,
+                                              int /*metaTypeId*/);
+    /**
+    * @brief Converts Python object to QMap<QString, int>.
+    * @param obj Python object.
+    * @param outMap QMap output.
+    * @return Whether the conversion was successful or not.
+    */
+    static bool convertToQMapStringQString(PyObject* obj, void* outMap,
+                                           int /*metaTypeId*/, bool /*strict*/);
+
 private:
     /**
     * @brief Template function for converting QMap instances into Python

@@ -27,6 +27,8 @@ namespace func
 {
 
 PyObjectAPIReturn projectPath(PyObject* self);
+PyObjectAPIReturn footprint(PyObject* self, PyObject* args, PyObject* kwargs);
+
 
 static PyMethodDef PROJECT_PATH_F_DEF[] =
 {
@@ -35,6 +37,15 @@ static PyMethodDef PROJECT_PATH_F_DEF[] =
         (PyCFunction)projectPath,
         METH_NOARGS,
         "projectPath() returns the current project path."
+    },
+    {
+        gtpy::constants::FOOTPRINT_F_NAME,
+        (PyCFunction)footprint,
+        METH_VARARGS | METH_KEYWORDS,
+        "footprint(only_active=True)\n\n"
+        "Returns the current application footprint map.\n"
+        "Optional keyword arguments:\n"
+        "only_active: If 'True', on the currently active modules are included"
     },
     { nullptr, nullptr, 0, nullptr }
 };
