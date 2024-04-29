@@ -2107,6 +2107,14 @@ GtpyContextManager::registerTypeConverters() const
             GtpyTypeConversion::convertFromQMapStringInt);
     PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
             GtpyTypeConversion::convertToQMapStringInt);
+
+    objectPtrMapId = qRegisterMetaType<QMap<QString, QString>>(
+        "QMap<QString, QString>");
+
+    PythonQtConv::registerMetaTypeToPythonConverter(
+        objectPtrMapId, GtpyTypeConversion::convertFromQMapStringQString);
+    PythonQtConv::registerPythonToMetaTypeConverter(
+        objectPtrMapId, GtpyTypeConversion::convertToQMapStringQString);
 }
 
 QString
@@ -2327,4 +2335,17 @@ GtpyTypeConversion::convertToQMapStringInt(PyObject* obj, void* outMap,
         int, bool)
 {
     return pythonToMap<QString, int>(obj, outMap);
+}
+
+PyObject *
+GtpyTypeConversion::convertFromQMapStringQString(const void *inObject, int)
+{
+    return mapToPython<QString, QString>(inObject);
+}
+
+bool
+GtpyTypeConversion::convertToQMapStringQString(PyObject *obj, void *outMap,
+                                               int, bool)
+{
+    return pythonToMap<QString, QString>(obj, outMap);
 }
