@@ -1,4 +1,0 @@
-[submodule "tests/pipeline-scripts"]
-	path = tests/pipeline-scripts
-	url = ../gitlab-pipeline-scripts.git
-	branch = main
