@@ -11,6 +11,7 @@
 #define GTPY_CONSOLE_H
 
 #include <QTextEdit>
+#include <QTimer>
 
 #include "gtpy_contextmanager.h"
 
@@ -119,6 +120,22 @@ private:
 
     /// Cursor Position
     int m_cursorPosition;
+
+    class ConsoleCache
+    {
+    public:
+        explicit ConsoleCache(QTextEdit&);
+
+        void append(const QString& text);
+        void flush();
+
+    private:
+        QTextEdit& edit;
+        QString cacheStr;
+        QTimer timer;
+    };
+
+    ConsoleCache cache;
 
     /**
      * @brief Executes current input.
