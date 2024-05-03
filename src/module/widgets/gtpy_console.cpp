@@ -33,7 +33,7 @@ const QRegularExpression GtpyConsole::RE_ERROR_LINE
 
 GtpyConsole::GtpyConsole(int contextId,
                          QWidget* parent) :
-    QTextEdit(parent), m_python(Q_NULLPTR), m_defaultPrompt("> ")
+    QTextEdit(parent), m_python(nullptr), m_defaultPrompt("> "), cache(*this)
 {
     setFrameStyle(QFrame::NoFrame);
 
@@ -657,6 +657,7 @@ GtpyConsole::hideKeyboardInterruptException()
 
     output.replace(matchError.captured(), interruptString);
 
+    cache.flush();
     this->clear();
     this->insertPlainText(output);
 }
@@ -712,12 +713,14 @@ GtpyConsole::appendCommandPrompt(int contextId, bool storeOnly)
 
             m_commandPrompt.append(m_defaultPrompt);
 
+            cache.flush();
             append(m_commandPrompt);
 
             m_commandPrompt = temp;
         }
         else
         {
+            cache.flush();
             append(m_commandPrompt);
         }
 
@@ -747,6 +750,7 @@ GtpyConsole::onCodeExecuted(int contextId)
 
         if (messageInserted)
         {
+            cache.flush();
             append(QString());
         }
 
@@ -766,6 +770,7 @@ GtpyConsole::insertCompletion()
 
     m_cpl->insertCompletion(tc);
 
+    cache.flush();
     setTextCursor(tc);
 
     m_cpl->getPopup()->hide();
@@ -777,10 +782,35 @@ GtpyConsole::consoleMessage(const QString& message)
     QTextCursor cursor = textCursor();
     cursor.movePosition(QTextCursor::End);
     setTextCursor(cursor);
-    append(QString());
-    insertPlainText(message);
+    cache.append("\n" + message);
 
     hideKeyboardInterruptException();
 
     setCurrentCharFormat(m_defaultTextCharacterFormat);
+}
+
+GtpyConsole::ConsoleCache::ConsoleCache(QTextEdit & edit)
+    : edit(edit)
+{
+    QObject::connect(&timer, &QTimer::timeout, &edit, [this]
+    {
+        flush();
+    });
+}
+
+void 
+GtpyConsole::ConsoleCache::append(const QString& text)
+{
+    cacheStr += text;
+    timer.start(30);
+}
+
+void
+GtpyConsole::ConsoleCache::flush()
+{
+    if (cacheStr.isEmpty()) return;
+
+    timer.stop();
+    edit.insertPlainText(cacheStr);
+    cacheStr.clear();
 }

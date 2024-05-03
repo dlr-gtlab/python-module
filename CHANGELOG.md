@@ -5,9 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
+### Changed
+ - Improved the performance of the python console output - #270
+ 
 ### Added
  - New global function `footprint` to query the application footprint - #269
+ - Clone function for GtObjects - #258
+ - Added some decorator functions for easier access of children and property containers of gtobjects - #254, #255
+
+### Fixed
+ - Fix of some memory leaks - #261, #264
+ - Fix of calls of shared functions with gtobjects as arguments - #256
+ - Fixed deadlock for calls of python calculators in the python console - #251
 
 ## [1.5.0] - 2023-12-20
 ### Fixed
