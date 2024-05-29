@@ -3,17 +3,16 @@ Upstream-Name: GTlabPython
 Upstream-Contact:  <>
 Source: 
 
-Files: .github/*
-Copyright: 2023 German Aerospace Center (DLR)
+Files: .github/* README.md CHANGELOG.md src/module/*.json src/setup_module/*.json
+Copyright: 2024 German Aerospace Center (DLR)
 License: Apache-2.0
 
 
-Files: images/*.png
-Copyright: 2023 German Aerospace Center (DLR)
+Files: images/*
+Copyright: 2024 German Aerospace Center (DLR)
 License: CC-BY-SA-4.0
 
 
-# sample test project files
-Files: tests/**/*.gt*
-Copyright: 2023 German Aerospace Center (DLR)
+Files: .bumpversion.cfg .gitignore .gitlab/* .gitlab-ci.yml
+Copyright: 2024 German Aerospace Center (DLR)
 License: CC0-1.0

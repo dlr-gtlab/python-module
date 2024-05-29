@@ -1,3 +1,9 @@
+/* GTlab - Gas Turbine laboratory
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
+ */
+
 #ifndef GT_COMPAT_H
 #define GT_COMPAT_H
 
