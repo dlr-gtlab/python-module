@@ -10,8 +10,9 @@ project(PythonQt)
 
 # Set PythonQt_QT_VERSION
 set(PythonQt_QT_VERSION 5)
-
 set(PythonQT_VERSION 3.4.2)
+
+set(CMAKE_AUTOMOC ON)
 
 # Requirements
 set(minimum_required_qt5_version "5.3.0")
@@ -163,10 +164,6 @@ list(REMOVE_DUPLICATES qt_required_components)
 message(STATUS "${PROJECT_NAME}: Required Qt components [${qt_required_components}]")
 find_package(Qt5 ${minimum_required_qt_version} COMPONENTS ${qt_required_components} REQUIRED)
 
-macro(pythonqt_wrap_cpp)
-  qt5_wrap_cpp(${ARGV})
-endmacro()
-
 if(UNIX)
   find_package(OpenGL)
   if(OPENGL_FOUND)
@@ -313,16 +310,12 @@ foreach(qtlib ${qtlibs})
 endforeach()
 
 #-----------------------------------------------------------------------------
-# Do wrapping
-pythonqt_wrap_cpp(gen_moc_sources ${moc_sources})
-
-#-----------------------------------------------------------------------------
 # Build the library
 
 
 add_library(PythonQt SHARED
             ${sources}
-            ${gen_moc_sources}
+            ${moc_sources}
 )
 
 add_library(PythonQt::PythonQt ALIAS PythonQt)
@@ -388,10 +381,6 @@ if(PythonQt_BUILD_TESTING)
   set(test_sources
   ${PYTHON_QT_SRC_DIR}/tests/PythonQtTestMain.cpp
   ${PYTHON_QT_SRC_DIR}/tests/PythonQtTests.cpp
-  ${PYTHON_QT_SRC_DIR}/tests/PythonQtTests.h
-    )
-
-  pythonqt_wrap_cpp(test_sources
   ${PYTHON_QT_SRC_DIR}/tests/PythonQtTests.h
     )
 
