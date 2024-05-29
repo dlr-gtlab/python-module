@@ -1,0 +1,19 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: GTlabPython
+Upstream-Contact:  <>
+Source: 
+
+Files: .github/*
+Copyright: 2023 German Aerospace Center (DLR)
+License: Apache-2.0
+
+
+Files: images/*.png
+Copyright: 2023 German Aerospace Center (DLR)
+License: CC-BY-SA-4.0
+
+
+# sample test project files
+Files: tests/**/*.gt*
+Copyright: 2023 German Aerospace Center (DLR)
+License: CC0-1.0

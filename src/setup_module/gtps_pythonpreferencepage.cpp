@@ -22,6 +22,8 @@ GtPythonPreferencePage::GtPythonPreferencePage() :
 
     ui->setupUi(this);
 
+    ui->iconLabel->setPixmap(gt::gui::icon::python().pixmap(32,32));
+
     connect(ui->btnSelectPyExe, &QPushButton::clicked,
             this, &GtPythonPreferencePage::onBtnSelectPyExePressed);
 
