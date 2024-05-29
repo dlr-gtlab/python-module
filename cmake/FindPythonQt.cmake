@@ -2,7 +2,7 @@ include(CMakeFindDependencyMacro )
 find_dependency(Python3 COMPONENTS Development)
 
 # Look for the header file.
-find_path(PythonQt_INCLUDE_DIR NAMES PythonQt.h PATH_SUFFIXES include)
+find_path(PythonQt_INCLUDE_DIR NAMES PythonQt.h PATH_SUFFIXES include include/PythonQt)
 
 set (PYTHONQT_LIBNAME_SUFFIX ${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})
 set (PYTHONQT_LIBNAME_SUFFIX_ALT ${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
