@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_collapsiblelocalitem.h
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 16.09.2021
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 16.09.2021
+ * Author: Marvin Noethen (AT-TW)
  */
 
 #ifndef GTPYCOLLAPSIBLELOCALITEM_H

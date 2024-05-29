@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtps_constants.h
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 22.03.2023
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 22.03.2023
+ * Author: Marvin Noethen (AT-TW)
  */
 
 #ifndef GTPS_CONSTANTS_H

@@ -2,7 +2,7 @@
  *
  * SPDX-FileCopyrightText: 2023 German Aerospace Center (DLR)
  *
- * Author: Martin Siggelr (AT-TWK)
+ * Author: Martin Siggel (AT-TWK)
  */
 
 #ifndef GTPYTHREADSCOPE_H

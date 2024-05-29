@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_pythonsvgwidget.cpp
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 13.08.2019
- *  Author: Stanislaus Reitenbach (AT-TW)
- *  Tel.: +49 2203 601 2907
+ * Created on: 13.08.2019
+ * Author: Stanislaus Reitenbach (AT-TW)
  */
 
 #include <QMouseEvent>
