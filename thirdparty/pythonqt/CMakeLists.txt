@@ -345,8 +345,9 @@ target_compile_options(PythonQt PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
   )
 
+target_link_libraries(PythonQt PUBLIC Qt${PythonQt_QT_VERSION}::Core)
 foreach(qtlib ${qt_required_components})
-  target_link_libraries(PythonQt PUBLIC Qt${PythonQt_QT_VERSION}::${qtlib})
+  target_link_libraries(PythonQt PRIVATE Qt${PythonQt_QT_VERSION}::${qtlib})
 endforeach()
 
 target_link_libraries(PythonQt PUBLIC
@@ -366,6 +367,23 @@ install(TARGETS PythonQt
         ARCHIVE DESTINATION ${PythonQt_INSTALL_ARCHIVE_DIR})
 install(FILES ${headers} DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR})
 
+
+file(GENERATE
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/PythonQtConfig.cmake"
+  INPUT  "${PROJECT_SOURCE_DIR}/PythonQtConfig.in"
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/PythonQtConfigVersion.cmake"
+  VERSION ${PythonQT_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+install (FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/PythonQtConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/PythonQtConfigVersion.cmake"
+  DESTINATION ${PythonQt_INSTALL_CONFIG_DIR})
 
 install(EXPORT  PythonQt-targets
     DESTINATION ${PythonQt_INSTALL_CONFIG_DIR}

@@ -1,0 +1,13 @@
+include(CMakeFindDependencyMacro)
+
+# - Config file for the GTlabPython package
+include("${CMAKE_CURRENT_LIST_DIR}/PythonQt-targets.cmake")
+
+# create alias
+if (NOT TARGET PythonQt::PythonQt)
+    add_library(PythonQt::PythonQt INTERFACE IMPORTED)
+
+    set_target_properties(PythonQt::PythonQt PROPERTIES
+      INTERFACE_LINK_LIBRARIES "PythonQt"
+    )
+endif()
