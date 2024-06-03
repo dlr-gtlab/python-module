@@ -253,7 +253,6 @@ badges_1.7:
   dependencies:
     - windowsBuildRelease_1.7
     - linuxBuildDebug_1.7
-    - codingstyle
 
 badges_2.0:
   stage: badges
@@ -265,5 +264,4 @@ badges_2.0:
     - linuxBuildDebug_2.0
     - testWin_2.0
     - testLinux_2.0
-    - codingstyle
 
