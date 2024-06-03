@@ -1,3 +1,8 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 2018 Takafumi Arakaki
+ */
+
 #ifndef FIND_LIBPYTHON_H
 #define FIND_LIBPYTHON_H
 
