@@ -28,8 +28,11 @@ if (NOT TARGET GTlab::Numerics)
   find_package(GTlabNumerics REQUIRED)
 endif()
 
-find_package(PythonQt REQUIRED)
+add_subdirectory(thirdparty)
 
+if (NOT TARGET PythonQt::PythonQt)
+  find_package(PythonQt REQUIRED)
+endif()
 
 option(BUILD_WITH_COVERAGE "Build with code coverage (linux only)" OFF)
 option(BUILD_UNITTESTS "Build Unittests" OFF)
