@@ -62,7 +62,11 @@ GtpyProcessDataDistributor::taskElement(const QString& name)
 
     task->moveToThread(m_pythonTask->thread());
 
-    task->setParent(m_pythonTask);
+    // We need to run setParent from the main thread, where the python task is living
+    // Otherwise qt will cause problems
+    QMetaObject::invokeMethod(m_pythonTask, [this, task](){
+        task->setParent(m_pythonTask);
+    }, Qt::BlockingQueuedConnection);
 
     return task;
 }
