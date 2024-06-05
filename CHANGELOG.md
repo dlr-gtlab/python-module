@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+ - Fixed setting ObjectLinkProperties of derived objects - #279
  - Fixed crash of findGtTask in debug mode - #281
 
 ## [1.6.0] - 2024-05-03
