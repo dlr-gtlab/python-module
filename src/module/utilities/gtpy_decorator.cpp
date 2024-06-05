@@ -1047,12 +1047,9 @@ GtpyDecorator::setPropertyValue(GtObject* obj, const QString& id,
         return;
     }
 
-    GtObjectLinkProperty* objLinkProp =
-                    qobject_cast<GtObjectLinkProperty*>(prop);
-
-    if (objLinkProp)
+    if (auto* objLinkProp = qobject_cast<GtObjectLinkProperty*>(prop))
     {
-        GtObject* dataObj = qvariant_cast<GtObject*>(val);
+        auto* dataObj = qvariant_cast<GtObject*>(val);
 
         if (!dataObj)
         {
@@ -1064,17 +1061,28 @@ GtpyDecorator::setPropertyValue(GtObject* obj, const QString& id,
 
         if (dataObj)
         {
-            QStringList allowedClasses = objLinkProp->allowedClasses();
-
             QString objClassName = QString::fromUtf8(
                                        dataObj->metaObject()->className());
 
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
+            QStringList allowedClasses = objLinkProp->allowedClasses();
             if (allowedClasses.contains(objClassName))
             {
                 val = dataObj->uuid();
             }
+#else
+            if (objLinkProp->isAllowed(objClassName))
+            {
+                val = dataObj->uuid();
+            }
+#endif
+
             else
             {
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+                QStringList allowedClasses = objLinkProp->allowedClasses();
+#endif
+
                 QString output =  QStringLiteral("ERROR: ") +
                                   objClassName +
                                   QObject::tr(" is not an allowed class "
@@ -1245,10 +1253,7 @@ GtpyDecorator::setPropertyValue(GtAbstractProperty* prop,
         return;
     }
 
-    GtObjectLinkProperty* objLinkProp =
-                    qobject_cast<GtObjectLinkProperty*>(subProp);
-
-    if (objLinkProp)
+    if (auto* objLinkProp = qobject_cast<GtObjectLinkProperty*>(subProp))
     {
         GtObject* dataObj = qvariant_cast<GtObject*>(val);
 
@@ -1262,17 +1267,29 @@ GtpyDecorator::setPropertyValue(GtAbstractProperty* prop,
 
         if (dataObj)
         {
-            QStringList allowedClasses = objLinkProp->allowedClasses();
-
             QString objClassName = QString::fromUtf8(
                                        dataObj->metaObject()->className());
 
+
+#if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
+            QStringList allowedClasses = objLinkProp->allowedClasses();
             if (allowedClasses.contains(objClassName))
             {
                 val = dataObj->uuid();
             }
+#else
+            if (objLinkProp->isAllowed(objClassName))
+            {
+                val = dataObj->uuid();
+            }
+#endif
+
             else
             {
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+                QStringList allowedClasses = objLinkProp->allowedClasses();
+#endif
+
                 QString output =  QStringLiteral("ERROR: ") +
                                   objClassName +
                                   QObject::tr(" is not an allowed class "
