@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
+#
 # Cmake script to build python qt from git using cmake
 # Modernized version of https://github.com/commontk/PythonQt
 
@@ -6,9 +9,6 @@ cmake_minimum_required(VERSION 3.15)
 project(PythonQt)
 
 #----------------------------------------------------------------------------
-# Qt version
-
-# Set PythonQt_QT_VERSION
 set(PythonQt_QT_VERSION 5)
 set(PythonQT_VERSION 3.4.2)
 
@@ -23,7 +23,7 @@ set(QT_VERSION_MAJOR ${Qt5_VERSION_MAJOR})
 set(QT_VERSION_MINOR ${Qt5_VERSION_MINOR})
 
 
-
+# Download pythonqt source code
 include(FetchContent)
 FetchContent_Declare(
     pythonqt
@@ -274,10 +274,6 @@ list(TRANSFORM sources PREPEND "${PYTHON_QT_SRC_DIR}/")
 list(TRANSFORM headers PREPEND "${PYTHON_QT_SRC_DIR}/")
 list(TRANSFORM moc_sources PREPEND "${PYTHON_QT_SRC_DIR}/")
 
-
-
-
-
 #-----------------------------------------------------------------------------
 # Add extra sources
 set(PYTHONQT_DEFINES "")
@@ -343,7 +339,7 @@ set_target_properties(PythonQt PROPERTIES
 
 target_compile_options(PythonQt PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
-  )
+)
 
 target_link_libraries(PythonQt PUBLIC Qt${PythonQt_QT_VERSION}::Core)
 foreach(qtlib ${qt_required_components})
@@ -397,10 +393,10 @@ include(CTest)
 
 if(PythonQt_BUILD_TESTING)
   set(test_sources
-  ${PYTHON_QT_SRC_DIR}/tests/PythonQtTestMain.cpp
-  ${PYTHON_QT_SRC_DIR}/tests/PythonQtTests.cpp
-  ${PYTHON_QT_SRC_DIR}/tests/PythonQtTests.h
-    )
+    ${PYTHON_QT_SRC_DIR}/tests/PythonQtTestMain.cpp
+    ${PYTHON_QT_SRC_DIR}/tests/PythonQtTests.cpp
+    ${PYTHON_QT_SRC_DIR}/tests/PythonQtTests.h
+  )
 
   add_executable(PythonQtTest ${test_sources})
   target_link_libraries(PythonQtTest PRIVATE PythonQt)
@@ -410,4 +406,3 @@ if(PythonQt_BUILD_TESTING)
     COMMAND ${Slicer_LAUNCH_COMMAND} $<TARGET_FILE:PythonQtTest>
     )
 endif()
-
