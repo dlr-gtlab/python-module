@@ -24,8 +24,10 @@ if(NOT TARGET GTlab::Core)
     find_package(GTlab REQUIRED)
 endif()
 
-if (NOT TARGET GTlab::Numerics)
-  find_package(GTlabNumerics REQUIRED)
+if (GTlab_VERSION_MAJOR LESS 2)
+    if (NOT TARGET GTlab::Numerics)
+        find_package(GTlabNumerics REQUIRED)
+    endif()
 endif()
 
 add_subdirectory(thirdparty)
