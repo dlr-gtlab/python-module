@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 16.09.2021
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "gtpy_collapsiblelocalitem.h"
@@ -39,7 +39,7 @@ GtpyCollapsibleLocalItem::appendChild(GtpyAbstractLocalItem* item,
         GtpyCollapsibleLocalItem* child =
             level->collapsibleChild(itemName);
 
-        if (child == Q_NULLPTR)
+        if (child == nullptr)
         {
             child = new GtpyCollapsibleLocalItem(itemName);
             level->appendChild(child);

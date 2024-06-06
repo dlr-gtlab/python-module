@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 11.05.2020
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #ifndef GTPYGLOBALS_H

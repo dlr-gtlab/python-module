@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 22.04.2020
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include <QThread>
@@ -76,7 +76,7 @@ findTaskFromHigherFrame()
     if (!func || !PyPPCallable_Check(func)) return nullptr;
 
 
-    GtTask* parentTask = Q_NULLPTR;
+    GtTask* parentTask = nullptr;
 
     auto fram = PyPPObject_Call(func, PyPPTuple_New(0));
     for (;fram; fram = PyPPObject_GetAttr(fram, "f_back"))
@@ -124,7 +124,7 @@ findTaskByRunnable()
 GtTask*
 GtpyCalculatorsModule::findRunningParentTask()
 {
-    GtTask* parentTask = Q_NULLPTR;
+    GtTask* parentTask = nullptr;
 
     parentTask = findValue__task();
 
@@ -227,7 +227,7 @@ GtpyCreateCalculator_dealloc(GtpyCreateCalculator* self)
     if (self->m_calcClassName)
     {
         Py_DECREF(self->m_calcClassName);
-        self->m_calcClassName = Q_NULLPTR;
+        self->m_calcClassName = nullptr;
     }
 
     Py_TYPE(self)->tp_free((PyObject*)self);
@@ -248,7 +248,7 @@ GtpyCreateCalculator_Call(PyObject* func, PyObject* args_py,
 
         PyErr_SetString(PyExc_RuntimeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     auto args = PyPPObject::Borrow(args_py);
@@ -269,7 +269,7 @@ GtpyCreateCalculator_Call(PyObject* func, PyObject* args_py,
 
             PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
 
-            return Q_NULLPTR;
+            return nullptr;
         }
 
         if (argsCount == 1)
@@ -286,7 +286,7 @@ GtpyCreateCalculator_Call(PyObject* func, PyObject* args_py,
 
                     PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-                    return Q_NULLPTR;
+                    return nullptr;
                 }
 
                 objName = PyPPString_AsQString(arg);
@@ -360,7 +360,7 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
 
         PyErr_SetString(PyExc_RuntimeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     if (!args_py)
@@ -371,7 +371,7 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
 
@@ -386,7 +386,7 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
     else if (argsCount > 1)
     {
@@ -396,7 +396,7 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
 
         PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     auto arg = PyPPTuple_GetItem(args, 0);
@@ -408,7 +408,7 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
                          "existing task";
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     if (!PyPPUnicode_Check(arg))
@@ -416,7 +416,7 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
         QString error =  "findGtTask(name) --> name has to be a string";
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     QString taskName = PyPPString_AsQString(arg);
@@ -431,7 +431,7 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
 
         PyErr_SetString(PyExc_SystemError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     return GtpyDecorator::wrapGtObject(task, GtpyDecorator::ForcePython).release();

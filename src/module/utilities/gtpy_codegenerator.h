@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 18.11.2019
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #ifndef GTPY_CODEGENERATOR_H
@@ -46,7 +46,7 @@ protected:
      * @brief The GtpyCodeGenerator constructor.
      * @param parent Parent object.
      */
-    explicit GtpyCodeGenerator(QObject* parent = Q_NULLPTR);
+    explicit GtpyCodeGenerator(QObject* parent = nullptr);
 
 private:
     /**

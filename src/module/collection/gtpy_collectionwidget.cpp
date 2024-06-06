@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 12.08.2021
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include <QHBoxLayout>
@@ -25,7 +25,7 @@
 #include "gtpy_collectionwidget.h"
 
 GtpyCollectionWidget::GtpyCollectionWidget(QWidget* parent) : QWidget(parent),
-    m_editor(Q_NULLPTR)
+    m_editor(nullptr)
 {
     QHBoxLayout* mainLayout = new QHBoxLayout;
 

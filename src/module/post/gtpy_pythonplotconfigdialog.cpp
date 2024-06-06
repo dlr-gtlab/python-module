@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 13.08.2019
- * Author: Stanislaus Reitenbach (AT-TW)
+ * Author: Stanislaus Reitenbach (DLR AT-TWK)
  */
 
 #include <QVBoxLayout>
@@ -45,7 +45,7 @@ GtpyPythonPlotConfigDialog::GtpyPythonPlotConfigDialog(QWidget* parent) :
 QString
 GtpyPythonPlotConfigDialog::pythonScript()
 {
-    if (m_editor == Q_NULLPTR)
+    if (m_editor == nullptr)
     {
         return QString();
     }
@@ -56,7 +56,7 @@ GtpyPythonPlotConfigDialog::pythonScript()
 void
 GtpyPythonPlotConfigDialog::setScript(const QString& str)
 {
-    if (m_editor == Q_NULLPTR)
+    if (m_editor == nullptr)
     {
         return;
     }

@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 12.08.2019
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #ifndef GTPY_DECORATOR_H
@@ -614,7 +614,7 @@ public slots:
     ///-------> functions of GtDataZone0D <-------
 #if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
     double value(GtDataZone0D* dataZone, const QString& paramName, bool* ok =
-                     Q_NULLPTR);
+                     nullptr);
 
     /**
      * @brief entries
@@ -622,7 +622,7 @@ public slots:
      * @param ok - flag to show success
      * @return a map of the entries of the datazone
      */
-    QMap<QString, double> entries(GtDataZone0D* dataZone, bool* ok = Q_NULLPTR);
+    QMap<QString, double> entries(GtDataZone0D* dataZone, bool* ok = nullptr);
 
     bool setValue(GtDataZone0D* dataZone, const QString& paramName,
                   const double& value);

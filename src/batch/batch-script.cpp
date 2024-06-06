@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 24.07.2015
- * Author: Stanislaus Reitenbach (AT-TW)
+ * Author: Stanislaus Reitenbach (DLR AT-TWK)
  */
 
 #include <iostream>

@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 13.08.2019
- * Author: Stanislaus Reitenbach (AT-TW)
+ * Author: Stanislaus Reitenbach (DLR AT-TWK)
  */
 
 #include "gtpy_pythonplotwidget.h"
@@ -22,9 +22,9 @@ GtpyPythonPlotItem::createUI(GtPostTemplateItem* dm, QWidget* parent)
 {
     GtpyPythonPlotItem* itm = qobject_cast<GtpyPythonPlotItem*>(dm);
 
-    if (itm == Q_NULLPTR)
+    if (itm == nullptr)
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     return new GtpyPythonPlotWidget(itm, parent);

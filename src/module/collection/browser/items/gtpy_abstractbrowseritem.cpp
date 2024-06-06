@@ -5,13 +5,13 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 22.08.2021
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "gtpy_abstractbrowseritem.h"
 
 GtpyAbstractBrowserItem::GtpyAbstractBrowserItem() : m_parentItem(
-        Q_NULLPTR), m_selected(false), m_typeId(-1)
+        nullptr), m_selected(false), m_typeId(-1)
 {
 
 }
@@ -80,7 +80,7 @@ GtpyAbstractBrowserItem::child(int row)
 {
     if (row < 0 || row >= m_childItems.size())
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     return m_childItems.at(row);

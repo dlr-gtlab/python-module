@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 23.08.2021
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "gtpy_collapsiblebrowseritem.h"
@@ -37,7 +37,7 @@ GtpyRootBrowserItem::ident() const
 GtpyCollapsibleBrowserItem*
 GtpyRootBrowserItem::createChild(int typeId, const QString& ident)
 {
-    GtpyCollapsibleBrowserItem* item = Q_NULLPTR;
+    GtpyCollapsibleBrowserItem* item = nullptr;
 
     if (!m_itemTypes.contains(typeId))
     {

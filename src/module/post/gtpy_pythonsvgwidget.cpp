@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 13.08.2019
- * Author: Stanislaus Reitenbach (AT-TW)
+ * Author: Stanislaus Reitenbach (DLR AT-TWK)
  */
 
 #include <QMouseEvent>
@@ -18,7 +18,7 @@
 #include "gtpy_pythonsvgwidget.h"
 
 GtpyPythonSvgWidget::GtpyPythonSvgWidget(QWidget* parent) : QSvgWidget(parent),
-    m_rubberBand(Q_NULLPTR)
+    m_rubberBand(nullptr)
 {
 
 }
@@ -28,7 +28,7 @@ GtpyPythonSvgWidget::mousePressEvent(QMouseEvent* event)
 {
     m_origin = event->pos();
 
-    if (m_rubberBand == Q_NULLPTR)
+    if (m_rubberBand == nullptr)
     {
         m_rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
     }
@@ -42,7 +42,7 @@ GtpyPythonSvgWidget::mousePressEvent(QMouseEvent* event)
 void
 GtpyPythonSvgWidget::mouseMoveEvent(QMouseEvent* event)
 {
-    if (m_rubberBand != Q_NULLPTR)
+    if (m_rubberBand != nullptr)
     {
         m_rubberBand->setGeometry(QRect(m_origin, event->pos()).normalized());
     }
@@ -53,7 +53,7 @@ GtpyPythonSvgWidget::mouseMoveEvent(QMouseEvent* event)
 void
 GtpyPythonSvgWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-    if (m_rubberBand != Q_NULLPTR)
+    if (m_rubberBand != nullptr)
     {
         m_rubberBand->hide();
 
@@ -100,7 +100,7 @@ GtpyPythonSvgWidget::heightForWidth(int w) const
 {
     QSvgRenderer* rend = renderer();
 
-    if (rend != Q_NULLPTR)
+    if (rend != nullptr)
     {
         double ar = double(rend->defaultSize().height()) /
                     double(rend->defaultSize().width());

@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 13.08.2019
- * Author: Stanislaus Reitenbach (AT-TW)
+ * Author: Stanislaus Reitenbach (DLR AT-TWK)
  */
 
 #ifndef GTPY_PYTHONPLOTCONFIGDIALOG_H
@@ -27,7 +27,7 @@ public:
      * @brief Constructor.
      * @param parent Parent widget
      */
-    explicit GtpyPythonPlotConfigDialog(QWidget* parent = Q_NULLPTR);
+    explicit GtpyPythonPlotConfigDialog(QWidget* parent = nullptr);
 
     /**
      * @brief Returns user defined script.

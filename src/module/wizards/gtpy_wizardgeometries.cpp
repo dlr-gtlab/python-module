@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 27.05.2020
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include <QSettings>
@@ -25,9 +25,9 @@ GtpyWizardGeometries::GtpyWizardGeometries(QObject* parent) : QObject(parent)
 GtpyWizardGeometries*
 GtpyWizardGeometries::instance()
 {
-    static GtpyWizardGeometries* retval = Q_NULLPTR;
+    static GtpyWizardGeometries* retval = nullptr;
 
-    if (retval == Q_NULLPTR)
+    if (retval == nullptr)
     {
         retval = new GtpyWizardGeometries(gtApp);
     }

@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 12.08.2021
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #ifndef GTPYCOLLECTIONWIDGET_H
@@ -30,7 +30,7 @@ public:
      * @brief GtpyCollectionWidget
      * @param parentParent widget.
      */
-    explicit GtpyCollectionWidget(QWidget* parent = Q_NULLPTR);
+    explicit GtpyCollectionWidget(QWidget* parent = nullptr);
 
     /**
      * @brief Sets collection items list.

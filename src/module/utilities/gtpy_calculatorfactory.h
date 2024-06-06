@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 12.08.2019
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #ifndef GTPYCALCULATORFACTORY_H
@@ -28,7 +28,7 @@ public:
      * @brief GtpyCalculatorFactory
      * @param parent Parent object.
      */
-    Q_INVOKABLE explicit GtpyCalculatorFactory(QObject* parent = Q_NULLPTR);
+    Q_INVOKABLE explicit GtpyCalculatorFactory(QObject* parent = nullptr);
 
     /**
      * @brief createCalculator Creates an instance of the calculator class with

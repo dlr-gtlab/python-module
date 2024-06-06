@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 27.05.2020
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #ifndef GTPYWIZARDGEOMETRIES_H
@@ -80,7 +80,7 @@ private:
      * @brief GtpyWizardGeometries
      * @param parent
      */
-    explicit GtpyWizardGeometries(QObject* parent = Q_NULLPTR);
+    explicit GtpyWizardGeometries(QObject* parent = nullptr);
 
     /**
      * @brief Removes the sttings entries identified by the given uuid.

@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 12.08.2019
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include <QAbstractItemView>
@@ -575,7 +575,7 @@ GtpyScriptEditor::moveCursorToLastFound()
 void
 GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
 {
-    if (m_cpl == Q_NULLPTR)
+    if (m_cpl == nullptr)
     {
         GtCodeEditor::keyPressEvent(event);
     }
@@ -966,7 +966,7 @@ GtpyScriptEditor::resetErrorLine()
 void
 GtpyScriptEditor::insertCompletion()
 {
-    if (m_cpl == Q_NULLPTR)
+    if (m_cpl == nullptr)
     {
         return;
     }

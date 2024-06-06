@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 22.07.2020
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "gtpy_loggingmodule.h"
@@ -19,7 +19,7 @@ GtpyPyLogger_dealloc(GtpyPyLogger* self)
     if (self->m_outputType)
     {
         Py_DECREF(self->m_outputType);
-        self->m_outputType = Q_NULLPTR;
+        self->m_outputType = nullptr;
     }
 
     Py_TYPE(self)->tp_free((PyObject*)self);
@@ -39,7 +39,7 @@ GtpyPyLogger_new(PyTypeObject* type, PyObject* argsPy,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
 
@@ -53,7 +53,7 @@ GtpyPyLogger_new(PyTypeObject* type, PyObject* argsPy,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
     else if (argsCount > 1)
     {
@@ -64,7 +64,7 @@ GtpyPyLogger_new(PyTypeObject* type, PyObject* argsPy,
 
         PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     auto outputType = PyPPTuple_GetItem(args, 0);
@@ -200,7 +200,7 @@ printOutput(QString message)
 static PyObjectAPIReturn
 GtpyPyLogger_lshift(PyObject* self, PyObject* arg)
 {
-    if (self == Q_NULLPTR || arg == Q_NULLPTR)
+    if (self == nullptr || arg == nullptr)
     {
         Py_RETURN_NONE;
     }

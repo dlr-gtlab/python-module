@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 12.08.2019
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #ifndef GTPY_CONTEXTMANAGER_H
@@ -80,7 +80,7 @@ public:
 
     struct PythonContext
     {
-        PythonQtObjectPtr module = Q_NULLPTR;
+        PythonQtObjectPtr module = nullptr;
         QString contextName;
     };
 
@@ -322,7 +322,7 @@ protected:
     * @brief The GtpyContextManager constructor.
     * @param parent Parent object.
     */
-    explicit GtpyContextManager(QObject* parent = Q_NULLPTR);
+    explicit GtpyContextManager(QObject* parent = nullptr);
 
 private:
     /// Private static strings

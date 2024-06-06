@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 18.11.2019
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include <QMetaProperty>
@@ -33,9 +33,9 @@ GtpyCodeGenerator::GtpyCodeGenerator(QObject* parent) : QObject(parent)
 GtpyCodeGenerator*
 GtpyCodeGenerator::instance()
 {
-    static GtpyCodeGenerator* retval = Q_NULLPTR;
+    static GtpyCodeGenerator* retval = nullptr;
 
-    if (retval == Q_NULLPTR)
+    if (retval == nullptr)
     {
         retval = new GtpyCodeGenerator(gtApp);
     }
@@ -46,7 +46,7 @@ GtpyCodeGenerator::instance()
 QString
 GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc)
 {
-    if (calc == Q_NULLPTR)
+    if (calc == nullptr)
     {
         return QString();
     }
@@ -67,14 +67,14 @@ GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc)
 
         QObject* newObj = calcData->metaData().newInstance();
 
-        if (newObj == Q_NULLPTR)
+        if (newObj == nullptr)
         {
             return QString();
         }
 
         GtCalculator* defaultCalc = qobject_cast<GtCalculator*>(newObj);
 
-        if (defaultCalc == Q_NULLPTR)
+        if (defaultCalc == nullptr)
         {
             delete newObj;
             return QString();
@@ -148,7 +148,7 @@ GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc)
 
             GtAbstractProperty* prop = calc->findProperty(ident);
 
-            if (prop != Q_NULLPTR)
+            if (prop != nullptr)
             {
                 int propIdpos = regExp.indexIn(ident);
 
@@ -208,9 +208,9 @@ GtpyCodeGenerator::propValToString(GtAbstractProperty* prop)
 
         if (obj)
         {
-            GtPackage* pack = Q_NULLPTR;
+            GtPackage* pack = nullptr;
 
-            while (pack == Q_NULLPTR)
+            while (pack == nullptr)
             {
                 QString objName = obj->objectName();
 
@@ -226,7 +226,7 @@ GtpyCodeGenerator::propValToString(GtAbstractProperty* prop)
 
                 obj = qobject_cast<GtObject*>(obj->parent());
 
-                if (obj == Q_NULLPTR)
+                if (obj == nullptr)
                 {
                     break;
                 }
@@ -237,7 +237,7 @@ GtpyCodeGenerator::propValToString(GtAbstractProperty* prop)
 
                 val.insert(0, ".");
 
-                if (pack != Q_NULLPTR)
+                if (pack != nullptr)
                 {
                     objName = pack->objectName();
 
@@ -256,8 +256,8 @@ GtpyCodeGenerator::propValToString(GtAbstractProperty* prop)
                 }
             }
 
-            obj = Q_NULLPTR;
-            pack = Q_NULLPTR;
+            obj = nullptr;
+            pack = nullptr;
         }
         else
         {
@@ -300,7 +300,7 @@ GtpyCodeGenerator::propValToString(GtAbstractProperty* prop)
 QString
 GtpyCodeGenerator::helperPyCode(GtObject* obj, const QString& pyObjName)
 {
-    if (obj == Q_NULLPTR)
+    if (obj == nullptr)
     {
         return QString();
     }
@@ -321,7 +321,7 @@ GtpyCodeGenerator::helperPyCode(GtObject* obj, const QString& pyObjName)
 
     foreach (GtObject* child, children)
     {
-        if (child != Q_NULLPTR)
+        if (child != nullptr)
         {
             QString childClassName = child->metaObject()->className();
 
@@ -410,7 +410,7 @@ GtpyCodeGenerator::helperPyCode(GtObject* obj, const QString& pyObjName)
 
                 foreach (GtAbstractProperty* prop, props)
                 {
-                    if (prop != Q_NULLPTR)
+                    if (prop != nullptr)
                     {
                         QString ident = prop->ident();
 

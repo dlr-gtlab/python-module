@@ -5,7 +5,7 @@
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Created on: 20.09.2021
- * Author: Marvin Noethen (AT-TW)
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #ifndef GTPYCOLLECTIONBROWSERSORTMODEL_H
@@ -27,7 +27,7 @@ public:
      * @brief GtpyCollectionBrowserSortModel
      * @param parent Parent object.
      */
-    explicit GtpyCollectionBrowserSortModel(QObject* parent = Q_NULLPTR);
+    explicit GtpyCollectionBrowserSortModel(QObject* parent = nullptr);
 
 protected:
     /**
