@@ -55,21 +55,18 @@ GtpyRootBrowserItem::createChild(int typeId, const QString& ident)
 GtpyCollapsibleBrowserItem*
 GtpyRootBrowserItem::child(int typeId)
 {
-    GtpyCollapsibleBrowserItem* item = Q_NULLPTR;
+    if (!m_itemTypes.contains(typeId)) return nullptr;
 
-    if (m_itemTypes.contains(typeId))
+    auto iter = std::find_if(std::begin(m_childItems),
+                             std::end(m_childItems),
+                             [typeId](const auto* child)
     {
-        foreach (GtpyAbstractBrowserItem* child, m_childItems)
-        {
-            if (child->typeId() == typeId)
-            {
-                item = dynamic_cast<GtpyCollapsibleBrowserItem*>(child);
-                break;
-            }
-        }
-    }
+        return child->typeId() == typeId;
+    });
 
-    return item;
+    if (iter == m_childItems.end()) return nullptr;
+
+    return dynamic_cast<GtpyCollapsibleBrowserItem*>(*iter);
 }
 
 void

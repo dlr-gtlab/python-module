@@ -370,11 +370,7 @@ GtpyTaskWizardPage::configCalculator(GtCalculator* calc)
 
     if (calcNameNew != calcNameBefor)
     {
-        QString headline;
-
         QString className = calc->metaObject()->className();
-        headline = calc->objectName();
-
         onProcessComponentRenamed(className, calcNameBefor, calcNameNew);
     }
 
@@ -622,20 +618,14 @@ GtpyTaskWizardPage::deleteProcessElements(const QList<QModelIndex>& indexList)
                 QList<GtProcessComponent*> pComList =
                     m_task->findChildren<GtProcessComponent*>(obj->objectName());
 
-                foreach (GtProcessComponent* comp, pComList)
+                auto objIter = std::find(std::begin(pComList), std::end(pComList), obj);
+                if (objIter == std::end(pComList)) continue;
+
+                delete *objIter;
+
+                if (m_calcModel && m_treeView)
                 {
-                    if (comp == obj)
-                    {
-                        delete comp;
-                        comp = nullptr;
-
-                        if (m_calcModel && m_treeView)
-                        {
-                            m_treeView->expandAll();
-                        }
-
-                        break;
-                    }
+                    m_treeView->expandAll();
                 }
             }
         }

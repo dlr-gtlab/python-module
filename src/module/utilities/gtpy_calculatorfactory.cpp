@@ -96,6 +96,7 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
         parent->appendChild(calc);
     }
 
+    // cppcheck-suppress unknownMacro
     Py_END_ALLOW_THREADS
 
     return calc;

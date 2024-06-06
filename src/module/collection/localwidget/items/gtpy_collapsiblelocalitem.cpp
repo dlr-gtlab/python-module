@@ -60,13 +60,14 @@ GtpyCollapsibleLocalItem::appendChild(GtpyAbstractLocalItem* item)
 GtpyCollapsibleLocalItem*
 GtpyCollapsibleLocalItem::collapsibleChild(const QString& ident)
 {
-    foreach (GtpyAbstractLocalItem* item, m_childItems)
+    auto iter = std::find_if(std::begin(m_childItems),
+                             std::end(m_childItems),
+                             [&ident](const auto* item)
     {
-        if (item->ident() == ident && item->isCollapsible())
-        {
-            return dynamic_cast<GtpyCollapsibleLocalItem*>(item);
-        }
-    }
+        return item->ident() == ident && item->isCollapsible();
+    });
 
-    return Q_NULLPTR;
+    if (iter == m_childItems.end()) return nullptr;
+
+    return dynamic_cast<GtpyCollapsibleLocalItem*>(*iter);
 }

@@ -169,12 +169,14 @@ inline PyPPObject PyPPList_GetItem(const PyPPObject& list, Py_ssize_t index)
     return PyPPObject::Borrow(PyList_GetItem(list.get(), index));
 }
 
+// cppcheck-suppress constParameter
 inline int PyPPList_Sort(PyPPObject& o)
 {
     return PyList_Sort(o.get());
 }
 
 // does not steal!
+// cppcheck-suppress constParameter
 inline int PyPPList_Append(PyPPObject& list, const PyPPObject& item)
 {
     return PyList_Append(list.get(), item.get());
@@ -192,6 +194,7 @@ inline PyPPObject PyPPDict_Copy(const PyPPObject& o)
     return PyPPObject::NewRef(PyDict_Copy(o.get()));
 }
 
+// cppcheck-suppress constParameter
 inline int PyPPDict_Merge(PyPPObject& a, const PyPPObject& b, int override)
 {
     return PyDict_Merge(a.get(), b.get(), override);
@@ -207,12 +210,13 @@ inline PyPPObject PyPPDict_GetItem(const PyPPObject& dict, const char* s)
     return PyPPDict_GetItem(dict, PyPPObject::fromString(s));
 }
 
-
+// cppcheck-suppress constParameter
 inline int PyPPDict_SetItem(PyPPObject& dict, const char *key, const PyPPObject& val)
 {
     return PyDict_SetItemString(dict.get(), key, val.get());
 }
 
+// cppcheck-suppress constParameter
 inline int PyPPDict_SetItem(PyPPObject& dict, const PyPPObject& key, const PyPPObject& val)
 {
     return PyDict_SetItem(dict.get(), key.get(), val.get());
@@ -228,6 +232,7 @@ inline PyPPObject PyPPDict_Keys(const PyPPObject& p)
     return PyPPObject::NewRef(PyDict_Keys(p.get()));
 }
 
+// cppcheck-suppress constParameter
 inline int PyPPDict_DelItem(PyPPObject& p, const char *key)
 {
     return PyDict_DelItemString(p.get(), key);
@@ -256,6 +261,7 @@ inline PyPPObject PyPPTuple_GetItem(const PyPPObject& tuple, Py_ssize_t pos)
 }
 
 // set item steals the object, so we need to move in o
+// cppcheck-suppress constParameter
 inline int PyPPTuple_SetItem(PyPPObject& p, Py_ssize_t pos, PyPPObject&& o)
 {
     return PyTuple_SetItem(p.get(), pos, o.release());
@@ -377,6 +383,7 @@ inline PyPPObject PyPPThreadState_GetDict()
     return PyPPObject::Borrow(PyThreadState_GetDict());
 }
 
+// cppcheck-suppress constParameter
 inline int PyPPModule_AddObject(PyPPObject& module, const char *name, PyPPObject&& value)
 {
     auto ret = PyModule_AddObject(module.get(), name, value.get());

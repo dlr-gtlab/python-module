@@ -9,6 +9,8 @@
 
 #include "gtpy_collapsiblebrowseritem.h"
 
+#include <algorithm>
+
 GtpyCollapsibleBrowserItem::GtpyCollapsibleBrowserItem(QString const& ident) :
     GtpyAbstractBrowserItem(), m_ident(ident)
 {
@@ -105,15 +107,16 @@ GtpyCollapsibleBrowserItem::selectedItems()
 GtpyCollapsibleBrowserItem*
 GtpyCollapsibleBrowserItem::collapsibleChild(const QString& ident)
 {
-    foreach (GtpyAbstractBrowserItem* item, m_childItems)
+    auto iter = std::find_if(std::begin(m_childItems),
+                             std::end(m_childItems),
+                             [&ident](const auto* item)
     {
-        if (item->ident() == ident && item->isCollapsible())
-        {
-            return dynamic_cast<GtpyCollapsibleBrowserItem*>(item);
-        }
-    }
+        return item->ident() == ident && item->isCollapsible();
+    });
 
-    return Q_NULLPTR;
+    if (iter == m_childItems.end()) return nullptr;
+
+    return dynamic_cast<GtpyCollapsibleBrowserItem*>(*iter);
 }
 
 void

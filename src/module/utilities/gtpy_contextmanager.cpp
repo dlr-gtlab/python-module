@@ -1043,7 +1043,7 @@ GtpyContextManager::initLoggingModuleC()
     initExtensionModule(GtpyGlobals::MODULE_GtLogging_C, &GtpyLoggingModule::GtpyLogging_Module);
 #else
     initExtensionModule(GtpyGlobals::MODULE_GtLogging_C,
-                        GtpyLoggingModule::GtpyLoggingModule_StaticMethods));
+                        GtpyLoggingModule::GtpyLoggingModule_StaticMethods);
 #endif
 }
 

@@ -804,22 +804,17 @@ GtpyDecorator::hasWarnings(GtProcessComponent* comp)
     }
 
     if (comp->currentState() == GtProcessComponent::WARN_FINISHED ||
-            comp->currentState() == GtProcessComponent::FAILED)
+        comp->currentState() == GtProcessComponent::FAILED)
     {
         return true;
     }
 
-    foreach (GtProcessComponent* child,
-             comp->findChildren<GtProcessComponent*>())
-    {
-        if (child->currentState() == GtProcessComponent::WARN_FINISHED ||
-                child->currentState() == GtProcessComponent::FAILED)
-        {
-            return true;
-        }
-    }
+    auto childs = comp->findChildren<GtProcessComponent*>();
 
-    return false;
+    return std::any_of(std::begin(childs), std::end(childs), [](auto* child){
+        return child->currentState() == GtProcessComponent::WARN_FINISHED ||
+               child->currentState() == GtProcessComponent::FAILED;
+    });
 }
 
 
