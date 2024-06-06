@@ -385,8 +385,6 @@ GtpyConsole::keyPressEvent(QKeyEvent* e)
         {
             m_cpl->getPopup()->hide();
         }
-
-        eventHandled = true;
     }
 }
 

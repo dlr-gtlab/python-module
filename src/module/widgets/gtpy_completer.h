@@ -117,7 +117,7 @@ private:
      * @param s2 String 2
      * @return Size of the equal part
      */
-    int compareStrings(QString s1, QString s2);
+    int compareStrings(const QString& s1, const QString& s2);
 
     /// Id of Context
     int m_contextId;

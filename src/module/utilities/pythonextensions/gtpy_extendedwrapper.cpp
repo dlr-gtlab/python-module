@@ -287,8 +287,7 @@ GtpyExtendedWrapper_setattro(PyObject* obj, PyObject* name, PyObject* value)
             {
                 if (PyObject_TypeCheck(value, &GtpyExtendedWrapper_Type))
                 {
-                    GtpyExtendedWrapper* wrapper = (GtpyExtendedWrapper*)value;
-                    value = (PyObject*)wrapper->_obj;
+                    value = (PyObject*)reinterpret_cast<GtpyExtendedWrapper*>(value)->_obj;
                 }
 
                 GtpyDecorator decorator;

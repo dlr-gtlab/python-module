@@ -355,7 +355,7 @@ GtpyCompleter::setCompletionPrefix(const QString& prefix)
 }
 
 int
-GtpyCompleter::compareStrings(QString s1, QString s2)
+GtpyCompleter::compareStrings(const QString& s1, const QString& s2)
 {
     int i;
 
