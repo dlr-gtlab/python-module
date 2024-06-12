@@ -855,7 +855,16 @@ GtpyContextManager::createCustomModule(
 {
     GTPY_GIL_SCOPE
 
-    PythonQt::self()->createModuleFromScript(moduleName).evalScript(code);
+    auto module = PythonQt::self()->createModuleFromScript(moduleName);
+
+    if (!module) return;
+
+    module.evalScript(code);
+
+    // We need to delete this attribute, as the new module is built-in,see
+    // https://docs.python.org/3/reference/import.html#file__
+    // also see issue #284
+    PyObject_DelAttrString(module, "__file__");
 }
 
 void
