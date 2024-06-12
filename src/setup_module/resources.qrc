@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>resources/python-icon-tinted_128.png</file>
-        <file>resources/python_icon_bw.png</file>
-    </qresource>
-</RCC>

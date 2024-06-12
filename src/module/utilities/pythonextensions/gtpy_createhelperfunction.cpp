@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_createhelperfunction.cpp
- * copyright 2009-2018 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 26.02.2020
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 26.02.2020
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "PythonQt.h"
@@ -26,13 +27,13 @@ meth_dealloc(GtpyCreateHelperFunctionObject* m)
     if (m->m_helperName)
     {
         Py_DECREF(m->m_helperName);
-        m->m_helperName = Q_NULLPTR;
+        m->m_helperName = nullptr;
     }
 
     if (m->m_self)
     {
         Py_DECREF(m->m_self);
-        m->m_self = Q_NULLPTR;
+        m->m_self = nullptr;
     }
 
     Py_TYPE(m)->tp_free((PyObject*)m);
@@ -57,7 +58,7 @@ GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args_py,
 
         PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     QString helperName = QString(PyString_AsString(f->m_helperName));
@@ -72,7 +73,7 @@ GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args_py,
                             "(objName) accepts only a argument of type string";
 
             PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
-            return Q_NULLPTR;
+            return nullptr;
         }
         else
         {
@@ -86,7 +87,7 @@ GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args_py,
 
         PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     if (objectName.isEmpty())
@@ -108,7 +109,7 @@ GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args_py,
     QString error = "Invalid GtpyExtendedWrapper instance";
     PyErr_SetString(PyExc_ValueError, error.toLatin1().data());
 
-    return Q_NULLPTR;
+    return nullptr;
 }
 
 PyObjectAPIReturn
@@ -125,7 +126,7 @@ GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* argsPy,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     auto args = PyPPObject::Borrow(argsPy);
@@ -138,7 +139,7 @@ GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* argsPy,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     auto arg = PyPPTuple_GetItem(args, 0);
@@ -150,7 +151,7 @@ GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* argsPy,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
 
@@ -161,7 +162,7 @@ GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* argsPy,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     self->m_helperName = arg.release();
@@ -175,7 +176,7 @@ GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* argsPy,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     if (secArg->ob_type != &GtpyExtendedWrapper_Type)
@@ -186,7 +187,7 @@ GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* argsPy,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     self->m_self = secArg.release();

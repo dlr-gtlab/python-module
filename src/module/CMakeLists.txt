@@ -6,6 +6,9 @@
 #
 ######################################################################
 
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
+
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 

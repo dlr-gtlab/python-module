@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_contextmanager.h
- * copyright 2009-2018 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 12.08.2019
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 12.08.2019
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #ifndef GTPY_CONTEXTMANAGER_H
@@ -79,7 +80,7 @@ public:
 
     struct PythonContext
     {
-        PythonQtObjectPtr module = Q_NULLPTR;
+        PythonQtObjectPtr module = nullptr;
         QString contextName;
     };
 
@@ -321,7 +322,7 @@ protected:
     * @brief The GtpyContextManager constructor.
     * @param parent Parent object.
     */
-    explicit GtpyContextManager(QObject* parent = Q_NULLPTR);
+    explicit GtpyContextManager(QObject* parent = nullptr);
 
 private:
     /// Private static strings

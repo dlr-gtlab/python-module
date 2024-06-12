@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_console.cpp
- * copyright 2009-2018 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 12.08.2019
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 12.08.2019
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "iostream"
@@ -132,7 +133,7 @@ GtpyConsole::clearConsole()
 void
 GtpyConsole::keyPressEvent(QKeyEvent* e)
 {
-    if (m_cpl == Q_NULLPTR)
+    if (m_cpl == nullptr)
     {
         QTextEdit::keyPressEvent(e);
     }
@@ -759,7 +760,7 @@ GtpyConsole::onCodeExecuted(int contextId)
 void
 GtpyConsole::insertCompletion()
 {
-    if (m_cpl == Q_NULLPTR)
+    if (m_cpl == nullptr)
     {
         return;
     }

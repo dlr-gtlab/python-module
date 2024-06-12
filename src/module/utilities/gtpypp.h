@@ -1,6 +1,8 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpypp.h
- * copyright 2024 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
  * Author: Martin Siggel (martin.siggel@dlr.de)
  */

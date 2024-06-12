@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_collectionwidget.h
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 12.08.2021
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 12.08.2021
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #ifndef GTPYCOLLECTIONWIDGET_H
@@ -29,7 +30,7 @@ public:
      * @brief GtpyCollectionWidget
      * @param parentParent widget.
      */
-    explicit GtpyCollectionWidget(QWidget* parent = Q_NULLPTR);
+    explicit GtpyCollectionWidget(QWidget* parent = nullptr);
 
     /**
      * @brief Sets collection items list.

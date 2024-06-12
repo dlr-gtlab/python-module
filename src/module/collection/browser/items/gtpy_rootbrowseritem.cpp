@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_rootbrowseritem.cpp
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 23.08.2021
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 23.08.2021
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "gtpy_collapsiblebrowseritem.h"
@@ -36,7 +37,7 @@ GtpyRootBrowserItem::ident() const
 GtpyCollapsibleBrowserItem*
 GtpyRootBrowserItem::createChild(int typeId, const QString& ident)
 {
-    GtpyCollapsibleBrowserItem* item = Q_NULLPTR;
+    GtpyCollapsibleBrowserItem* item = nullptr;
 
     if (!m_itemTypes.contains(typeId))
     {

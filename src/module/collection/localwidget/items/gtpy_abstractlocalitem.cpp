@@ -1,15 +1,16 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_abstractlocalitem.cpp
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 16.09.2021
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 16.09.2021
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "gtpy_abstractlocalitem.h"
 
-GtpyAbstractLocalItem::GtpyAbstractLocalItem() : m_parentItem(Q_NULLPTR)
+GtpyAbstractLocalItem::GtpyAbstractLocalItem() : m_parentItem(nullptr)
 {
 
 }
@@ -54,7 +55,7 @@ GtpyAbstractLocalItem::child(int row)
 {
     if (row < 0 || row >= m_childItems.size())
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     return m_childItems.at(row);
@@ -71,7 +72,7 @@ GtpyAbstractLocalItem::deleteChild(int row)
     GtpyAbstractLocalItem* child = m_childItems.takeAt(row);
 
     delete child;
-    child = Q_NULLPTR;
+    child = nullptr;
 
     Q_UNUSED(child);
 

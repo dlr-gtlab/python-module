@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_generalpage.cpp
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 19.07.2021
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 19.07.2021
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include <QTableWidget>
@@ -53,7 +54,7 @@ GtpyGeneralPage::GtpyGeneralPage(QWidget* parent) :
 void
 GtpyGeneralPage::saveSettings(GtpyEditorSettings* pref)
 {
-    if (pref != Q_NULLPTR)
+    if (pref != nullptr)
     {
         pref->setTabSize(m_tabSize->value());
         pref->setReplaceTabBySpace(m_replaceBySpaces->isChecked());
@@ -63,7 +64,7 @@ GtpyGeneralPage::saveSettings(GtpyEditorSettings* pref)
 void
 GtpyGeneralPage::loadSettings(GtpyEditorSettings* pref)
 {
-    if (pref != Q_NULLPTR)
+    if (pref != nullptr)
     {
         m_tabSize->setValue(pref->tabSize());
         m_replaceBySpaces->setChecked(pref->replaceTabBySpace());

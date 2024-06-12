@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_decorator.cpp
- * copyright 2009-2018 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 12.08.2019
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 12.08.2019
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include <QDebug>
@@ -71,10 +72,10 @@ GtpyDecorator::pyObjectToGtObject(PythonQtObjectPtr obj)
 {
     if (obj.isNull())
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
-    GtObject* gtObj = Q_NULLPTR;
+    GtObject* gtObj = nullptr;
 
     if (obj->ob_type == &GtpyExtendedWrapper_Type)
     {
@@ -110,7 +111,7 @@ GtpyDecorator::wrapGtObject(GtObject* obj, Ownership owner)
     PyPPTuple_SetItem(childArg, 0, std::move(pyQtWrapper));
 
     auto retval = PyPPObject::NewRef(GtpyExtendedWrapper_Type.tp_new(
-        &GtpyExtendedWrapper_Type, childArg.get(), Q_NULLPTR));
+        &GtpyExtendedWrapper_Type, childArg.get(), nullptr));
 
     GtpyExtendedWrapper* self = (GtpyExtendedWrapper*)(retval.get());
 
@@ -145,7 +146,7 @@ GtpyDecorator::wrapGtObject(std::unique_ptr<GtObject>&& obj)
 void
 GtpyDecorator::init(GtCoreApplication* app, const QString& id)
 {
-    if (app == Q_NULLPTR)
+    if (app == nullptr)
     {
         QString output = QStringLiteral("ERROR: ") +
                          QObject::tr("app is a null pointer!");
@@ -170,7 +171,7 @@ GtpyDecorator::init(GtCoreApplication* app, const QString& id)
 void
 GtpyDecorator::initLanguage(GtCoreApplication* app)
 {
-    if (app == Q_NULLPTR)
+    if (app == nullptr)
     {
         QString output = QStringLiteral("ERROR: ") +
                          QObject::tr("app is a null pointer!");
@@ -189,7 +190,7 @@ GtpyDecorator::initLanguage(GtCoreApplication* app)
 void
 GtpyDecorator::initDatamodel(GtCoreApplication* app)
 {
-    if (app == Q_NULLPTR)
+    if (app == nullptr)
     {
         QString output = QStringLiteral("ERROR: ") +
                          QObject::tr("app is a null pointer!");
@@ -208,7 +209,7 @@ GtpyDecorator::initDatamodel(GtCoreApplication* app)
 void
 GtpyDecorator::loadModules(GtCoreApplication* app)
 {
-    if (app == Q_NULLPTR)
+    if (app == nullptr)
     {
         QString output = QStringLiteral("ERROR: ") +
                          QObject::tr("app is a null pointer!");
@@ -227,7 +228,7 @@ GtpyDecorator::loadModules(GtCoreApplication* app)
 void
 GtpyDecorator::initCalculators(GtCoreApplication* app)
 {
-    if (app == Q_NULLPTR)
+    if (app == nullptr)
     {
         QString output = QStringLiteral("ERROR: ") +
                          QObject::tr("app is a null pointer!");
@@ -246,7 +247,7 @@ GtpyDecorator::initCalculators(GtCoreApplication* app)
 void
 GtpyDecorator::initSession(GtCoreApplication* app, const QString& id)
 {
-    if (app == Q_NULLPTR)
+    if (app == nullptr)
     {
         QString output = QStringLiteral("ERROR: ") +
                          QObject::tr("app is a null pointer!");
@@ -265,7 +266,7 @@ GtpyDecorator::initSession(GtCoreApplication* app, const QString& id)
 void
 GtpyDecorator::switchSession(GtCoreApplication* app, const QString& id)
 {
-    if (app == Q_NULLPTR)
+    if (app == nullptr)
     {
         QString output = QStringLiteral("ERROR: ") +
                          QObject::tr("app is a null pointer!");
@@ -284,7 +285,7 @@ GtpyDecorator::switchSession(GtCoreApplication* app, const QString& id)
 PyObjectAPIReturn GtpyDecorator::openProject(GtCoreApplication* app,
                                      const QString& projectId)
 {
-    if (app == Q_NULLPTR)
+    if (app == nullptr)
     {
         QString output = QStringLiteral("ERROR: ") +
                          QObject::tr("helper is a null pointer!");
@@ -293,7 +294,7 @@ PyObjectAPIReturn GtpyDecorator::openProject(GtCoreApplication* app,
 
         emit sendErrorMessage(output);
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     qDebug() << "open project...     projectId == " << projectId;
@@ -307,12 +308,12 @@ PyObjectAPIReturn GtpyDecorator::openProject(GtCoreApplication* app,
 
         emit sendErrorMessage(output);
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     GtProject* project = app->findProject(projectId);
 
-    if (project == Q_NULLPTR)
+    if (project == nullptr)
     {
         QString output = QStringLiteral("ERROR: ") +
                          QObject::tr("project not found!") +
@@ -322,7 +323,7 @@ PyObjectAPIReturn GtpyDecorator::openProject(GtCoreApplication* app,
 
         emit sendErrorMessage(output);
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     if (!gtDataModel->GtCoreDatamodel::openProject(project))
@@ -336,7 +337,7 @@ PyObjectAPIReturn GtpyDecorator::openProject(GtCoreApplication* app,
 
         emit sendErrorMessage(output);
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     qDebug() << "project opened!";
@@ -347,7 +348,7 @@ PyObjectAPIReturn GtpyDecorator::openProject(GtCoreApplication* app,
 PyObjectAPIReturn
 GtpyDecorator::currentProject(GtCoreApplication* app)
 {
-    if (app == Q_NULLPTR)
+    if (app == nullptr)
     {
         QString output = QStringLiteral("ERROR: ") +
                          QObject::tr("app is a null pointer!");
@@ -356,7 +357,7 @@ GtpyDecorator::currentProject(GtCoreApplication* app)
 
         emit sendErrorMessage(output);
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     return wrapGtObject(app->currentProject()).release();
@@ -365,7 +366,7 @@ GtpyDecorator::currentProject(GtCoreApplication* app)
 const QString
 GtpyDecorator::path(GtProject* pro)
 {
-    if (pro == Q_NULLPTR)
+    if (pro == nullptr)
     {
         QString output =  QStringLiteral("ERROR: ") +
                           QObject::tr("pro is a null pointer!");
@@ -383,7 +384,7 @@ GtpyDecorator::path(GtProject* pro)
 bool
 GtpyDecorator::isValid(GtProject* pro)
 {
-    if (pro == Q_NULLPTR)
+    if (pro == nullptr)
     {
         QString output =  QStringLiteral("ERROR: ") +
                           QObject::tr("pro is a null pointer!");
@@ -401,7 +402,7 @@ GtpyDecorator::isValid(GtProject* pro)
 bool
 GtpyDecorator::isOpen(GtProject* pro)
 {
-    if (pro == Q_NULLPTR)
+    if (pro == nullptr)
     {
         QString output =  QStringLiteral("ERROR: ") +
                           QObject::tr("pro is a null pointer!");
@@ -420,7 +421,7 @@ bool
 GtpyDecorator::runProcess(GtProject* pro, const QString& processId,
                           bool save)
 {
-    if (pro == Q_NULLPTR)
+    if (pro == nullptr)
     {
         QString output =  QStringLiteral("ERROR: ") +
                           QObject::tr("pro is a null pointer!");
@@ -448,7 +449,7 @@ GtpyDecorator::runProcess(GtProject* pro, const QString& processId,
 
     GtTask* process = pro->findProcess(processId);
 
-    if (process == Q_NULLPTR)
+    if (process == nullptr)
     {
         QString output =  QStringLiteral("ERROR: ") +
                           QObject::tr("process not found!") +
@@ -510,9 +511,9 @@ GtpyDecorator::runProcess(GtProject* pro, const QString& processId,
 PyObjectAPIReturn
 GtpyDecorator::findProcess(GtProject* pro, const QString& processId)
 {
-    if (pro == Q_NULLPTR || processId.isEmpty())
+    if (pro == nullptr || processId.isEmpty())
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     return wrapGtObject(pro->findProcess(processId)).release();
@@ -523,7 +524,7 @@ GtpyDecorator::run(GtCalculator* calc)
 {
     bool success = false;
 
-    if (calc != Q_NULLPTR)
+    if (calc != nullptr)
     {
         Py_BEGIN_ALLOW_THREADS
 
@@ -605,7 +606,7 @@ GtpyDecorator::run(GtTask* task)
 {
     bool success = false;
 
-    if (task != Q_NULLPTR)
+    if (task != nullptr)
     {
         Py_BEGIN_ALLOW_THREADS
 
@@ -623,7 +624,7 @@ GtpyDecorator::run(GtTask* task)
 //bool
 //GtpyDecorator::runProcess(GtTask* process)
 //{
-//    if (process == Q_NULLPTR)
+//    if (process == nullptr)
 //    {
 //        QString output =  QStringLiteral("ERROR: ") +
 //                          QObject::tr("process not found!");
@@ -661,7 +662,7 @@ GtpyDecorator::run(GtTask* task)
 bool
 GtpyDecorator::close(GtProject* pro, bool save)
 {
-    if (pro == Q_NULLPTR)
+    if (pro == nullptr)
     {
         QString output =  QStringLiteral("ERROR: ") +
                           QObject::tr("pro is a null pointer!");
@@ -710,7 +711,7 @@ GtpyDecorator::close(GtProject* pro, bool save)
 void
 GtpyDecorator::deleteAllCalculators(GtTask* task)
 {
-    if (task == Q_NULLPTR)
+    if (task == nullptr)
     {
         return;
     }
@@ -843,9 +844,9 @@ GtpyDecorator::taskElement(
 PyObjectAPIReturn
 GtpyDecorator::findGtChild(GtObject* obj, const QString& childName)
 {
-    if (obj == Q_NULLPTR || childName.isEmpty())
+    if (obj == nullptr || childName.isEmpty())
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     GtObject* child = obj->findDirectChild<GtObject*>(childName);
@@ -856,7 +857,7 @@ QList<PyObjectAPIReturn>
 GtpyDecorator::findGtChildren(GtObject* obj, const QString& childrenName,
                               const QString& objectClassName)
 {
-    if (obj == Q_NULLPTR)
+    if (obj == nullptr)
     {
         return QList<PyObjectAPIReturn>();
     }
@@ -988,9 +989,9 @@ GtpyDecorator::findGtProperties(GtObject* obj)
 GtAbstractProperty*
 GtpyDecorator::findGtProperty(GtObject* obj, const QString& id)
 {
-    if (obj == Q_NULLPTR || id.isEmpty())
+    if (obj == nullptr || id.isEmpty())
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     return obj->findProperty(id);
@@ -999,14 +1000,14 @@ GtpyDecorator::findGtProperty(GtObject* obj, const QString& id)
 QVariant
 GtpyDecorator::propertyValue(GtObject* obj, const QString& id)
 {
-    if (obj == Q_NULLPTR || id.isEmpty())
+    if (obj == nullptr || id.isEmpty())
     {
         return QVariant();
     }
 
     GtAbstractProperty* prop = obj->findProperty(id);
 
-    if (prop == Q_NULLPTR)
+    if (prop == nullptr)
     {
         QString message = "\n\n" + QString(obj->metaObject()->className()) +
                           " has no GtProperty with the id: " + id;
@@ -1023,14 +1024,14 @@ void
 GtpyDecorator::setPropertyValue(GtObject* obj, const QString& id,
                                 QVariant val)
 {
-    if (obj == Q_NULLPTR || id.isEmpty())
+    if (obj == nullptr || id.isEmpty())
     {
         return;
     }
 
     GtAbstractProperty* prop = obj->findProperty(id);
 
-    if (prop == Q_NULLPTR)
+    if (prop == nullptr)
     {
         QString message = "\n\n" + QString(obj->metaObject()->className()) +
                           " has no GtProperty with the id: " + id +
@@ -1172,7 +1173,7 @@ GtpyDecorator::acceptChangesRecursively(GtObject* obj)
 QString
 GtpyDecorator::className(GtObject* obj)
 {
-    if (obj == Q_NULLPTR)
+    if (obj == nullptr)
     {
         return QString();
     }
@@ -1183,7 +1184,7 @@ GtpyDecorator::className(GtObject* obj)
 QList<GtAbstractProperty*>
 GtpyDecorator::findGtProperties(GtAbstractProperty* prop)
 {
-    if (prop == Q_NULLPTR)
+    if (prop == nullptr)
     {
         return QList<GtAbstractProperty*>();
     }
@@ -1194,9 +1195,9 @@ GtpyDecorator::findGtProperties(GtAbstractProperty* prop)
 GtAbstractProperty*
 GtpyDecorator::findGtProperty(GtAbstractProperty* prop, const QString& id)
 {
-    if (prop == Q_NULLPTR || id.isEmpty())
+    if (prop == nullptr || id.isEmpty())
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     return prop->findProperty(id);
@@ -1205,14 +1206,14 @@ GtpyDecorator::findGtProperty(GtAbstractProperty* prop, const QString& id)
 QVariant
 GtpyDecorator::propertyValue(GtAbstractProperty* prop, const QString& id)
 {
-    if (prop == Q_NULLPTR || id.isEmpty())
+    if (prop == nullptr || id.isEmpty())
     {
         return QVariant();
     }
 
     GtAbstractProperty* subProp = prop->findProperty(id);
 
-    if (subProp == Q_NULLPTR)
+    if (subProp == nullptr)
     {
         QString message = "\n\n" + QString(prop->metaObject()->className()) +
                           " has no subproperty of type GtProperty with the "
@@ -1230,14 +1231,14 @@ void
 GtpyDecorator::setPropertyValue(GtAbstractProperty* prop,
                                 const QString& id, QVariant val)
 {
-    if (prop == Q_NULLPTR || id.isEmpty())
+    if (prop == nullptr || id.isEmpty())
     {
         return;
     }
 
     GtAbstractProperty* subProp = prop->findProperty(id);
 
-    if (subProp == Q_NULLPTR)
+    if (subProp == nullptr)
     {
         QString message = "\n\n" + QString(prop->metaObject()->className()) +
                           " has no subproperty of type GtProperty with the "
@@ -1337,7 +1338,7 @@ GtpyDecorator::setPropertyValue(GtAbstractProperty* prop,
 QString
 GtpyDecorator::ident(GtAbstractProperty* prop)
 {
-    if (prop == Q_NULLPTR)
+    if (prop == nullptr)
     {
         return QString();
     }
@@ -1348,7 +1349,7 @@ GtpyDecorator::ident(GtAbstractProperty* prop)
 bool
 GtpyDecorator::isActive(GtAbstractProperty* prop) const
 {
-    if (prop == Q_NULLPTR)
+    if (prop == nullptr)
     {
         return false;
     }
@@ -1359,7 +1360,7 @@ GtpyDecorator::isActive(GtAbstractProperty* prop) const
 void
 GtpyDecorator::setActive(GtAbstractProperty* prop, bool val)
 {
-    if (prop == Q_NULLPTR)
+    if (prop == nullptr)
     {
         return;
     }
@@ -1370,7 +1371,7 @@ GtpyDecorator::setActive(GtAbstractProperty* prop, bool val)
 bool
 GtpyDecorator::isOptional(GtAbstractProperty* prop) const
 {
-    if (prop == Q_NULLPTR)
+    if (prop == nullptr)
     {
         return false;
     }
@@ -1381,7 +1382,7 @@ GtpyDecorator::isOptional(GtAbstractProperty* prop) const
 void
 GtpyDecorator::setOptional(GtAbstractProperty* prop, bool val)
 {
-    if (prop == Q_NULLPTR)
+    if (prop == nullptr)
     {
         return;
     }
@@ -1398,7 +1399,7 @@ GtpyDecorator::getChildren(QObject* obj)
 void
 GtpyDecorator::setObjectName(QObject* obj, QString name)
 {
-    if (obj == Q_NULLPTR)
+    if (obj == nullptr)
     {
         return;
     }

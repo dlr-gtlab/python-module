@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_collectionwidget.cpp
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 12.08.2021
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 12.08.2021
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include <QHBoxLayout>
@@ -24,7 +25,7 @@
 #include "gtpy_collectionwidget.h"
 
 GtpyCollectionWidget::GtpyCollectionWidget(QWidget* parent) : QWidget(parent),
-    m_editor(Q_NULLPTR)
+    m_editor(nullptr)
 {
     QHBoxLayout* mainLayout = new QHBoxLayout;
 

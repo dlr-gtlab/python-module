@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_processdatadistributor.cpp
- * copyright 2009-2018 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 29.01.2020
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 29.01.2020
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "gt_application.h"
@@ -53,7 +54,7 @@ GtpyProcessDataDistributor::taskElement(const QString& name)
     //        if(child->uuid() == task->uuid())
     //        {
     //            delete child;
-    //            child = Q_NULLPTR;
+    //            child = nullptr;
     //            break;
     //        }
     //    }

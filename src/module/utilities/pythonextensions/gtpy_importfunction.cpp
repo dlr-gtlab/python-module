@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_importfunction.cpp
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 23.03.2020
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 23.03.2020
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "gtpy_globals.h"
@@ -19,7 +20,7 @@ GtpyMyImport_dealloc(GtpyMyImport* self)
     if (self->defaultImp)
     {
         Py_DECREF(self->defaultImp);
-        self->defaultImp = Q_NULLPTR;
+        self->defaultImp = nullptr;
     }
 
     Py_TYPE(self)->tp_free((PyObject*)self);
@@ -32,7 +33,7 @@ GtpyMyImport_new(PyTypeObject* type, PyObject* /*args*/,
 {
     GtpyMyImport* self;
     self = (GtpyMyImport*)type->tp_alloc(type, 0);
-    self->defaultImp = Q_NULLPTR;
+    self->defaultImp = nullptr;
 
     return (PyObject*)self;
 }
@@ -79,7 +80,7 @@ GtpyMyImport_Call(PyObject* func, PyObject* args,
 {
     GtpyMyImport* f = (GtpyMyImport*)func;
 
-    if (f->defaultImp == Q_NULLPTR)
+    if (f->defaultImp == nullptr)
     {
         QString error =  "Something is wrong with the import system defined "
                          "for the Python Module! (raised by "
@@ -87,13 +88,13 @@ GtpyMyImport_Call(PyObject* func, PyObject* args,
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
     else
     {
         if (!isImportAllowed(args))
         {
-            return Q_NULLPTR;
+            return nullptr;
         }
 
         auto mod = PyPPObject_Call(PyPPObject::Borrow(f->defaultImp.object()),
@@ -109,7 +110,7 @@ meth_importGtCalculators(PyObject* self)
 {
     GtpyMyImport* f = (GtpyMyImport*)self;
 
-    if (f->defaultImp == Q_NULLPTR)
+    if (f->defaultImp == nullptr)
     {
         QString error =  "Something is wrong with the import system defined "
                          "for the Python Module! (raised by "
@@ -117,7 +118,7 @@ meth_importGtCalculators(PyObject* self)
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
-        return Q_NULLPTR;
+        return nullptr;
     }
     else
     {
@@ -129,7 +130,7 @@ meth_importGtCalculators(PyObject* self)
 
         if (!mod)
         {
-            return Q_NULLPTR;
+            return nullptr;
         }
 
         auto globals = PyPPEval_GetGlobals();
@@ -152,7 +153,7 @@ GtpyMyImport_methods[] =
         METH_NOARGS, "Imports GtCalculators without checking if it is "
         "allowed."
     },
-    {Q_NULLPTR, Q_NULLPTR, 0, Q_NULLPTR}  /* Sentinel */
+    {nullptr, nullptr, 0, nullptr}  /* Sentinel */
 };
 
 PyTypeObject

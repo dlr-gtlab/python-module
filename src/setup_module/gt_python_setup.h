@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gt_python_setup.h
- * copyright 2009-2022 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 17.10.2022
- *  Author: Marvin Nöthen (AT-TW)
- *  Tel.: +49 2203 601 2907
+ * Created on: 17.10.2022
+ * Author: Marvin Nöthen (DLR AT-TWK)
  */
 
 #ifndef GTPYTHON_H

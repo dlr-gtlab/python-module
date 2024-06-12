@@ -76,49 +76,43 @@ GTlab by the following three interfaces.
         <figcaption> <i>Fig. 3: Python Task Wizard</i></figcaption>
     </figure>
 
-### PythonQt for embedding Python 
-For embedding Python into the Python Module the library 
-[PythonQt](https://mevislab.github.io/pythonqt/ "This link takes you to the homepage of PythonQt.")
-was used. It is designed to embed a Python Interpreter into an existing C++
-application so users can control parts of the application using Python at 
-runtime. PythonQt makes use of the 
-[Meta-Object System](https://doc.qt.io/archives/qt-4.8/metaobjects.html "This link takes you to a description of the Meat-Object System.")
-of Qt to transfer C++ objects to the Python environment.
+## License
+
+The largest portion of the code is licensed under the `Apache 2.0 License`.
+
+Smaller thirdparty party code part of code base uses other permissive licenses, such as the
+`BSD` and `MIT` licenses. Please review the directory [LICENSES](https://github.com/dlr-gtlab/python-module/tree/master/LICENSES) and [.reuse](https://github.com/dlr-gtlab/python-module/tree/master/.reuse)
+for a full overview on all licensed used.
 
 
-### Compiling the Python Module
-To compile the Python module, you must copy the file local_setting.pri from the 
-features directory and paste it next to the project file gtlab_python.pro. 
-The local_settings.pri contains the following three paths that you must adapt
-for your local system. 
+## Compiling from Source
 
-  * DEV_TOOLS  = path\to\your\local\GTlab-DevTools
-    
-  * GTLAB_REPO = path\to\a\local\stored\GTlab-Repository
-    
-  * GTLAB_PATH = path\to\the\installed\version\of\GTlab 
+### Prerequisites
 
-The path to the DevTools is always needed because the compiled version of 
-PythonQt and Python is stored in the DevTools. Whether you have to specify the path 
-to the repository or the path to the installed GTlab version depends on which 
-compile mode you choose. You can specify the compile mode with the value of the
-variable COMPILE_MODE. The compile mode determines whether the header files of 
-the DevTools or a GTlab repository are used. It also determines in which build 
-directory the binaries will be stored. 
+A working GTlab installation is required. This includes GTlab and the GTlab Logging library.
+In addition, the Qt toolkit need to be installed to build the Python module.
 
-There are four modes:
+The Python module uses the `PythonQt` library to embed the Python interpreter into GTlab
+and provide access to GTlab's data model structure and the slots of all classes.
+__PythonQt will be automatically downloaded and built by the Python module.__ 
+If you want to use your own installation of PythonQt, use `BUILD_BUNDLED_PYTHONQT=OFF` 
+in the CMake configuration.
 
-|   COMPILE_MODE  | description                                                                                                                                   | paths to specify         |
-|  ---            |  ------                                                                                                                                       | ------                   |
-| module          | header files of DevTools are used;<br> a build directory which contains the binaries will be created at the Python Module directory           | DEV_TOOLS                |
-| moduleTests     | header files of a GTlab reposetory are used;<br> a build directory which contains the binaries will be created at the Python Module directory | DEV_TOOLS<br> GTLAB_REPO |
-| gtlab           | header files of DevTools are used;<br> the binaries will be stored in the bin directory of the installed GTlab version                        | DEV_TOOLS<br> GTLAB_PATH |
-| gtlabRepository | header files of a GTlab reposetory are used;<br> the binaries will be stored in the \build\modules\ directory of the GTlab repository         | DEV_TOOLS<br> GTLAB_REPO |
 
-By setting the PY_VERSION flag you can specify the Python version that you want 
-to use. 
+| Library              |  Version  | Bundled | Where to get                                 |
+| -------------------- | --------- | ------- | -------------------------------------------- |
+| Qt                   |  5.15.x   | No      | https://download.qt.io/official_releases/qt/ |
+| GTlab Core + Logging |  >= 2.0   | No      | https://github.com/dlr-gtlab/gtlab-core      |
+| Python               |  3.9.x    | No      | https://www.python.org/downloads/            |
+| PythonQt             | >= 3.5.0  | Yes     | https://github.com/MeVisLab/pythonqt         |
 
-| Python version | Flag |
-| ----           | ---  |
-| Python 2.7     | 273  |
-| Python 3.7     | 373  |
+### Building
+
+The python module requires a recent `CMake` (>3.15) to build. The configuration and build process is
+similar to other CMake builds:
+
+```
+cmake -S . -B build_dir -DQt5_DIR=<path/to/cmake/Qt5> -DCMAKE_PREFIX_PATH=<path/to/gtlab_install> -DCMAKE_INSTALL_PREFIX=<path/to/gtlab_install>
+cmake --build build_dir
+cmake --build build_dir --target install
+```

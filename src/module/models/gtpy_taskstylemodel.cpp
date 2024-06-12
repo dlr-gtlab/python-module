@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_taskstylemodel.cpp
- * copyright 2009-2018 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 12.08.2019
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 12.08.2019
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include <QMimeData>
@@ -59,7 +60,7 @@ GtpyTaskStyleModel::data(const QModelIndex& index, int role) const
             GtProcessComponent* pc =
                 qobject_cast<GtProcessComponent*>(item);
 
-            if (pc == Q_NULLPTR)
+            if (pc == nullptr)
             {
                 return QVariant();
             }
@@ -76,7 +77,7 @@ GtpyTaskStyleModel::data(const QModelIndex& index, int role) const
                         dynamic_cast<GtExtendedCalculatorDataImpl*>(
                             calcData.get());
 
-                    if (eData != Q_NULLPTR)
+                    if (eData != nullptr)
                     {
                         return eData->icon;
                     }
@@ -95,7 +96,7 @@ GtpyTaskStyleModel::data(const QModelIndex& index, int role) const
                         dynamic_cast<GtExtendedTaskDataImpl*>(
                             taskData.get());
 
-                    if (eData != Q_NULLPTR)
+                    if (eData != nullptr)
                     {
                         return eData->icon;
                     }
@@ -191,7 +192,7 @@ GtpyTaskStyleModel::canDropMimeData(const QMimeData* data,
                     gtProcessFactory);
 
     // check object
-    if (obj == Q_NULLPTR)
+    if (obj == nullptr)
     {
         gtError() << tr("Could not restore object from mimedata!");
         return false;
@@ -299,7 +300,7 @@ GtpyTaskStyleModel::moveRows(const QModelIndex& sourceParent,
         {
             foreach (GtObject* child, objsToMove)
             {
-                child->setParent(Q_NULLPTR);
+                child->setParent(nullptr);
                 dstParentObj->appendChild(child);
             }
         }
@@ -329,7 +330,7 @@ GtpyTaskStyleModel::moveRows(const QModelIndex& sourceParent,
 
             foreach (GtObject* child, objsToMove)
             {
-                child->setParent(Q_NULLPTR);
+                child->setParent(nullptr);
                 dstParentObj->insertChild(destinationChild, child);
                 destinationChild++;
             }
@@ -338,7 +339,7 @@ GtpyTaskStyleModel::moveRows(const QModelIndex& sourceParent,
         {
             foreach (GtObject* child, objsToMove)
             {
-                child->setParent(Q_NULLPTR);
+                child->setParent(nullptr);
                 dstParentObj->insertChild(destinationChild, child);
                 destinationChild++;
             }
@@ -363,7 +364,7 @@ GtpyTaskStyleModel::dropMimeData(const QMimeData* data,
     // get destination object
     GtObject* destObj = static_cast<GtObject*>(parent.internalPointer());
 
-    if (destObj == Q_NULLPTR)
+    if (destObj == nullptr)
     {
         return false;
     }
@@ -387,7 +388,7 @@ GtpyTaskStyleModel::dropMimeData(const QMimeData* data,
     GtObject* obj = destObj->getObjectByUuid(memento.uuid());
 
     // check object
-    if (obj == Q_NULLPTR)
+    if (obj == nullptr)
     {
         return false;
     }
@@ -396,7 +397,7 @@ GtpyTaskStyleModel::dropMimeData(const QMimeData* data,
     GtObject* parentObj = obj->parentObject();
 
     // check parent object
-    if (parentObj == Q_NULLPTR)
+    if (parentObj == nullptr)
     {
         return false;
     }

@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_decorator.h
- * copyright 2009-2018 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 12.08.2019
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 12.08.2019
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #ifndef GTPY_DECORATOR_H
@@ -613,7 +614,7 @@ public slots:
     ///-------> functions of GtDataZone0D <-------
 #if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
     double value(GtDataZone0D* dataZone, const QString& paramName, bool* ok =
-                     Q_NULLPTR);
+                     nullptr);
 
     /**
      * @brief entries
@@ -621,7 +622,7 @@ public slots:
      * @param ok - flag to show success
      * @return a map of the entries of the datazone
      */
-    QMap<QString, double> entries(GtDataZone0D* dataZone, bool* ok = Q_NULLPTR);
+    QMap<QString, double> entries(GtDataZone0D* dataZone, bool* ok = nullptr);
 
     bool setValue(GtDataZone0D* dataZone, const QString& paramName,
                   const double& value);

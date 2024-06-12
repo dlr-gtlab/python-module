@@ -170,15 +170,23 @@ code-coverage:
     paths:
       - "test-coverage"
 
-# code quality
-codingstyle:
-  stage: codequality
-  extends: .codingStyleTemplate
  
 cppcheck:
   stage: codequality
   extends: .cppCheckTemplate
   allow_failure: true
+
+check-license:
+   stage: codequality
+   tags: ["docker", "linux"]
+   needs: []
+   image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/buster-dev
+   before_script:
+    - python3 -m pip install reuse
+   script:
+    - reuse lint
+   variables:
+     GIT_SUBMODULE_STRATEGY: "none"
 
 pages:
   stage: badges
@@ -245,7 +253,6 @@ badges_1.7:
   dependencies:
     - windowsBuildRelease_1.7
     - linuxBuildDebug_1.7
-    - codingstyle
 
 badges_2.0:
   stage: badges
@@ -257,5 +264,4 @@ badges_2.0:
     - linuxBuildDebug_2.0
     - testWin_2.0
     - testLinux_2.0
-    - codingstyle
 

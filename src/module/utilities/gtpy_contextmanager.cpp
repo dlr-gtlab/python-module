@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_contextmanager.cpp
- * copyright 2009-2018 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 12.08.2019
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 12.08.2019
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include <Qt>
@@ -73,9 +74,9 @@ const QString GtpyContextManager::CLASS_WRAPPER_MODULE =
     QStringLiteral("GtClasses");
 
 GtpyContextManager::GtpyContextManager(QObject* parent) :
-    QObject(parent), m_decorator(Q_NULLPTR),
+    QObject(parent), m_decorator(nullptr),
     m_errorEmitted(false),
-    m_pyThreadState(Q_NULLPTR),
+    m_pyThreadState(nullptr),
     m_contextsInitialized(false)
 {
     qRegisterMetaType<GtpyContextManager::Context>
@@ -142,9 +143,9 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
 GtpyContextManager*
 GtpyContextManager::instance()
 {
-    static GtpyContextManager* retval = Q_NULLPTR;
+    static GtpyContextManager* retval = nullptr;
 
-    if (retval == Q_NULLPTR)
+    if (retval == nullptr)
     {
         retval = new GtpyContextManager(gtApp);
     }
@@ -154,7 +155,7 @@ GtpyContextManager::instance()
 
 GtpyContextManager::~GtpyContextManager()
 {
-    if (m_pyThreadState != Q_NULLPTR)
+    if (m_pyThreadState != nullptr)
     {
         PyEval_RestoreThread(m_pyThreadState);
     }
@@ -300,7 +301,7 @@ GtpyContextManager::evalScript(int contextId,
 
     PythonQtObjectPtr currentContext = context(contextId);
 
-    if (currentContext == Q_NULLPTR)
+    if (currentContext == nullptr)
     {
         return false;
     }
@@ -333,7 +334,7 @@ GtpyContextManager::introspection(int contextId, const QString& objectname,
 
     PythonQtObjectPtr currentContext = context(contextId);
 
-    if (currentContext == Q_NULLPTR)
+    if (currentContext == nullptr)
     {
         return QMultiMap<QString, GtpyFunction>();
     }
@@ -413,7 +414,7 @@ GtpyContextManager::addObject(int contextId,
         return false;
     }
 
-    if (obj == Q_NULLPTR)
+    if (obj == nullptr)
     {
         return false;
     }
@@ -421,7 +422,7 @@ GtpyContextManager::addObject(int contextId,
     GTPY_GIL_SCOPE
     PythonQtObjectPtr currentContext = context(contextId);
 
-    if (currentContext == Q_NULLPTR)
+    if (currentContext == nullptr)
     {
         return false;
     }
@@ -453,7 +454,7 @@ GtpyContextManager::addGtObject(int contextId, const QString& name,
         return false;
     }
 
-    if (obj == Q_NULLPTR)
+    if (obj == nullptr)
     {
         return false;
     }
@@ -548,7 +549,7 @@ GtpyContextManager::removeObject(int contextId, const QString& name)
 
     PythonQtObjectPtr currentContext = context(contextId);
 
-    if (currentContext == Q_NULLPTR)
+    if (currentContext == nullptr)
     {
         return false;
     }
@@ -569,7 +570,7 @@ GtpyContextManager::removeAllAddedObjects(int contextId)
 
     PythonQtObjectPtr currentContext = context(contextId);
 
-    if (currentContext == Q_NULLPTR)
+    if (currentContext == nullptr)
     {
         return false;
     }
@@ -596,7 +597,7 @@ GtpyContextManager::addTaskValue(int contextId, GtTask* task)
         return false;
     }
 
-    if (task != Q_NULLPTR)
+    if (task != nullptr)
     {
         addObject(contextId, TASK_VAR, task, false);
 
@@ -744,7 +745,7 @@ GtpyContextManager::deleteContext(int contextId, bool emitSignal)
 
     PyPPDict_DelItem(modules, con.contextName.toStdString().c_str());
 
-    con.module.setNewRef(Q_NULLPTR);
+    con.module.setNewRef(nullptr);
 
     if (emitSignal)
     {
@@ -975,7 +976,7 @@ GtpyContextManager::initExtensionModule(const QString& moduleName,
     GTPY_GIL_SCOPE
 
     QByteArray name = moduleName.toUtf8();
-    PyObject* myMod = Q_NULLPTR;
+    PyObject* myMod = nullptr;
 
     myMod = Py_InitModule(name.constData(), methods);
     Py_INCREF(myMod);
@@ -1084,14 +1085,14 @@ GtpyContextManager::initBatchContext(int contextId)
     GTPY_GIL_SCOPE
     PythonQtObjectPtr con = context(contextId);
 
-    if (con == Q_NULLPTR)
+    if (con == nullptr)
     {
         return;
     }
 
     importDefaultModules(contextId);
 
-    if (gtApp != Q_NULLPTR)
+    if (gtApp != nullptr)
     {
         addObject(contextId, "GTlab", gtApp);
 
@@ -1122,14 +1123,14 @@ GtpyContextManager::initGlobalContext(int contextId)
 {
     PythonQtObjectPtr con = context(contextId);
 
-    if (con == Q_NULLPTR)
+    if (con == nullptr)
     {
         return;
     }
 
     importDefaultModules(contextId);
 
-    if (gtApp != Q_NULLPTR)
+    if (gtApp != nullptr)
     {
         addObject(contextId, QStringLiteral("GTlab"), gtApp);
 
@@ -1276,7 +1277,7 @@ GtpyContextManager::initWrapperModule()
         &GtpyExtendedWrapperModule::GtpyExtendedWrapper_Module
     );
 #else
-    auto mod = initExtensionModule(GtpyGlobals::MODULE_GtObjectWrapperModuleC, Q_NULLPTR);
+    auto mod = initExtensionModule(GtpyGlobals::MODULE_GtObjectWrapperModuleC, nullptr);
 #endif
 
     auto wrapperType = PyPPObject::NewRef(
@@ -1321,7 +1322,7 @@ GtpyContextManager::enableOutputToAppConsole(int contextId)
 {
     PythonQtObjectPtr con = context(contextId);
 
-    if (con == Q_NULLPTR)
+    if (con == nullptr)
     {
         return;
     }
@@ -1339,7 +1340,7 @@ GtpyContextManager::importDefaultModules(int contextId)
     GTPY_GIL_SCOPE
     PythonQtObjectPtr con = context(contextId);
 
-    if (con == Q_NULLPTR)
+    if (con == nullptr)
     {
         return;
     }
@@ -1360,7 +1361,7 @@ GtpyContextManager::importLoggingFuncs(int contextId,
     GTPY_GIL_SCOPE
     PythonQtObjectPtr con = context(contextId);
 
-    if (con == Q_NULLPTR)
+    if (con == nullptr)
     {
         return;
     }
@@ -1399,7 +1400,7 @@ GtpyContextManager::importCalcModule(int contextId)
     GTPY_GIL_SCOPE
     PythonQtObjectPtr con = context(contextId);
 
-    if (con == Q_NULLPTR)
+    if (con == nullptr)
     {
         return;
     }
@@ -1524,7 +1525,7 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
 
     QMultiMap<QString, GtpyFunction> results;
 
-    if (m_decorator == Q_NULLPTR)
+    if (m_decorator == nullptr)
     {
         return results;
     }
@@ -1645,7 +1646,7 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
             {
                 QObject* obj = qvariant_cast<QObject*>(var);
 
-                if (obj != Q_NULLPTR && !obj->objectName().isEmpty())
+                if (obj != nullptr && !obj->objectName().isEmpty())
                 {
                     QString objName = obj->objectName();
 
@@ -1745,7 +1746,7 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
                 GtAbstractProperty* prop = qvariant_cast<GtAbstractProperty*>(
                                                var);
 
-                if (prop != Q_NULLPTR && !prop->objectName().isEmpty())
+                if (prop != nullptr && !prop->objectName().isEmpty())
                 {
                     QString propName = prop->objectName();
 
@@ -2271,7 +2272,7 @@ GtpyContextManager::deleteRunnable()
 {
     GtpyScriptRunnable* runnable = qobject_cast<GtpyScriptRunnable*>(sender());
 
-    if (runnable != Q_NULLPTR)
+    if (runnable != nullptr)
     {
         // connect runnable signals to task runner slots
         disconnect(runnable, &GtpyScriptRunnable::runnableFinished,

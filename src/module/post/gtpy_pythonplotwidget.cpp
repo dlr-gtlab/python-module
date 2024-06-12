@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_pythonplotwidget.cpp
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 13.08.2019
- *  Author: Stanislaus Reitenbach (AT-TW)
- *  Tel.: +49 2203 601 2907
+ * Created on: 13.08.2019
+ * Author: Stanislaus Reitenbach (DLR AT-TWK)
  */
 
 #include <QHBoxLayout>
@@ -130,7 +131,7 @@ GtpyPythonPlotWidget::createSvgPlot()
 {
     GtpyPythonPlotData* pData = m_dm->findDirectChild<GtpyPythonPlotData*>();
 
-    if (pData == Q_NULLPTR)
+    if (pData == nullptr)
     {
         return;
     }
@@ -175,14 +176,14 @@ GtpyPythonPlotWidget::showConfigurationMenu(GtObject*)
     GtpyPythonPlotConfigDialog dialog;
     dialog.resize(600, 400);
 
-    if (pData != Q_NULLPTR)
+    if (pData != nullptr)
     {
         dialog.setScript(pData->script());
     }
 
     dialog.exec();
 
-    if (pData == Q_NULLPTR)
+    if (pData == nullptr)
     {
         pData = new GtpyPythonPlotData;
         m_dm->appendChild(pData);
@@ -196,7 +197,7 @@ GtpyPythonPlotWidget::showConfigurationMenu(GtObject*)
 bool
 GtpyPythonPlotWidget::canShowConfigurationMenu(GtObject*)
 {
-    if (m_dm == Q_NULLPTR)
+    if (m_dm == nullptr)
     {
         return false;
     }

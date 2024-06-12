@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_wizardsettings.cpp
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 27.05.2020
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 27.05.2020
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include <QSettings>
@@ -24,9 +25,9 @@ GtpyWizardGeometries::GtpyWizardGeometries(QObject* parent) : QObject(parent)
 GtpyWizardGeometries*
 GtpyWizardGeometries::instance()
 {
-    static GtpyWizardGeometries* retval = Q_NULLPTR;
+    static GtpyWizardGeometries* retval = nullptr;
 
-    if (retval == Q_NULLPTR)
+    if (retval == nullptr)
     {
         retval = new GtpyWizardGeometries(gtApp);
     }

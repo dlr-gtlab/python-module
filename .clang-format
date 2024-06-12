@@ -1,0 +1,27 @@
+#SPDX-License-Identifier: CC0-1.0
+#SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
+
+BasedOnStyle: Microsoft
+IndentWidth: 4
+AlwaysBreakAfterReturnType: TopLevelDefinitions
+AlwaysBreakTemplateDeclarations: Yes
+PPIndentWidth: 0
+NamespaceIndentation: All
+AccessModifierOffset: -4
+
+# comments
+ReflowComments: False
+
+ColumnLimit: 80
+PointerAlignment: Left
+MaxEmptyLinesToKeep: 2
+
+
+# classes
+BreakConstructorInitializers: AfterColon 
+# works only on clang 14
+# PackConstructorInitializers: Never
+
+# todo: discuss
+SortIncludes: Never 
+IncludeBlocks: Preserve

@@ -6,6 +6,9 @@
 #
 ######################################################################
 
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
+
 # only for GTlab 2.x
 
 if (GTlab_VERSION_MAJOR LESS 2)
@@ -31,7 +34,6 @@ set(SOURCES
     gtps_pythoninterpreter.cpp
     gtps_pythonpreferencepage.cpp
     gtps_systemsettings.cpp
-    resources.qrc
     gtps_pythonpreferencepage.ui
 )
 

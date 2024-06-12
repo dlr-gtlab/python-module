@@ -1,16 +1,17 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_abstractbrowseritem.cpp
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 22.08.2021
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 22.08.2021
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "gtpy_abstractbrowseritem.h"
 
 GtpyAbstractBrowserItem::GtpyAbstractBrowserItem() : m_parentItem(
-        Q_NULLPTR), m_selected(false), m_typeId(-1)
+        nullptr), m_selected(false), m_typeId(-1)
 {
 
 }
@@ -79,7 +80,7 @@ GtpyAbstractBrowserItem::child(int row)
 {
     if (row < 0 || row >= m_childItems.size())
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     return m_childItems.at(row);

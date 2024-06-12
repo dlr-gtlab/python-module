@@ -1,3 +1,11 @@
+/* GTlab - Gas Turbine laboratory
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
+ *
+ * Author: Martin Siggel (AT-TWK)
+ */
+
 #ifndef GTPS_PYTHONPREFERENCEPAGE_H
 #define GTPS_PYTHONPREFERENCEPAGE_H
 

@@ -1,3 +1,11 @@
+/* GTlab - Gas Turbine laboratory
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
+ *
+ * Author: Martin Siggel (AT-TWK)
+ */
+
 #include "gtps_pythonpreferencepage.h"
 #include "ui_gtps_pythonpreferencepage.h"
 
@@ -21,6 +29,8 @@ GtPythonPreferencePage::GtPythonPreferencePage() :
     setTitleShort("Python");
 
     ui->setupUi(this);
+
+    ui->iconLabel->setPixmap(gt::gui::icon::python().pixmap(32,32));
 
     connect(ui->btnSelectPyExe, &QPushButton::clicked,
             this, &GtPythonPreferencePage::onBtnSelectPyExePressed);

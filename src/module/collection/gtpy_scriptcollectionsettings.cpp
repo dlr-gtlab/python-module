@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpyscriptcollectionsettings.cpp
- * copyright 2009-2019 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 12.08.2021
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 12.08.2021
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "gt_collectionitem.h"
@@ -33,7 +34,7 @@ GtpyScriptCollectionSettings::setLocalCollectionData(QWidget* widget,
     GtpyCollectionWidget* localWidget = dynamic_cast<GtpyCollectionWidget*>(
                                             widget);
 
-    if (localWidget == Q_NULLPTR)
+    if (localWidget == nullptr)
     {
         return;
     }
@@ -66,7 +67,7 @@ GtpyScriptCollectionSettings::setBrowserWidgetData(
 {
     GtpyCollectionBrowser* wid = qobject_cast<GtpyCollectionBrowser*>(widget);
 
-    if (wid == Q_NULLPTR)
+    if (wid == nullptr)
     {
         return;
     }

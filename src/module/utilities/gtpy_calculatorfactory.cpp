@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpycalculatorfactory.cpp
- * copyright 2009-2018 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 12.08.2019
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 12.08.2019
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include "PythonQtPythonInclude.h"
@@ -28,11 +29,11 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
                                         const QString& objName,
                                         GtTask* parent)
 {
-    GtCalculator* calc = Q_NULLPTR;
+    GtCalculator* calc = nullptr;
 
     Py_BEGIN_ALLOW_THREADS
 
-    //    if (parent != Q_NULLPTR)
+    //    if (parent != nullptr)
     //    {
     //        QList<GtCalculator*> calculators =
     //                parent->findChildren<GtCalculator*>(objName);
@@ -50,29 +51,29 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
     GtCalculatorData calcData =
         gtCalculatorFactory->calculatorData(className);
 
-    if (calcData == Q_NULLPTR)
+    if (calcData == nullptr)
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     if (!calcData->isValid())
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     QObject* newObj = calcData->metaData().newInstance();
 
-    if (newObj == Q_NULLPTR)
+    if (newObj == nullptr)
     {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     calc = qobject_cast<GtCalculator*>(newObj);
 
-    if (calc == Q_NULLPTR)
+    if (calc == nullptr)
     {
         delete newObj;
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     calc->setFactory(gtProcessFactory);
@@ -86,7 +87,7 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
         calc->setObjectName(objName);
     }
 
-    if (parent != Q_NULLPTR)
+    if (parent != nullptr)
     {
         if (calc->thread() != parent->thread())
         {

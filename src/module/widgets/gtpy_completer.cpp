@@ -1,10 +1,11 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_completer.cpp
- * copyright 2009-2018 by DLR
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
- *  Created on: 12.08.2019
- *  Author: Marvin Noethen (AT-TW)
- *  Tel.: +49 2203 601 2692
+ * Created on: 12.08.2019
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
 #include <QAbstractItemView>
@@ -40,7 +41,7 @@ GtpyCompleter::GtpyCompleter(int contextId, QWidget* widget) :
 void
 GtpyCompleter::handleTabCompletion(QTextCursor textCursor, QRect cursorRect)
 {
-    if (m_model == Q_NULLPTR)
+    if (m_model == nullptr)
     {
         return;
     }
@@ -220,7 +221,7 @@ GtpyCompleter::getPopup() const
 QString
 GtpyCompleter::completionText(const QModelIndex& index) const
 {
-    if (m_model == Q_NULLPTR)
+    if (m_model == nullptr)
     {
         return QString();
     }
@@ -231,7 +232,7 @@ GtpyCompleter::completionText(const QModelIndex& index) const
 QString
 GtpyCompleter::completionName(const QModelIndex& index) const
 {
-    if (m_model == Q_NULLPTR)
+    if (m_model == nullptr)
     {
         return QString();
     }
@@ -242,7 +243,7 @@ GtpyCompleter::completionName(const QModelIndex& index) const
 int
 GtpyCompleter::completionCursorOffset(const QModelIndex& index) const
 {
-    if (m_model == Q_NULLPTR)
+    if (m_model == nullptr)
     {
         return 0;
     }

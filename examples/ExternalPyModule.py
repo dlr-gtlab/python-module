@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
+
 #For using this external module in a Python Task insert the following lines 
 #to the GTlab Python Editor.
 #import sys
