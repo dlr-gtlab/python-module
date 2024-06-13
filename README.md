@@ -1,4 +1,4 @@
-# GTlab Python Module
+# <img src="images/gtlabpython-logo.png" alt="drawing" width="64"/> Python Module 
 
 This module embeds Python into GTlab. Python is an interpreted programming 
 language that is suitable for script programming. Scripts are small 
