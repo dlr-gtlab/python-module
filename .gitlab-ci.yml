@@ -38,10 +38,12 @@ windowsBuildDebug_2.0:
   extends: 
     - .build-win_20
   script:
+    - $env:path = "$env:GTLAB_DEV_TOOLS\ThirdPartyLibraries\Python\Python_39;$env:path"
+    - $env:PATH+=(";.\build;"+$env:GTLAB_DEV_TOOLS+"\binDebug;"+$env:GTLAB_DEV_TOOLS+"\binDebug\modules;")
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2019-dbg -DGTLAB_DEVTOOLS_DIR="$env:GTLAB_DEV_TOOLS" -DBUILD_UNITTESTS=ON
     - cmake --build build --target install
 
-windowsBuildRelease_1.7:
+.windowsBuildRelease_1.7:
   stage: build
   extends: 
     - .build-win_17
@@ -61,7 +63,7 @@ windowsBuildRelease_2.0:
     - cmake --build build --target install
     
 # build on Linux system
-linuxBuildDebug_1.7:
+.linuxBuildDebug_1.7:
   stage: build
   extends: 
     - .build-linux_17
@@ -79,7 +81,7 @@ linuxBuildDebug_2.0:
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-linux-dbg -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS  -DBUILD_UNITTESTS=ON
     - cmake --build build --target install
  
-linuxBuildRelease_1.7:
+.linuxBuildRelease_1.7:
   stage: build
   extends: 
     - .build-linux_17
@@ -214,7 +216,7 @@ package-win_2.0:
   variables:
     toolchain: msvc2019
 
-package-win_1.7:
+.package-win_1.7:
   stage: package
   tags: ["docker", "linux"]
   extends: [".run-master-and-tags"]
@@ -237,7 +239,7 @@ package-linux_2.0:
   variables:
     toolchain: linux
 
-package-linux_1.7:
+.package-linux_1.7:
   extends: [".package"]
   needs: ["linuxBuildDebug_1.7", "linuxBuildRelease_1.7"]
   variables:
@@ -245,7 +247,7 @@ package-linux_1.7:
 
 
 # badges
-badges_1.7:
+.badges_1.7:
   stage: badges
   extends: 
     - .stable-only-master
