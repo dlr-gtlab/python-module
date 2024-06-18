@@ -38,7 +38,7 @@ windowsBuildDebug_2.0:
   extends: 
     - .build-win_20
   script:
-    - $env:path = "$env:GTLAB_DEV_TOOLS\ThirdPartyLibraries\Python\Python_39;$env:path"
+    - $env:path = "$env:PYTHON3_HOME;$env:path"
     - $env:PATH+=(";.\build;"+$env:GTLAB_DEV_TOOLS+"\binDebug;"+$env:GTLAB_DEV_TOOLS+"\binDebug\modules;")
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2019-dbg -DGTLAB_DEVTOOLS_DIR="$env:GTLAB_DEV_TOOLS" -DBUILD_UNITTESTS=ON
     - cmake --build build --target install
