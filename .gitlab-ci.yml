@@ -38,18 +38,10 @@ windowsBuildDebug_2.0:
   extends: 
     - .build-win_20
   script:
+    - $env:path = "$env:GTLAB_DEV_TOOLS\ThirdPartyLibraries\Python\Python_39;$env:path"
+    - $env:PATH+=(";.\build;"+$env:GTLAB_DEV_TOOLS+"\binDebug;"+$env:GTLAB_DEV_TOOLS+"\binDebug\modules;")
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2019-dbg -DGTLAB_DEVTOOLS_DIR="$env:GTLAB_DEV_TOOLS" -DBUILD_UNITTESTS=ON
     - cmake --build build --target install
-
-windowsBuildRelease_1.7:
-  stage: build
-  extends: 
-    - .build-win_17
-  script:
-    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-msvc2017 -DGTLAB_DEVTOOLS_DIR="$env:GTLAB_DEV_TOOLS" -DPython3_LIBRARY="$env:PYTHON_DIR"/libs/python37.lib -DPython3_INCLUDE_DIR="$env:PYTHON_DIR"/include
-    - cmake --build build --target install
-  variables:
-    PYTHON_DIR: C:\devel\GTlab-DevTools\stable\1_7\ThirdPartyLibraries\Python\Python_37
 
 windowsBuildRelease_2.0:
   stage: build_2.0
@@ -60,17 +52,6 @@ windowsBuildRelease_2.0:
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-msvc2019 -DGTLAB_DEVTOOLS_DIR="$env:GTLAB_DEV_TOOLS"
     - cmake --build build --target install
     
-# build on Linux system
-linuxBuildDebug_1.7:
-  stage: build
-  extends: 
-    - .build-linux_17
-  script:
-    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-linux-dbg -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS  -DBUILD_UNITTESTS=ON -DPython3_LIBRARY=$PYTHON_DIR/libs/libpython3.7m.so -DPython3_INCLUDE_DIR=$PYTHON_DIR/include/
-    - cmake --build build --target install
-  variables:
-    PYTHON_DIR: /home/gitlab-runner/GTlab-Devtools/stable/1_7/ThirdPartyLibraries/Python/Python_37/
-
 linuxBuildDebug_2.0:
   stage: build_2.0
   extends: 
@@ -79,17 +60,6 @@ linuxBuildDebug_2.0:
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-linux-dbg -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS  -DBUILD_UNITTESTS=ON
     - cmake --build build --target install
  
-linuxBuildRelease_1.7:
-  stage: build
-  extends: 
-    - .build-linux_17
-    - .run-master-and-tags
-  script:
-    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-linux -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS  -DPython3_LIBRARY=$PYTHON_DIR/libs/libpython3.7m.so -DPython3_INCLUDE_DIR=$PYTHON_DIR/include/
-    - cmake --build build --target install
-  variables:
-    PYTHON_DIR: /home/gitlab-runner/GTlab-Devtools/stable/1_7/ThirdPartyLibraries/Python/Python_37/
-
 linuxBuildRelease_2.0:
   stage: build_2.0
   extends: 
@@ -170,7 +140,6 @@ code-coverage:
     paths:
       - "test-coverage"
 
- 
 cppcheck:
   stage: codequality
   extends: .cppCheckTemplate
@@ -214,45 +183,12 @@ package-win_2.0:
   variables:
     toolchain: msvc2019
 
-package-win_1.7:
-  stage: package
-  tags: ["docker", "linux"]
-  extends: [".run-master-and-tags"]
-  needs: ["windowsBuildRelease_1.7"]
-  image: debian:buster
-  script:
-    - mv install-$toolchain gtlabpython-$toolchain
-    - tar czf gtlabpython-$toolchain.tar.gz gtlabpython-$toolchain
-  artifacts:
-    name: "gtlabpython-$toolchain"
-    paths: ["gtlabpython-$toolchain.tar.gz"]
-  variables:
-    toolchain: msvc2017
-    GIT_STRATEGY: "none"
-
-
 package-linux_2.0:
   extends: [".package"]
   needs: ["linuxBuildDebug_2.0", "linuxBuildRelease_2.0"]
   variables:
     toolchain: linux
 
-package-linux_1.7:
-  extends: [".package"]
-  needs: ["linuxBuildDebug_1.7", "linuxBuildRelease_1.7"]
-  variables:
-    toolchain: linux
-
-
-# badges
-badges_1.7:
-  stage: badges
-  extends: 
-    - .stable-only-master
-    - .badgeTemplate
-  dependencies:
-    - windowsBuildRelease_1.7
-    - linuxBuildDebug_1.7
 
 badges_2.0:
   stage: badges

@@ -27,3 +27,5 @@ target_compile_definitions(GTlabPythonUnitTest
 
 target_link_libraries(GTlabPythonUnitTest PRIVATE GTlab::Core GTlab::Python gtest Qt5::Core)
 
+include(GoogleTest)
+gtest_discover_tests(GTlabPythonUnitTest TEST_PREFIX "PythonModule.")
