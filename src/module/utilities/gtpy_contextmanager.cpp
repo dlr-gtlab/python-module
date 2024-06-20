@@ -143,14 +143,8 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
 GtpyContextManager*
 GtpyContextManager::instance()
 {
-    static GtpyContextManager* retval = nullptr;
-
-    if (retval == nullptr)
-    {
-        retval = new GtpyContextManager(gtApp);
-    }
-
-    return retval;
+    static GtpyContextManager mgr(nullptr);
+    return &mgr;
 }
 
 GtpyContextManager::~GtpyContextManager()
@@ -2044,7 +2038,7 @@ GtpyContextManager::calculatorCompletions(int contextId) const
     foreach (GtCalculatorData calcData,
              gtCalculatorFactory->calculatorDataList())
     {
-        if (!gtApp->devMode() &&
+        if (!gtDevMode() &&
                 calcData->status != GtCalculatorDataImpl::RELEASE)
         {
             continue;

@@ -452,7 +452,7 @@ GtpyCalculatorsModule::createCalcConstructors()
     foreach (GtCalculatorData calcData,
              gtCalculatorFactory->calculatorDataList())
     {
-        if (!gtApp->devMode() &&
+        if (!gtDevMode() &&
                 calcData->status != GtCalculatorDataImpl::RELEASE)
         {
             continue;

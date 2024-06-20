@@ -727,7 +727,7 @@ GtpyTaskWizardPage::addElement()
 
             if (calcData->isValid())
             {
-                if (gtApp->devMode() ||
+                if (gtDevMode() ||
                         calcData->status == GtCalculatorDataImpl::RELEASE)
                 {
                     QAction* act = menu.addAction(calcData->id);

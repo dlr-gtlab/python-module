@@ -59,5 +59,8 @@ struct StdOutMetaData
 extern const QString COLLECTION_ID;
 extern const QString COLLECTION_cat;
 extern const QString COLLECTION_subcat;
+
+#define gtDevMode() (gtApp && gtApp->devMode())
+
 }
 #endif // GTPYGLOBALS_H
