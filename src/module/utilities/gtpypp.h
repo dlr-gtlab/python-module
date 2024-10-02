@@ -130,7 +130,7 @@ public:
 
     operator bool() const
     {
-        return get() != nullptr;
+        return (PyObject*)(get()) != Py_None && get() != nullptr;
     }
 
 private:
