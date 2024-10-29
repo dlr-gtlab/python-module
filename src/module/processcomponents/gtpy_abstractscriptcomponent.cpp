@@ -23,6 +23,7 @@
 
 #include "gtpy_transfer.h"
 #include "gtpy_contextmanager.h"
+#include "gtpy_packageiteration.h"
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 
@@ -109,6 +110,16 @@ GtpyAbstractScriptComponent::GtpyAbstractScriptComponent() :
     m_script.hide();
     m_replaceTabBySpaces.hide();
     m_tabSize.hide();
+
+    using PackageInfo = gtpy::package::PackageInfo;
+    gtpy::package::forEachPackage([&](const PackageInfo& pInfo){
+        auto pathProp = new GtObjectPathProperty(
+                    QStringLiteral(""), QStringLiteral(""), QStringLiteral(""),
+                    pInfo.objectName, nullptr, QStringList() << pInfo.className);
+
+        pathProp->hide(true);
+
+        m_dynamicPathProps << pathProp;});
 }
 
 GtpyAbstractScriptComponent::~GtpyAbstractScriptComponent()
