@@ -25,17 +25,6 @@ namespace gtpy
 namespace package
 {
 /**
- * @brief The PackageInfo struct
- * Struct to store information about the GtPackages.
- */
-struct PackageInfo
-{
-    QString modId;
-    QString className;
-    QString objectName;
-};
-
-/**
  * @brief Iterates through the packages and calls the passed function
  * for each package.
  * @param func Function to be called. It gets a package as a parameter.
@@ -57,7 +46,10 @@ void forEachPackage(Func func)
                             [&pkgClassName](GtPackage* p){
                         return p->metaObject()->className() == pkgClassName; });
 
-                func({modId, pkgClassName,(*pkgObj)->objectName()});
+                if (pkgObj != packages.end())
+                {
+                    func(*pkgObj);
+                }
             }
         }
     }

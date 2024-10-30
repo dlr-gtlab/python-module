@@ -111,11 +111,13 @@ GtpyAbstractScriptComponent::GtpyAbstractScriptComponent() :
     m_replaceTabBySpaces.hide();
     m_tabSize.hide();
 
-    using PackageInfo = gtpy::package::PackageInfo;
-    gtpy::package::forEachPackage([&](const PackageInfo& pInfo){
+    gtpy::package::forEachPackage([&](const GtPackage* pkg){
+        if (!pkg) return;
+
         auto pathProp = new GtObjectPathProperty(
                     QStringLiteral(""), QStringLiteral(""), QStringLiteral(""),
-                    pInfo.objectName, nullptr, QStringList() << pInfo.className);
+                    pkg->objectName(), nullptr,
+                    QStringList() << pkg->metaObject()->className());
 
         pathProp->hide(true);
 

@@ -889,13 +889,10 @@ GtpyAbstractScriptingWizardPage::reloadWizardGeometry()
 void
 GtpyAbstractScriptingWizardPage::loadPackages()
 {   
-    using PackageInfo = gtpy::package::PackageInfo;
-    gtpy::package::forEachPackage([&](const PackageInfo& pInfo){
-        auto* obj = scope()->getObjectByPath(
-                    QStringList() << scope()->objectName() << pInfo.objectName);
-        if (obj)
+    gtpy::package::forEachPackage([&](const GtPackage* pkg){
+        if (pkg)
         {
-            auto* clone = obj->clone();
+            auto* clone = pkg->clone();
             clone->setParent(this);
             gtpy::transfer::gtObjectToPython(m_contextId, clone);
         }
