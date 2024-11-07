@@ -34,7 +34,6 @@ GtpyScriptCalculator::GtpyScriptCalculator()
 
     for (auto* pathProp : qAsConst(m_dynamicPathProps))
     {
-        pathProp->setParent(this);
         registerProperty(*pathProp);
     }
 
