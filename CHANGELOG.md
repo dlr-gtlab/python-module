@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+ - Fixed inaccessible GTlab packages in the Python Task and the Python Calculator context - #566
  - Fixed setting ObjectLinkProperties of derived objects - #279
  - Fixed crash of findGtTask from external scripts - #568
  - Fixed crash of findGtTask in debug mode - #281
