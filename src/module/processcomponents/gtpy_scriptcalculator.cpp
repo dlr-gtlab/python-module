@@ -13,7 +13,6 @@
 #include "gt_processdata.h"
 
 #include "gtpy_contextmanager.h"
-#include "gtpy_packageiteration.h"
 #include "gtpy_wizardgeometries.h"
 
 #include "gtpy_scriptcalculator.h"
@@ -33,15 +32,10 @@ GtpyScriptCalculator::GtpyScriptCalculator()
     registerProperty(m_replaceTabBySpaces);
     registerProperty(m_tabSize);
 
-    using PackageInfo = gtpy::package::PackageInfo;
-    gtpy::package::forEachPackage([&](const PackageInfo& pInfo){
-        auto pathProp = new GtObjectPathProperty(
-                    QStringLiteral(""), QStringLiteral(""), QStringLiteral(""),
-                    pInfo.modId, this, QStringList() << pInfo.className);
-        pathProp->hide(true);
+    for (auto* pathProp : qAsConst(m_dynamicPathProps))
+    {
         registerProperty(*pathProp);
-
-        m_dynamicPathProps << pathProp; });
+    }
 
     connect(this, SIGNAL(stateChanged(GtProcessComponent::STATE)), this,
             SLOT(onStateChanged(GtProcessComponent::STATE)));

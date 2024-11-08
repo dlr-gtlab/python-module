@@ -25,17 +25,6 @@ namespace gtpy
 namespace package
 {
 /**
- * @brief The PackageInfo struct
- * Struct to store information about the GtPackages.
- */
-struct PackageInfo
-{
-    QString modId;
-    QString className;
-    QString objectName;
-};
-
-/**
  * @brief Iterates through the packages and calls the passed function
  * for each package.
  * @param func Function to be called. It gets a package as a parameter.
@@ -43,23 +32,17 @@ struct PackageInfo
 template <class Func>
 void forEachPackage(Func func)
 {
-    if (auto* project = gtApp->currentProject())
+    auto* project = gtApp->currentProject();
+
+    if (!project) return;
+
+    auto packages = project->findDirectChildren<GtPackage*>();
+
+    for (auto* pkg : packages)
     {
-        auto packages = project->findDirectChildren<GtPackage*>();
+        assert(pkg != nullptr);
 
-        for (const auto& modId: project->moduleIds())
-        {
-            auto pkgClassName = gtApp->modulePackageId(modId);
-
-            if (!pkgClassName.isEmpty())
-            {
-                auto pkgObj = std::find_if(packages.begin(), packages.end(),
-                            [&pkgClassName](GtPackage* p){
-                        return p->metaObject()->className() == pkgClassName; });
-
-                func({modId, pkgClassName,(*pkgObj)->objectName()});
-            }
-        }
+        func(pkg);
     }
 }
 
