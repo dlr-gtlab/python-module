@@ -32,26 +32,17 @@ namespace package
 template <class Func>
 void forEachPackage(Func func)
 {
-    if (auto* project = gtApp->currentProject())
+    auto* project = gtApp->currentProject();
+
+    if (!project) return;
+
+    auto packages = project->findDirectChildren<GtPackage*>();
+
+    for (auto* pkg : packages)
     {
-        auto packages = project->findDirectChildren<GtPackage*>();
+        assert(pkg != nullptr);
 
-        for (const auto& modId: project->moduleIds())
-        {
-            auto pkgClassName = gtApp->modulePackageId(modId);
-
-            if (!pkgClassName.isEmpty())
-            {
-                auto pkgObj = std::find_if(packages.begin(), packages.end(),
-                            [&pkgClassName](GtPackage* p){
-                        return p->metaObject()->className() == pkgClassName; });
-
-                if (pkgObj != packages.end())
-                {
-                    func(*pkgObj);
-                }
-            }
-        }
+        func(pkg);
     }
 }
 
