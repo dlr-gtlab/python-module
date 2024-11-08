@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
  - Fixed setting ObjectLinkProperties of derived objects - #279
+ - Fixed crash of findGtTask from external scripts - #568
  - Fixed crash of findGtTask in debug mode - #281
  - Fixed error `TypeError: <module 'gtlab_svg_backend' from ''> is a built-in module` related to the inspect module - #284
 
