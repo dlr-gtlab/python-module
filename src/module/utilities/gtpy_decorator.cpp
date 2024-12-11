@@ -929,22 +929,57 @@ GtpyDecorator::findGtParent(GtObject* obj)
     return wrapGtObject(obj->findParent<GtObject*>()).release();
 }
 #if GT_VERSION >= 0x020000
-QVariant
-GtpyDecorator::getPropertyContainerVal(GtObject* obj, QString const& id,
-                                       int index, QString const& memberId)
-{
-    if (!obj)
-    {
-        gtError() << __func__ << " -> Invalid object given!";
-        return {};
-    }
 
-    GtPropertyStructContainer* s = obj->findPropertyContainer(id);
+/// helping function to avoid code doubling here
+namespace
+{
+    GtPropertyStructContainer* structContainerOfObject(GtObject* obj,
+                                                       const QString& id)
+    {
+        if (!obj)
+        {
+            gtError() << __func__ << " -> Invalid object given!";
+            return nullptr;
+        }
+
+        return obj->findPropertyContainer(id);
+    }
+}
+
+
+
+int
+GtpyDecorator::getPropertyContainerSize(GtObject* obj, const QString& id)
+{
+    GtPropertyStructContainer* s = structContainerOfObject(obj, id);
 
     if (!s)
     {
         gtError() << __func__ << " -> PropertyStruct container of "
-                                 "object not fund!";
+                                 "object not found!";
+        return -1;
+    }
+
+    return s->size();
+}
+
+QVariant
+GtpyDecorator::getPropertyContainerVal(GtObject* obj, QString const& id,
+                                       int index, QString const& memberId)
+{
+    GtPropertyStructContainer* s = structContainerOfObject(obj, id);
+
+    if (!s)
+    {
+        gtError() << __func__ << " -> PropertyStruct container of "
+                                 "object not found!";
+        return {};
+    }
+
+    if (index < 0 || index >= s->size())
+    {
+        gtError() << __func__ << " -> Index is invalid for "
+                                 "requested property container!";
         return {};
     }
 
@@ -958,20 +993,22 @@ GtpyDecorator::setPropertyContainerVal(GtObject* obj, const QString& id,
                                        int index, const QString& memberId,
                                        const QVariant& val)
 {
-    if (!obj)
-    {
-        gtError() << __func__ << " -> Invalid object given!";
-        return false;
-    }
-
-    GtPropertyStructContainer* s = obj->findPropertyContainer(id);
+    GtPropertyStructContainer* s = structContainerOfObject(obj, id);
 
     if (!s)
     {
         gtError() << __func__ << " -> PropertyStruct container of "
-                                 "object not fund!";
+                                 "object not found!";
         return false;
     }
+
+    if (index < 0 || index >= s->size())
+    {
+        gtError() << __func__ << " -> Index is invalid for "
+                                 "requested property container!";
+        return false;
+    }
+
 
     GtPropertyStructInstance& structCon = s->at(index);
 

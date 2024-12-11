@@ -404,6 +404,17 @@ public slots:
 
 #if GT_VERSION >= 0x020000
     /**
+     * @brief getPropertyContainerSize
+     * Find a struct container property and return a value of
+     * a defined propety
+     * @param obj - parent object of the struct propety
+     * @param id of the property struct container
+     * @return size of the container (number of elements in the container)
+     * Returns -1 for invalid inputs
+     */
+    int getPropertyContainerSize(GtObject* obj, const QString& id);
+
+    /**
      * @brief getPropertyContainerVal
      * Find a struct container property and return a value of
      * a defined propety
