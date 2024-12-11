@@ -929,10 +929,34 @@ GtpyDecorator::findGtParent(GtObject* obj)
     return wrapGtObject(obj->findParent<GtObject*>()).release();
 }
 #if GT_VERSION >= 0x020000
+
+int
+GtpyDecorator::getPropertyContainerSize(GtObject* obj, const QString& id)
+{
+    if (!obj)
+    {
+        gtError() << __func__ << " -> Invalid object given!";
+        return -1;
+    }
+
+    GtPropertyStructContainer* s = obj->findPropertyContainer(id);
+
+    if (!s)
+    {
+        gtError() << __func__ << " -> PropertyStruct container of "
+                                 "object not fund!";
+        return -1;
+    }
+
+    return s->size();
+}
+
 QVariant
 GtpyDecorator::getPropertyContainerVal(GtObject* obj, QString const& id,
                                        int index, QString const& memberId)
 {
+    if (index < 0) return {};
+
     if (!obj)
     {
         gtError() << __func__ << " -> Invalid object given!";
@@ -945,6 +969,13 @@ GtpyDecorator::getPropertyContainerVal(GtObject* obj, QString const& id,
     {
         gtError() << __func__ << " -> PropertyStruct container of "
                                  "object not fund!";
+        return {};
+    }
+
+    if (index >= s->size())
+    {
+        gtError() << __func__ << " -> Index to high for "
+                                 "requested property container!";
         return {};
     }
 
@@ -958,6 +989,8 @@ GtpyDecorator::setPropertyContainerVal(GtObject* obj, const QString& id,
                                        int index, const QString& memberId,
                                        const QVariant& val)
 {
+    if (index < 0) return {};
+
     if (!obj)
     {
         gtError() << __func__ << " -> Invalid object given!";
@@ -971,6 +1004,13 @@ GtpyDecorator::setPropertyContainerVal(GtObject* obj, const QString& id,
         gtError() << __func__ << " -> PropertyStruct container of "
                                  "object not fund!";
         return false;
+    }
+
+    if (index >= s->size())
+    {
+        gtError() << __func__ << " -> Index to high for "
+                                 "requested property container!";
+        return {};
     }
 
     GtPropertyStructInstance& structCon = s->at(index);
