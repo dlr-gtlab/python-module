@@ -622,7 +622,7 @@ QString
 GtpyContextManager::qvariantToPyStr(const QVariant& val) const
 {
     GTPY_GIL_SCOPE
-    return PyPPString_AsQString(PyPPObject::fromQVariant(val));
+    return PyPPObject_AsQString(PyPPObject::fromQVariant(val));
 }
 
 QString

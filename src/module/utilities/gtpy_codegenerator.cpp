@@ -9,6 +9,7 @@
  */
 
 #include <QMetaProperty>
+#include <QRegularExpression>
 
 #include "gt_application.h"
 #include "gt_calculator.h"
@@ -24,6 +25,17 @@
 #include "gtpy_contextmanager.h"
 
 #include "gtpy_codegenerator.h"
+
+namespace {
+
+QString
+quot(const QString& val)
+{
+    return QString{"\"%1\""}.arg(val);
+}
+
+}
+
 
 GtpyCodeGenerator::GtpyCodeGenerator(QObject* parent) : QObject(parent)
 {
@@ -185,113 +197,29 @@ GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc)
 QString
 GtpyCodeGenerator::propValToString(GtAbstractProperty* prop)
 {
-    QString val;
+    QString val{};
 
-    if (qobject_cast<GtModeProperty*>(prop))
+    if (qobject_cast<GtObjectLinkProperty*>(prop))
     {
-        QString valTemp = GtpyContextManager::instance()->qvariantToPyStr(
-                              prop->valueToVariant());
+        const auto& uuid = prop->valueToVariant().toString();
+        val = pythonObjectPath(gtDataModel->objectByUuid(uuid));
 
-        if (valTemp.isEmpty())
+        if (val.isEmpty())
         {
-            valTemp = "\"\"";
-        }
-
-        val = "\""
-              + valTemp
-              + "\"";
-    }
-    else if (qobject_cast<GtObjectLinkProperty*>(prop))
-    {
-        GtObject* obj = gtDataModel->objectByUuid(prop->valueToVariant().
-                        toString());
-
-        if (obj)
-        {
-            GtPackage* pack = nullptr;
-
-            while (pack == nullptr)
-            {
-                QString objName = obj->objectName();
-
-                if (!objName.contains(
-                            QRegExp(QStringLiteral("^[a-zA-Z0-9_]*$"))))
-                {
-                    QString funcName =
-                        GtpyContextManager::instance()->findChildFuncName();
-
-                    objName = funcName + "(\"" + objName +
-                              "\")";
-                }
-
-                obj = qobject_cast<GtObject*>(obj->parent());
-
-                if (obj == nullptr)
-                {
-                    break;
-                }
-
-                pack = qobject_cast<GtPackage*>(obj);
-
-                val.insert(0, objName);
-
-                val.insert(0, ".");
-
-                if (pack != nullptr)
-                {
-                    objName = pack->objectName();
-
-                    if (!objName.contains(
-                                QRegExp(QStringLiteral("^[a-zA-Z0-9_]*$"))))
-                    {
-                        QString funcName =
-                            GtpyContextManager::instance()->
-                            findChildFuncName();
-
-                        objName = funcName + "(\"" + objName +
-                                  "\")";
-                    }
-
-                    val.insert(0, objName);
-                }
-            }
-
-            obj = nullptr;
-            pack = nullptr;
-        }
-        else
-        {
-            QString valTemp = prop->valueToVariant().toString();
-
-            if (valTemp.isEmpty())
-            {
-                val = "\"\"";
-            }
-            else
-            {
-                val =  GtpyContextManager::instance()->qvariantToPyStr(
-                           prop->valueToVariant());
-            }
+            val = quot(uuid);
         }
     }
-    else if (qobject_cast<GtStringProperty*>(prop))
+    else if (qobject_cast<GtStringProperty*>(prop) ||
+             dynamic_cast<GtProperty<QString>*>(prop) ||
+             qobject_cast<GtModeProperty*>(prop))
     {
-        val = "\"";
-        val +=  GtpyContextManager::instance()->qvariantToPyStr(
-                    prop->valueToVariant());
-        val += "\"";
-    }
-    else if (dynamic_cast<GtProperty<QString>*>(prop))
-    {
-        val = "\"";
-        val +=  GtpyContextManager::instance()->qvariantToPyStr(
-                    prop->valueToVariant());
-        val += "\"";
+        val = quot(GtpyContextManager::instance()->qvariantToPyStr(
+            prop->valueToVariant()));
     }
     else
     {
         val = GtpyContextManager::instance()->qvariantToPyStr(
-                  prop->valueToVariant());
+            prop->valueToVariant());
     }
 
     return val;
@@ -437,3 +365,37 @@ GtpyCodeGenerator::helperPyCode(GtObject* obj, const QString& pyObjName)
 
     return pyCode;
 }
+
+QString
+GtpyCodeGenerator::pythonObjectPath(GtObject* obj)
+{
+    QStringList objPath{};
+    generatePythonObjectPath(obj, objPath);
+    return objPath.join('.');
+}
+
+void
+GtpyCodeGenerator::generatePythonObjectPath(GtObject* obj,
+                                            QStringList& objPath)
+{
+    if (!obj) return;
+
+    QString objGetter  = obj->objectName();
+
+    // if the object name contains special characters use findGtChild
+    // with the object name as a parameter to get the object
+    if (!objGetter.contains(QRegularExpression("^[a-zA-Z0-9_]*$")))
+    {
+        objGetter = GtpyContextManager::instance()->findChildFuncName() +
+                    "(" + quot(obj->objectName()) + ")";
+    }
+
+    objPath.prepend(objGetter);
+
+    // since packages are accessible directly via the Python context
+    // terminate recursion after resolving the package getter
+    if (qobject_cast<GtPackage*>(obj)) return;
+
+    generatePythonObjectPath(obj->parentObject(), objPath);
+}
+
