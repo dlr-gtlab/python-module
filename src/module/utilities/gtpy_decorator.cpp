@@ -955,8 +955,6 @@ QVariant
 GtpyDecorator::getPropertyContainerVal(GtObject* obj, QString const& id,
                                        int index, QString const& memberId)
 {
-    if (index < 0) return {};
-
     if (!obj)
     {
         gtError() << __func__ << " -> Invalid object given!";
@@ -972,9 +970,9 @@ GtpyDecorator::getPropertyContainerVal(GtObject* obj, QString const& id,
         return {};
     }
 
-    if (index >= s->size())
+    if (index < 0 || index >= s->size())
     {
-        gtError() << __func__ << " -> Index to high for "
+        gtError() << __func__ << " -> Index is invalid for "
                                  "requested property container!";
         return {};
     }
@@ -989,8 +987,6 @@ GtpyDecorator::setPropertyContainerVal(GtObject* obj, const QString& id,
                                        int index, const QString& memberId,
                                        const QVariant& val)
 {
-    if (index < 0) return {};
-
     if (!obj)
     {
         gtError() << __func__ << " -> Invalid object given!";
@@ -1006,12 +1002,13 @@ GtpyDecorator::setPropertyContainerVal(GtObject* obj, const QString& id,
         return false;
     }
 
-    if (index >= s->size())
+    if (index < 0 || index >= s->size())
     {
-        gtError() << __func__ << " -> Index to high for "
+        gtError() << __func__ << " -> Index is invalid for "
                                  "requested property container!";
         return {};
     }
+
 
     GtPropertyStructInstance& structCon = s->at(index);
 
