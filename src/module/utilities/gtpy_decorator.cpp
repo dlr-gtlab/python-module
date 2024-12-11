@@ -930,21 +930,33 @@ GtpyDecorator::findGtParent(GtObject* obj)
 }
 #if GT_VERSION >= 0x020000
 
+/// helping function to avoid code doubling here
+namespace
+{
+    GtPropertyStructContainer* structContainerOfObject(GtObject* obj,
+                                                       const QString& id)
+    {
+        if (!obj)
+        {
+            gtError() << __func__ << " -> Invalid object given!";
+            return nullptr;
+        }
+
+        return obj->findPropertyContainer(id);
+    }
+}
+
+
+
 int
 GtpyDecorator::getPropertyContainerSize(GtObject* obj, const QString& id)
 {
-    if (!obj)
-    {
-        gtError() << __func__ << " -> Invalid object given!";
-        return -1;
-    }
-
-    GtPropertyStructContainer* s = obj->findPropertyContainer(id);
+    GtPropertyStructContainer* s = structContainerOfObject(obj, id);
 
     if (!s)
     {
         gtError() << __func__ << " -> PropertyStruct container of "
-                                 "object not fund!";
+                                 "object not found!";
         return -1;
     }
 
@@ -955,18 +967,12 @@ QVariant
 GtpyDecorator::getPropertyContainerVal(GtObject* obj, QString const& id,
                                        int index, QString const& memberId)
 {
-    if (!obj)
-    {
-        gtError() << __func__ << " -> Invalid object given!";
-        return {};
-    }
-
-    GtPropertyStructContainer* s = obj->findPropertyContainer(id);
+    GtPropertyStructContainer* s = structContainerOfObject(obj, id);
 
     if (!s)
     {
         gtError() << __func__ << " -> PropertyStruct container of "
-                                 "object not fund!";
+                                 "object not found!";
         return {};
     }
 
@@ -987,18 +993,12 @@ GtpyDecorator::setPropertyContainerVal(GtObject* obj, const QString& id,
                                        int index, const QString& memberId,
                                        const QVariant& val)
 {
-    if (!obj)
-    {
-        gtError() << __func__ << " -> Invalid object given!";
-        return false;
-    }
-
-    GtPropertyStructContainer* s = obj->findPropertyContainer(id);
+    GtPropertyStructContainer* s = structContainerOfObject(obj, id);
 
     if (!s)
     {
         gtError() << __func__ << " -> PropertyStruct container of "
-                                 "object not fund!";
+                                 "object not found!";
         return false;
     }
 
@@ -1006,7 +1006,7 @@ GtpyDecorator::setPropertyContainerVal(GtObject* obj, const QString& id,
     {
         gtError() << __func__ << " -> Index is invalid for "
                                  "requested property container!";
-        return {};
+        return false;
     }
 
 
