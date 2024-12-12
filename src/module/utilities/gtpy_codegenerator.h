@@ -65,27 +65,29 @@ private:
      */
     QString helperPyCode(GtObject* obj, const QString& pyObjName);
 
-
     /**
-      * @brief Returns the Python code representing the object path of the
-      * given object. The path can be used to access the given object in Python.
-      * It starts from the GtPackage that the object belongs to.
+      * @brief Returns the object path of the specified object as Python code.
+      * The object path can be used to access the object in Python. It begins
+      * with the GtPackage to which the object belongs.
       * @param obj The GtObject for which to generate the Python object path.
-      * @return The Python code that can be used to access the specified object
-      * in Python.
+      * @return The object path of the specified object which can be used to
+      * access the corresponding object in Python.
       */
     QString pythonObjectPath(GtObject* obj);
 
     /**
-      * @brief Recursively generates the Python object path for the given object
-      * It prepends the object name of the given object to the getterList
-      * and calls itself, passing the parent object of the given object. The
-      * recursion stops when a GtPackage object is passed and processed, since
-      * packages are accessible directly in Python. The recursion also stops if
-      * the given object is a nullptr.
+      * @brief Recursively generates the object path of the specified object.
+      * It prepends the Python getter method of the given object to the
+      * getterList and calls itself, passing the parent object of the given
+      * object. The recursion stops when a GtPackage object is passed and
+      * processed or when the given object is a nullptr.
+      *
+      * To use the object path in Python, join the entries of the getterList
+      * with '.'.
+      *
       * @param obj The GtObject for which to generate the Python object path.
-      * @param getterList A reference to a `QStringList` that stores the path
-      * components.
+      * @param getterList A reference to a QStringList that stores the getter
+      * methods representing the object path of the specified object in Python.
       */
     void generatePythonObjectPath(GtObject* obj, QStringList& getterList);
 
