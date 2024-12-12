@@ -28,8 +28,7 @@
 
 namespace {
 
-QString
-quot(const QString& val)
+inline QString quot(const QString& val)
 {
     return QString{"\"%1\""}.arg(val);
 }
@@ -210,8 +209,7 @@ GtpyCodeGenerator::propValToString(GtAbstractProperty* prop)
         }
     }
     else if (qobject_cast<GtStringProperty*>(prop) ||
-             dynamic_cast<GtProperty<QString>*>(prop) ||
-             qobject_cast<GtModeProperty*>(prop))
+             dynamic_cast<GtProperty<QString>*>(prop))
     {
         val = quot(GtpyContextManager::instance()->qvariantToPyStr(
             prop->valueToVariant()));
@@ -367,7 +365,7 @@ GtpyCodeGenerator::helperPyCode(GtObject* obj, const QString& pyObjName)
 }
 
 QString
-GtpyCodeGenerator::pythonObjectPath(GtObject* obj)
+GtpyCodeGenerator::pythonObjectPath(GtObject* obj) const
 {
     QStringList objPath{};
     generatePythonObjectPath(obj, objPath);
@@ -376,7 +374,7 @@ GtpyCodeGenerator::pythonObjectPath(GtObject* obj)
 
 void
 GtpyCodeGenerator::generatePythonObjectPath(GtObject* obj,
-                                            QStringList& objPath)
+                                            QStringList& objPath) const
 {
     if (!obj) return;
 

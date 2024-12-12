@@ -73,7 +73,7 @@ private:
       * @return The object path of the specified object which can be used to
       * access the corresponding object in Python.
       */
-    QString pythonObjectPath(GtObject* obj);
+    QString pythonObjectPath(GtObject* obj) const;
 
     /**
       * @brief Recursively generates the object path of the specified object.
@@ -89,7 +89,7 @@ private:
       * @param getterList A reference to a QStringList that stores the getter
       * methods representing the object path of the specified object in Python.
       */
-    void generatePythonObjectPath(GtObject* obj, QStringList& getterList);
+    void generatePythonObjectPath(GtObject* obj, QStringList& getterList) const;
 
 };
 
