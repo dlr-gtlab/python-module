@@ -94,7 +94,11 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
             calc->moveToThread(parent->thread());
         }
 
-        parent->appendChild(calc);
+        // ensure appendChild is called in the thread where parent and calc are
+        // living to avoid thread affinity issues
+        QMetaObject::invokeMethod(parent, [parent, calc](){
+            parent->appendChild(calc);
+        }, Qt::BlockingQueuedConnection);
     }
 
     // cppcheck-suppress unknownMacro
