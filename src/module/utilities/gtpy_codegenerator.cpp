@@ -17,7 +17,6 @@
 #include "gt_datamodel.h"
 #include "gt_package.h"
 #include "gt_stringproperty.h"
-#include "gt_modeproperty.h"
 #include "gt_objectlinkproperty.h"
 #include "gt_calculatorfactory.h"
 #include "gt_calculatorhelperfactory.h"
