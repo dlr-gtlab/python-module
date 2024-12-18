@@ -355,6 +355,19 @@ inline QString PyPPString_AsQString(const PyPPObject& obj)
     return QString::fromUtf8(PyPPUnicode_AsUTF8(obj));
 }
 
+inline QString PyPPObject_AsQString(const PyPPObject& obj)
+{
+    auto strObj = obj;
+
+    if (!PyPPUnicode_Check(strObj))
+   {
+        strObj =  PyPPObject::NewRef(PyObject_Str(obj.get()));
+   }
+
+   return PyPPString_AsQString(strObj);
+}
+
+
 inline QVariant PyPPObject_AsQVariant(const PyPPObject& obj)
 {
     if (obj && PyPPObject_TypeCheck(obj, &GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type))
