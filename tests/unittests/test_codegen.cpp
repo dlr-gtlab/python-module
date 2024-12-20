@@ -17,54 +17,6 @@
 #include "test_helper.h"
 
 
-class TestGtpyCodeGenerator : public ::testing::Test
-{
-protected:
-    virtual void SetUp() override
-    {
-        // create a temporary data model to initialize gtDataModel
-        dataModel = new MyCoreDataModel{};
-
-        // initialize calculator data for MyCalculator
-        auto testCalcData = GT_CALC_DATA(MyCalculator);
-        testCalcData->id = "My GtCalculator";
-        testCalcData->version = GtVersionNumber(0, 1);
-        testCalcData->status = GtCalculatorDataImpl::PROTOTYPE;
-        testCalcData->category = "Test";
-        testCalcData->author = "Author";
-
-        // register calculator data in the calculator factory
-        gtCalculatorFactory->registerCalculatorData(testCalcData);
-
-        // create the test calculator
-        calc = new MyCalculator{};
-        calc->setFactory(gtCalculatorFactory);
-
-        // set a custom object name to test if the corresponding Python object
-        // is named correctly
-        calc->setObjectName("My gt Calculator");
-    }
-
-    virtual void TearDown() override
-    {
-        if (calc.data())
-        {
-            delete calc;
-        }
-
-        if (dataModel.data())
-        {
-            delete dataModel;
-        }
-
-        gtCalculatorFactory->unregisterClass(MyCalculator::staticMetaObject);
-    }
-
-    QPointer<MyCalculator> calc;
-    QPointer<MyCoreDataModel> dataModel;
-};
-
-
 TEST(TestCodegen, TestPyIdentifier)
 {
     auto ident = gtpy::codegen::pyIdentifier("gtlab");
@@ -122,4 +74,71 @@ TEST(TestCodegen, TestPyObjectIdentifier)
     o.setObjectName("");
     ident = gtpy::codegen::pyObjectIdentifier(&o);
     EXPECT_EQ(ident.toStdString(), "my_object");
+}
+
+TEST(TestCodegen, TestPyObjectPath)
+{
+    MyPackage p;
+    p.setObjectName("MyPackageName");
+
+    MyObject first;
+    first.setObjectName("FirstObj");
+    p.appendChild(&first);
+
+    MyObject sec;
+    sec.setObjectName("Second Object");
+    first.appendChild(&sec);
+
+    MyObject searchedObj;
+    searchedObj.setObjectName("SearchedObject");
+    sec.appendChild(&searchedObj);
+
+    auto path = gtpy::codegen::pyObjectPath(&searchedObj);
+    EXPECT_EQ(path.toStdString(),
+              "MyPackageName.FirstObj.findGtChild(\"Second Object\")"
+              ".SearchedObject");
+}
+
+TEST(TestCodegen, TestPySetterName)
+{
+    auto ident = gtpy::codegen::pySetterName("Prop");
+    EXPECT_EQ(ident.toStdString(), "setProp");
+
+    ident = gtpy::codegen::pySetterName("prop");
+    EXPECT_EQ(ident.toStdString(), "setProp");
+
+    ident = gtpy::codegen::pySetterName("My Prop");
+    EXPECT_EQ(ident.toStdString(), "setMyProp");
+
+    ident = gtpy::codegen::pySetterName("my PROP");
+    EXPECT_EQ(ident.toStdString(), "setMyPROP");
+
+    ident = gtpy::codegen::pySetterName("my 123");
+    EXPECT_EQ(ident.toStdString(), "setMy123");
+
+    ident = gtpy::codegen::pySetterName("my /*-+$%&/()=?\"");
+    EXPECT_EQ(ident.toStdString(), "setMy");
+
+    ident = gtpy::codegen::pySetterName("");
+    EXPECT_EQ(ident.toStdString(), "");
+
+    ident = gtpy::codegen::pySetterName(" /*-+$%&/()=?\"");
+    EXPECT_EQ(ident.toStdString(), "");
+}
+
+TEST(TestCodegen, TestPyPropSetterName)
+{
+    MyProperty p;
+    p.setIdent("propIdent");
+
+    auto setterName = gtpy::codegen::pyPropSetterName(&p);
+    EXPECT_EQ(setterName.toStdString(), "setPropIdent");
+
+    p.setIdent("");
+
+    setterName = gtpy::codegen::pyPropSetterName(&p);
+    EXPECT_EQ(setterName.toStdString(), "");
+
+    setterName = gtpy::codegen::pyPropSetterName(nullptr);
+    EXPECT_EQ(setterName.toStdString(), "");
 }

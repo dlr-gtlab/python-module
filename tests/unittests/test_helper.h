@@ -12,12 +12,14 @@
 
 #include <gt_coredatamodel.h>
 #include <gt_object.h>
+#include <gt_package.h>
 #include <gt_calculator.h>
 #include <gt_doubleproperty.h>
 #include <gt_boolproperty.h>
 #include <gt_objectlinkproperty.h>
 
 #include <gtpy_contextmanager.h>
+
 
 class MyObject : public GtObject
 {
@@ -26,6 +28,43 @@ public:
     MyObject()
     {
         setObjectName("MyObjectName");
+    }
+};
+
+class MyPackage : public GtPackage
+{
+    Q_OBJECT
+public:
+    MyPackage()
+    {
+        setObjectName("MyPackageName");
+    }
+};
+
+class MyProperty : public GtProperty<QString>
+{
+    Q_OBJECT
+public:
+    MyProperty()
+    {
+        setObjectName("MyProperty");
+    }
+
+    QVariant valueToVariant(const QString& unit,
+                            bool* success = nullptr) const override
+    {
+        return {};
+    }
+
+    bool setValueFromVariant(const QVariant& val,
+                             const QString& unit) override
+    {
+        return false;
+    }
+
+    void setIdent(const QString& ident)
+    {
+        m_id = ident;
     }
 };
 
