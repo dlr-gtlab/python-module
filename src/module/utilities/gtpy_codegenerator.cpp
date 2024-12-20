@@ -15,25 +15,13 @@
 #include "gt_calculator.h"
 #include "gt_objectmementodiff.h"
 #include "gt_datamodel.h"
-#include "gt_package.h"
-#include "gt_stringproperty.h"
 #include "gt_objectlinkproperty.h"
-#include "gt_calculatorfactory.h"
 #include "gt_calculatorhelperfactory.h"
 
 #include "gtpy_contextmanager.h"
+#include "gtpy_codegen.h"
 
 #include "gtpy_codegenerator.h"
-
-namespace {
-
-inline QString quot(const QString& val)
-{
-    return QString{"\"%1\""}.arg(val);
-}
-
-}
-
 
 GtpyCodeGenerator::GtpyCodeGenerator(QObject* parent) : QObject(parent)
 {
@@ -56,133 +44,11 @@ GtpyCodeGenerator::instance()
 QString
 GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc)
 {
-    if (calc == nullptr)
-    {
-        return QString();
-    }
+    auto pyCode = gtpy::codegen::calcToPyCode(calc);
 
-    QString className = calc->metaObject()->className();
-
-    GtObjectMemento before;
-
-    if (gtCalculatorFactory->calculatorDataExists(className))
-    {
-        GtCalculatorData calcData =
-            gtCalculatorFactory->calculatorData(className);
-
-        if (!calcData->isValid())
-        {
-            return QString();
-        }
-
-        QObject* newObj = calcData->metaData().newInstance();
-
-        if (newObj == nullptr)
-        {
-            return QString();
-        }
-
-        GtCalculator* defaultCalc = qobject_cast<GtCalculator*>(newObj);
-
-        if (defaultCalc == nullptr)
-        {
-            delete newObj;
-            return QString();
-        }
-
-        defaultCalc->setFactory(gtCalculatorFactory);
-        defaultCalc->setUuid(calc->uuid());
-
-        before = defaultCalc->toMemento();
-
-        delete defaultCalc;
-    }
-    else
-    {
-        return QString();
-    }
-
-    QString objName = calc->objectName();
-
-    QRegExp regExp("[^A-Za-z0-9]+");
-
-    QString pyCode;
-
-    QString tempObjName = objName;
-
-    if (tempObjName.isEmpty())
-    {
-        tempObjName = className;
-    }
-
-    int pos = regExp.indexIn(tempObjName);
-
-    while (pos >= 0)
-    {
-        tempObjName = tempObjName.remove(pos, 1);
-        pos = regExp.indexIn(tempObjName);
-    }
-
-    tempObjName.replace(0, 1, tempObjName.at(0).toLower());
-
-    pyCode += (tempObjName + " = " + className + "(\"" +
-               objName + "\")\n");
-
-    GtObjectMementoDiff diff(before, calc->toMemento());
-
-    QDomElement root = diff.documentElement();
-
-    while (!root.isNull())
-    {
-        if (root.attribute("uuid") == calc->uuid())
-        {
-            break;
-        }
-
-        root = root.nextSiblingElement();
-    }
-
-    if (!root.isNull())
-    {
-        QDomElement changeElement = root.firstChildElement(
-                                        "diff-property-change");
-
-        while (!changeElement.isNull())
-        {
-            QString ident = changeElement.attribute("name");
-
-            if (ident.isEmpty())
-            {
-                continue;
-            }
-
-            GtAbstractProperty* prop = calc->findProperty(ident);
-
-            if (prop != nullptr)
-            {
-                int propIdpos = regExp.indexIn(ident);
-
-                while (propIdpos >= 0)
-                {
-                    ident = ident.remove(propIdpos, 1);
-                    propIdpos = regExp.indexIn(ident);
-                }
-
-                ident.replace(0, 1, ident.at(0).toUpper());
-
-                ident.insert(0, "set");
-
-                QString val = propValToString(prop);
-
-                pyCode += (tempObjName + "." + ident + "(" + val + ")\n");
-
-                changeElement = changeElement.
-                                nextSiblingElement("diff-property-change");
-            }
-        }
-    }
-
-    QString helperPy = helperPyCode(calc, tempObjName);
+    // TODO: check if the concept of helper classes is still relevant
+    auto helperPy = helperPyCode(
+        calc, gtpy::codegen::pyObjectIdentifier(calc));
 
     if (!helperPy.isEmpty())
     {
@@ -190,36 +56,6 @@ GtpyCodeGenerator::calculatorPyCode(GtCalculator* calc)
     }
 
     return pyCode;
-}
-
-QString
-GtpyCodeGenerator::propValToString(GtAbstractProperty* prop)
-{
-    QString val{};
-
-    if (qobject_cast<GtObjectLinkProperty*>(prop))
-    {
-        const auto& uuid = prop->valueToVariant().toString();
-        val = pythonObjectPath(gtDataModel->objectByUuid(uuid));
-
-        if (val.isEmpty())
-        {
-            val = quot(uuid);
-        }
-    }
-    else if (qobject_cast<GtStringProperty*>(prop) ||
-             dynamic_cast<GtProperty<QString>*>(prop))
-    {
-        val = quot(GtpyContextManager::instance()->qvariantToPyStr(
-            prop->valueToVariant()));
-    }
-    else
-    {
-        val = GtpyContextManager::instance()->qvariantToPyStr(
-            prop->valueToVariant());
-    }
-
-    return val;
 }
 
 QString
@@ -339,7 +175,7 @@ GtpyCodeGenerator::helperPyCode(GtObject* obj, const QString& pyObjName)
                     {
                         QString ident = prop->ident();
 
-                        QString val = propValToString(prop);
+                        QString val = gtpy::codegen::propValToPyCode(prop);
 
                         pyCode += (helperObjName + "." +
                                    GtpyContextManager::instance()->
@@ -362,37 +198,3 @@ GtpyCodeGenerator::helperPyCode(GtObject* obj, const QString& pyObjName)
 
     return pyCode;
 }
-
-QString
-GtpyCodeGenerator::pythonObjectPath(GtObject* obj) const
-{
-    QStringList objPath{};
-    generatePythonObjectPath(obj, objPath);
-    return objPath.join('.');
-}
-
-void
-GtpyCodeGenerator::generatePythonObjectPath(GtObject* obj,
-                                            QStringList& objPath) const
-{
-    if (!obj) return;
-
-    QString objGetter  = obj->objectName();
-
-    // if the object name contains special characters use findGtChild
-    // with the object name as a parameter to get the object
-    if (!objGetter.contains(QRegularExpression("^[a-zA-Z0-9_]*$")))
-    {
-        objGetter = GtpyContextManager::instance()->findChildFuncName() +
-                    "(" + quot(obj->objectName()) + ")";
-    }
-
-    objPath.prepend(objGetter);
-
-    // since packages are accessible directly via the Python context
-    // terminate recursion after resolving the package getter
-    if (qobject_cast<GtPackage*>(obj)) return;
-
-    generatePythonObjectPath(obj->parentObject(), objPath);
-}
-

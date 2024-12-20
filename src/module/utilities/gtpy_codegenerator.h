@@ -52,46 +52,12 @@ protected:
 
 private:
     /**
-     * @brief Converts the property value of the given property to python value
-     * and returns it as string.
-     * @param prop Property whose value should be converted.
-     * @return Value of property as python string
-     */
-    QString propValToString(GtAbstractProperty* prop);
-
-    /**
      * @brief Generates the python code to initialize a helper object.
      * @param obj Helper object
      * @param pyObjName Name of object into python environment.
      * @return The generated python code as string value.
      */
     QString helperPyCode(GtObject* obj, const QString& pyObjName);
-
-    /**
-      * @brief Returns the object path of the specified object as Python code.
-      * The object path can be used to access the object in Python. It begins
-      * with the GtPackage to which the object belongs.
-      * @param obj The GtObject for which to generate the Python object path.
-      * @return The object path of the specified object which can be used to
-      * access the corresponding object in Python.
-      */
-    QString pythonObjectPath(GtObject* obj) const;
-
-    /**
-      * @brief Recursively generates the object path of the specified object.
-      * It prepends the Python getter method of the given object to the
-      * getterList and calls itself, passing the parent object of the given
-      * object. The recursion stops when a GtPackage object is passed and
-      * processed or when the given object is a nullptr.
-      *
-      * To use the object path in Python, join the entries of the getterList
-      * with '.'.
-      *
-      * @param obj The GtObject for which to generate the Python object path.
-      * @param getterList A reference to a QStringList that stores the getter
-      * methods representing the object path of the specified object in Python.
-      */
-    void generatePythonObjectPath(GtObject* obj, QStringList& getterList) const;
 
 };
 
