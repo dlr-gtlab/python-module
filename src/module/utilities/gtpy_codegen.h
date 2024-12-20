@@ -13,6 +13,8 @@
 
 #include <QString>
 
+#include "gt_pythonmodule_exports.h"
+
 class GtObject;
 class GtCalculator;
 class GtAbstractProperty;
@@ -36,7 +38,7 @@ namespace codegen
  * @return A Python-compatible identifier based on the given string. If the
  * string is empty or cannot be converted, an empty QString is returned.
  */
-QString pyIdentifier(const QString& str);
+QString GT_PYTHON_EXPORT pyIdentifier(const QString& str);
 
 /**
  * @brief Returns a Python-compatible object identifier for the specified
@@ -46,7 +48,7 @@ QString pyIdentifier(const QString& str);
  * @return A Python-compatible object identifier. If the object is null or
  * the identifier cannot be generated, an empty QString is returned.
  */
-QString pyObjectIdentifier(GtObject* obj);
+QString GT_PYTHON_EXPORT pyObjectIdentifier(GtObject* obj);
 
 /**
   * @brief Returns the object path of the specified object as Python code.
@@ -56,7 +58,7 @@ QString pyObjectIdentifier(GtObject* obj);
   * @return The object path of the specified object which can be used to
   * access the corresponding object in Python.
   */
-QString pyObjectPath(GtObject* obj);
+QString GT_PYTHON_EXPORT pyObjectPath(GtObject* obj);
 
 /**
  * @brief Returns a Python-compatible setter method name from the specified
@@ -69,7 +71,7 @@ QString pyObjectPath(GtObject* obj);
  * @return The generated setter method name. If the input string is empty or
  * contains only special characters, an empty QString is returned.
  */
-QString pySetterName(const QString& str);
+QString GT_PYTHON_EXPORT pySetterName(const QString& str);
 
 /**
  * @brief Returns a Python-compatible setter method name for the specified
@@ -86,7 +88,7 @@ QString pySetterName(const QString& str);
  * @return The setter method name for the specified property. If the setter
  * method name cannot be generated, an empty QString is returned.
  */
-QString pyPropSetterName(GtAbstractProperty* prop);
+QString GT_PYTHON_EXPORT pyPropSetterName(GtAbstractProperty* prop);
 
 /**
   * @brief Converts the property value of the given property to Python code
@@ -94,7 +96,7 @@ QString pyPropSetterName(GtAbstractProperty* prop);
   * @param prop Property whose value should be converted.
   * @return Value of property as Python code.
   */
-QString propValToPyCode(GtAbstractProperty* prop);
+QString GT_PYTHON_EXPORT propValToPyCode(GtAbstractProperty* prop);
 
 /**
  * @brief Generates Python code to create and configure a calculator object
@@ -108,7 +110,7 @@ QString propValToPyCode(GtAbstractProperty* prop);
  * @return The Python code to create and configure the calculator object. If
  * the input calculator is invalid, an empty QString is returned.
  */
-QString calcToPyCode(GtCalculator* calc);
+QString GT_PYTHON_EXPORT calcToPyCode(GtCalculator* calc);
 
 } // namespace codegen
 

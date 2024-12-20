@@ -74,7 +74,7 @@ TEST_F(TestGtpyCodeGenerator, TestPyCodeDefaultProps)
     QString code = generator->calculatorPyCode(calc);
 
     QString expectedCode{
-        R"(mygtCalculator = MyCalculator("My gt Calculator")
+        R"(my_gt_calculator = MyCalculator("My gt Calculator")
 )"};
 
     EXPECT_EQ(code.toStdString(), expectedCode.toStdString());
@@ -87,8 +87,8 @@ TEST_F(TestGtpyCodeGenerator, TestPyCodeStrProps)
     QString code = generator->calculatorPyCode(calc);
 
     QString expectedCode{
-        R"(mygtCalculator = MyCalculator("My gt Calculator")
-mygtCalculator.setStrprop("new value")
+        R"(my_gt_calculator = MyCalculator("My gt Calculator")
+my_gt_calculator.setStrprop("new value")
 )"};
 
     EXPECT_EQ(code.toStdString(), expectedCode.toStdString());
@@ -101,8 +101,8 @@ TEST_F(TestGtpyCodeGenerator, TestPyCodeDoubleProp)
     QString code = generator->calculatorPyCode(calc);
 
     QString expectedCode{
-        R"(mygtCalculator = MyCalculator("My gt Calculator")
-mygtCalculator.setDoubleProp(4.2)
+        R"(my_gt_calculator = MyCalculator("My gt Calculator")
+my_gt_calculator.setDoubleProp(4.2)
 )"};
 
     EXPECT_EQ(code.toStdString(), expectedCode.toStdString());
@@ -115,8 +115,8 @@ TEST_F(TestGtpyCodeGenerator, TestPyCodeBoolPropDefaultTrue)
     QString code = generator->calculatorPyCode(calc);
 
     QString expectedCode{
-        R"(mygtCalculator = MyCalculator("My gt Calculator")
-mygtCalculator.setBoolproptrue(False)
+        R"(my_gt_calculator = MyCalculator("My gt Calculator")
+my_gt_calculator.setBoolproptrue(False)
 )"};
 
     EXPECT_EQ(code.toStdString(), expectedCode.toStdString());
@@ -129,8 +129,8 @@ TEST_F(TestGtpyCodeGenerator, TestPyCodeBoolPropDefaultFalse)
     QString code = generator->calculatorPyCode(calc);
 
     QString expectedCode{
-        R"(mygtCalculator = MyCalculator("My gt Calculator")
-mygtCalculator.setBoolpropFalse(True)
+        R"(my_gt_calculator = MyCalculator("My gt Calculator")
+my_gt_calculator.setBoolpropFalse(True)
 )"};
 
     EXPECT_EQ(code.toStdString(), expectedCode.toStdString());
@@ -145,8 +145,8 @@ TEST_F(TestGtpyCodeGenerator, TestPyCodeObjectLinkProp)
     QString code = generator->calculatorPyCode(calc);
 
     QString expectedCode{
-        R"(mygtCalculator = MyCalculator("My gt Calculator")
-mygtCalculator.setObjLinkprop("{6c43fb0e-f7c0-4c78-bcec-3e66613647ac}")
+        R"(my_gt_calculator = MyCalculator("My gt Calculator")
+my_gt_calculator.setObjLinkprop("{6c43fb0e-f7c0-4c78-bcec-3e66613647ac}")
 )"};
 
     EXPECT_EQ(code.toStdString(), expectedCode.toStdString());

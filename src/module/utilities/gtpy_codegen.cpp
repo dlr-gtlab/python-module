@@ -96,35 +96,48 @@ gtpy::codegen::pyIdentifier(const QString& str)
 
     // match capital letter sequences optionally preceded or followed by an
     // underscore
-    QRegularExpression capLetters{"(?:_)?[A-Z]+(?:_)?"};
+    QRegularExpression capLetters{"[A-Z]+"};
     QRegularExpressionMatchIterator iterator = capLetters.globalMatch(ident);
 
+    int shift = 0;
+
     // iterate over the capital letter sequences
-    while (iterator.hasNext()) {
+    while (iterator.hasNext())
+    {
         auto match = iterator.next();
 
+        // adjust the start and end positions of the match
+        // necessary because ident is modified during the loop
+        int startPos = match.capturedStart() + shift;
+        int endPos = match.capturedEnd() + shift;
+
         // convert uppercase letters to lowercase
-        auto lower = match.captured(0).toLower();
+        auto matchedStr = match.captured(0).toLower();
+        bool singleLetter = (matchedStr.size() == 1);
 
-        // if the match is not at the start, prepend an underscore
-        if (match.capturedStart() > 0 && !lower.startsWith("_"))
+        // if the match is not at the start of the string and there is not
+        // already an underscore before the match, prepend an underscore
+        if (startPos > 0 && ident.at(startPos - 1) != "_")
         {
-            lower.prepend("_");
+            matchedStr.prepend("_");
         }
 
-        // if the match is not at the end of the string and the match is
+        // if the match is not at the end of the string and it consists of
         // more than one letter, append an underscore
-        if (lower.length() > 2 && match.capturedEnd() < ident.length() &&
-            !lower.endsWith("_"))
+        if (!singleLetter && endPos < ident.length() &&
+            ident.at(endPos) != "_")
         {
-            lower.append("_");
+            matchedStr.append("_");
         }
 
-        ident.replace(match.capturedStart(), match.capturedLength(), lower);
+        ident.replace(startPos, endPos - startPos, matchedStr);
+
+        shift += matchedStr.length() - (endPos - startPos);
     }
 
     // if the resulting identifier starts with a digit, prepend an underscore
-    if (!ident.isEmpty() && ident[0].isDigit()) {
+    if (!ident.isEmpty() && ident[0].isDigit())
+    {
         ident.prepend("_");
     }
 

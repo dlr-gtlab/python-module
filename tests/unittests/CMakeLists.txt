@@ -20,6 +20,7 @@ add_executable(GTlabPythonUnitTest
     test_helper.h
     test_variantconvert.cpp
     test_codegenerator.cpp
+    test_codegen.cpp
 )
 
 target_compile_definitions(GTlabPythonUnitTest
