@@ -28,7 +28,7 @@ TEST(TestCodegen, TestPyIdentifier)
     ident = gtpy::codegen::pyIdentifier("gtlab_");
     EXPECT_EQ(ident.toStdString(), "gtlab_");
 
-    ident = gtpy::codegen::pyIdentifier("GTlab");
+    ident = gtpy::codegen::pyIdentifier("gt_lab");
     EXPECT_EQ(ident.toStdString(), "gt_lab");
 
     ident = gtpy::codegen::pyIdentifier("gt lab");

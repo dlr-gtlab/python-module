@@ -89,7 +89,16 @@ gtpy::codegen::pyIdentifier(const QString& str)
     // remove special characters except underscores
     ident.replace(QRegularExpression{"[^A-Za-z0-9 _]"}, "");
 
-    if (ident.isEmpty()) return {};
+    if (ident.isEmpty())
+    {
+        gtWarning() << QObject::tr(
+                           "A valid Python identifier cannot be created based "
+                           "on '%1'. The given string is either empty or "
+                           "contains only special characters."
+                           ).arg(str);
+
+        return {};
+    }
 
     // replace whitespaces with a single underscore
     ident.replace(QRegularExpression{"\\s+"}, "_");
@@ -113,6 +122,7 @@ gtpy::codegen::pyIdentifier(const QString& str)
 
         // convert uppercase letters to lowercase
         auto matchedStr = match.captured(0).toLower();
+
         bool singleLetter = (matchedStr.size() == 1);
 
         // if the match is not at the start of the string and there is not
@@ -181,8 +191,9 @@ gtpy::codegen::pySetterName(const QString& str)
     if (setterName.isEmpty())
     {
         gtWarning() << QObject::tr(
-                "Setter for '%1' cannot be created! The given string is empty "
-                "or only contains special characters."
+                           "A valid setter method name cannot be created "
+                           "based on '%1'. The given string is either empty or "
+                           "contains only special characters."
             ).arg(str);
 
         return {};
@@ -240,7 +251,7 @@ gtpy::codegen::calcToPyCode(GtCalculator* calc)
 
     const auto& defaultMemento = defaultCalcMemento(calc);
 
-    if (defaultMemento.isNull()) return {};
+    assert(!defaultMemento.isNull());
 
     const auto& objName = calc->objectName();
     const auto& className = calc->metaObject()->className();
