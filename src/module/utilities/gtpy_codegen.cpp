@@ -78,6 +78,103 @@ GtObjectMemento defaultCalcMemento(GtCalculator* calc)
     return defaultCalc->toMemento();
 }
 
+QString helperPyCode(GtObject* helper, const QString& pyHelperIdent,
+                     const QString& pyParentIdent)
+{
+    if (!helper) return {};
+
+    // Python code to create the helper object
+    QString helperCode{"%1 = %2.create%3(%4)\n"};
+    helperCode = helperCode.arg(pyHelperIdent)
+                     .arg(pyParentIdent)
+                     .arg(helper->metaObject()->className())
+                     .arg(quot(helper->objectName()));
+
+    // generate code to set the Qt properties of the helper
+    QString setPropCodeTemplate{"%1.%2 = %3\n"};
+    setPropCodeTemplate = setPropCodeTemplate.arg(pyHelperIdent);
+
+    const auto* metaObject = helper->metaObject();
+
+    // start with index 1 to exclude the objectName property
+    for(int i = 1; i < metaObject->propertyCount(); ++i)
+    {
+        auto metaProp = metaObject->property(i);
+        auto type = metaProp.type();
+
+        auto pyPropVal = GtpyContextManager::instance()->qvariantToPyStr(
+            helper->property(metaProp.name()));
+
+        if (type == QVariant::String || type == QVariant::ByteArray ||
+            type == QVariant::Char)
+        {
+            pyPropVal = quot(pyPropVal);
+        }
+
+        // TODO: Identify additional types that may require special
+        // handling, such as quotation, when translating to Python code.
+
+        helperCode.append(setPropCodeTemplate
+                              .arg(QString::fromLatin1(metaProp.name()))
+                              .arg(pyPropVal));
+    }
+
+    // generate code to set the GtProperties of the helper
+    QString setGtPropCodeTemplate{"%1.%2(%3, %4)\n"};
+    setGtPropCodeTemplate = setGtPropCodeTemplate
+                                .arg(pyHelperIdent)
+                                .arg(GtpyContextManager::instance()->
+                                     setPropertyValueFuncName());
+
+    for (auto prop : qAsConst(helper->properties()))
+    {
+        helperCode.append(setGtPropCodeTemplate
+                              .arg(quot(prop->ident()))
+                              .arg(gtpy::codegen::propValToPyCode(prop)));
+    }
+
+    return helperCode.append("\n");
+}
+
+QString helpersPyCode(GtObject* obj, const QString& pyObjIdent,
+                     QStringList& usedObjNames)
+{
+    if (!obj) return {};
+
+    QStringList helperNames = gtCalculatorHelperFactory->connectedHelper(
+        obj->metaObject()->className());
+
+    if (helperNames.isEmpty()) return {};
+
+    QString pyCode{};
+
+    auto children = obj->findDirectChildren<GtObject*>();
+
+    for (GtObject* helper : qAsConst(children))
+    {
+        QString className = helper->metaObject()->className();
+
+        if (!helperNames.contains(className)) continue;
+
+        // generate a unique Python object identifier for the helper object
+        auto pyHelperIdent = helper->objectName().isEmpty() ?
+                                 className : helper->objectName();
+
+        auto uniqueName = gt::makeUniqueName(pyHelperIdent, usedObjNames);
+        usedObjNames.append(uniqueName);
+
+        pyHelperIdent = gtpy::codegen::pyIdentifier(uniqueName);
+
+        // generate Python code for the helper object
+        pyCode.append(helperPyCode(helper, pyHelperIdent, pyObjIdent));
+
+        // recursively generate code for the helpers of the current helper
+        pyCode.append(helpersPyCode(helper, pyHelperIdent, usedObjNames));
+    }
+
+    return pyCode;
+}
+
 }
 
 QString
@@ -92,7 +189,7 @@ gtpy::codegen::pyIdentifier(const QString& str)
     if (ident.isEmpty())
     {
         gtWarning() << QObject::tr(
-                           "A valid Python identifier cannot be created based "
+                           "Cannot create a valid Python identifier based "
                            "on '%1'. The given string is either empty or "
                            "contains only special characters."
                            ).arg(str);
@@ -191,7 +288,7 @@ gtpy::codegen::pySetterName(const QString& str)
     if (setterName.isEmpty())
     {
         gtWarning() << QObject::tr(
-                           "A valid setter method name cannot be created "
+                           "Cannot create a valid setter method name "
                            "based on '%1'. The given string is either empty or "
                            "contains only special characters."
             ).arg(str);
@@ -219,10 +316,10 @@ gtpy::codegen::propValToPyCode(GtAbstractProperty* prop)
 {
     QString val{};
 
-    if (qobject_cast<GtObjectLinkProperty*>(prop))
+    if (auto objLinkProp = qobject_cast<GtObjectLinkProperty*>(prop))
     {
-        const auto& uuid = prop->valueToVariant().toString();
-        val = pyObjectIdentifier(gtDataModel->objectByUuid(uuid));
+        const auto& uuid = objLinkProp->linkedObjectUUID();
+        val = pyObjectPath(gtDataModel->objectByUuid(uuid));
 
         if (val.isEmpty())
         {
@@ -298,6 +395,16 @@ gtpy::codegen::calcToPyCode(GtCalculator* calc)
 
     // TODO: evluate if it is still necessary to generate Python
     // code for helper classes
+    auto helperCode = helpersPyCode(calc, pyObjIdent,
+                                   QStringList{} << pyObjIdent);
+
+    if (!helperCode.isEmpty())
+    {
+        if (helperCode.endsWith("\n\n")) helperCode.chop(1);
+
+        pyCode.append("\n");
+        pyCode.append(helperCode);
+    }
 
     return pyCode;
 }

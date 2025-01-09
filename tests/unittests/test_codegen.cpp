@@ -16,8 +16,142 @@
 
 #include "test_helper.h"
 
+class TestCodegen : public ::testing::Test
+{
+protected:
+    virtual void SetUp() override
+    {
+        // create a temporary data model to initialize gtDataModel
+        dataModel = new MyCoreDataModel{};
 
-TEST(TestCodegen, TestPyIdentifier)
+        // initialize calculator data for MyCalculator
+        auto testCalcData = GT_CALC_DATA(MyCalculator);
+        testCalcData->id = "My GtCalculator";
+        testCalcData->version = GtVersionNumber(0, 1);
+        testCalcData->status = GtCalculatorDataImpl::PROTOTYPE;
+        testCalcData->category = "Test";
+        testCalcData->author = "Author";
+
+        // register calculator data in the calculator factory
+        gtCalculatorFactory->registerCalculatorData(testCalcData);
+
+        // create the test calculator
+        calc = new MyCalculator{};
+        calc->setFactory(gtCalculatorFactory);
+
+        // set a custom object name
+        calc->setObjectName("My GtCalculator");
+    }
+
+    virtual void TearDown() override
+    {
+        if (calc.data())
+        {
+            delete calc;
+        }
+
+        if (dataModel.data())
+        {
+            delete dataModel;
+        }
+
+        gtCalculatorFactory->unregisterClass(MyCalculator::staticMetaObject);
+    }
+
+    QPointer<MyCalculator> calc;
+    QPointer<MyCoreDataModel> dataModel;
+};
+
+TEST_F(TestCodegen, TestCalcToPyCode)
+{
+    auto code = gtpy::codegen::calcToPyCode(calc);
+    EXPECT_EQ(code.toStdString(),
+              R"(my_gt_calculator = MyCalculator("My GtCalculator")
+)");
+
+    calc->strProp = "new value";
+    calc->intProp = 42;
+    calc->doubleProp = 4.2;
+    code = gtpy::codegen::calcToPyCode(calc);
+
+    EXPECT_EQ(code.toStdString(),
+              R"(my_gt_calculator = MyCalculator("My GtCalculator")
+my_gt_calculator.setStrprop("new value")
+my_gt_calculator.setIntprop(42)
+my_gt_calculator.setDoubleprop(4.2)
+)");
+
+    calc->boolPropDefaultTrue = false;
+    calc->boolPropDefaultFalse = true;
+    calc->objLinkProp.setVal("{6c43fb0e-f7c0-4c78-bcec-3e66613647ac}");
+    code = gtpy::codegen::calcToPyCode(calc);
+
+    EXPECT_EQ(code.toStdString(),
+              R"(my_gt_calculator = MyCalculator("My GtCalculator")
+my_gt_calculator.setStrprop("new value")
+my_gt_calculator.setIntprop(42)
+my_gt_calculator.setDoubleprop(4.2)
+my_gt_calculator.setBoolproptrue(False)
+my_gt_calculator.setBoolpropfalse(True)
+my_gt_calculator.setObjlinkprop("{6c43fb0e-f7c0-4c78-bcec-3e66613647ac}")
+)");
+}
+
+TEST_F(TestCodegen, TestCalcToPyCodeWithHelpers)
+{
+    REGISTER_HELPER(MyCalculator, FirstCalculatorHelper);
+    REGISTER_HELPER(FirstCalculatorHelper, SubHelper);
+
+    REGISTER_HELPER(MyCalculator, SecondCalculatorHelper);
+
+    FirstCalculatorHelper firstHelper1{};
+    firstHelper1.setObjectName("First Helper");
+    firstHelper1.strProp = "str prop val";
+    firstHelper1.strVal = "str val";
+
+    SubHelper subHelper{};
+    subHelper.intVal = 42;
+
+    firstHelper1.appendChild(&subHelper);
+
+    FirstCalculatorHelper firstHelper2{};
+    firstHelper2.setObjectName("First Helper");
+
+    SecondCalculatorHelper secHelper{};
+    secHelper.doubleProp = 4.2;
+    secHelper.doubleVal = 42.42;
+
+    calc->appendChild(&firstHelper1);
+    calc->appendChild(&firstHelper2);
+    calc->appendChild(&secHelper);
+
+    auto code = gtpy::codegen::calcToPyCode(calc);
+
+    gtWarning() << code;
+
+    EXPECT_EQ(code.toStdString(),
+              R"(my_gt_calculator = MyCalculator("My GtCalculator")
+
+first_helper = my_gt_calculator.createFirstCalculatorHelper("First Helper")
+first_helper.strVal = "str val"
+first_helper.setPropertyValue("str prop", "str prop val")
+
+sub_helper = first_helper.createSubHelper("")
+sub_helper.intVal = 42
+sub_helper.setPropertyValue("int prop", 0)
+
+first_helper2 = my_gt_calculator.createFirstCalculatorHelper("First Helper")
+first_helper2.strVal = "strVal"
+first_helper2.setPropertyValue("str prop", "strPropVal")
+
+second_calculator_helper = my_gt_calculator.createSecondCalculatorHelper("")
+second_calculator_helper.doubleVal = 42.42
+second_calculator_helper.setPropertyValue("double prop", 4.2)
+)");
+
+}
+
+TEST(TestCodegenUtilities, TestPyIdentifier)
 {
     auto ident = gtpy::codegen::pyIdentifier("gtlab");
     EXPECT_EQ(ident.toStdString(), "gtlab");
@@ -55,13 +189,16 @@ TEST(TestCodegen, TestPyIdentifier)
     ident = gtpy::codegen::pyIdentifier("   gt LAB   ");
     EXPECT_EQ(ident.toStdString(), "gt_lab");
 
+    ident = gtpy::codegen::pyIdentifier("123");
+    EXPECT_EQ(ident.toStdString(), "_123");
+
     // And now forget everything you have read before.
     // Here is the one and only correct way to write it — no exceptions!
     ident = gtpy::codegen::pyIdentifier("GTlab");
     EXPECT_EQ(ident.toStdString(), "gt_lab");
 }
 
-TEST(TestCodegen, TestPyObjectIdentifier)
+TEST(TestCodegenUtilities, TestPyObjectIdentifier)
 {
     MyObject o;
     o.setObjectName("MyObjectName");
@@ -76,7 +213,7 @@ TEST(TestCodegen, TestPyObjectIdentifier)
     EXPECT_EQ(ident.toStdString(), "my_object");
 }
 
-TEST(TestCodegen, TestPyObjectPath)
+TEST(TestCodegenUtilities, TestPyObjectPath)
 {
     MyPackage p;
     p.setObjectName("MyPackageName");
@@ -99,7 +236,7 @@ TEST(TestCodegen, TestPyObjectPath)
               ".SearchedObject");
 }
 
-TEST(TestCodegen, TestPySetterName)
+TEST(TestCodegenUtilities, TestPySetterName)
 {
     auto ident = gtpy::codegen::pySetterName("Prop");
     EXPECT_EQ(ident.toStdString(), "setProp");
@@ -126,7 +263,7 @@ TEST(TestCodegen, TestPySetterName)
     EXPECT_EQ(ident.toStdString(), "");
 }
 
-TEST(TestCodegen, TestPyPropSetterName)
+TEST(TestCodegenUtilities, TestPyPropSetterName)
 {
     MyProperty p;
     p.setIdent("propIdent");
@@ -141,4 +278,40 @@ TEST(TestCodegen, TestPyPropSetterName)
 
     setterName = gtpy::codegen::pyPropSetterName(nullptr);
     EXPECT_EQ(setterName.toStdString(), "");
+}
+
+TEST(TestCodegenUtilities, TestPropValToPyCode)
+{
+    GtStringProperty strProp{"str prop", "name", "brief", "str value"};
+    auto code = gtpy::codegen::propValToPyCode(&strProp);
+    EXPECT_EQ(code.toStdString(), R"("str value")");
+
+    GtDoubleProperty doubleProp{"double prop", "name", "brief"};
+    doubleProp = 4.2;
+    code = gtpy::codegen::propValToPyCode(&doubleProp);
+    EXPECT_EQ(code.toStdString(), R"(4.2)");
+
+    GtIntProperty intProp{"int prop", "name", "brief"};
+    intProp = 42;
+    code = gtpy::codegen::propValToPyCode(&intProp);
+    EXPECT_EQ(code.toStdString(), R"(42)");
+
+    GtBoolProperty boolProp{"bool prop", "name", "brief", true};
+    code = gtpy::codegen::propValToPyCode(&boolProp);
+    EXPECT_EQ(code.toStdString(), R"(True)");
+
+    boolProp = false;
+    code = gtpy::codegen::propValToPyCode(&boolProp);
+    EXPECT_EQ(code.toStdString(), R"(False)");
+
+    // init datamodel to test object link property
+    MyCoreDataModel{};
+
+    GtObjectLinkProperty objLinkProp{"obj link prop", "name", "brief", nullptr,
+                                     QStringList{} << GT_CLASSNAME(GtObject),
+                                     true};
+    objLinkProp.setVal("{6c43fb0e-f7c0-4c78-bcec-3e66613647ac}");
+    code = gtpy::codegen::propValToPyCode(&objLinkProp);
+    EXPECT_EQ(code.toStdString(),
+              R"("{6c43fb0e-f7c0-4c78-bcec-3e66613647ac}")");
 }

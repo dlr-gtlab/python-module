@@ -15,6 +15,7 @@
 #include <gt_package.h>
 #include <gt_calculator.h>
 #include <gt_doubleproperty.h>
+#include <gt_intproperty.h>
 #include <gt_boolproperty.h>
 #include <gt_objectlinkproperty.h>
 
@@ -75,7 +76,57 @@ public:
     {
 
     }
+};
 
+class FirstCalculatorHelper : public GtObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(QString strVal MEMBER strVal)
+
+public:
+    FirstCalculatorHelper()
+    {
+        registerProperty(strProp);
+    }
+
+
+    QString strVal{"strVal"};
+    GtStringProperty strProp{"str prop", "name", "brief", "strPropVal"};
+};
+
+class SecondCalculatorHelper : public GtObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(double doubleVal MEMBER doubleVal)
+
+public:
+    SecondCalculatorHelper()
+    {
+        registerProperty(doubleProp);
+
+        doubleProp = 42.42;
+    }
+
+    double doubleVal = 4.2;
+    GtDoubleProperty doubleProp{"double prop", "name", "brief"};
+};
+
+class SubHelper : public GtObject
+{
+    Q_OBJECT
+
+    Q_PROPERTY(int intVal MEMBER intVal)
+
+public:
+    SubHelper()
+    {
+        registerProperty(intProp);
+    }
+
+    int intVal = 0;
+    GtIntProperty intProp{"int prop", "name", "brief"};
 };
 
 class MyCalculator : public GtCalculator
@@ -88,6 +139,7 @@ public:
         setObjectName("MyGtCalculator");
 
         registerProperty(strProp);
+        registerProperty(intProp);
         registerProperty(doubleProp);
         registerProperty(boolPropDefaultTrue);
         registerProperty(boolPropDefaultFalse);
@@ -99,14 +151,13 @@ public:
         return true;
     }
 
-    // vary property idents to test if the corresponding Python setter method
-    // is named correctly by the automated code generation
     GtStringProperty strProp{"str prop", "name", "brief", "value"};
-    GtDoubleProperty doubleProp{"Double Prop", "name", "brief"};
-    GtBoolProperty boolPropDefaultTrue{"boolproptrue", "name", "brief", true};
-    GtBoolProperty boolPropDefaultFalse{"  bool  prop  False", "name", "brief",
+    GtIntProperty intProp{"int prop", "name", "brief"};
+    GtDoubleProperty doubleProp{"double prop", "name", "brief"};
+    GtBoolProperty boolPropDefaultTrue{"bool prop true", "name", "brief", true};
+    GtBoolProperty boolPropDefaultFalse{"bool prop false", "name", "brief",
                                         false};
-    GtObjectLinkProperty objLinkProp{"obj Link prop", "name", "brief", this,
+    GtObjectLinkProperty objLinkProp{"obj link prop", "name", "brief", this,
                                      QStringList{} << GT_CLASSNAME(GtObject),
                                      true};
 };

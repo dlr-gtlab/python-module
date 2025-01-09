@@ -11,8 +11,6 @@
 #ifndef GTPY_CODEGENERATOR_H
 #define GTPY_CODEGENERATOR_H
 
-#include "gt_pythonmodule_exports.h"
-
 #include <QObject>
 
 class GtObject;
@@ -22,7 +20,7 @@ class GtCalculator;
 /**
  * @brief The GtpyCodeGenerator class
  */
-class GT_PYTHON_EXPORT GtpyCodeGenerator : public QObject
+class GtpyCodeGenerator : public QObject
 {
     Q_OBJECT
 
@@ -49,16 +47,6 @@ protected:
      * @param parent Parent object.
      */
     explicit GtpyCodeGenerator(QObject* parent = nullptr);
-
-private:
-    /**
-     * @brief Generates the python code to initialize a helper object.
-     * @param obj Helper object
-     * @param pyObjName Name of object into python environment.
-     * @return The generated python code as string value.
-     */
-    QString helperPyCode(GtObject* obj, const QString& pyObjName);
-
 };
 
 #endif // GTPY_CODEGENERATOR_H
