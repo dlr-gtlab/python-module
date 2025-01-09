@@ -8,6 +8,8 @@
  * Author: Marvin Noethen (DLR AT-TWK)
  */
 
+#include <QRegExpValidator>
+
 #include "gtpy_abstractscriptcomponent.h"
 
 #include "gt_package.h"
@@ -62,6 +64,15 @@ structContainerValue(const GtPropertyStructContainer& con, const QString& argNam
     return entry->getMemberValToVariant("value");
 }
 
+gt::PropertyFactoryFunction
+makeWildcardStringProperty(QString value = "")
+{
+    return [=](const QString& id) {
+        return new GtStringProperty(id, id, {}, std::move(value),
+                                    new QRegExpValidator{QRegExp{".*"}});
+    };
+}
+
 }
 
 #endif
@@ -88,7 +99,7 @@ GtpyAbstractScriptComponent::GtpyAbstractScriptComponent() :
     };
 
     m_inputArgs.registerAllowedType(
-                createStructDef("str", gt::makeStringProperty()));
+                createStructDef("str", makeWildcardStringProperty()));
     m_inputArgs.registerAllowedType(
                 createStructDef("int", gt::makeIntProperty(0)));
     m_inputArgs.registerAllowedType(
