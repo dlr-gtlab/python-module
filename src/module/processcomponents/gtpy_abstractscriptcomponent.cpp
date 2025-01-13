@@ -23,6 +23,10 @@
 #include "gt_intmonitoringproperty.h"
 #endif
 
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+#include <QRegularExpression>
+#endif
+
 #include "gtpy_transfer.h"
 #include "gtpy_contextmanager.h"
 #include "gtpy_packageiteration.h"
@@ -67,10 +71,17 @@ structContainerValue(const GtPropertyStructContainer& con, const QString& argNam
 gt::PropertyFactoryFunction
 makeWildcardStringProperty(QString value = "")
 {
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+    return [=](const QString& id) {
+        return new GtStringProperty(id, id, {}, std::move(value),
+                                    QRegularExpression(QRegExp{".*"}.pattern()));
+    };
+#else
     return [=](const QString& id) {
         return new GtStringProperty(id, id, {}, std::move(value),
                                     new QRegExpValidator{QRegExp{".*"}});
     };
+#endif
 }
 
 }
