@@ -8,8 +8,6 @@
  * Author: Marvin Noethen (DLR AT-TWK)
  */
 
-#include <QRegExpValidator>
-
 #include "gtpy_abstractscriptcomponent.h"
 
 #include "gt_package.h"
@@ -25,6 +23,8 @@
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
 #include <QRegularExpression>
+#else
+#include <QRegExpValidator>
 #endif
 
 #include "gtpy_transfer.h"
@@ -74,7 +74,7 @@ makeWildcardStringProperty(QString value = "")
 #if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
     return [=](const QString& id) {
         return new GtStringProperty(id, id, {}, std::move(value),
-                                    QRegularExpression(QRegExp{".*"}.pattern()));
+                                    QRegularExpression(".*"));
     };
 #else
     return [=](const QString& id) {
