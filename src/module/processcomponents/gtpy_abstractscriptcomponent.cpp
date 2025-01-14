@@ -21,6 +21,12 @@
 #include "gt_intmonitoringproperty.h"
 #endif
 
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+#include <QRegularExpression>
+#else
+#include <QRegExpValidator>
+#endif
+
 #include "gtpy_transfer.h"
 #include "gtpy_contextmanager.h"
 #include "gtpy_packageiteration.h"
@@ -62,6 +68,22 @@ structContainerValue(const GtPropertyStructContainer& con, const QString& argNam
     return entry->getMemberValToVariant("value");
 }
 
+gt::PropertyFactoryFunction
+makeWildcardStringProperty(QString value = "")
+{
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+    return [=](const QString& id) {
+        return new GtStringProperty(id, id, {}, std::move(value),
+                                    QRegularExpression{".*"});
+    };
+#else
+    return [=](const QString& id) {
+        return new GtStringProperty(id, id, {}, std::move(value),
+                                    new QRegExpValidator{QRegExp{".*"}});
+    };
+#endif
+}
+
 }
 
 #endif
@@ -88,7 +110,7 @@ GtpyAbstractScriptComponent::GtpyAbstractScriptComponent() :
     };
 
     m_inputArgs.registerAllowedType(
-                createStructDef("str", gt::makeStringProperty()));
+                createStructDef("str", makeWildcardStringProperty()));
     m_inputArgs.registerAllowedType(
                 createStructDef("int", gt::makeIntProperty(0)));
     m_inputArgs.registerAllowedType(
