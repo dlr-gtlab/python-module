@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
  - Fixed the automated code generation for double and bool properties in the Python Task wizard - #279
- 
+
+### Added
+ - String input values for Python Tasks and Python Calculators now allow special characters - #269
+
 ## [1.6.1] - 2024-11-08
 
 ### Fixed

@@ -74,7 +74,7 @@ makeWildcardStringProperty(QString value = "")
 #if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
     return [=](const QString& id) {
         return new GtStringProperty(id, id, {}, std::move(value),
-                                    QRegularExpression(".*"));
+                                    QRegularExpression{".*"});
     };
 #else
     return [=](const QString& id) {
