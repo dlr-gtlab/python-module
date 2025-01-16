@@ -47,7 +47,6 @@ set(HEADERS
     processcomponents/gtpy_task.h
     utilities/gtpy_calculatorfactory.h
     utilities/gtpy_codegen.h
-    utilities/gtpy_codegenerator.h
     utilities/gtpy_constants.h
     utilities/gtpy_contextmanager.h
     utilities/gtpy_convert.h
@@ -121,7 +120,6 @@ set(SOURCES
     processcomponents/gtpy_task.cpp
     utilities/gtpy_calculatorfactory.cpp
     utilities/gtpy_codegen.cpp
-    utilities/gtpy_codegenerator.cpp
     utilities/gtpy_contextmanager.cpp
     utilities/gtpy_convert.cpp
     utilities/gtpy_decorator.cpp
