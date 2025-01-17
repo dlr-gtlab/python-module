@@ -390,6 +390,12 @@ inline PyPPObject PyPPImport_ImportModule(const char *name)
     return PyPPObject::NewRef(PyImport_ImportModule(name));
 }
 
+inline PyPPObject PyPPImport_GetModuleDict()
+{
+    return PyPPObject::Borrow(PyImport_GetModuleDict());
+}
+
+
 
 /// Low Level API
 
