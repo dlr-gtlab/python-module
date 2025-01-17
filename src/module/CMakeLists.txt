@@ -28,6 +28,9 @@ set(HEADERS
     collection/localwidget/items/gtpy_abstractlocalitem.h
     collection/localwidget/items/gtpy_collapsiblelocalitem.h
     collection/localwidget/items/gtpy_localitem.h
+    context/gtpy_context.h
+    context/gtpy_code.h
+    context/gtpy_module.h
     extensions/gtpy_pythonfunctions.h
     gt_compat.h
     gt_python.h
@@ -105,6 +108,9 @@ set(SOURCES
     collection/localwidget/items/gtpy_abstractlocalitem.cpp
     collection/localwidget/items/gtpy_collapsiblelocalitem.cpp
     collection/localwidget/items/gtpy_localitem.cpp
+    context/gtpy_context.cpp
+    context/gtpy_code.cpp
+    context/gtpy_module.cpp
     extensions/gtpy_pythonfunctions.cpp
     gt_python.cpp
     models/gtpy_completermodel.cpp
@@ -187,6 +193,7 @@ target_include_directories(GTlabPython PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/collection/itemwidget>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/collection/localwidget>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/collection/localwidget/items>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/context>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/extensions>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/models>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/post>
