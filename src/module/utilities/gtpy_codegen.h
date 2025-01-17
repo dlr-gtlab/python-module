@@ -96,7 +96,7 @@ QString GT_PYTHON_EXPORT pyPropSetterName(GtAbstractProperty* prop);
   * @param prop Property whose value should be converted.
   * @return Value of property as Python code.
   */
-QString GT_PYTHON_EXPORT propValToPyCode(GtAbstractProperty* prop);
+QString GT_PYTHON_EXPORT pyPropValue(GtAbstractProperty* prop);
 
 /**
  * @brief Generates Python code to create and configure a calculator object
@@ -110,7 +110,7 @@ QString GT_PYTHON_EXPORT propValToPyCode(GtAbstractProperty* prop);
  * @return The Python code to create and configure the calculator object. If
  * the input calculator is invalid, an empty QString is returned.
  */
-QString GT_PYTHON_EXPORT calcToPyCode(GtCalculator* calc);
+QString GT_PYTHON_EXPORT pyCalcCode(GtCalculator* calc);
 
 } // namespace codegen
 

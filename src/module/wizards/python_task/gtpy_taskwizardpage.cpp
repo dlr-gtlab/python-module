@@ -392,7 +392,7 @@ GtpyTaskWizardPage::configCalculator(GtCalculator* calc)
     caption = ("#" + GtpyTaskWizardPage::ARROW_LEFT + caption +
                GtpyTaskWizardPage::ARROW_RIGHT);
 
-    QString pyCode = gtpy::codegen::calcToPyCode(calc);
+    QString pyCode = gtpy::codegen::pyCalcCode(calc);
 
     int lastLineBreak = pyCode.lastIndexOf(QChar('\n'));
     pyCode.remove(lastLineBreak, 1);
@@ -491,7 +491,7 @@ GtpyTaskWizardPage::insertConstructor(GtCalculator* calc)
     QString pyCode = ("#" + GtpyTaskWizardPage::ARROW_LEFT + objName +
                       GtpyTaskWizardPage::ARROW_RIGHT + "\n");
 
-    pyCode += gtpy::codegen::calcToPyCode(calc);
+    pyCode += gtpy::codegen::pyCalcCode(calc);
 
     QString caption;
 

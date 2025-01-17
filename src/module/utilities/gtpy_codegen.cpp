@@ -130,7 +130,7 @@ QString helperPyCode(GtObject* helper, const QString& pyHelperIdent,
     {
         helperCode.append(setGtPropCodeTemplate
                               .arg(quot(prop->ident()))
-                              .arg(gtpy::codegen::propValToPyCode(prop)));
+                              .arg(gtpy::codegen::pyPropValue(prop)));
     }
 
     return helperCode.append("\n");
@@ -312,7 +312,7 @@ gtpy::codegen::pyPropSetterName(GtAbstractProperty* prop)
 }
 
 QString
-gtpy::codegen::propValToPyCode(GtAbstractProperty* prop)
+gtpy::codegen::pyPropValue(GtAbstractProperty* prop)
 {
     QString val{};
 
@@ -342,7 +342,7 @@ gtpy::codegen::propValToPyCode(GtAbstractProperty* prop)
 }
 
 QString
-gtpy::codegen::calcToPyCode(GtCalculator* calc)
+gtpy::codegen::pyCalcCode(GtCalculator* calc)
 {
     if (!calc) return {};
 
@@ -386,11 +386,11 @@ gtpy::codegen::calcToPyCode(GtCalculator* calc)
 
         if (setterName.isEmpty()) continue;
 
-        const auto& val = propValToPyCode(prop);
+        const auto& val = pyPropValue(prop);
 
         pyCode.append(setPropCodeTemplate
                           .arg(setterName)
-                          .arg(propValToPyCode(prop)));
+                          .arg(pyPropValue(prop)));
     }
 
     // TODO: evluate if it is still necessary to generate Python
