@@ -16,11 +16,11 @@
 #include <QSignalMapper>
 
 // python includes
+#include "gtpy_codegen.h"
 #include "gtpy_icons_compat.h"
 #include "gtpy_contextmanager.h"
 #include "gtpy_taskstylemodel.h"
 #include "gtpy_tasktreeview.h"
-#include "gtpy_codegenerator.h"
 #include "gtpy_scripteditor.h"
 #include "gtpy_objectmodel.h"
 #include "gtpy_transfer.h"
@@ -392,7 +392,7 @@ GtpyTaskWizardPage::configCalculator(GtCalculator* calc)
     caption = ("#" + GtpyTaskWizardPage::ARROW_LEFT + caption +
                GtpyTaskWizardPage::ARROW_RIGHT);
 
-    QString pyCode = GtpyCodeGenerator::instance()->calculatorPyCode(calc);
+    QString pyCode = gtpy::codegen::pyCalcCode(calc);
 
     int lastLineBreak = pyCode.lastIndexOf(QChar('\n'));
     pyCode.remove(lastLineBreak, 1);
@@ -491,7 +491,7 @@ GtpyTaskWizardPage::insertConstructor(GtCalculator* calc)
     QString pyCode = ("#" + GtpyTaskWizardPage::ARROW_LEFT + objName +
                       GtpyTaskWizardPage::ARROW_RIGHT + "\n");
 
-    pyCode += GtpyCodeGenerator::instance()->calculatorPyCode(calc);
+    pyCode += gtpy::codegen::pyCalcCode(calc);
 
     QString caption;
 

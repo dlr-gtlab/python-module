@@ -117,7 +117,7 @@ private:
     void updateLastUsedElementList(const QString& str);
 
     /**
-     * @brief Uses GtpyCodeGenerator to create the Python code representing the
+     * @brief Uses gtpy::codegen to create the Python code representing the
      * calculator settings and inserts it into the script.
      * @param calc Edit calculator object.
      * @param before Memento object of the calculator before editing.
