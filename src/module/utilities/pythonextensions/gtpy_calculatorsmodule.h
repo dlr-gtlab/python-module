@@ -17,6 +17,7 @@
 
 #include "gt_task.h"
 
+#include "gtpy_code.h"
 #include "gtpy_globals.h"
 
 namespace GtpyCalculatorsModule
@@ -53,7 +54,7 @@ static PyModuleDef
 GtpyCalculators_Module =
 {
     PyModuleDef_HEAD_INIT,
-    MODULE_GTCALCULATORS,
+    gtpy::code::modules::GT_CALCULATORS,
     NULL,
     -1,
     GtpyCalculatorsModule_StaticMethods,

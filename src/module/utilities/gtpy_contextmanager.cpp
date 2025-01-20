@@ -39,6 +39,7 @@
 #endif
 
 #include "gtpy_constants.h"
+#include "gtpy_code.h"
 #include "gtpy_stdout.h"
 #include "gtpy_decorator.h"
 #include "gtpy_interruptrunnable.h"
@@ -1030,9 +1031,9 @@ GtpyContextManager::initCalculatorsModule()
 {
     GTPY_GIL_SCOPE
 #ifdef PY3K
-    initExtensionModule(GtpyGlobals::MODULE_GtCalculators, &GtpyCalculatorsModule::GtpyCalculators_Module);
+    initExtensionModule(gtpy::code::modules::GT_CALCULATORS, &GtpyCalculatorsModule::GtpyCalculators_Module);
 #else
-    initExtensionModule(GtpyGlobals::MODULE_GtCalculators,
+    initExtensionModule(gtpy::code::modules::GT_CALCULATORS,
                         GtpyCalculatorsModule::GtpyCalculatorsModule_StaticMethods);
 #endif
     GtpyCalculatorsModule::createCalcConstructors();
