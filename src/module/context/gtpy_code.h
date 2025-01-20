@@ -30,6 +30,7 @@ constexpr const char* GT_CLASSES = "GtClasses";
 // custom modules
 constexpr const char* GT_LOGGING = "GtLogging";
 constexpr const char* GT_OBJECT_WRAPPER_MODULE_C = "GtObjectWrapperModuleC";
+constexpr const char* GT_CALCULATORS = "GtCalculators";
 
 } // namespace module
 
@@ -44,6 +45,12 @@ namespace funcs
 {
 
 constexpr const char* IMPORT_GT_CALCULATORS = "importGtCalculators";
+
+constexpr const char* GT_DEBUG = "gtDebug";
+constexpr const char* GT_INFO = "gtInfo";
+constexpr const char* GT_WARNING = "gtWarning";
+constexpr const char* GT_ERROR = "gtError";
+constexpr const char* GT_FATAL = "gtFatal";
 
 } // namespace funcs
 
