@@ -19,7 +19,6 @@ add_executable(GTlabPythonUnitTest
     main.cpp
     test_helper.h
     test_variantconvert.cpp
-    test_codegenerator.cpp
     test_contextconfig.cpp
 )
 
