@@ -12,53 +12,99 @@
 #include <QMutex>
 
 #include "gt_logging.h"
+#include "gt_version.h"
+#include "gt_coreapplication.h"
 
 #include "gtpy_gilscope.h"
 #include "gtpy_code.h"
-
+#include "gtpy_pythonfunctions.h"
 #include "gtpypp.h"
 
 #include "gtpy_context.h"
 
 namespace {
 
-const QString taskRunContextInitCode()
+void initBatchContext(GtpyContext& context)
 {
-    gtDebug() << gtpy::code::import::defaultModules();
-    gtDebug() << gtpy::code::import::loggingFunctions();
-    gtDebug() << gtpy::code::import::calculatorModule();
+    context.evalScript(gtpy::code::import::defaultModules());
+    context.evalScript(gtpy::code::import::loggingFunctions());
 
-    return "";
+    context.evalScript(gtpy::code::enableAppConsoleLogging(true));
+
+    if (!gtApp) return;
+
+    const QString gtlabIdent{"GTlab"};
+
+    context.addObject(gtlabIdent, gtApp);
+    context.evalScript(gtpy::code::enableGTlabControl(gtlabIdent));
 }
 
-const QString initPyCode(GtpyContext::Type type)
+void initGlobalContext(GtpyContext& context)
+{
+    initBatchContext(context);
+
+    // TODO: Figure out why we need to run this Python code
+    context.evalScript("import sys\nsys.argv.append('')\ndel sys\n");
+}
+
+void initScriptEditorContext(GtpyContext& context)
+{
+    context.evalScript(gtpy::code::import::defaultModules());
+    context.evalScript(gtpy::code::import::loggingFunctions());
+}
+
+void initCalculatorRunContext(GtpyContext& context)
+{
+    initScriptEditorContext(context);
+
+    context.evalScript(gtpy::code::enableAppConsoleLogging(true));
+}
+
+void initTaskEditorContext(GtpyContext& context)
+{
+    context.evalScript(gtpy::code::import::defaultModules());
+    context.evalScript(gtpy::code::import::loggingFunctions());
+    context.evalScript(gtpy::code::import::calculatorModule());
+}
+
+void initTaskRunContext(GtpyContext& context)
+{
+    initTaskEditorContext(context);
+
+    context.evalScript(gtpy::code::enableAppConsoleLogging(true));
+}
+
+void initContext(GtpyContext::Type type, GtpyContext& context)
 {
     switch (type)
     {
     case GtpyContext::BatchContext:
-
+        initBatchContext(context);
         break;
+
     case GtpyContext::GlobalContext:
-
+        initGlobalContext(context);
         break;
+
     case GtpyContext::ScriptEditorContext:
-
+        initScriptEditorContext(context);
         break;
+
     case GtpyContext::CalculatorRunContext:
-
+        initCalculatorRunContext(context);
         break;
+
     case GtpyContext::TaskEditorContext:
-
+        initTaskEditorContext(context);
         break;
+
     case GtpyContext::TaskRunContext:
+        initTaskRunContext(context);
+        break;
 
-        return taskRunContextInitCode();
     case GtpyContext::CollectionContext:
-
         break;
     }
-
-    return "";
 }
 
 }
@@ -72,13 +118,18 @@ GtpyContext::GtpyContext(Type type) : GtpyModule(QUuid::createUuid().toString())
     {
         PyPPDict_DelItem(modulesDict, moduleName().toUtf8().constData());
     }
+
+    // add functions via Python C API
+    addFunctions(gtpy::extension::func::PROJECT_PATH_F_DEF);
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+    addFunctions(gtpy::extension::func::SHARED_FUNC_F_DEF);
+#endif
+
+    initContext(type, *this);
 }
 
 GtpyContext
 GtpyContext::createContext(Type type)
 {
-    auto context = GtpyContext{type};
-    context.evalScript(initPyCode(type));
-
-    return std::move(context);
+    return std::move(GtpyContext{type});
 }

@@ -38,10 +38,14 @@ gtpy::code::import::calculatorModule()
 QString
 gtpy::code::import::loggingFunctions()
 {
-    // TODO: replace hardcoded function names with constant variables
     static const QString code = QStringLiteral(
-        "from %1 import gtDebug, gtInfo, gtError, gtFatal, gtWarning\n")
-        .arg(gtpy::code::modules::GT_LOGGING);
+        "from %1 import %2, %3, %4, %5, %6\n")
+        .arg(gtpy::code::modules::GT_LOGGING)
+        .arg(gtpy::code::funcs::GT_DEBUG)
+        .arg(gtpy::code::funcs::GT_INFO)
+        .arg(gtpy::code::funcs::GT_WARNING)
+        .arg(gtpy::code::funcs::GT_ERROR)
+        .arg(gtpy::code::funcs::GT_FATAL);
 
     return code;
 }
@@ -55,13 +59,17 @@ gtpy::code::enableAppConsoleLogging(bool enable)
 }
 
 QString
-gtpy::code::removeFromSysModules(const QString& moduleName)
+gtpy::code::enableGTlabControl(const QString& gtlabPyIdent)
 {
-    //TODO: Check if Python C API Functions can be used in constructor of
-    // GtpyContext to remove the module right after creating it
     return QStringLiteral(
-               "import sys\n"
-               "sys.modules['%1'] = None\n"
-               "del sys\n")
-        .arg(moduleName);
+        "def openProject(projectName):\n"
+        "    return %1.openProject(projectName)\n"
+        "def currentProject():\n"
+        "    return %1.currentProject()\n"
+        "def init(id = ''):\n"
+        "    return %1.init(id)\n"
+        "def switchSession(id = ''):\n"
+        "    return %1.switchSession(id)\n")
+        .arg(gtlabPyIdent);
 }
+

@@ -20,6 +20,7 @@
 #include "PythonQtObjectPtr.h"
 #include "PythonQtConversion.h"
 
+#include "gt_version.h"
 
 #include "gtpy_gilscope.h"
 #include "gtpy_globals.h"

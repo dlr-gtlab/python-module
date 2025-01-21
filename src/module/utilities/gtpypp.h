@@ -418,6 +418,11 @@ inline int PyPPModule_AddObject(PyPPObject& module, const char *name, PyPPObject
     return ret;
 }
 
+inline int PyPPModule_AddFunctions(PyPPObject& module, PyMethodDef* def)
+{
+    return PyModule_AddFunctions(module.get(), def);
+}
+
 inline PyPPObject PyPPModule_Create(PyModuleDef* def)
 {
     return PyPPObject::NewRef(PyModule_Create(def));

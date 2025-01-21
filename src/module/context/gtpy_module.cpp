@@ -10,8 +10,11 @@
 
 #include <QMutex>
 
-#include "gtpy_gilscope.h"
 #include "gtpypp.h"
+#include "gtpy_regexp.h"
+#include "gtpy_gilscope.h"
+
+#include "gt_logging.h"
 
 #include "gtpy_module.h"
 
@@ -33,6 +36,12 @@ GtpyModule::GtpyModule(const QString& moduleName) :
     pimpl->moduleName = moduleName;
     pimpl->module = PyPPObject::Borrow(
         PythonQt::self()->createModuleFromScript(pimpl->moduleName));
+}
+
+bool
+GtpyModule::addFunctions(PyMethodDef* def)
+{
+    return PyPPModule_AddFunctions(pimpl->module, def);
 }
 
 GtpyModule::~GtpyModule()
@@ -68,10 +77,28 @@ GtpyModule::evalScript(const QString& script, EvalOption option) const
     return !hadError;
 }
 
+void
+GtpyModule::addObject(const QString& pyIdent, QObject* obj) const
+{
+    if (!obj)
+    {
+        gtError() << "nullptr cannot be added to the Python module.";
+        return;
+    }
+
+    if (!gtpy::re::validation::isValidPythonIdentifier(pyIdent))
+    {
+        gtError() << "Invalid Python identifier given ( " << pyIdent << " )."
+                  << "The object " << obj
+                  << " cannot be added to the Python module.";
+        return;
+    }
+
+    PythonQt::self()->addObject(pimpl->module.get(), pyIdent, obj);
+}
+
 const QString&
 GtpyModule::moduleName() const
 {
     return pimpl->moduleName;
 }
-
-

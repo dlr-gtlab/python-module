@@ -32,7 +32,7 @@ constexpr const char* GT_LOGGING = "GtLogging";
 constexpr const char* GT_OBJECT_WRAPPER_MODULE_C = "GtObjectWrapperModuleC";
 constexpr const char* GT_CALCULATORS = "GtCalculators";
 
-} // namespace module
+} // namespace modules
 
 namespace classes
 {
@@ -59,7 +59,7 @@ namespace attrs
 
 constexpr const char* LOGGING_ENABLED = "__outputToAppConsole";
 
-} // namespace attr
+} // namespace attrs
 
 namespace import
 {
@@ -74,7 +74,7 @@ QString loggingFunctions();
 
 QString enableAppConsoleLogging(bool enable);
 
-QString removeFromSysModules(const QString& moduleName);
+QString enableGTlabControl(const QString& gtlabPyIdent);
 
 } // namespace code
 

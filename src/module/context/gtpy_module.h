@@ -14,6 +14,7 @@
 #include <memory>
 
 #include <QString>
+#include <QObject>
 
 #include "PythonQtPythonInclude.h"
 
@@ -37,10 +38,14 @@ public:
 
     bool evalScript(const QString& script, EvalOption option = EvalFile) const;
 
+    void addObject(const QString& pyIdent, QObject* obj) const;
+
     const QString& moduleName() const;
 
 protected:
     GtpyModule(const QString& moduleName);
+
+    bool addFunctions(PyMethodDef* def);
 
 private:
     struct Impl;
