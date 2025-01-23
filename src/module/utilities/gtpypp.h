@@ -202,6 +202,11 @@ inline int PyPPDict_Merge(PyPPObject& a, const PyPPObject& b, int override)
     return PyDict_Merge(a.get(), b.get(), override);
 }
 
+inline void PyPPDict_Clear(PyPPObject& dict)
+{
+    PyDict_Clear(dict.get());
+}
+
 inline PyPPObject PyPPDict_GetItem(const PyPPObject& dict, const PyPPObject& str)
 {
     return PyPPObject::Borrow(PyDict_GetItem(dict.get(), str.get()));

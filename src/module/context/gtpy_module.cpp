@@ -10,7 +10,6 @@
 
 #include <QMutex>
 
-#include "gtpypp.h"
 #include "gtpy_regexp.h"
 #include "gtpy_gilscope.h"
 
@@ -23,10 +22,39 @@ struct GtpyModule::Impl
     QString moduleName{};
     PyPPObject module{};
     QMutex evalMutex{};
-};
 
-GtpyModule::GtpyModule(GtpyModule&&) noexcept = default;
-GtpyModule& GtpyModule::operator=(GtpyModule&&) noexcept = default;
+    ~Impl()
+    {
+        if (!module) return;
+
+        GTPY_GIL_SCOPE
+        // When adding functions to a module using PyModule_AddFunctions(),
+        // each function increments the reference count of the module before
+        // being added to the module's dictionary (__dict__). As a result, the
+        // reference count of the module becomes greater than expected.
+        //
+        // When this destructor is called, the reference count of the module
+        // should ideally decrease from 1 to 0. However, this is not possible
+        // as long as there are objects in the module's dictionary that hold
+        // references to the module itself.
+        //
+        // To simplify memory management and ensure the module can be properly
+        // deallocated, we clear the module's __dict__ at this point. After
+        // clearing the dictionary, the module's reference count should drop
+        // to 1.
+        if (auto dict = PyPPModule_GetDict(module)) PyPPDict_Clear(dict);
+
+        // Prevent a GIL scope assertion by decrementing the reference count
+        // here. The assertion occurs when ~PyPPObjectT() decrements the
+        // reference count to 0, which triggers the deallocation of the
+        // corresponding PyObject. This deallocation requires the GIL to be
+        // locked. But ~PyPPObjectT() currently does not lock the GIL.
+        //
+        // To avoid the assertion, we explicitly decrement the reference count
+        // here.
+        Py_XDECREF(module.release());
+    }
+};
 
 GtpyModule::GtpyModule(const QString& moduleName) :
     pimpl(std::make_unique<Impl>())
@@ -38,21 +66,10 @@ GtpyModule::GtpyModule(const QString& moduleName) :
         PythonQt::self()->createModuleFromScript(pimpl->moduleName));
 }
 
-bool
-GtpyModule::addFunctions(PyMethodDef* def)
-{
-    return PyPPModule_AddFunctions(pimpl->module, def);
-}
+GtpyModule::GtpyModule(GtpyModule&&) noexcept = default;
+GtpyModule& GtpyModule::operator=(GtpyModule&&) noexcept = default;
 
-GtpyModule::~GtpyModule()
-{
-    GTPY_GIL_SCOPE
-
-    // prevent a GIL scope assertion by decrementing the reference count here
-    // TODO: Analyze why the assertion occurs when ~PyPPObjectT() handles
-    // the reference count decrement.
-    if (pimpl) Py_XDECREF(pimpl->module.release());
-}
+GtpyModule::~GtpyModule() = default;
 
 bool
 GtpyModule::evalScript(const QString& script, EvalOption option) const
@@ -86,6 +103,8 @@ GtpyModule::addObject(const QString& pyIdent, QObject* obj) const
         return;
     }
 
+    // TODO: Check if we should allow adding an object when pyIdent contains
+    // special characters
     if (!gtpy::re::validation::isValidPythonIdentifier(pyIdent))
     {
         gtError() << "Invalid Python identifier given ( " << pyIdent << " )."
@@ -97,8 +116,40 @@ GtpyModule::addObject(const QString& pyIdent, QObject* obj) const
     PythonQt::self()->addObject(pimpl->module.get(), pyIdent, obj);
 }
 
+void
+GtpyModule::addVariable(const QString& pyIdent, const QVariant& value) const
+{
+    PythonQt::self()->addVariable(pimpl->module.get(), pyIdent, value);
+}
+
+void
+GtpyModule::removeVariable(const QString& pyIdent) const
+{
+    PythonQt::self()->removeVariable(pimpl->module.get(), pyIdent);
+}
+
 const QString&
 GtpyModule::moduleName() const
 {
     return pimpl->moduleName;
 }
+
+PyPPObject
+GtpyModule::module() const
+{
+    return PyPPObject::Borrow(pimpl->module.get());
+}
+
+bool
+GtpyModule::isValid() const
+{
+    return static_cast<bool>(pimpl->module);
+}
+
+bool
+GtpyModule::addFunctions(PyMethodDef* def)
+{
+    return PyPPModule_AddFunctions(pimpl->module, def);
+}
+
+

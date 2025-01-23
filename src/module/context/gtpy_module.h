@@ -18,6 +18,8 @@
 
 #include "PythonQtPythonInclude.h"
 
+#include "gtpypp.h"
+
 class GtpyModule
 {
 public:
@@ -26,24 +28,30 @@ public:
         EvalSingleString = Py_single_input
     };
 
-    virtual ~GtpyModule();
+    GtpyModule(const GtpyModule& other) noexcept = delete;
+    GtpyModule& operator=(const GtpyModule& other) noexcept = delete;
 
-    // delete the copy constructor and copy assignment operator
-    GtpyModule(const GtpyModule&) = delete;
-    GtpyModule& operator=(const GtpyModule&) = delete;
-
-    // declare the move constructor and move assignment operator
     GtpyModule(GtpyModule&&) noexcept;
     GtpyModule& operator=(GtpyModule&&) noexcept;
+
+    virtual ~GtpyModule();
 
     bool evalScript(const QString& script, EvalOption option = EvalFile) const;
 
     void addObject(const QString& pyIdent, QObject* obj) const;
 
+    void addVariable(const QString& pyIdent, const QVariant& value) const;
+
+    void removeVariable(const QString& pyIdent) const;
+
     const QString& moduleName() const;
 
+    PyPPObject module() const;
+
+    bool isValid() const;
+
 protected:
-    GtpyModule(const QString& moduleName);
+    explicit GtpyModule(const QString& moduleName);
 
     bool addFunctions(PyMethodDef* def);
 

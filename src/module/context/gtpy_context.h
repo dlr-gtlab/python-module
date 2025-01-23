@@ -18,7 +18,8 @@
 class GtpyContext : public GtpyModule
 {
 public:
-    enum Type {
+    enum Type
+    {
         BatchContext = 0,
         GlobalContext,
         ScriptEditorContext,
@@ -28,10 +29,6 @@ public:
         CollectionContext
     };
 
-
-    static GtpyContext createContext(Type type);
-
-private:
     explicit GtpyContext(Type type);
 };
 

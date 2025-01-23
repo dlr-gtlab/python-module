@@ -9,9 +9,7 @@
  */
 
 #include <QUuid>
-#include <QMutex>
 
-#include "gt_logging.h"
 #include "gt_version.h"
 #include "gt_coreapplication.h"
 
@@ -126,10 +124,4 @@ GtpyContext::GtpyContext(Type type) : GtpyModule(QUuid::createUuid().toString())
 #endif
 
     initContext(type, *this);
-}
-
-GtpyContext
-GtpyContext::createContext(Type type)
-{
-    return std::move(GtpyContext{type});
 }
