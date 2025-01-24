@@ -265,8 +265,6 @@ public:
     void resetContext(const GtpyContextManager::Context& type,
                       int contextId = -1);
 
-    void insertContext(int contextId, GtpyContext* con);
-
     /**
      * @brief Returns the PythonQt object pointer of the context with the given
      * contextId.
@@ -357,7 +355,7 @@ private:
     * @param contextId Python context identifier.
     * @return Pointer to Python Context.
     */
-    GtpyContext* context(int contextId) const;
+    std::shared_ptr<GtpyContext> context(int contextId) const;
 
 #ifdef PY3K
     /**
@@ -521,7 +519,7 @@ private:
     QString contextNameById(int contextId);
 
     /// Map of Python context
-    QMap<int, GtpyContext*> m_contextMap;
+    QMap<int, std::shared_ptr<GtpyContext>> m_contextMap;
 
     /// Whether the contexts send messages to the application console
     QMap<int, bool> m_appLogging;

@@ -197,8 +197,6 @@ GtpyContextManager::~GtpyContextManager()
         PyEval_RestoreThread(m_pyThreadState);
     }
 
-    auto contextList = m_contextMap.values();
-    qDeleteAll(contextList);
     m_contextMap.clear();
 
     PythonQt::cleanup();
@@ -675,7 +673,7 @@ GtpyContextManager::initContexts()
 
         int contextId = metaEnum.value(i);
 
-        insertContext(contextId, new GtpyContext{type});
+        m_contextMap.insert(contextId, std::make_shared<GtpyContext>(type));
 
         if (type == GtpyContext::TaskEditorContext ||
             type == GtpyContext::TaskRunContext)
@@ -701,7 +699,7 @@ GtpyContextManager::createNewContext(const GtpyContextManager::Context& type,
     int contextId = *std::max_element(keys.begin(), keys.end()) + 1;
     auto contextType = contextTypeEnumConvert(type);
 
-    insertContext(contextId, new GtpyContext{contextType});
+    m_contextMap.insert(contextId, std::make_shared<GtpyContext>(contextType));
 
     if ((contextType == GtpyContext::TaskEditorContext ||
          contextType == GtpyContext::TaskRunContext ) &&
@@ -723,8 +721,7 @@ GtpyContextManager::createNewContext(const GtpyContextManager::Context& type,
 bool
 GtpyContextManager::deleteContext(int contextId, bool emitSignal)
 {
-    auto con = m_contextMap.take(contextId);
-    delete con;
+    m_contextMap.take(contextId);
 
     if (emitSignal)
     {
@@ -747,7 +744,7 @@ GtpyContextManager::resetContext(const GtpyContextManager::Context& type,
 
     auto contextType = contextTypeEnumConvert(type);
 
-    insertContext(contextId, new GtpyContext{contextType});
+    m_contextMap.insert(contextId, std::make_shared<GtpyContext>(contextType));
 
     if (contextType == GtpyContext::TaskEditorContext ||
         contextType == GtpyContext::TaskRunContext)
@@ -761,15 +758,6 @@ GtpyContextManager::resetContext(const GtpyContextManager::Context& type,
     {
         m_calcAccessibleContexts.removeOne(contextId);
     }
-}
-
-void
-GtpyContextManager::insertContext(int contextId, GtpyContext* con)
-{
-    auto context = m_contextMap.take(contextId);
-    delete context;
-
-    m_contextMap.insert(contextId, con);
 }
 
 PythonQtObjectPtr
@@ -866,7 +854,7 @@ GtpyContextManager::createCustomModule(
     PyObject_DelAttrString(module, "__file__");
 }
 
-GtpyContext*
+std::shared_ptr<GtpyContext>
 GtpyContextManager::context(int contextId) const
 {
     return m_contextMap.value(contextId, nullptr);
