@@ -1,6 +1,6 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_contextmanager.cpp
- * 
+ *
  * SPDX-License-Identifier: Apache-2.0
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
