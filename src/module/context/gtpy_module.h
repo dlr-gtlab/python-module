@@ -23,7 +23,8 @@
 class GtpyModule
 {
 public:
-    enum EvalOption {
+    enum EvalOption
+    {
         EvalFile = Py_file_input,
         EvalSingleString = Py_single_input
     };
@@ -46,14 +47,14 @@ public:
 
     const QString& moduleName() const;
 
-    PyPPObject module() const;
-
     bool isValid() const;
 
 protected:
     explicit GtpyModule(const QString& moduleName);
 
     bool addFunctions(PyMethodDef* def);
+
+    PyPPObject module() const;
 
 private:
     struct Impl;

@@ -28,6 +28,7 @@ struct GtpyModule::Impl
         if (!module) return;
 
         GTPY_GIL_SCOPE
+
         // When adding functions to a module using PyModule_AddFunctions(),
         // each function increments the reference count of the module before
         // being added to the module's dictionary (__dict__). As a result, the
@@ -52,6 +53,7 @@ struct GtpyModule::Impl
         //
         // To avoid the assertion, we explicitly decrement the reference count
         // here.
+        assert(module->ob_refcnt == 1);
         Py_XDECREF(module.release());
     }
 };
@@ -137,7 +139,7 @@ GtpyModule::moduleName() const
 PyPPObject
 GtpyModule::module() const
 {
-    return PyPPObject::Borrow(pimpl->module.get());
+    return pimpl->module;
 }
 
 bool

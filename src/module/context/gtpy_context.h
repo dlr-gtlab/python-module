@@ -17,6 +17,8 @@
 
 class GtpyContext : public GtpyModule
 {
+    friend class GtpyContextManager;
+
 public:
     enum Type
     {
