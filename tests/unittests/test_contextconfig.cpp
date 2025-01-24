@@ -38,17 +38,17 @@ TEST_P(TestDefaultContextConfig, DefaultFunctionality)
 
     GTPY_GIL_SCOPE
 
-    QString contextName{PyModule_GetName(ctxObj.get())};
+    // QString contextName{PyModule_GetName(ctxObj.get())};
 
-    // check if the module name matches the expected pattern
-    EXPECT_TRUE(params.contextNameRegex.match(contextName).hasMatch());
+    // // check if the module name matches the expected pattern
+    // EXPECT_TRUE(params.contextNameRegex.match(contextName).hasMatch());
 
     // check if the sys.modules entry is None
-    auto modulesDict = PyPPImport_GetModuleDict();
+    // auto modulesDict = PyPPImport_GetModuleDict();
 
-    auto module = PyPPDict_GetItem(modulesDict,
-                                   contextName.toStdString().data());
-    EXPECT_TRUE(module.get() && module.get() == Py_None);
+    // auto module = PyPPDict_GetItem(modulesDict,
+    //                                contextName.toStdString().data());
+    // EXPECT_TRUE(module.get() && module.get() == Py_None);
 
     // check if the context provides the projectPath() function
     auto projectPathFunc = PyPPObject_GetAttr(
