@@ -28,9 +28,6 @@ set(HEADERS
     collection/localwidget/items/gtpy_abstractlocalitem.h
     collection/localwidget/items/gtpy_collapsiblelocalitem.h
     collection/localwidget/items/gtpy_localitem.h
-    context/gtpy_context.h
-    context/gtpy_code.h
-    context/gtpy_module.h
     extensions/gtpy_pythonfunctions.h
     gt_compat.h
     gt_python.h
@@ -49,8 +46,10 @@ set(HEADERS
     processcomponents/gtpy_scriptcalculator.h
     processcomponents/gtpy_task.h
     utilities/gtpy_calculatorfactory.h
+	utilities/gtpy_code.h
     utilities/gtpy_codegen.h
     utilities/gtpy_constants.h
+	utilities/gtpy_context.h
     utilities/gtpy_contextmanager.h
     utilities/gtpy_convert.h
     utilities/gtpy_decorator.h
@@ -59,6 +58,7 @@ set(HEADERS
     utilities/gtpy_globals.h
     utilities/gtpy_interruptrunnable.h
     utilities/gtpy_matplotlib.h
+	utilities/gtpy_module.h
     utilities/gtpy_packageiteration.h
     utilities/gtpy_processdatadistributor.h
     utilities/gtpy_regexp.h
@@ -108,9 +108,6 @@ set(SOURCES
     collection/localwidget/items/gtpy_abstractlocalitem.cpp
     collection/localwidget/items/gtpy_collapsiblelocalitem.cpp
     collection/localwidget/items/gtpy_localitem.cpp
-    context/gtpy_context.cpp
-    context/gtpy_code.cpp
-    context/gtpy_module.cpp
     extensions/gtpy_pythonfunctions.cpp
     gt_python.cpp
     models/gtpy_completermodel.cpp
@@ -125,13 +122,16 @@ set(SOURCES
     processcomponents/gtpy_scriptcalculator.cpp
     processcomponents/gtpy_task.cpp
     utilities/gtpy_calculatorfactory.cpp
+	utilities/gtpy_code.cpp
     utilities/gtpy_codegen.cpp
+	utilities/gtpy_context.cpp
     utilities/gtpy_contextmanager.cpp
     utilities/gtpy_convert.cpp
     utilities/gtpy_decorator.cpp
     utilities/gtpy_gilscope.cpp
     utilities/gtpy_globals.cpp
     utilities/gtpy_interruptrunnable.cpp
+	utilities/gtpy_module.cpp
     utilities/gtpy_processdatadistributor.cpp
     utilities/gtpy_regexp.cpp
     utilities/gtpy_scriptrunnable.cpp
@@ -193,7 +193,6 @@ target_include_directories(GTlabPython PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/collection/itemwidget>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/collection/localwidget>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/collection/localwidget/items>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/context>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/extensions>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/models>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/post>
