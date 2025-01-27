@@ -340,7 +340,7 @@ GtpyContextManager::evalScript(int contextId,
     }
 
     auto con = context(contextId);
-    if (!con || !con->isValid()) return false;
+    if (!con) return false;
 
     bool success = true;
 
@@ -364,7 +364,7 @@ GtpyContextManager::introspection(int contextId, const QString& objectname,
     GTPY_GIL_SCOPE
 
     auto con = context(contextId);
-    if (!con || !con->isValid()) return {};
+    if (!con) return {};
 
     QMultiMap<QString, GtpyFunction> results;
 
@@ -449,7 +449,7 @@ GtpyContextManager::addObject(int contextId,
     GTPY_GIL_SCOPE
 
     auto con = context(contextId);
-    if (!con || !con->isValid()) return false;
+    if (!con) return false;
 
     QStringList list = m_addedObjectNames.value(contextId, QStringList());
 
@@ -486,7 +486,7 @@ GtpyContextManager::addGtObject(int contextId, const QString& name,
     GTPY_GIL_SCOPE
 
     auto con = context(contextId);
-    if (!con || !con->isValid()) return false;
+    if (!con) return false;
 
     QStringList list = m_addedObjectNames.value(contextId, QStringList());
 
@@ -529,7 +529,7 @@ GtpyContextManager::addVariable(int contextId, const QString& name, const QVaria
     GTPY_GIL_SCOPE
 
     auto con = context(contextId);
-    if (!con || !con->isValid()) return false;
+    if (!con) return false;
 
     con->addVariable(name, value);
 
@@ -542,7 +542,7 @@ GtpyContextManager::getVariable(int contextId, const QString &name)
     GTPY_GIL_SCOPE
 
     auto con = context(contextId);
-    if (!con || !con->isValid()) return {};
+    if (!con) return {};
 
     auto obj = PyPPObject::Borrow(
         PythonQt::self()->lookupObject(con->module().get(), name));
@@ -562,7 +562,7 @@ GtpyContextManager::removeObject(int contextId, const QString& name)
     }
 
     auto con = context(contextId);
-    if (!con || !con->isValid()) return false;
+    if (!con) return false;
 
     con->removeVariable(name);
 
@@ -579,7 +579,7 @@ GtpyContextManager::removeAllAddedObjects(int contextId)
     GTPY_GIL_SCOPE
 
     auto con = context(contextId);
-    if (!con || !con->isValid()) return false;
+    if (!con) return false;
 
     QStringList list = m_addedObjectNames.value(contextId, QStringList());
 
@@ -1582,7 +1582,7 @@ GtpyContextManager::builtInCompletions(int contextId) const
     }
 
     auto con = context(contextId);
-    if (!con || !con->isValid()) return results;
+    if (!con) return results;
 
     con->eval(QStringLiteral("import inspect"));
     con->eval(QStringLiteral("def __builtins():") +
@@ -1640,7 +1640,7 @@ GtpyContextManager::setImportableModulesCompletions(int contextId)
     QMultiMap<QString, GtpyFunction> results;
 
     auto con = context(contextId);
-    if (!con || !con->isValid()) return;
+    if (!con) return;
 
     con->eval(QStringLiteral("import pkgutil"));
     con->eval(QStringLiteral("def __importableModules():\n") +
@@ -1869,7 +1869,7 @@ GtpyContextManager::contextIdByName(const QString& contextName)
     foreach (int id, ids)
     {
         auto con = context(id);
-        assert(con && con->isValid());
+        assert(con);
 
         if (con->moduleName() == contextName)
         {
@@ -1885,7 +1885,7 @@ GtpyContextManager::contextNameById(int contextId)
 {
 
     auto con = context(contextId);
-    if (!con || !con->isValid()) return {};
+    if (!con) return {};
 
     return con->moduleName();
 }

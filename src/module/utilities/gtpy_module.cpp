@@ -150,12 +150,6 @@ GtpyModule::moduleName() const
 }
 
 bool
-GtpyModule::isValid() const
-{
-    return static_cast<bool>(pimpl->module);
-}
-
-bool
 GtpyModule::addFunctions(PyMethodDef* def)
 {
     return PyPPModule_AddFunctions(pimpl->module, def);

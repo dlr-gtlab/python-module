@@ -100,8 +100,6 @@ public:
      */
     const QString& moduleName() const;
 
-    bool isValid() const;
-
 protected:
     /**
      * @brief Adds a set of functions defined by the provided PyMethodDef
