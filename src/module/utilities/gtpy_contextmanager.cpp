@@ -62,44 +62,45 @@
 namespace
 {
 
-    GtpyContext::Type contextTypeEnumConvert(GtpyContextManager::Context type)
+GtpyContext::Type contextTypeEnumConvert(GtpyContextManager::Context type)
+{
+    switch (type)
     {
-        switch (type)
-        {
-        case GtpyContextManager::BatchContext:
-            return GtpyContext::BatchContext;
+    case GtpyContextManager::BatchContext:
+        return GtpyContext::BatchContext;
 
-        case GtpyContextManager::GlobalContext:
-            return GtpyContext::GlobalContext;
+    case GtpyContextManager::GlobalContext:
+        return GtpyContext::GlobalContext;
 
-        case GtpyContextManager::ScriptEditorContext:
-            return GtpyContext::ScriptEditorContext;
+    case GtpyContextManager::ScriptEditorContext:
+        return GtpyContext::ScriptEditorContext;
 
-        case GtpyContextManager::CalculatorRunContext:
-            return GtpyContext::CalculatorRunContext;
+    case GtpyContextManager::CalculatorRunContext:
+        return GtpyContext::CalculatorRunContext;
 
-        case GtpyContextManager::TaskEditorContext:
-            return GtpyContext::TaskEditorContext;
+    case GtpyContextManager::TaskEditorContext:
+        return GtpyContext::TaskEditorContext;
 
-        case GtpyContextManager::TaskRunContext:
-            return GtpyContext::TaskRunContext;
+    case GtpyContextManager::TaskRunContext:
+        return GtpyContext::TaskRunContext;
 
-        case GtpyContextManager::CollectionContext:
-            return GtpyContext::CollectionContext;
-        }
+    case GtpyContextManager::CollectionContext:
+        return GtpyContext::CollectionContext;
     }
+}
 
-    GtpyContext::EvalOption evalOptEnumConvert(GtpyContextManager::EvalOptions opt)
+GtpyContext::InputType evalOptEnumConvert(GtpyContextManager::EvalOptions opt)
+{
+    switch (opt)
     {
-        switch (opt)
-        {
-        case GtpyContextManager::EvalFile:
-            return GtpyContext::EvalFile;
+    case GtpyContextManager::EvalFile:
+        return GtpyContext::Script;
 
-        case GtpyContextManager::EvalSingleString:
-            return GtpyContext::EvalSingleString;
-        }
+    case GtpyContextManager::EvalSingleString:
+        return GtpyContext::SingleStatement;
     }
+}
+
 }
 
 ///critical static strings
@@ -345,7 +346,7 @@ GtpyContextManager::evalScript(int contextId,
 
     if (!script.isEmpty())
     {
-        success = con->evalScript(script, evalOptEnumConvert(option));
+        success = con->eval(script, evalOptEnumConvert(option));
     }
 
     if (output || (!success && errorMessage))
@@ -1583,14 +1584,14 @@ GtpyContextManager::builtInCompletions(int contextId) const
     auto con = context(contextId);
     if (!con || !con->isValid()) return results;
 
-    con->evalScript(QStringLiteral("import inspect"));
-    con->evalScript(QStringLiteral("def __builtins():") +
+    con->eval(QStringLiteral("import inspect"));
+    con->eval(QStringLiteral("def __builtins():") +
                    QStringLiteral("return dir(inspect.builtins)"));
 
     auto tmpPythonQtPtr = PythonQtObjectPtr{con->module().get()};
     QVariant v = tmpPythonQtPtr.call(QStringLiteral("__builtins"));
 
-    con->evalScript(QStringLiteral("del inspect"));
+    con->eval(QStringLiteral("del inspect"));
 
     if (v.isNull())
     {
@@ -1641,8 +1642,8 @@ GtpyContextManager::setImportableModulesCompletions(int contextId)
     auto con = context(contextId);
     if (!con || !con->isValid()) return;
 
-    con->evalScript(QStringLiteral("import pkgutil"));
-    con->evalScript(QStringLiteral("def __importableModules():\n") +
+    con->eval(QStringLiteral("import pkgutil"));
+    con->eval(QStringLiteral("def __importableModules():\n") +
                    QStringLiteral("\tmodules = pkgutil.iter_modules()\n") +
                    QStringLiteral("\tx = (i.name for i in modules)\n") +
                    QStringLiteral("\treturn list(x)"));
@@ -1650,7 +1651,7 @@ GtpyContextManager::setImportableModulesCompletions(int contextId)
     auto tmpPythonQtPtr = PythonQtObjectPtr{con->module().get()};
     QVariant v = tmpPythonQtPtr.call(QStringLiteral("__importableModules"));
 
-    con->evalScript(QStringLiteral("del pkgutil"));
+    con->eval(QStringLiteral("del pkgutil"));
 
     if (v.isNull())
     {

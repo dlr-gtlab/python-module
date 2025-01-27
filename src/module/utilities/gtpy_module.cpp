@@ -9,6 +9,7 @@
  */
 
 #include <QMutex>
+#include <QMutexLocker>
 
 #include "gtpy_regexp.h"
 #include "gtpy_gilscope.h"
@@ -21,7 +22,7 @@ struct GtpyModule::Impl
 {
     QString moduleName{};
     PyPPObject module{};
-    QMutex evalMutex{};
+    static QMutex evalMutex;
 
     ~Impl()
     {
@@ -58,6 +59,8 @@ struct GtpyModule::Impl
     }
 };
 
+QMutex GtpyModule::Impl::evalMutex{};
+
 GtpyModule::GtpyModule(const QString& moduleName) :
     pimpl(std::make_unique<Impl>())
 {
@@ -74,24 +77,28 @@ GtpyModule& GtpyModule::operator=(GtpyModule&&) noexcept = default;
 GtpyModule::~GtpyModule() = default;
 
 bool
-GtpyModule::evalScript(const QString& script, EvalOption option) const
+GtpyModule::eval(const QString& code, InputType type) const
 {
     GTPY_GIL_SCOPE
 
-    assert(pimpl->module.get());
+    if (code.isEmpty()) return true;
 
+    // TODO: Ensure the error handling in this method is thread-safe.
+    // PythonQt::evalScript() clears the error status before the script is
+    // evaluated. This could lead to problems with error handling if the method
+    // is called in multiple threads. The current implementation is based on
+    // the previous implementation of GtpyContextManager::evalScript(). Since
+    // no thread-safety issues with GtpyContextManager::evalScript() have been
+    // observed so far, it might be acceptable to keep this implementation.
+    // However, remember to verify the thread safety again.
     bool hadError = false;
 
-    if (!script.isEmpty())
-    {
-        PythonQt::self()->evalScript(pimpl->module.get(), script, option);
+    PythonQt::self()->evalScript(pimpl->module.get(), code, type);
 
-        // TODO: Check if mutex is used correctly
-        pimpl->evalMutex.lock();
-        hadError = PythonQt::self()->hadError();
-        PythonQt::self()->clearError();
-        pimpl->evalMutex.unlock();
-    }
+    QMutexLocker locker{&Impl::evalMutex};
+
+    hadError = PythonQt::self()->hadError();
+    PythonQt::self()->clearError();
 
     return !hadError;
 }
@@ -105,8 +112,6 @@ GtpyModule::addObject(const QString& pyIdent, QObject* obj) const
         return;
     }
 
-    // TODO: Check if we should allow adding an object when pyIdent contains
-    // special characters
     if (!gtpy::re::validation::isValidPythonIdentifier(pyIdent))
     {
         gtError() << "Invalid Python identifier given ( " << pyIdent << " )."
@@ -121,6 +126,14 @@ GtpyModule::addObject(const QString& pyIdent, QObject* obj) const
 void
 GtpyModule::addVariable(const QString& pyIdent, const QVariant& value) const
 {
+    if (!gtpy::re::validation::isValidPythonIdentifier(pyIdent))
+    {
+        gtError() << "Invalid Python identifier given ( " << pyIdent << " )."
+                  << "The value " << value
+                  << " cannot be added to the Python module.";
+        return;
+    }
+
     PythonQt::self()->addVariable(pimpl->module.get(), pyIdent, value);
 }
 
@@ -136,12 +149,6 @@ GtpyModule::moduleName() const
     return pimpl->moduleName;
 }
 
-PyPPObject
-GtpyModule::module() const
-{
-    return pimpl->module;
-}
-
 bool
 GtpyModule::isValid() const
 {
@@ -154,4 +161,8 @@ GtpyModule::addFunctions(PyMethodDef* def)
     return PyPPModule_AddFunctions(pimpl->module, def);
 }
 
-
+PyPPObject
+GtpyModule::module() const
+{
+    return pimpl->module;
+}

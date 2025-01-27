@@ -24,17 +24,17 @@ namespace {
 
 void initBatchContext(GtpyContext& context)
 {
-    context.evalScript(gtpy::code::import::defaultModules());
-    context.evalScript(gtpy::code::import::loggingFunctions());
+    context.eval(gtpy::code::import::defaultModules());
+    context.eval(gtpy::code::import::loggingFunctions());
 
-    context.evalScript(gtpy::code::enableAppConsoleLogging(true));
+    context.eval(gtpy::code::enableAppConsoleLogging(true));
 
     if (!gtApp) return;
 
     const QString gtlabIdent{"GTlab"};
 
     context.addObject(gtlabIdent, gtApp);
-    context.evalScript(gtpy::code::enableGTlabControl(gtlabIdent));
+    context.eval(gtpy::code::enableGTlabControl(gtlabIdent));
 }
 
 void initGlobalContext(GtpyContext& context)
@@ -42,34 +42,34 @@ void initGlobalContext(GtpyContext& context)
     initBatchContext(context);
 
     // TODO: Figure out why we need to run this Python code
-    context.evalScript("import sys\nsys.argv.append('')\ndel sys\n");
+    context.eval("import sys\nsys.argv.append('')\ndel sys\n");
 }
 
 void initScriptEditorContext(GtpyContext& context)
 {
-    context.evalScript(gtpy::code::import::defaultModules());
-    context.evalScript(gtpy::code::import::loggingFunctions());
+    context.eval(gtpy::code::import::defaultModules());
+    context.eval(gtpy::code::import::loggingFunctions());
 }
 
 void initCalculatorRunContext(GtpyContext& context)
 {
     initScriptEditorContext(context);
 
-    context.evalScript(gtpy::code::enableAppConsoleLogging(true));
+    context.eval(gtpy::code::enableAppConsoleLogging(true));
 }
 
 void initTaskEditorContext(GtpyContext& context)
 {
-    context.evalScript(gtpy::code::import::defaultModules());
-    context.evalScript(gtpy::code::import::loggingFunctions());
-    context.evalScript(gtpy::code::import::calculatorModule());
+    context.eval(gtpy::code::import::defaultModules());
+    context.eval(gtpy::code::import::loggingFunctions());
+    context.eval(gtpy::code::import::calculatorModule());
 }
 
 void initTaskRunContext(GtpyContext& context)
 {
     initTaskEditorContext(context);
 
-    context.evalScript(gtpy::code::enableAppConsoleLogging(true));
+    context.eval(gtpy::code::enableAppConsoleLogging(true));
 }
 
 void initContext(GtpyContext::Type type, GtpyContext& context)
