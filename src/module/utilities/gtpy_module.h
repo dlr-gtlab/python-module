@@ -21,7 +21,7 @@
 #include "gtpypp.h"
 
 /**
- * @brief The GtpyModule class represents the C++ interface for a Python module.
+ * @brief The GtpyModule class represents a C++ interface for a Python module.
  * A Python module corresponds to an importable *.py file.
  */
 class GtpyModule

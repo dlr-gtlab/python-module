@@ -62,7 +62,8 @@
 namespace
 {
 
-GtpyContext::Type contextTypeEnumConvert(GtpyContextManager::Context type)
+GtpyContext::ContextType contextTypeEnumConvert(
+        GtpyContextManager::Context type)
 {
     switch (type)
     {
@@ -85,7 +86,7 @@ GtpyContext::Type contextTypeEnumConvert(GtpyContextManager::Context type)
         return GtpyContext::TaskRunContext;
 
     case GtpyContextManager::CollectionContext:
-        return GtpyContext::CollectionContext;
+        return GtpyContext::DefaultContext;
     }
 }
 

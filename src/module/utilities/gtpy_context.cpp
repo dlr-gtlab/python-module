@@ -72,7 +72,7 @@ void initTaskRunContext(GtpyContext& context)
     context.eval(gtpy::code::enableAppConsoleLogging(true));
 }
 
-void initContext(GtpyContext::Type type, GtpyContext& context)
+void initContext(GtpyContext::ContextType type, GtpyContext& context)
 {
     switch (type)
     {
@@ -100,14 +100,15 @@ void initContext(GtpyContext::Type type, GtpyContext& context)
         initTaskRunContext(context);
         break;
 
-    case GtpyContext::CollectionContext:
+    case GtpyContext::DefaultContext:
         break;
     }
 }
 
 }
 
-GtpyContext::GtpyContext(Type type) : GtpyModule(QUuid::createUuid().toString())
+GtpyContext::GtpyContext(ContextType type) :
+    GtpyModule(QUuid::createUuid().toString())
 {
     GTPY_GIL_SCOPE
 
