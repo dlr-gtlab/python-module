@@ -202,6 +202,11 @@ inline int PyPPDict_Merge(PyPPObject& a, const PyPPObject& b, int override)
     return PyDict_Merge(a.get(), b.get(), override);
 }
 
+inline void PyPPDict_Clear(PyPPObject& dict)
+{
+    PyDict_Clear(dict.get());
+}
+
 inline PyPPObject PyPPDict_GetItem(const PyPPObject& dict, const PyPPObject& str)
 {
     return PyPPObject::Borrow(PyDict_GetItem(dict.get(), str.get()));
@@ -390,6 +395,12 @@ inline PyPPObject PyPPImport_ImportModule(const char *name)
     return PyPPObject::NewRef(PyImport_ImportModule(name));
 }
 
+inline PyPPObject PyPPImport_GetModuleDict()
+{
+    return PyPPObject::Borrow(PyImport_GetModuleDict());
+}
+
+
 
 /// Low Level API
 
@@ -410,6 +421,11 @@ inline int PyPPModule_AddObject(PyPPObject& module, const char *name, PyPPObject
     }
 
     return ret;
+}
+
+inline int PyPPModule_AddFunctions(PyPPObject& module, PyMethodDef* def)
+{
+    return PyModule_AddFunctions(module.get(), def);
 }
 
 inline PyPPObject PyPPModule_Create(PyModuleDef* def)

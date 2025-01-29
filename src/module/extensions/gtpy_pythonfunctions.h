@@ -11,7 +11,6 @@
 #ifndef GTPY_PYTHONFUNCTIONS_H
 #define GTPY_PYTHONFUNCTIONS_H
 
-#include "gt_globals.h"
 
 #include "PythonQtPythonInclude.h"
 

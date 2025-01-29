@@ -16,8 +16,6 @@
 #include "PythonQtPythonInclude.h"
 #include "PythonQtInstanceWrapper.h"
 
-#include "gtpy_globals.h"
-
 #include <gt_object.h>
 
 namespace GtpyExtendedWrapperModule
