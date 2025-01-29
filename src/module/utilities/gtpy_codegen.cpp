@@ -393,8 +393,6 @@ gtpy::codegen::pyCalcCode(GtCalculator* calc)
                           .arg(pyPropValue(prop)));
     }
 
-    // TODO: evluate if it is still necessary to generate Python
-    // code for helper classes
     auto helperCode = helpersPyCode(calc, pyObjIdent,
                                    QStringList{} << pyObjIdent);
 
