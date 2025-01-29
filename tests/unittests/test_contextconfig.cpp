@@ -19,12 +19,11 @@
 #include <gtpy_code.h>
 #include <gtest/gtest.h>
 
-struct TestContextConfigParams {
+struct TestContextParams {
     GtpyContextManager::Context type;
-    QRegularExpression contextNameRegex;
 };
 
-class TestDefaultContextConfig : public ::testing::TestWithParam<TestContextConfigParams> {};
+class TestDefaultContextConfig : public ::testing::TestWithParam<TestContextParams> {};
 
 TEST_P(TestDefaultContextConfig, DefaultFunctionality)
 {
@@ -37,18 +36,6 @@ TEST_P(TestDefaultContextConfig, DefaultFunctionality)
     ASSERT_TRUE(ctxObj);
 
     GTPY_GIL_SCOPE
-
-    // QString contextName{PyModule_GetName(ctxObj.get())};
-
-    // // check if the module name matches the expected pattern
-    // EXPECT_TRUE(params.contextNameRegex.match(contextName).hasMatch());
-
-    // check if the sys.modules entry is None
-    // auto modulesDict = PyPPImport_GetModuleDict();
-
-    // auto module = PyPPDict_GetItem(modulesDict,
-    //                                contextName.toStdString().data());
-    // EXPECT_TRUE(module.get() && module.get() == Py_None);
 
     // check if the context provides the projectPath() function
     auto projectPathFunc = PyPPObject_GetAttr(
@@ -90,26 +77,16 @@ INSTANTIATE_TEST_SUITE_P(
     ContextTypes,
     TestDefaultContextConfig,
     ::testing::Values(
-        TestContextConfigParams{GtpyContextManager::BatchContext,
-                                QRegularExpression{"^BatchContext_\\d+$"}},
-        TestContextConfigParams{GtpyContextManager::GlobalContext,
-                                QRegularExpression{"^GlobalContext_\\d+$"}},
-        TestContextConfigParams{GtpyContextManager::ScriptEditorContext,
-                                QRegularExpression{"^ScriptEditorContext_\\d+$"}},
-        TestContextConfigParams{GtpyContextManager::CalculatorRunContext,
-                                QRegularExpression{"^CalculatorRunContext_\\d+$"}},
-        TestContextConfigParams{GtpyContextManager::TaskEditorContext,
-                                QRegularExpression{"^TaskEditorContext_\\d+$"}},
-        TestContextConfigParams{GtpyContextManager::TaskRunContext,
-                                QRegularExpression{"^TaskRunContext_\\d+$"}},
-        TestContextConfigParams{GtpyContextManager::CollectionContext,
-                                QRegularExpression{"^CollectionContext_\\d+$"}}
+        TestContextParams{GtpyContextManager::BatchContext},
+        TestContextParams{GtpyContextManager::GlobalContext},
+        TestContextParams{GtpyContextManager::ScriptEditorContext},
+        TestContextParams{GtpyContextManager::CalculatorRunContext},
+        TestContextParams{GtpyContextManager::TaskEditorContext},
+        TestContextParams{GtpyContextManager::TaskRunContext},
+        TestContextParams{GtpyContextManager::CollectionContext}
         )
     );
 
-struct TestContextParams {
-    GtpyContextManager::Context type;
-};
 
 class TestDefaultModulesProvided : public ::testing::TestWithParam<TestContextParams> {};
 
