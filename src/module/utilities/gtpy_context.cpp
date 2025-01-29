@@ -72,7 +72,7 @@ void initTaskRunContext(const GtpyContext& context)
     context.eval(gtpy::code::enableAppConsoleLogging(true));
 }
 
-void initContext(GtpyContext::ContextType type, GtpyContext& context)
+void initContext(GtpyContext::ContextType type, const GtpyContext& context)
 {
     switch (type)
     {
