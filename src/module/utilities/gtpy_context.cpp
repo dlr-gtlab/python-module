@@ -24,7 +24,7 @@ namespace {
 
 void initBatchContext(GtpyContext& context)
 {
-    context.eval(gtpy::code::import::defaultModules());
+    context.eval(gtpy::code::import::defaultImports());
     context.eval(gtpy::code::import::loggingFunctions());
 
     context.eval(gtpy::code::enableAppConsoleLogging(true));
@@ -47,7 +47,7 @@ void initGlobalContext(GtpyContext& context)
 
 void initScriptEditorContext(GtpyContext& context)
 {
-    context.eval(gtpy::code::import::defaultModules());
+    context.eval(gtpy::code::import::defaultImports());
     context.eval(gtpy::code::import::loggingFunctions());
 }
 
@@ -60,7 +60,7 @@ void initCalculatorRunContext(GtpyContext& context)
 
 void initTaskEditorContext(GtpyContext& context)
 {
-    context.eval(gtpy::code::import::defaultModules());
+    context.eval(gtpy::code::import::defaultImports());
     context.eval(gtpy::code::import::loggingFunctions());
     context.eval(gtpy::code::import::calculatorModule());
 }

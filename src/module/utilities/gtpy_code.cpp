@@ -12,7 +12,7 @@
 
 
 QString
-gtpy::code::import::defaultModules()
+gtpy::code::import::defaultImports()
 {
     static const QString code = QStringLiteral(
             "from %1 import %2\n"
