@@ -8,6 +8,7 @@
  * Author: Marvin Noethen (DLR AT-TWK)
  */
 
+#include "gtpy_code.h"
 #include "gtpy_globals.h"
 #include "gtpy_calculatorsmodule.h"
 
@@ -56,7 +57,7 @@ checkModuleName(PyObject* argsPy, const QString& moduleName)
 static bool
 isImportAllowed(PyObject* args)
 {
-    if (checkModuleName(args, GtpyGlobals::MODULE_GtCalculators))
+    if (checkModuleName(args, gtpy::code::modules::GT_CALCULATORS))
     {
         //if (!GtpyCalculatorsModule::findRunningParentTask())
         //{
@@ -124,7 +125,7 @@ meth_importGtCalculators(PyObject* self)
     {
         auto argsTuple = PyPPTuple_New(1);
 
-        PyPPTuple_SetItem(argsTuple, 0, PyPPObject::fromQString(GtpyGlobals::MODULE_GtCalculators));
+        PyPPTuple_SetItem(argsTuple, 0, PyPPObject::fromQString(gtpy::code::modules::GT_CALCULATORS));
 
         auto mod = PyPPObject_Call(PyPPObject::Borrow(f->defaultImp), argsTuple);
 
@@ -138,7 +139,7 @@ meth_importGtCalculators(PyObject* self)
         if (globals && PyPPDict_Check(globals))
         {
             PyPPDict_Merge(globals, PyPPModule_GetDict(mod), 0);
-            PyPPDict_SetItem(globals, PyPPObject::fromQString(GtpyGlobals::MODULE_GtCalculators), mod);
+            PyPPDict_SetItem(globals, PyPPObject::fromQString(gtpy::code::modules::GT_CALCULATORS), mod);
         }
 
         return mod.release();

@@ -16,8 +16,6 @@
 #define QSTRING_TO_CHAR_PTR(x) QString(x).toLocal8Bit().data()
 #define QSTRING_AS_PYSTRING(x) PyString_FromString(QSTRING_TO_CHAR_PTR(x))
 
-#define MODULE_GTCALCULATORS "GtCalculators"
-
 #define PyObjectAPIReturn PyObject*
 
 namespace GtpyGlobals
@@ -27,7 +25,6 @@ extern const QString PYTHONHOME_VAR;
 
 ///Python Modules
 extern const QString MODULE_GtObjectWrapperModuleC;
-extern const QString MODULE_GtCalculators;
 extern const QString MODULE_GtLogging;
 extern const QString MODULE_GtLogging_C;
 
