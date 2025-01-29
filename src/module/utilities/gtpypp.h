@@ -202,7 +202,7 @@ inline int PyPPDict_Merge(PyPPObject& a, const PyPPObject& b, int override)
     return PyDict_Merge(a.get(), b.get(), override);
 }
 
-inline void PyPPDict_Clear(PyPPObject& dict)
+inline void PyPPDict_Clear(const PyPPObject& dict)
 {
     PyDict_Clear(dict.get());
 }
@@ -423,7 +423,7 @@ inline int PyPPModule_AddObject(PyPPObject& module, const char *name, PyPPObject
     return ret;
 }
 
-inline int PyPPModule_AddFunctions(PyPPObject& module, PyMethodDef* def)
+inline int PyPPModule_AddFunctions(const PyPPObject& module, PyMethodDef* def)
 {
     return PyModule_AddFunctions(module.get(), def);
 }

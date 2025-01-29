@@ -88,6 +88,9 @@ GtpyContext::ContextType contextTypeEnumConvert(
     case GtpyContextManager::CollectionContext:
         return GtpyContext::DefaultContext;
     }
+
+    assert(false);
+    return static_cast<GtpyContext::ContextType>(-1);
 }
 
 GtpyContext::InputType evalOptEnumConvert(GtpyContextManager::EvalOptions opt)
@@ -100,6 +103,9 @@ GtpyContext::InputType evalOptEnumConvert(GtpyContextManager::EvalOptions opt)
     case GtpyContextManager::EvalSingleString:
         return GtpyContext::SingleStatement;
     }
+
+    assert(false);
+    return static_cast<GtpyContext::InputType>(-1);
 }
 
 }

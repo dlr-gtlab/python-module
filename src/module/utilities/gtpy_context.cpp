@@ -22,7 +22,7 @@
 
 namespace {
 
-void initBatchContext(GtpyContext& context)
+void initBatchContext(const GtpyContext& context)
 {
     context.eval(gtpy::code::import::defaultImports());
     context.eval(gtpy::code::import::loggingFunctions());
@@ -37,7 +37,7 @@ void initBatchContext(GtpyContext& context)
     context.eval(gtpy::code::enableGTlabControl(gtlabIdent));
 }
 
-void initGlobalContext(GtpyContext& context)
+void initGlobalContext(const GtpyContext& context)
 {
     initBatchContext(context);
 
@@ -45,27 +45,27 @@ void initGlobalContext(GtpyContext& context)
     context.eval("import sys\nsys.argv.append('')\ndel sys\n");
 }
 
-void initScriptEditorContext(GtpyContext& context)
+void initScriptEditorContext(const GtpyContext& context)
 {
     context.eval(gtpy::code::import::defaultImports());
     context.eval(gtpy::code::import::loggingFunctions());
 }
 
-void initCalculatorRunContext(GtpyContext& context)
+void initCalculatorRunContext(const GtpyContext& context)
 {
     initScriptEditorContext(context);
 
     context.eval(gtpy::code::enableAppConsoleLogging(true));
 }
 
-void initTaskEditorContext(GtpyContext& context)
+void initTaskEditorContext(const GtpyContext& context)
 {
     context.eval(gtpy::code::import::defaultImports());
     context.eval(gtpy::code::import::loggingFunctions());
     context.eval(gtpy::code::import::calculatorModule());
 }
 
-void initTaskRunContext(GtpyContext& context)
+void initTaskRunContext(const GtpyContext& context)
 {
     initTaskEditorContext(context);
 
