@@ -680,12 +680,9 @@ GtpyContextManager::createNewContext(const GtpyContextManager::Context& type,
 
     QList<int> keys = m_contextMap.keys();
 
-    if (keys.isEmpty())
-    {
-        return -1;
-    }
-
-    int contextId = *std::max_element(keys.begin(), keys.end()) + 1;
+    // We let user contexts start from 100 to have room for system contexts
+    int contextId = keys.isEmpty() ? 100 :
+                        *std::max_element(keys.begin(), keys.end()) + 1;
 
     contextName += ("_" + QString::number(contextId));
 
