@@ -49,7 +49,7 @@ def show(*args, **kwargs):
             os.makedirs(thread_path, exist_ok=True)
 
         for num, fig_manager in enumerate(Gcf.get_all_fig_managers()):
-            output_path = os.path.join(thread_path, f"figure_{num}.svg")
+            output_path = os.path.join(thread_path, "figure_{}.svg".format(num))
 
             fig = fig_manager.canvas.figure
             fig.set_size_inches(6, 4)
@@ -68,7 +68,7 @@ try:
     from gtlab_svg_backend import set_temp_dir
 
     pid = os.getpid()
-    dir_name = os.path.join(tempfile.gettempdir(), f"pid_{pid}")
+    dir_name = os.path.join(tempfile.gettempdir(), "pid_{}".format(pid))
     if not os.path.exists(dir_name):
         os.makedirs(dir_name, exist_ok=True)
 
