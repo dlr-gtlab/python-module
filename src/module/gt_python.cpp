@@ -155,6 +155,12 @@ GtPythonModule::init()
 
     connect(pyClearButton, SIGNAL(clicked(bool)), pythonConsole,
             SLOT(clearConsole()));
+
+
+    if (!GtpyContextManager::instance()->initMatplotlib())
+    {
+        gtError() << "Unable to register matplotlib backend. Is matplotlib installed?";
+    }
 }
 
 QList<GtCalculatorData>

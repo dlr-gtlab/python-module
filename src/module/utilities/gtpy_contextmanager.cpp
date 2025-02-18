@@ -131,13 +131,6 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     m_pyThreadState = PyEval_SaveThread();
 
     GtpyCustomization::customizeSlotCalling();
-
-#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-    createCustomModule(gtpy::matplotlib::backendName,
-                       gtpy::matplotlib::customBackend);
-    evalScript(GtpyContextManager::GlobalContext,
-               gtpy::matplotlib::setCustomBackend);
-#endif
 }
 
 GtpyContextManager*
@@ -843,7 +836,7 @@ GtpyContextManager::threadDictMetaData()
     return retval;
 }
 
-void
+bool
 GtpyContextManager::createCustomModule(
         const QString& moduleName, const QString& code)
 {
@@ -851,14 +844,16 @@ GtpyContextManager::createCustomModule(
 
     auto module = PythonQt::self()->createModuleFromScript(moduleName);
 
-    if (!module) return;
-
-    module.evalScript(code);
+    if (!module) return false;
 
     // We need to delete this attribute, as the new module is built-in,see
     // https://docs.python.org/3/reference/import.html#file__
     // also see issue #284
     PyObject_DelAttrString(module, "__file__");
+
+    module.evalScript(code);
+
+    return !PythonQt::self()->hadError();
 }
 
 void
@@ -1506,6 +1501,20 @@ GtpyContextManager::addModulePath(const QString& path)
     {
         PyPPList_Append(pyPath, pathObj);
     }
+}
+
+bool GtpyContextManager::initMatplotlib()
+{
+#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
+    gtDebug() << "Initializing Matplotlib backend";
+    if (!createCustomModule(gtpy::matplotlib::backendName,
+                            gtpy::matplotlib::customBackend)) return false;
+
+    if (!evalScript(GtpyContextManager::GlobalContext,
+                    gtpy::matplotlib::setCustomBackend)) return false;
+#endif
+
+    return true;
 }
 
 void
