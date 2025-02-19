@@ -79,6 +79,10 @@ TEST(VariantConvert, addVariableObject)
     o.setObjectName("Object3");
     ctxMgr->addVariable(context.id(), "obj3", QVariant::fromValue(&o));
 
+    // register the class so PythonQt can convert the Python object to a
+    // QVariant in PythonQtConv::PyObjToQVariant()
+    PythonQt::self()->registerClass(o.metaObject());
+
     // get back the object from python
     auto objPtr = ctxMgr->getVariable(context.id(), "obj3").value<GtObject*>();
     ASSERT_TRUE(objPtr != nullptr);
