@@ -103,7 +103,7 @@ testWin_2.0:
 testLinux_2.0:
   stage: test_2.0
   tags: ["linux", "docker"]
-  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster:2.0.14
   needs: ["linuxBuildDebug_2.0"]
   before_script:
     # update to latest dev tools
@@ -123,7 +123,7 @@ testLinux_2.0:
 code-coverage:
   stage: codequality
   tags: ["linux", "docker"]
-  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster
+  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster:2.0.14
   extends: 
     - .build-linux_20
   script:
