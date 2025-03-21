@@ -1,6 +1,6 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_contextmanager.cpp
- * 
+ *
  * SPDX-License-Identifier: Apache-2.0
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
@@ -39,6 +39,7 @@
 #endif
 
 #include "gtpy_constants.h"
+#include "gtpy_code.h"
 #include "gtpy_stdout.h"
 #include "gtpy_decorator.h"
 #include "gtpy_interruptrunnable.h"
@@ -49,7 +50,6 @@
 #include "gtpy_propertysetter.h"
 #include "gtpy_importfunction.h"
 #include "gtpy_calculatorsmodule.h"
-#include "gtpy_pythonfunctions.h"
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 #include "gtpy_matplotlib.h"
@@ -58,6 +58,57 @@
 #include "gtpy_contextmanager.h"
 
 #include "gtpypp.h"
+
+namespace
+{
+
+GtpyContext::ContextType contextTypeEnumConvert(
+        GtpyContextManager::Context type)
+{
+    switch (type)
+    {
+    case GtpyContextManager::BatchContext:
+        return GtpyContext::BatchContext;
+
+    case GtpyContextManager::GlobalContext:
+        return GtpyContext::GlobalContext;
+
+    case GtpyContextManager::ScriptEditorContext:
+        return GtpyContext::ScriptEditorContext;
+
+    case GtpyContextManager::CalculatorRunContext:
+        return GtpyContext::CalculatorRunContext;
+
+    case GtpyContextManager::TaskEditorContext:
+        return GtpyContext::TaskEditorContext;
+
+    case GtpyContextManager::TaskRunContext:
+        return GtpyContext::TaskRunContext;
+
+    case GtpyContextManager::CollectionContext:
+        return GtpyContext::DefaultContext;
+    }
+
+    assert(false);
+    return static_cast<GtpyContext::ContextType>(-1);
+}
+
+GtpyContext::InputType evalOptEnumConvert(GtpyContextManager::EvalOptions opt)
+{
+    switch (opt)
+    {
+    case GtpyContextManager::EvalFile:
+        return GtpyContext::Script;
+
+    case GtpyContextManager::EvalSingleString:
+        return GtpyContext::SingleStatement;
+    }
+
+    assert(false);
+    return static_cast<GtpyContext::InputType>(-1);
+}
+
+}
 
 ///critical static strings
 const QString GtpyContextManager::LIST_DATATYPE = QStringLiteral("QList");
@@ -80,7 +131,7 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     m_contextsInitialized(false)
 {
     qRegisterMetaType<GtpyContextManager::Context>
-    ("GtpyContextManager::Context");
+        ("GtpyContextManager::Context");
 
 #if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
     setEnvironmentPaths();
@@ -126,8 +177,6 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     connect(PythonQt::self(), SIGNAL(systemExitExceptionRaised(int)), this,
             SLOT(onSystemExitExceptionRaised(int)));
 
-    initExtensions();
-
     m_pyThreadState = PyEval_SaveThread();
 
     GtpyCustomization::customizeSlotCalling();
@@ -146,6 +195,8 @@ GtpyContextManager::~GtpyContextManager()
     {
         PyEval_RestoreThread(m_pyThreadState);
     }
+
+    m_contextMap.clear();
 
     PythonQt::cleanup();
 }
@@ -215,6 +266,8 @@ GtpyContextManager::setEnvironmentPaths() const
 void
 GtpyContextManager::initExtensions()
 {
+    GTPY_GIL_SCOPE
+
     if (PyType_Ready(&GtpyStdOutRedirect_Type) < 0)
     {
         gtError() << "could not initialize GtpyStdOutRedirect_Type";
@@ -263,6 +316,13 @@ GtpyContextManager::initExtensions()
     }
 
     Py_INCREF(&GtpyLoggingModule::GtpyPyLogger_Type);
+
+    initLoggingModuleC();
+    initWrapperModule();
+    initCalculatorsModule();
+    initImportBehaviour();
+
+    addCollectionPaths();
 }
 
 bool
@@ -272,10 +332,7 @@ GtpyContextManager::evalScript(int contextId,
                                const bool errorMessage,
                                const EvalOptions& option)
 {
-    if (!m_contextsInitialized)
-    {
-        initContexts();
-    }
+    assert(m_contextsInitialized);
 
     GTPY_GIL_SCOPE
 
@@ -286,31 +343,22 @@ GtpyContextManager::evalScript(int contextId,
         emit startedScriptEvaluation(contextId);
     }
 
-    PythonQtObjectPtr currentContext = context(contextId);
+    auto con = context(contextId);
+    if (!con) return false;
 
-    if (currentContext == nullptr)
-    {
-        return false;
-    }
-
-    bool hadError = false;
+    bool success = true;
 
     if (!script.isEmpty())
     {
-        currentContext.evalScript(script, option);
-
-        m_evalMutex.lock();
-        hadError = PythonQt::self()->hadError();
-        PythonQt::self()->clearError();
-        m_evalMutex.unlock();
+        success = con->eval(script, evalOptEnumConvert(option));
     }
 
-    if (output || (hadError && errorMessage))
+    if (output || (!success && errorMessage))
     {
         emit scriptEvaluated(contextId);
     }
 
-    return !hadError;
+    return success;
 }
 
 QMultiMap<QString, GtpyFunction>
@@ -319,16 +367,10 @@ GtpyContextManager::introspection(int contextId, const QString& objectname,
 {
     GTPY_GIL_SCOPE
 
-    PythonQtObjectPtr currentContext = context(contextId);
-
-    if (currentContext == nullptr)
-    {
-        return QMultiMap<QString, GtpyFunction>();
-    }
+    auto con = context(contextId);
+    if (!con) return {};
 
     QMultiMap<QString, GtpyFunction> results;
-
-    PythonQtObjectPtr object;
 
     const bool objNameIsEmpty = objectname.isEmpty();
 
@@ -341,19 +383,21 @@ GtpyContextManager::introspection(int contextId, const QString& objectname,
         standardCompletionsSet = true;
     }
 
+    PyPPObject object;
+
     if (objNameIsEmpty)
     {
-        object = currentContext;
+        object = con->module();
     }
     else
     {
-        object = PythonQt::self()->lookupObject(currentContext,
-                                                objectname);
+        object = PyPPObject::Borrow(
+            PythonQt::self()->lookupObject(con->module().get(), objectname));
     }
 
     if (object)
     {
-        results = introspectObject(object);
+        results = introspectObject(object.get());
     }
     else
     {
@@ -365,15 +409,15 @@ GtpyContextManager::introspection(int contextId, const QString& objectname,
 
         if (eval)
         {
-            object = PythonQt::self()->lookupObject(currentContext,
-                                                    temp);
+            object = PyPPObject::Borrow(
+                PythonQt::self()->lookupObject(con->module().get(), temp));
 
             if (object)
             {
-                results = introspectObject(object);
+                results = introspectObject(object.get());
             }
 
-            currentContext.removeVariable(temp);
+            con->removeVariable(temp);
         }
     }
 
@@ -407,12 +451,9 @@ GtpyContextManager::addObject(int contextId,
     }
 
     GTPY_GIL_SCOPE
-    PythonQtObjectPtr currentContext = context(contextId);
 
-    if (currentContext == nullptr)
-    {
-        return false;
-    }
+    auto con = context(contextId);
+    if (!con) return false;
 
     QStringList list = m_addedObjectNames.value(contextId, QStringList());
 
@@ -427,7 +468,7 @@ GtpyContextManager::addObject(int contextId,
         m_addedObjectNames.insert(contextId, list);
     }
 
-    currentContext.addObject(name, obj);
+    con->addObject(name, obj);
 
     return true;
 }
@@ -447,12 +488,9 @@ GtpyContextManager::addGtObject(int contextId, const QString& name,
     }
 
     GTPY_GIL_SCOPE
-    auto currentContext = PyPPObject::Borrow(context(contextId));
 
-    if (!currentContext)
-    {
-        return false;
-    }
+    auto con = context(contextId);
+    if (!con) return false;
 
     QStringList list = m_addedObjectNames.value(contextId, QStringList());
 
@@ -480,11 +518,11 @@ GtpyContextManager::addGtObject(int contextId, const QString& name,
 
     auto wrapped = PyPPObject::NewRef(
         GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type.tp_new(
-        &GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type, argsTuple.get(),
+            &GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type, argsTuple.get(),
             NULL));
 
-
-    PyPPModule_AddObject(currentContext, name.toLatin1().data(), std::move(wrapped));
+    auto mod = con->module();
+    PyPPModule_AddObject(mod, name.toLatin1().data(), std::move(wrapped));
 
     return true;
 }
@@ -494,15 +532,10 @@ GtpyContextManager::addVariable(int contextId, const QString& name, const QVaria
 {
     GTPY_GIL_SCOPE
 
-    PythonQtObjectPtr con = context(contextId);
+    auto con = context(contextId);
+    if (!con) return false;
 
-    if (!con)
-    {
-        return false;
-    }
-
-
-    con.addVariable(name, value);
+    con->addVariable(name, value);
 
     return true;
 }
@@ -511,14 +544,12 @@ QVariant
 GtpyContextManager::getVariable(int contextId, const QString &name)
 {
     GTPY_GIL_SCOPE
-    PythonQtObjectPtr con = context(contextId);
 
-    if (!con)
-    {
-        return {};
-    }
+    auto con = context(contextId);
+    if (!con) return {};
 
-    auto obj = PyPPObject::Borrow(PythonQt::self()->lookupObject(con, name));
+    auto obj = PyPPObject::Borrow(
+        PythonQt::self()->lookupObject(con->module().get(), name));
     return PyPPObject_AsQVariant(obj);
 }
 
@@ -534,14 +565,10 @@ GtpyContextManager::removeObject(int contextId, const QString& name)
         return false;
     }
 
-    PythonQtObjectPtr currentContext = context(contextId);
+    auto con = context(contextId);
+    if (!con) return false;
 
-    if (currentContext == nullptr)
-    {
-        return false;
-    }
-
-    currentContext.removeVariable(name);
+    con->removeVariable(name);
 
     list.removeOne(name);
 
@@ -555,18 +582,14 @@ GtpyContextManager::removeAllAddedObjects(int contextId)
 {
     GTPY_GIL_SCOPE
 
-    PythonQtObjectPtr currentContext = context(contextId);
-
-    if (currentContext == nullptr)
-    {
-        return false;
-    }
+    auto con = context(contextId);
+    if (!con) return false;
 
     QStringList list = m_addedObjectNames.value(contextId, QStringList());
 
     foreach (QString objName, list)
     {
-        currentContext.removeVariable(objName);
+        con->removeVariable(objName);
     }
 
     m_addedObjectNames.insert(contextId, QStringList());
@@ -615,6 +638,7 @@ QString
 GtpyContextManager::qvariantToPyStr(const QVariant& val) const
 {
     GTPY_GIL_SCOPE
+
     return PyPPObject_AsQString(PyPPObject::fromQVariant(val));
 }
 
@@ -633,29 +657,33 @@ GtpyContextManager::setPropertyValueFuncName() const
 void
 GtpyContextManager::initContexts()
 {
-    initLoggingModuleC();
-    initWrapperModule();
-    initCalculatorsModule();
+    if (m_contextsInitialized) return;
 
-    initImportBehaviour();
-
-    addCollectionPaths();
+    initExtensions();
 
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
-                             metaObj.indexOfEnumerator("Context"));
+        metaObj.indexOfEnumerator("Context"));
 
     int keyCount = metaEnum.keyCount();
 
     for (int i = 0;  i < keyCount; i++)
     {
-        QString contextName = QString::fromUtf8(metaEnum.key(i));
-
-        Context type = static_cast<Context>(metaEnum.value(i));
+        auto type = contextTypeEnumConvert(
+            static_cast<Context>(metaEnum.value(i)));
 
         int contextId = metaEnum.value(i);
 
-        defaultContextConfig(type, contextId, contextName);
+        m_contextMap.insert(contextId, std::make_shared<GtpyContext>(type));
+
+        if (type == GtpyContext::TaskEditorContext ||
+            type == GtpyContext::TaskRunContext)
+        {
+            if (!m_calcAccessibleContexts.contains(contextId))
+            {
+                m_calcAccessibleContexts << contextId;
+            }
+        }
     }
 
     initStdOut();
@@ -667,26 +695,23 @@ int
 GtpyContextManager::createNewContext(const GtpyContextManager::Context& type,
                                      bool emitSignal)
 {
-    QMetaObject metaObj = GtpyContextManager::staticMetaObject;
-    QMetaEnum metaEnum = metaObj.enumerator(
-                             metaObj.indexOfEnumerator("Context"));
-
-    QString contextName = QString::fromUtf8(metaEnum.key((int)type));
-
-    if (contextName.isEmpty())
-    {
-        return -1;
-    }
-
-    QList<int> keys = m_contextMap.keys();
+    auto keys = m_contextMap.keys();
 
     // We let user contexts start from 100 to have room for system contexts
     int contextId = keys.isEmpty() ? 100 :
                         *std::max_element(keys.begin(), keys.end()) + 1;
+    auto contextType = contextTypeEnumConvert(type);
 
-    contextName += ("_" + QString::number(contextId));
+    m_contextMap.insert(contextId, std::make_shared<GtpyContext>(contextType));
 
-    defaultContextConfig(type, contextId, contextName);
+    if ((contextType == GtpyContext::TaskEditorContext ||
+         contextType == GtpyContext::TaskRunContext ) &&
+        !m_calcAccessibleContexts.contains(contextId))
+    {
+        m_calcAccessibleContexts << contextId;
+    }
+
+    m_addedObjectNames.insert(contextId, {});
 
     if (emitSignal)
     {
@@ -699,37 +724,7 @@ GtpyContextManager::createNewContext(const GtpyContextManager::Context& type,
 bool
 GtpyContextManager::deleteContext(int contextId, bool emitSignal)
 {
-    QMetaObject metaObj = GtpyContextManager::staticMetaObject;
-    QMetaEnum metaEnum = metaObj.enumerator(
-                             metaObj.indexOfEnumerator("Context"));
-
-    if (contextId < metaEnum.keyCount())
-    {
-        //gtDebug() << "It is not allowed to remove one of the default contexts!";
-        return false;
-    }
-
-    PythonContext con = m_contextMap.take(contextId);
-
-    if (!con.module)
-    {
-        return false;
-    }
-
-    GTPY_GIL_SCOPE
-
-    auto sys = PyPPImport_ImportModule("sys");
-    auto dict = PyPPModule_GetDict(sys);
-
-    if (!dict) return false;
-
-    auto modules = PyPPDict_GetItem(dict, "modules");
-
-    if (!modules) return false;
-
-    PyPPDict_DelItem(modules, con.contextName.toStdString().c_str());
-
-    con.module.setNewRef(nullptr);
+    m_contextMap.take(contextId);
 
     if (emitSignal)
     {
@@ -750,20 +745,31 @@ GtpyContextManager::resetContext(const GtpyContextManager::Context& type,
         contextId = (int)type;
     }
 
-    QString contextName = contextNameById(contextId);
+    auto contextType = contextTypeEnumConvert(type);
 
-    if (contextName.isEmpty())
+    m_contextMap.insert(contextId, std::make_shared<GtpyContext>(contextType));
+
+    if (contextType == GtpyContext::TaskEditorContext ||
+        contextType == GtpyContext::TaskRunContext)
     {
-        return;
+        if (!m_calcAccessibleContexts.contains(contextId))
+        {
+            m_calcAccessibleContexts << contextId;
+        }
     }
-
-    defaultContextConfig(type, contextId, contextName);
+    else
+    {
+        m_calcAccessibleContexts.removeOne(contextId);
+    }
 }
 
 PythonQtObjectPtr
 GtpyContextManager::contextPointer(int contextId) const
 {
-    return context(contextId);
+    auto con = context(contextId);
+    if (!con) return {};
+
+    return PythonQtObjectPtr{con->module().get()};
 }
 
 long
@@ -835,7 +841,7 @@ GtpyContextManager::threadDictMetaData()
 
 bool
 GtpyContextManager::createCustomModule(
-        const QString& moduleName, const QString& code)
+    const QString& moduleName, const QString& code)
 {
     GTPY_GIL_SCOPE
 
@@ -853,85 +859,11 @@ GtpyContextManager::createCustomModule(
     return !PythonQt::self()->hadError();
 }
 
-void
-GtpyContextManager::defaultContextConfig(const Context& type, int contextId,
-                                         const QString& contextName)
-{
-    GTPY_GIL_SCOPE
-
-    PythonContext context;
-
-    context.module = PythonQt::self()->createModuleFromScript(contextName);
-    context.contextName = contextName;
-
-    m_contextMap.insert(contextId, context);
-
-    QString pyCode =
-        "import sys\n"
-        "sys.modules['" + contextName +
-        "'] = None\n" +
-        "del sys\n";
-
-    context.module.evalScript(pyCode);
-
-    m_addedObjectNames.insert(contextId, QStringList());
-
-    PyModule_AddFunctions(context.module,
-                          gtpy::extension::func::PROJECT_PATH_F_DEF);
-
-#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-    PyModule_AddFunctions(context.module,
-                          gtpy::extension::func::SHARED_FUNC_F_DEF);
-#endif
-
-    specificContextConfig(type, contextId);
-}
-
-void
-GtpyContextManager::specificContextConfig(
-    const GtpyContextManager::Context& type, int contextId)
-{
-    switch (type)
-    {
-        case GtpyContextManager::BatchContext:
-            initBatchContext(contextId);
-            break;
-
-        case GtpyContextManager::GlobalContext:
-            initGlobalContext(contextId);
-            break;
-
-        case GtpyContextManager::ScriptEditorContext:
-            initScriptEditorContext(contextId);
-            break;
-
-        case GtpyContextManager::CalculatorRunContext:
-            initCalculatorRunContext(contextId);
-            break;
-
-        case GtpyContextManager::TaskEditorContext:
-            initTaskEditorContext(contextId);
-            break;
-
-        case GtpyContextManager::TaskRunContext:
-            initTaskRunContext(contextId);
-            break;
-
-        default:
-            break;
-    }
-}
-
-PythonQtObjectPtr
+std::shared_ptr<GtpyContext>
 GtpyContextManager::context(int contextId) const
 {
-    GTPY_GIL_SCOPE
-
-    PythonContext con = m_contextMap.value(contextId);
-
-    return con.module;
+    return m_contextMap.value(contextId, nullptr);
 }
-
 
 #ifdef PY3K
 PyPPObject
@@ -970,7 +902,7 @@ GtpyContextManager::initExtensionModule(const QString& moduleName,
 {
     GTPY_GIL_SCOPE
 
-    QByteArray name = moduleName.toUtf8();
+            QByteArray name = moduleName.toUtf8();
     PyObject* myMod = nullptr;
 
     myMod = Py_InitModule(name.constData(), methods);
@@ -1022,9 +954,10 @@ GtpyContextManager::initCalculatorsModule()
 {
     GTPY_GIL_SCOPE
 #ifdef PY3K
-    initExtensionModule(GtpyGlobals::MODULE_GtCalculators, &GtpyCalculatorsModule::GtpyCalculators_Module);
+    initExtensionModule(gtpy::code::modules::GT_CALCULATORS,
+                        &GtpyCalculatorsModule::GtpyCalculators_Module);
 #else
-    initExtensionModule(GtpyGlobals::MODULE_GtCalculators,
+    initExtensionModule(gtpy::code::modules::GT_CALCULATORS,
                         GtpyCalculatorsModule::GtpyCalculatorsModule_StaticMethods);
 #endif
     GtpyCalculatorsModule::createCalcConstructors();
@@ -1036,7 +969,8 @@ GtpyContextManager::initLoggingModuleC()
     GTPY_GIL_SCOPE
 
 #ifdef PY3K
-    initExtensionModule(GtpyGlobals::MODULE_GtLogging_C, &GtpyLoggingModule::GtpyLogging_Module);
+    initExtensionModule(GtpyGlobals::MODULE_GtLogging_C,
+                        &GtpyLoggingModule::GtpyLogging_Module);
 #else
     initExtensionModule(GtpyGlobals::MODULE_GtLogging_C,
                         GtpyLoggingModule::GtpyLoggingModule_StaticMethods);
@@ -1075,129 +1009,6 @@ GtpyContextManager::initImportBehaviour()
 }
 
 void
-GtpyContextManager::initBatchContext(int contextId)
-{
-    GTPY_GIL_SCOPE
-    PythonQtObjectPtr con = context(contextId);
-
-    if (con == nullptr)
-    {
-        return;
-    }
-
-    importDefaultModules(contextId);
-
-    if (gtApp != nullptr)
-    {
-        addObject(contextId, "GTlab", gtApp);
-
-        QString pyCode =
-            "def openProject(projectName):\n"
-            "    return GTlab.openProject(projectName)\n"
-            "def currentProject():\n"
-            "    return GTlab.currentProject()\n"
-            "def init(id = ''):\n"
-            "    return GTlab.init(id)\n"
-            "def switchSession(id = ''):\n"
-            "    return GTlab.switchSession(id)\n";
-
-        GTPY_GIL_SCOPE
-        con.evalScript(pyCode);
-    }
-    else
-    {
-        qWarning() << tr("ERROR: GtApplication is not initialized!!! "
-                         "Batch context can not register the GTlab object.");
-    }
-
-    importLoggingFuncs(contextId, true);
-}
-
-void
-GtpyContextManager::initGlobalContext(int contextId)
-{
-    PythonQtObjectPtr con = context(contextId);
-
-    if (con == nullptr)
-    {
-        return;
-    }
-
-    importDefaultModules(contextId);
-
-    if (gtApp != nullptr)
-    {
-        addObject(contextId, QStringLiteral("GTlab"), gtApp);
-
-        QString pyCode =
-            "def openProject(projectName):\n"
-            "    return GTlab.openProject(projectName)\n"
-            "def currentProject():\n"
-            "    return GTlab.currentProject()\n"
-            "def init(id = ''):\n"
-            "    return GTlab.init(id)\n"
-            "def switchSession(id = ''):\n"
-            "    return GTlab.switchSession(id)\n";
-
-        GTPY_GIL_SCOPE
-
-        con.evalScript(pyCode);
-    }
-    else
-    {
-        qWarning() << tr("ERROR: GtApplication is not initialized!!! "
-                         "Batch context can not register the GTlab object.");
-    }
-
-    QString pyCode =
-        "import sys\n"
-        "sys.argv.append('')\n"
-        "del sys\n";
-
-    GTPY_GIL_SCOPE
-
-    con.evalScript(pyCode);
-
-    importLoggingFuncs(contextId, true);
-}
-
-void
-GtpyContextManager::initScriptEditorContext(int contextId)
-{
-    importDefaultModules(contextId);
-
-    importLoggingFuncs(contextId, false);
-}
-
-void
-GtpyContextManager::initCalculatorRunContext(int contextId)
-{
-    importDefaultModules(contextId);
-
-    importLoggingFuncs(contextId, true);
-}
-
-void
-GtpyContextManager::initTaskEditorContext(int contextId)
-{
-    importDefaultModules(contextId);
-
-    importLoggingFuncs(contextId, false);
-
-    importCalcModule(contextId);
-}
-
-void
-GtpyContextManager::initTaskRunContext(int contextId)
-{
-    importDefaultModules(contextId);
-
-    importLoggingFuncs(contextId, true);
-
-    importCalcModule(contextId);
-}
-
-void
 GtpyContextManager::initStdOut()
 {
     GTPY_GIL_SCOPE
@@ -1222,57 +1033,16 @@ GtpyContextManager::initStdOut()
 void
 GtpyContextManager::initWrapperModule()
 {
-    //    GTPY_GIL_SCOPE
-
-    //    PythonQtObjectPtr sys;
-    //    sys.setNewRef(PyImport_ImportModule("sys"));
-
-    //    QByteArray name = "GtObjectWrapperModuleC";
-    //    PyObject* myMod;
-    //#ifdef PY3K
-    //    customPyModule.m_name = name.constData();
-    //    myMod = PyModule_Create(&customPyModule);
-    //#else
-    //    myMod = Py_InitModule(name.constData(), NULL);
-    //#endif
-    //    // add GtObjectWrapperModuleC to the list of builtin module names
-    //    PyObject* old_module_names =
-    //        PyObject_GetAttrString(sys.object(), "builtin_module_names");
-
-    //    if (old_module_names && PyTuple_Check(old_module_names))
-    //    {
-    //        Py_ssize_t old_size = PyTuple_Size(old_module_names);
-    //        PyObject* module_names = PyTuple_New(old_size + 1);
-
-    //        for (Py_ssize_t i = 0; i < old_size; i++)
-    //        {
-    //            PyTuple_SetItem(module_names, i,
-    //                            PyTuple_GetItem(old_module_names, i));
-    //        }
-
-    //        PyTuple_SetItem(module_names, old_size,
-    //                        PyString_FromString(name.constData()));
-    //        PyModule_AddObject(sys.object(), "builtin_module_names", module_names);
-    //    }
-
-    //#ifdef PY3K
-    //    PyDict_SetItem(PyObject_GetAttrString(sys.object(), "modules"),
-    //                   PyUnicode_FromString(name.constData()), myMod);
-    //#endif
-
-
-
-
     GTPY_GIL_SCOPE
-
 
 #ifdef PY3K
     auto mod = initExtensionModule(
         GtpyGlobals::MODULE_GtObjectWrapperModuleC,
         &GtpyExtendedWrapperModule::GtpyExtendedWrapper_Module
-    );
+        );
 #else
-    auto mod = initExtensionModule(GtpyGlobals::MODULE_GtObjectWrapperModuleC, nullptr);
+    auto mod = initExtensionModule(GtpyGlobals::MODULE_GtObjectWrapperModuleC,
+                                   nullptr);
 #endif
 
     auto wrapperType = PyPPObject::NewRef(
@@ -1304,105 +1074,12 @@ GtpyContextManager::addCollectionPaths()
         foreach (QString subdir, subdirs)
         {
             QString nativePath = QDir::toNativeSeparators(
-                                     collectionDir.absolutePath());
+                collectionDir.absolutePath());
             nativePath = nativePath + QDir::separator() + subdir;
 
             addModulePath(nativePath);
         }
     }
-}
-
-void
-GtpyContextManager::enableOutputToAppConsole(int contextId)
-{
-    PythonQtObjectPtr con = context(contextId);
-
-    if (con == nullptr)
-    {
-        return;
-    }
-
-    QString pyCode = GtpyGlobals::ATTR_outputToApp + " = True\n";
-
-    GTPY_GIL_SCOPE
-
-    con.evalScript(pyCode);
-}
-
-void
-GtpyContextManager::importDefaultModules(int contextId)
-{
-    GTPY_GIL_SCOPE
-    PythonQtObjectPtr con = context(contextId);
-
-    if (con == nullptr)
-    {
-        return;
-    }
-
-    QString pyCode =
-        "from PythonQt import " + CLASS_WRAPPER_MODULE + "\n" +
-        "from PythonQt import QtCore\n"
-        "from " + GtpyGlobals::MODULE_GtObjectWrapperModuleC + " import " +
-        GtpyGlobals::GTOBJECT_WRAPPER + "\n";
-
-    con.evalScript(pyCode);
-}
-
-void
-GtpyContextManager::importLoggingFuncs(int contextId,
-                                       bool appConsole)
-{
-    GTPY_GIL_SCOPE
-    PythonQtObjectPtr con = context(contextId);
-
-    if (con == nullptr)
-    {
-        return;
-    }
-
-    QString pyCode =
-        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging_C +
-        QStringLiteral(" import gtDebug\n") +
-        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging_C +
-        QStringLiteral(" import gtInfo\n") +
-        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging_C +
-        QStringLiteral(" import gtError\n") +
-        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging_C +
-        QStringLiteral(" import gtFatal\n") +
-        QStringLiteral("from ") + GtpyGlobals::MODULE_GtLogging_C +
-        QStringLiteral(" import gtWarning\n");
-
-    if (appConsole)
-    {
-        enableOutputToAppConsole(contextId);
-    }
-
-
-    con.evalScript(pyCode);
-
-    m_appLogging.insert(contextId, appConsole);
-}
-
-void
-GtpyContextManager::importCalcModule(int contextId)
-{
-    if (!m_calcAccessibleContexts.contains(contextId))
-    {
-        m_calcAccessibleContexts << contextId;
-    }
-
-    GTPY_GIL_SCOPE
-    PythonQtObjectPtr con = context(contextId);
-
-    if (con == nullptr)
-    {
-        return;
-    }
-
-    QString pyCode = "__import__." + GtpyGlobals::FUNC_importGtCalc + "()";
-
-    con.evalScript(pyCode);
 }
 
 int
@@ -1481,7 +1158,7 @@ GtpyContextManager::addModulePath(const QString& path)
 {
     GTPY_GIL_SCOPE
 
-    auto pyPath = PyPPSys_GetObject("path");
+        auto pyPath = PyPPSys_GetObject("path");
 
     if (!pyPath) return;
 
@@ -1516,7 +1193,7 @@ bool GtpyContextManager::initMatplotlib()
 
 void
 GtpyContextManager::setMetaDataToThreadDict(int contextId, bool output,
-        bool error)
+                                            bool error)
 {
     GtpyGlobals::StdOutMetaData metaData;
 
@@ -1532,7 +1209,7 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
 {
     GTPY_GIL_SCOPE
 
-    QMultiMap<QString, GtpyFunction> results;
+            QMultiMap<QString, GtpyFunction> results;
 
     if (m_decorator == nullptr)
     {
@@ -1574,8 +1251,8 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
             }
 
             PyPPObject value = isDict ?
-                               PyPPDict_GetItem(object, key) :
-                               PyPPObject_GetAttr(object, key);
+                                   PyPPDict_GetItem(object, key) :
+                                   PyPPObject_GetAttr(object, key);
 
             if (!value) continue;
 
@@ -1640,7 +1317,7 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
     PythonQtObjectPtr p = object.get();
 
     QString childrenFunc = m_decorator->getFunctionName(
-                               GET_CHILDREN_TAG);
+        GET_CHILDREN_TAG);
 
     if (results.keys().contains(childrenFunc.toLower()))
     {
@@ -1664,14 +1341,14 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
                     QString desc;
 
                     GtpyFunction existing = results.value(
-                                                objName.toLower());
+                        objName.toLower());
 
                     if (!existing.name.isEmpty())
                     {
                         results.remove(objName.toLower());
 
                         QString funcName = m_decorator->getFunctionName(
-                                               FIND_GT_CHILDREN_TAG);
+                            FIND_GT_CHILDREN_TAG);
 
                         if (funcName.isEmpty())
                         {
@@ -1693,12 +1370,12 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
                     else
                     {
                         static QRegularExpression regexp{
-                            "^[a-zA-Z_][a-zA-Z0-9_]*$"};
+                                                         "^[a-zA-Z_][a-zA-Z0-9_]*$"};
 
                         if (!objName.contains(regexp))
                         {
                             QString funcName = m_decorator->getFunctionName(
-                                                   FIND_GT_CHILD_TAG);
+                                FIND_GT_CHILD_TAG);
 
                             if (funcName.isEmpty())
                             {
@@ -1740,7 +1417,7 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
     }
 
     QString findPropsFuncName = m_decorator->getFunctionName(
-                                    FIND_GT_PROPERTIES_TAG);
+        FIND_GT_PROPERTIES_TAG);
 
     if (results.keys().contains(findPropsFuncName.toLower()))
     {
@@ -1753,7 +1430,7 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
             foreach (QVariant var, propertyListVar)
             {
                 GtAbstractProperty* prop = qvariant_cast<GtAbstractProperty*>(
-                                               var);
+                    var);
 
                 if (prop != nullptr && !prop->objectName().isEmpty())
                 {
@@ -1764,7 +1441,7 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
                     QString desc;
 
                     QString findFuncName = m_decorator->getFunctionName(
-                                               FIND_GT_PROPERTY_TAG);
+                        FIND_GT_PROPERTY_TAG);
 
                     if (findFuncName.isEmpty())
                     {
@@ -1790,10 +1467,10 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
                     results.insert(propfunc.name.toLower(), propfunc);
 
                     propName =  prop->objectName() +
-                                QStringLiteral(" setValue");
+                               QStringLiteral(" setValue");
 
                     QString setFuncName = m_decorator->getFunctionName(
-                                              SET_PROPERTY_VALUE_TAG);
+                        SET_PROPERTY_VALUE_TAG);
 
                     if (setFuncName.isEmpty())
                     {
@@ -1826,7 +1503,7 @@ GtpyContextManager::introspectObject(PyObject* objectIn) const
 
 
                     QString getFuncName = m_decorator->getFunctionName(
-                                              PROPERTY_VALUE_TAG);
+                        PROPERTY_VALUE_TAG);
 
                     if (getFuncName.isEmpty())
                     {
@@ -1922,20 +1599,17 @@ GtpyContextManager::builtInCompletions(int contextId) const
         return results;
     }
 
-    PythonQtObjectPtr con = context(contextId);
+    auto con = context(contextId);
+    if (!con) return results;
 
-    if (con.isNull())
-    {
-        return results;
-    }
-
-    con.evalScript(QStringLiteral("import inspect"));
-    con.evalScript(QStringLiteral("def __builtins():") +
+    con->eval(QStringLiteral("import inspect"));
+    con->eval(QStringLiteral("def __builtins():") +
                    QStringLiteral("return dir(inspect.builtins)"));
 
-    QVariant v = con.call(QStringLiteral("__builtins"));
+    auto tmpPythonQtPtr = PythonQtObjectPtr{con->module().get()};
+    QVariant v = tmpPythonQtPtr.call(QStringLiteral("__builtins"));
 
-    con.evalScript(QStringLiteral("del inspect"));
+    con->eval(QStringLiteral("del inspect"));
 
     if (v.isNull())
     {
@@ -1983,22 +1657,19 @@ GtpyContextManager::setImportableModulesCompletions(int contextId)
 
     QMultiMap<QString, GtpyFunction> results;
 
-    PythonQtObjectPtr con = context(contextId);
+    auto con = context(contextId);
+    if (!con) return;
 
-    if (con.isNull())
-    {
-        return;
-    }
-
-    con.evalScript(QStringLiteral("import pkgutil"));
-    con.evalScript(QStringLiteral("def __importableModules():\n") +
+    con->eval(QStringLiteral("import pkgutil"));
+    con->eval(QStringLiteral("def __importableModules():\n") +
                    QStringLiteral("\tmodules = pkgutil.iter_modules()\n") +
                    QStringLiteral("\tx = (i.name for i in modules)\n") +
                    QStringLiteral("\treturn list(x)"));
 
-    QVariant v = con.call(QStringLiteral("__importableModules"));
+    auto tmpPythonQtPtr = PythonQtObjectPtr{con->module().get()};
+    QVariant v = tmpPythonQtPtr.call(QStringLiteral("__importableModules"));
 
-    con.evalScript(QStringLiteral("del pkgutil"));
+    con->eval(QStringLiteral("del pkgutil"));
 
     if (v.isNull())
     {
@@ -2054,7 +1725,7 @@ GtpyContextManager::calculatorCompletions(int contextId) const
              gtCalculatorFactory->calculatorDataList())
     {
         if (!gtDevMode() &&
-                calcData->status != GtCalculatorDataImpl::RELEASE)
+            calcData->status != GtCalculatorDataImpl::RELEASE)
         {
             continue;
         }
@@ -2095,28 +1766,28 @@ void
 GtpyContextManager::registerTypeConverters() const
 {
     int objectPtrMapId = qRegisterMetaType<QMap<int, double>>(
-                             "QMap<int, double>");
+        "QMap<int, double>");
 
     PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
-            GtpyTypeConversion::convertFromQMapIntDouble);
+                                                    GtpyTypeConversion::convertFromQMapIntDouble);
     PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
-            GtpyTypeConversion::convertToQMapIntDouble);
+                                                    GtpyTypeConversion::convertToQMapIntDouble);
 
     objectPtrMapId = qRegisterMetaType<QMap<QString, double>>(
-                         "QMap<QString, double>");
+        "QMap<QString, double>");
 
     PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
-            GtpyTypeConversion::convertFromQMapStringDouble);
+                                                    GtpyTypeConversion::convertFromQMapStringDouble);
     PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
-            GtpyTypeConversion::convertToQMapStringDouble);
+                                                    GtpyTypeConversion::convertToQMapStringDouble);
 
     objectPtrMapId = qRegisterMetaType<QMap<QString, int>>(
-                         "QMap<QString, int>");
+        "QMap<QString, int>");
 
     PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
-            GtpyTypeConversion::convertFromQMapStringInt);
+                                                    GtpyTypeConversion::convertFromQMapStringInt);
     PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
-            GtpyTypeConversion::convertToQMapStringInt);
+                                                    GtpyTypeConversion::convertToQMapStringInt);
 
     objectPtrMapId = qRegisterMetaType<QMap<QString, QString>>(
         "QMap<QString, QString>");
@@ -2157,7 +1828,7 @@ GtpyContextManager::stdOutRedirectCB(const QString& contextName,
         if (contextId == BatchContext)
         {
             if (message.indexOf(QStringLiteral("\n")) != 0 &&
-                    !message.isEmpty())
+                !message.isEmpty())
             {
                 std::cout << message.toLatin1().data() << std::endl;
             }
@@ -2215,9 +1886,10 @@ GtpyContextManager::contextIdByName(const QString& contextName)
 
     foreach (int id, ids)
     {
-        PythonContext con = m_contextMap.value(id);
+        auto con = context(id);
+        assert(con);
 
-        if (con.contextName == contextName)
+        if (con->moduleName() == contextName)
         {
             return id;
         }
@@ -2229,9 +1901,11 @@ GtpyContextManager::contextIdByName(const QString& contextName)
 QString
 GtpyContextManager::contextNameById(int contextId)
 {
-    GTPY_GIL_SCOPE
 
-    return m_contextMap.value(contextId).contextName;
+    auto con = context(contextId);
+    if (!con) return {};
+
+    return con->moduleName();
 }
 
 void
@@ -2316,7 +1990,7 @@ GtpyTypeConversion::convertFromQMapIntDouble(const void* inObject, const int)
 
 bool
 GtpyTypeConversion::convertToQMapIntDouble(PyObject* obj, void* outMap,
-        int, bool)
+                                           int, bool)
 {
     return pythonToMap<int, double> (obj, outMap);
 }
@@ -2329,7 +2003,7 @@ GtpyTypeConversion::convertFromQMapStringDouble(const void* inObject, int)
 
 bool
 GtpyTypeConversion::convertToQMapStringDouble(PyObject* obj, void* outMap,
-        int, bool)
+                                              int, bool)
 {
     return pythonToMap<QString, double>(obj, outMap);
 }
@@ -2342,7 +2016,7 @@ GtpyTypeConversion::convertFromQMapStringInt(const void* inObject, int)
 
 bool
 GtpyTypeConversion::convertToQMapStringInt(PyObject* obj, void* outMap,
-        int, bool)
+                                           int, bool)
 {
     return pythonToMap<QString, int>(obj, outMap);
 }

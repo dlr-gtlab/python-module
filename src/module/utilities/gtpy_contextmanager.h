@@ -1,6 +1,6 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_contextmanager.h
- * 
+ *
  * SPDX-License-Identifier: Apache-2.0
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
@@ -20,8 +20,9 @@
 #include "PythonQtObjectPtr.h"
 #include "PythonQtConversion.h"
 
-#include "gt_globals.h"
+#include "gt_version.h"
 
+#include "gtpy_context.h"
 #include "gtpy_gilscope.h"
 #include "gtpy_globals.h"
 #include "gtpypp.h"
@@ -120,8 +121,8 @@ public:
     * @return
     */
     QMultiMap<QString, GtpyFunction> introspection(int contextId,
-            const QString& objectname,
-            const bool appendModules = false);
+                                                   const QString& objectname,
+                                                   const bool appendModules = false);
 
     /**
     * @brief Adds the object obj to the Python context indicated by
@@ -356,31 +357,11 @@ private:
     bool createCustomModule(const QString& moduleName, const QString& code);
 
     /**
-    * @brief Configures the python context indicated by contextId with the
-    * functionality indicated by type
-    * @param type Identifies the functionality of the context.
-    * @param contextId Id of a python context.
-    * @param contextName The name of the Python context.
-    */
-    void defaultContextConfig(const Context& type, int contextId,
-                              const QString& contextName);
-
-    /**
-    * @brief Calls the function containing the specific configuration for the
-    * Python context indicated by contextId. The type determines the
-    * configuration of the context.
-    * @param type Python context identifier.
-    * @param contextId Id of a python context.
-    */
-    void specificContextConfig(const GtpyContextManager::Context& type,
-                               int contextId);
-
-    /**
     * @brief Returns a pointer to the Python context indicated by contextId.
     * @param contextId Python context identifier.
     * @return Pointer to Python Context.
     */
-    PythonQtObjectPtr context(int contextId) const;
+    std::shared_ptr<GtpyContext> context(int contextId) const;
 
 #ifdef PY3K
     /**
@@ -401,7 +382,7 @@ private:
      * @return A new reference of the extension module.
      */
     PyPPObject initExtensionModule(const QString& moduleName,
-                                  PyMethodDef* methods);
+                                   PyMethodDef* methods);
 #endif
 
     /**
@@ -426,48 +407,6 @@ private:
     void initImportBehaviour();
 
     /**
-    * @brief Initializes additional functionalities for the context of type
-    * BatchContext.
-    * @param contextId Python context identifier.
-    */
-    void initBatchContext(int contextId);
-
-    /**
-    * @brief Initializes additional functionalities for the context of type
-    * GlobalContext.
-    * @param contextId Python context identifier.
-    */
-    void initGlobalContext(int contextId);
-
-    /**
-    * @brief Initializes additional functionalities for context of type
-    * ScriptEditorContext.
-    * @param contextId Python context identifier.
-    */
-    void initScriptEditorContext(int contextId);
-
-    /**
-    * @brief Initializes additional functionalities for context of type
-    * CalculatorRunContext.
-    * @param contextId Python context identifier.
-    */
-    void initCalculatorRunContext(int contextId);
-
-    /**
-    * @brief Initializes additional functionalities for context of type
-    * TaskEditorContext.
-    * @param contextId Python context identifier.
-    */
-    void initTaskEditorContext(int contextId);
-
-    /**
-    * @brief Initializes additional functionalities for context of type
-    * TaskRunContex.
-    * @param contextId Python context identifier.
-    */
-    void initTaskRunContext(int contextId);
-
-    /**
     * @brief Initializes the output behaviour of python.
     */
     void initStdOut();
@@ -481,36 +420,6 @@ private:
      * @brief Adds the paths of the script collection to the sys.path list.
      */
     void addCollectionPaths();
-
-    /**
-     * @brief Enables to send output to the application console.
-     * @param contextId Python context identifier.
-     */
-    void enableOutputToAppConsole(int contextId);
-
-    /**
-    * @brief Imports the default modules to the Python context identified by
-    * contextId.
-    * @param contextId Python context identifier.
-    */
-    void importDefaultModules(int contextId);
-
-    /**
-    * @brief Imports the logging functions to the context identified by
-    * contextId. Stores the appConsole value that specifies whether the
-    * logging functions send the output to the application console.
-    * @param contextId Python context identifier.
-    * @param appConsole If true, the logging messages are sent to the
-    * GTlab application console.
-    */
-    void importLoggingFuncs(int contextId, bool appConsole);
-
-    /**
-    * @brief Imports the calculator module to the context identified by
-    * contextId.
-    * @param contextId Python context identifier.
-    */
-    void importCalcModule(int contextId);
 
     /**
     * @brief Searches the line number out of an error message.
@@ -616,7 +525,7 @@ private:
     QString contextNameById(int contextId);
 
     /// Map of Python context
-    QMap<int, PythonContext> m_contextMap;
+    QMap<int, std::shared_ptr<GtpyContext>> m_contextMap;
 
     /// Whether the contexts send messages to the application console
     QMap<int, bool> m_appLogging;
@@ -750,7 +659,7 @@ public:
     * @return Given QMap instance as Python object.
     */
     static PyObject* convertFromQMapIntDouble(const void* inObject,
-            const int /*metaTypeId*/);
+                                              const int /*metaTypeId*/);
 
     /**
     * @brief Converts Python object to QMap<int, double>.
@@ -767,7 +676,7 @@ public:
     * @return Given QMap instance as Python object.
     */
     static PyObject* convertFromQMapStringDouble(const void* inObject,
-            int /*metaTypeId*/);
+                                                 int /*metaTypeId*/);
     /**
     * @brief Converts Python object to QMap<QString, double>.
     * @param obj Python object.
@@ -782,7 +691,7 @@ public:
     * @return Given QMap instance as Python object.
     */
     static PyObject* convertFromQMapStringInt(const void* inObject,
-            int /*metaTypeId*/);
+                                              int /*metaTypeId*/);
     /**
     * @brief Converts Python object to QMap<QString, int>.
     * @param obj Python object.
@@ -798,7 +707,7 @@ public:
     * @return Given QMap instance as Python object.
     */
     static PyObject* convertFromQMapStringQString(const void* inObject,
-                                              int /*metaTypeId*/);
+                                                  int /*metaTypeId*/);
     /**
     * @brief Converts Python object to QMap<QString, int>.
     * @param obj Python object.

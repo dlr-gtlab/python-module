@@ -18,6 +18,7 @@
 #include "gt_calculatorfactory.h"
 #include "gt_abstractrunnable.h"
 
+#include "gtpy_code.h"
 #include "gtpy_processdatadistributor.h"
 #include "gtpy_calculatorfactory.h"
 #include "gtpy_decorator.h"
@@ -440,9 +441,7 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
 void
 GtpyCalculatorsModule::createCalcConstructors()
 {
-    auto mod =
-        PyPPImport_ImportModule(
-            QSTRING_TO_CHAR_PTR(GtpyGlobals::MODULE_GtCalculators));
+    auto mod = PyPPImport_ImportModule(gtpy::code::modules::GT_CALCULATORS);
 
     if (!mod)
     {
