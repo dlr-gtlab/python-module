@@ -316,6 +316,13 @@ GtpyContextManager::initExtensions()
     }
 
     Py_INCREF(&GtpyLoggingModule::GtpyPyLogger_Type);
+
+    initLoggingModuleC();
+    initWrapperModule();
+    initCalculatorsModule();
+    initImportBehaviour();
+
+    addCollectionPaths();
 }
 
 bool
@@ -653,14 +660,6 @@ GtpyContextManager::setPropertyValueFuncName() const
 void
 GtpyContextManager::initContexts()
 {
-    initLoggingModuleC();
-    initWrapperModule();
-    initCalculatorsModule();
-
-    initImportBehaviour();
-
-    addCollectionPaths();
-
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
         metaObj.indexOfEnumerator("Context"));
