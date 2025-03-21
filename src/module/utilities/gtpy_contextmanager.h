@@ -318,6 +318,12 @@ public:
      */
     void addModulePath(const QString& path);
 
+    /**
+     * Initializes the Matplotlib backend
+     * Returns false, if matplotlib is not installed or cannot be imported
+     */
+    bool initMatplotlib();
+
 protected:
     /**
     * @brief The GtpyContextManager constructor.
@@ -348,7 +354,7 @@ private:
      * @param moduleName Name of the newly created Python module.
      * @param code Code of the Python module.
      */
-    void createCustomModule(const QString& moduleName, const QString& code);
+    bool createCustomModule(const QString& moduleName, const QString& code);
 
     /**
     * @brief Returns a pointer to the Python context indicated by contextId.
