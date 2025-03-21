@@ -164,9 +164,10 @@ public:
 
 struct TestPythonContext
 {
-    explicit TestPythonContext(GtpyContextManager::Context type = GtpyContextManager::ScriptEditorContext) :
-        context_id(GtpyContextManager::instance()->createNewContext(type))
+    explicit TestPythonContext(GtpyContextManager::Context type = GtpyContextManager::ScriptEditorContext)
     {
+        GtpyContextManager::instance()->initContexts();
+        context_id = GtpyContextManager::instance()->createNewContext(type);
     }
 
     ~TestPythonContext()

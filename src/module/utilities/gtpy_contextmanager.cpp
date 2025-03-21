@@ -177,8 +177,6 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     connect(PythonQt::self(), SIGNAL(systemExitExceptionRaised(int)), this,
             SLOT(onSystemExitExceptionRaised(int)));
 
-    initExtensions();
-
     m_pyThreadState = PyEval_SaveThread();
 
     GtpyCustomization::customizeSlotCalling();
@@ -268,6 +266,8 @@ GtpyContextManager::setEnvironmentPaths() const
 void
 GtpyContextManager::initExtensions()
 {
+    GTPY_GIL_SCOPE
+
     if (PyType_Ready(&GtpyStdOutRedirect_Type) < 0)
     {
         gtError() << "could not initialize GtpyStdOutRedirect_Type";
@@ -332,10 +332,7 @@ GtpyContextManager::evalScript(int contextId,
                                const bool errorMessage,
                                const EvalOptions& option)
 {
-    if (!m_contextsInitialized)
-    {
-        initContexts();
-    }
+    assert(m_contextsInitialized);
 
     GTPY_GIL_SCOPE
 
@@ -660,6 +657,10 @@ GtpyContextManager::setPropertyValueFuncName() const
 void
 GtpyContextManager::initContexts()
 {
+    if (m_contextsInitialized) return;
+
+    initExtensions();
+
     QMetaObject metaObj = GtpyContextManager::staticMetaObject;
     QMetaEnum metaEnum = metaObj.enumerator(
         metaObj.indexOfEnumerator("Context"));
