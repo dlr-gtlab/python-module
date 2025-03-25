@@ -68,6 +68,13 @@ QString path(const QString& settingId);
 
 }
 
+/**
+ * @brief Return the path of the embedded python executable
+ *
+ * If no embedded python is available, an empty string is returned
+ */
+QString embeddedPythonPath();
+
 } // namespace gtps
 
 #endif // GTPSGLOBALS_H

@@ -42,15 +42,6 @@ getSetting(const QString& settingId)
     return gtApp->settings()->getSetting(gtps::settings::path(settingId));
 }
 
-QString pythonExe()
-{
-#ifdef _WINDOWS
-    return "python.exe";
-#else
-    return "bin/python";
-#endif
-}
-
 /**
  * @brief Sets up an embedded python environment, if no other python env
  * has been configured (if available)
@@ -60,19 +51,14 @@ void checkAndSetupEmbeddedPyenv()
     QString python = getSetting(gtps::constants::PYEXE_S_ID).toString();
 
 
-    // test, if there is an embedded python distribution
-    auto pythonDir = QDir(QCoreApplication::applicationDirPath()
-                          + "/../lib/python");
-
-    QFile embeddedPythonExe(pythonDir.absoluteFilePath(pythonExe()));
+    QString embeddedPythonPath = gtps::embeddedPythonPath();
 
 
-    if (python.isEmpty() && embeddedPythonExe.exists())
+    if (python.isEmpty() && !embeddedPythonPath.isEmpty())
     {
-        gtInfo() << "Setting up embedded python environment in "
-                 << pythonDir.absolutePath();
-        setSetting(gtps::constants::PYEXE_S_ID,
-                   pythonDir.absoluteFilePath(pythonExe()));
+        gtInfo() << "Setting up embedded python interpreter "
+                 << embeddedPythonPath;
+        setSetting(gtps::constants::PYEXE_S_ID, embeddedPythonPath);
     }
 
 }

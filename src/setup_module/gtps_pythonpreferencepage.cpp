@@ -45,19 +45,31 @@ GtPythonPreferencePage::GtPythonPreferencePage() :
     if (vStr.endsWith(", ")) vStr = vStr.mid(0, vStr.size() - 2);
 
     ui->infoLabel->setTextFormat(Qt::MarkdownText);
-    ui->infoLabel->setText(tr("Please select a python executable.  \n"
-                              "__Note that GTlab currently only works "
+
+    ui->infoLabel->setText(tr("__Note that GTlab currently only works "
                               "with the following python versions__:  \n"
                               "%1"
                               ).arg(vStr));
 
-    ui->iconLabel->setPixmap(gt::gui::icon::python().pixmap(32,32));
+    ui->btnSwitchEmbedded->setIcon(gt::gui::icon::homeAccount());
+
+    ui->tabWidget->setTabIcon(0, gt::gui::icon::python());
+
+    if (gtps::embeddedPythonPath().isEmpty())
+    {
+        ui->btnSwitchEmbedded->setVisible(false);
+    }
 
     connect(ui->btnSelectPyExe, &QPushButton::clicked,
             this, &GtPythonPreferencePage::onBtnSelectPyExePressed);
 
     connect(ui->btnTestPyEnv, &QPushButton::clicked, this,
             &GtPythonPreferencePage::onBtnTestPyEnvPressed);
+
+    connect(ui->btnSwitchEmbedded, &QPushButton::clicked, this, [this]() {
+        ui->lePythonExe->setText(gtps::embeddedPythonPath());
+        onBtnTestPyEnvPressed();
+    });
 }
 
 void
@@ -86,7 +98,9 @@ GtPythonPreferencePage::onBtnSelectPyExePressed()
 
     if (QFile(currentPyExe).exists())
     {
-        dlg.selectFile(QDir::toNativeSeparators(currentPyExe));
+        QFileInfo fileInfo(currentPyExe);
+        dlg.setDirectory(fileInfo.absolutePath());
+        dlg.selectFile(fileInfo.fileName());
     }
 
 #ifdef WIN32

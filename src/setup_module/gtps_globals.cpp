@@ -20,6 +20,18 @@
 #include <QDir>
 #include <QDirIterator>
 
+namespace
+{
+    QString pythonExe()
+    {
+#ifdef _WINDOWS
+        return "python.exe";
+#else
+        return "bin/python";
+#endif
+    }
+}
+
 QString
 gtps::apiVersionStr(const GtVersionNumber &version)
 {
@@ -81,4 +93,18 @@ QString
 gtps::settings::path(const QString& settingId)
 {
     return moduleSettingPath(GT_MODULENAME(), settingId);
+}
+
+QString
+gtps::embeddedPythonPath()
+{
+    // test, if there is an embedded python distribution
+    auto pythonDir = QDir(QCoreApplication::applicationDirPath()
+                          + "/../lib/python");
+
+    QString pythonPath = pythonDir.absoluteFilePath(pythonExe());
+
+    if (!QFile(pythonPath).exists()) return {};
+
+    return pythonPath;
 }
