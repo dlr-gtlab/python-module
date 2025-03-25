@@ -47,7 +47,7 @@ QString pythonExe()
 #ifdef _WINDOWS
     return "python.exe";
 #else
-    return "python";
+    return "bin/python";
 #endif
 }
 
