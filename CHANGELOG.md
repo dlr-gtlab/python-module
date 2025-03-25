@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Fixed the automated code generation for double and bool properties in the Python Task wizard - #279
 
 ### Added
+ - Support for multiple python versions other that 3.9. To support multiple versions, the module needs to be 
+   compiled for the different python versions and shipped with GTlab. A restart is required after switching the 
+   python version. - #587
  - Support for an embedded python distribution, that comes along with GTlab - #585
  - String input values for Python Tasks and Python Calculators now allow special characters - #269
 

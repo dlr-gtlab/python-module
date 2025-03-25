@@ -21,6 +21,8 @@
 #include <QDir>
 #include <QString>
 
+#include <set>
+
 GtPythonPreferencePage::GtPythonPreferencePage() :
     GtPreferencesPage(tr("Python Environment"), nullptr),
     ui(std::make_unique<Ui::GtPythonPreferencePage>())
@@ -29,6 +31,25 @@ GtPythonPreferencePage::GtPythonPreferencePage() :
     setTitleShort("Python");
 
     ui->setupUi(this);
+
+    auto versions = gtps::python::version::supportedVersions();
+
+    std::set<GtVersionNumber> uniqueVersions{versions.begin(), versions.end()};
+
+    QString vStr;
+    for (auto&& v : uniqueVersions)
+    {
+        vStr.append(v.toString() + ", ");
+    }
+
+    if (vStr.endsWith(", ")) vStr = vStr.mid(0, vStr.size() - 2);
+
+    ui->infoLabel->setTextFormat(Qt::MarkdownText);
+    ui->infoLabel->setText(tr("Please select a python executable.  \n"
+                              "__Note that GTlab currently only works "
+                              "with the following python versions__:  \n"
+                              "%1"
+                              ).arg(vStr));
 
     ui->iconLabel->setPixmap(gt::gui::icon::python().pixmap(32,32));
 

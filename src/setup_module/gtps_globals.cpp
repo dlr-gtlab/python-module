@@ -16,6 +16,10 @@
 
 #include "gtps_globals.h"
 
+#include <QCoreApplication>
+#include <QDir>
+#include <QDirIterator>
+
 QString
 gtps::apiVersionStr(const GtVersionNumber &version)
 {
@@ -33,7 +37,33 @@ gtps::python::module::pythonModuleId(const GtVersionNumber& version)
 QVector<GtVersionNumber>
 gtps::python::version::supportedVersions()
 {
-    return QVector<GtVersionNumber>{GtVersionNumber(3, 9)};
+
+    QVector<GtVersionNumber> available;
+
+    QString moduleDir = QCoreApplication::applicationDirPath() + "/modules";
+
+    static QRegularExpression pymodRe("(lib)?GTlabPython([0-9])([0-9]+).(dll|so|dylib)$");
+
+    QDirIterator it(moduleDir, QDir::Files, QDirIterator::Subdirectories);
+
+    while (it.hasNext())
+    {
+        QString filePath = it.next();
+        QFileInfo fileInfo(filePath);
+        QString fileName = fileInfo.fileName();
+
+        auto matcher = pymodRe.match(fileName);
+
+        if (matcher.hasMatch())
+        {
+            available.push_back(GtVersionNumber(matcher.captured(2).toInt(),
+                                                matcher.captured(3).toInt()));
+        }
+    }
+
+    std::sort(available.begin(), available.end());
+
+    return available;
 }
 
 bool
