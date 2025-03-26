@@ -28,57 +28,6 @@
 #include <QDir>
 #include <QFile>
 
-namespace {
-
-void
-setSetting(const QString& settingId, const QVariant& value)
-{
-    gtApp->settings()->setSetting(gtps::settings::path(settingId), value);
-}
-
-QVariant
-getSetting(const QString& settingId)
-{
-    return gtApp->settings()->getSetting(gtps::settings::path(settingId));
-}
-
-QString pythonExe()
-{
-#ifdef _WINDOWS
-    return "python.exe";
-#else
-    return "bin/python";
-#endif
-}
-
-/**
- * @brief Sets up an embedded python environment, if no other python env
- * has been configured (if available)
- */
-void checkAndSetupEmbeddedPyenv()
-{
-    QString python = getSetting(gtps::constants::PYEXE_S_ID).toString();
-
-
-    // test, if there is an embedded python distribution
-    auto pythonDir = QDir(QCoreApplication::applicationDirPath()
-                          + "/../lib/python");
-
-    QFile embeddedPythonExe(pythonDir.absoluteFilePath(pythonExe()));
-
-
-    if (python.isEmpty() && embeddedPythonExe.exists())
-    {
-        gtInfo() << "Setting up embedded python environment in "
-                 << pythonDir.absolutePath();
-        setSetting(gtps::constants::PYEXE_S_ID,
-                   pythonDir.absoluteFilePath(pythonExe()));
-    }
-
-}
-
-}
-
 GtVersionNumber
 GtPythonSetupModule::version()
 {
@@ -104,14 +53,16 @@ GtPythonSetupModule::onLoad()
     gtApp->settings()->registerSetting(
                 gtps::settings::path(gtps::constants::SHOWHINT_S_ID), true);
 
+    // register show python path warning to settings
+    gtApp->settings()->registerSettingRestart(
+        gtps::settings::path(gtps::constants::USE_EMBEDDED_S_ID), true);
+
     auto errorOccurred = [this](const ErrorMsg& msg){
         suppressPythonModules(gtps::python::version::supportedVersions());
         m_errorMsg = msg;
     };
 
-    checkAndSetupEmbeddedPyenv();
-
-    auto python = getSetting(gtps::constants::PYEXE_S_ID).toString();
+    auto python = gtps::pythonPath();
 
     if (python.isEmpty())
     {
@@ -131,7 +82,7 @@ GtPythonSetupModule::onLoad()
         setPythonPaths(interpreter);
         // Next time the Python executable is invalid, the hint message box is
         // shown again.
-        setSetting(gtps::constants::SHOWHINT_S_ID, true);
+        gtps::settings::setSetting(gtps::constants::SHOWHINT_S_ID, true);
         break;
     case Status::Invalid:
         errorOccurred({tr("The specified Python interpreter is invalid."),
@@ -206,7 +157,7 @@ GtPythonSetupModule::showPythonErrorNotification(const ErrorMsg& msg)
         return;
     }
 
-    if (getSetting(gtps::constants::SHOWHINT_S_ID).toBool())
+    if (gtps::settings::getSetting(gtps::constants::SHOWHINT_S_ID).toBool())
     {
         QMessageBox mb;
         mb.setIcon(QMessageBox::Question);
@@ -221,7 +172,7 @@ GtPythonSetupModule::showPythonErrorNotification(const ErrorMsg& msg)
 
         auto ret = mb.exec();
 
-        setSetting(gtps::constants::SHOWHINT_S_ID, !cb->isChecked());
+        gtps::settings::setSetting(gtps::constants::SHOWHINT_S_ID, !cb->isChecked());
 
         if (ret == QMessageBox::Yes)
         {

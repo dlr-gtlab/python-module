@@ -45,19 +45,38 @@ GtPythonPreferencePage::GtPythonPreferencePage() :
     if (vStr.endsWith(", ")) vStr = vStr.mid(0, vStr.size() - 2);
 
     ui->infoLabel->setTextFormat(Qt::MarkdownText);
-    ui->infoLabel->setText(tr("Please select a python executable.  \n"
-                              "__Note that GTlab currently only works "
+
+    ui->infoLabel->setText(tr("__Note that GTlab currently only works "
                               "with the following python versions__:  \n"
                               "%1"
                               ).arg(vStr));
 
-    ui->iconLabel->setPixmap(gt::gui::icon::python().pixmap(32,32));
+    ui->tabWidget->setTabIcon(0, gt::gui::icon::python());
+
+
+    connect(ui->rbEmbedded, &QRadioButton::clicked, this, [this]()
+    {
+        ui->groupCustom->setEnabled(false);
+    });
+
+    connect(ui->rbCustomEnv, &QRadioButton::clicked, this, [this]()
+    {
+        ui->groupCustom->setEnabled(true);
+    });
+
+
+    if (gtps::embeddedPythonPath().isEmpty())
+    {
+        ui->rbEmbedded->setEnabled(false);
+        ui->rbEmbedded->setText(ui->rbEmbedded->text() + " (not available)");
+    }
 
     connect(ui->btnSelectPyExe, &QPushButton::clicked,
             this, &GtPythonPreferencePage::onBtnSelectPyExePressed);
 
     connect(ui->btnTestPyEnv, &QPushButton::clicked, this,
             &GtPythonPreferencePage::onBtnTestPyEnvPressed);
+
 }
 
 void
@@ -66,6 +85,8 @@ GtPythonPreferencePage::saveSettings(GtSettings& settings) const
     settings.setSetting(gtps::settings::path(gtps::constants::PYEXE_S_ID),
                         ui->lePythonExe->text());
 
+    settings.setSetting(gtps::settings::path(gtps::constants::USE_EMBEDDED_S_ID),
+                        ui->rbEmbedded->isChecked());
 }
 
 void
@@ -75,6 +96,12 @@ GtPythonPreferencePage::loadSettings(const GtSettings& settings)
                 gtps::settings::path(gtps::constants::PYEXE_S_ID)).toString();
 
     ui->lePythonExe->setText(std::move(pathToPython));
+
+    bool useEmbedded = gtps::settings::useEmbeddedPython();
+
+    ui->rbEmbedded->setChecked(useEmbedded);
+    ui->rbCustomEnv->setChecked(!useEmbedded);
+    ui->groupCustom->setEnabled(!useEmbedded);
 }
 
 void
@@ -86,7 +113,9 @@ GtPythonPreferencePage::onBtnSelectPyExePressed()
 
     if (QFile(currentPyExe).exists())
     {
-        dlg.selectFile(QDir::toNativeSeparators(currentPyExe));
+        QFileInfo fileInfo(currentPyExe);
+        dlg.setDirectory(fileInfo.absolutePath());
+        dlg.selectFile(fileInfo.fileName());
     }
 
 #ifdef WIN32

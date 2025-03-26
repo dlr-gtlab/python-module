@@ -19,6 +19,8 @@ namespace constants
 
 constexpr const char* PYEXE_S_ID = "pythonexe";
 constexpr const char* SHOWHINT_S_ID = "showHint";
+constexpr const char* USE_EMBEDDED_S_ID = "useEmbeddedEnv";
+
 
 } // namespace python
 

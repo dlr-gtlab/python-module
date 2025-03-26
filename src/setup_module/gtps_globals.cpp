@@ -13,12 +13,42 @@
 
 #include "gt_globals.h"
 #include "gt_moduleinterface.h"
+#include "gt_settings.h"
+#include "gtps_constants.h"
+
 
 #include "gtps_globals.h"
+#include <gt_application.h>
+
 
 #include <QCoreApplication>
 #include <QDir>
 #include <QDirIterator>
+
+namespace
+{
+    QString pythonExe()
+    {
+#ifdef _WINDOWS
+        return "python.exe";
+#else
+        return "bin/python";
+#endif
+    }
+}
+
+void
+gtps::settings::setSetting(const QString& settingId, const QVariant& value)
+{
+    gtApp->settings()->setSetting(gtps::settings::path(settingId), value);
+}
+
+QVariant
+gtps::settings::getSetting(const QString& settingId)
+{
+    return gtApp->settings()->getSetting(gtps::settings::path(settingId));
+}
+
 
 QString
 gtps::apiVersionStr(const GtVersionNumber &version)
@@ -42,7 +72,7 @@ gtps::python::version::supportedVersions()
 
     QString moduleDir = QCoreApplication::applicationDirPath() + "/modules";
 
-    static QRegularExpression pymodRe("(lib)?GTlabPython([0-9])([0-9]+).(dll|so|dylib)$");
+    static QRegularExpression pymodRe("(lib)?GTlabPython([0-9])([0-9]+)(-d)?.(dll|so|dylib)$");
 
     QDirIterator it(moduleDir, QDir::Files, QDirIterator::Subdirectories);
 
@@ -81,4 +111,49 @@ QString
 gtps::settings::path(const QString& settingId)
 {
     return moduleSettingPath(GT_MODULENAME(), settingId);
+}
+
+QString
+gtps::embeddedPythonPath()
+{
+    // test, if there is an embedded python distribution
+    auto pythonDir = QDir(QCoreApplication::applicationDirPath()
+                          + "/../lib/python");
+
+    QString pythonPath = pythonDir.absoluteFilePath(pythonExe());
+
+    if (!QFile(pythonPath).exists()) return {};
+
+    return pythonPath;
+}
+
+bool
+gtps::settings::useEmbeddedPython()
+{
+    QVariant useEmbeddedVar = getSetting(gtps::constants::USE_EMBEDDED_S_ID);
+
+    bool useEmbedded = true;
+
+    if (useEmbeddedVar.isValid()) useEmbedded = useEmbeddedVar.toBool();
+
+    return useEmbedded && !gtps::embeddedPythonPath().isEmpty();
+}
+
+QString
+gtps::pythonPath()
+{
+    if (gtps::settings::useEmbeddedPython())
+    {
+        return gtps::embeddedPythonPath();
+    }
+    else
+    {
+        return gtps::settings::customPythonPath();
+    }
+}
+
+QString
+gtps::settings::customPythonPath()
+{
+    return getSetting(gtps::constants::PYEXE_S_ID).toString();
 }
