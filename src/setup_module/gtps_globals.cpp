@@ -13,8 +13,13 @@
 
 #include "gt_globals.h"
 #include "gt_moduleinterface.h"
+#include "gt_settings.h"
+#include "gtps_constants.h"
+
 
 #include "gtps_globals.h"
+#include <gt_application.h>
+
 
 #include <QCoreApplication>
 #include <QDir>
@@ -31,6 +36,19 @@ namespace
 #endif
     }
 }
+
+void
+gtps::settings::setSetting(const QString& settingId, const QVariant& value)
+{
+    gtApp->settings()->setSetting(gtps::settings::path(settingId), value);
+}
+
+QVariant
+gtps::settings::getSetting(const QString& settingId)
+{
+    return gtApp->settings()->getSetting(gtps::settings::path(settingId));
+}
+
 
 QString
 gtps::apiVersionStr(const GtVersionNumber &version)
@@ -107,4 +125,35 @@ gtps::embeddedPythonPath()
     if (!QFile(pythonPath).exists()) return {};
 
     return pythonPath;
+}
+
+bool
+gtps::settings::useEmbeddedPython()
+{
+    QVariant useEmbeddedVar = getSetting(gtps::constants::USE_EMBEDDED_S_ID);
+
+    bool useEmbedded = true;
+
+    if (useEmbeddedVar.isValid()) useEmbedded = useEmbeddedVar.toBool();
+
+    return useEmbedded && !gtps::embeddedPythonPath().isEmpty();
+}
+
+QString
+gtps::pythonPath()
+{
+    if (gtps::settings::useEmbeddedPython())
+    {
+        return gtps::embeddedPythonPath();
+    }
+    else
+    {
+        return gtps::settings::customPythonPath();
+    }
+}
+
+QString
+gtps::settings::customPythonPath()
+{
+    return getSetting(gtps::constants::PYEXE_S_ID).toString();
 }

@@ -51,13 +51,24 @@ GtPythonPreferencePage::GtPythonPreferencePage() :
                               "%1"
                               ).arg(vStr));
 
-    ui->btnSwitchEmbedded->setIcon(gt::gui::icon::homeAccount());
-
     ui->tabWidget->setTabIcon(0, gt::gui::icon::python());
+
+
+    connect(ui->rbEmbedded, &QRadioButton::clicked, this, [this]()
+    {
+        ui->groupCustom->setEnabled(false);
+    });
+
+    connect(ui->rbCustomEnv, &QRadioButton::clicked, this, [this]()
+    {
+        ui->groupCustom->setEnabled(true);
+    });
+
 
     if (gtps::embeddedPythonPath().isEmpty())
     {
-        ui->btnSwitchEmbedded->setVisible(false);
+        ui->rbEmbedded->setEnabled(false);
+        ui->rbEmbedded->setText(ui->rbEmbedded->text() + " (not available)");
     }
 
     connect(ui->btnSelectPyExe, &QPushButton::clicked,
@@ -66,10 +77,6 @@ GtPythonPreferencePage::GtPythonPreferencePage() :
     connect(ui->btnTestPyEnv, &QPushButton::clicked, this,
             &GtPythonPreferencePage::onBtnTestPyEnvPressed);
 
-    connect(ui->btnSwitchEmbedded, &QPushButton::clicked, this, [this]() {
-        ui->lePythonExe->setText(gtps::embeddedPythonPath());
-        onBtnTestPyEnvPressed();
-    });
 }
 
 void
@@ -78,6 +85,8 @@ GtPythonPreferencePage::saveSettings(GtSettings& settings) const
     settings.setSetting(gtps::settings::path(gtps::constants::PYEXE_S_ID),
                         ui->lePythonExe->text());
 
+    settings.setSetting(gtps::settings::path(gtps::constants::USE_EMBEDDED_S_ID),
+                        ui->rbEmbedded->isChecked());
 }
 
 void
@@ -87,6 +96,12 @@ GtPythonPreferencePage::loadSettings(const GtSettings& settings)
                 gtps::settings::path(gtps::constants::PYEXE_S_ID)).toString();
 
     ui->lePythonExe->setText(std::move(pathToPython));
+
+    bool useEmbedded = gtps::settings::useEmbeddedPython();
+
+    ui->rbEmbedded->setChecked(useEmbedded);
+    ui->rbCustomEnv->setChecked(!useEmbedded);
+    ui->groupCustom->setEnabled(!useEmbedded);
 }
 
 void

@@ -13,6 +13,8 @@
 
 #include "gt_versionnumber.h"
 
+#include <QVariant>
+
 namespace gtps {
 
 /**
@@ -66,6 +68,28 @@ namespace settings
  */
 QString path(const QString& settingId);
 
+/**
+ * @brief Saves pre-registered python settings
+ */
+void setSetting(const QString& settingId, const QVariant& value);
+
+/**
+ * @brief Queries pre-registeted python settings
+ */
+QVariant getSetting(const QString& settingId);
+
+/**
+ * @brief Returns the path of custom python interpreter, stored in settings
+ * @return
+ */
+QString customPythonPath();
+
+/**
+ * @brief Checks, whether the embedded interpreter should be used
+ * @return
+ */
+bool useEmbeddedPython();
+
 }
 
 /**
@@ -74,6 +98,12 @@ QString path(const QString& settingId);
  * If no embedded python is available, an empty string is returned
  */
 QString embeddedPythonPath();
+
+/**
+ * @brief Returns the path of the python interpreter
+ */
+QString pythonPath();
+
 
 } // namespace gtps
 
