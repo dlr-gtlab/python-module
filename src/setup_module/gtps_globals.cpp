@@ -72,7 +72,7 @@ gtps::python::version::supportedVersions()
 
     QString moduleDir = QCoreApplication::applicationDirPath() + "/modules";
 
-    static QRegularExpression pymodRe("(lib)?GTlabPython([0-9])([0-9]+).(dll|so|dylib)$");
+    static QRegularExpression pymodRe("(lib)?GTlabPython([0-9])([0-9]+)(-d)?.(dll|so|dylib)$");
 
     QDirIterator it(moduleDir, QDir::Files, QDirIterator::Subdirectories);
 
