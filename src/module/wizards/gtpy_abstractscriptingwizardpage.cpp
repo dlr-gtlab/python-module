@@ -310,6 +310,9 @@ GtpyAbstractScriptingWizardPage::~GtpyAbstractScriptingWizardPage()
 void
 GtpyAbstractScriptingWizardPage::initializePage()
 {
+    // we want to react, when the wizard should be closed
+    if (wizard()) wizard()->installEventFilter(this);
+
     /// Can not be connected in the constructor because onSaveButtonClicked()
     /// calls the pure virtual function saveScript()
     connect(m_saveButton, SIGNAL(clicked(bool)), this,
@@ -366,7 +369,7 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
 
             if (m_saveButton->isEnabled())
             {
-                saveMesssageBox();
+                saveMessageBox();
                 return;
             }
 
@@ -754,14 +757,14 @@ GtpyAbstractScriptingWizardPage::enableSaveButton(bool enable)
     }
 }
 
-void
-GtpyAbstractScriptingWizardPage::saveMesssageBox()
+int
+GtpyAbstractScriptingWizardPage::saveMessageBox()
 {
     QWidget* wiz = wizard();
 
     if (!wiz)
     {
-        return;
+        return QMessageBox::Cancel;
     }
 
     QString text =
@@ -788,11 +791,13 @@ GtpyAbstractScriptingWizardPage::saveMesssageBox()
             break;
 
         case QMessageBox::Cancel:
-            return;
+            break;
 
         default:
             break;
     }
+
+    return ret;
 }
 
 void
@@ -960,6 +965,25 @@ void
 GtpyAbstractScriptingWizardPage::enableSaving(bool enable)
 {
     m_savingEnabled = enable;
+}
+
+
+bool
+GtpyAbstractScriptingWizardPage::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event && event->type() == QEvent::Close )
+    {
+        if (m_saveButton->isEnabled())
+        {
+            if (saveMessageBox() == QMessageBox::Cancel)
+            {
+                event->ignore();
+            }
+            return true;
+        }
+    }
+
+    return QObject::eventFilter(watched, event);
 }
 
 void
