@@ -644,6 +644,12 @@ signals:
 
 };
 
+/**
+ * @brief Returns the context manager instance
+ */
+GT_PYTHON_EXPORT GtpyContextManager& gtpyContextManager();
+
+
 Q_DECLARE_METATYPE(GtpyContextManager::Context);
 
 /**
