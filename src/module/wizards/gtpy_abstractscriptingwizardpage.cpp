@@ -971,16 +971,11 @@ GtpyAbstractScriptingWizardPage::enableSaving(bool enable)
 bool
 GtpyAbstractScriptingWizardPage::eventFilter(QObject *watched, QEvent *event)
 {
-    if (event && event->type() == QEvent::Close )
+    if (event && event->type() == QEvent::Close && m_saveButton->isEnabled())
     {
-        if (m_saveButton->isEnabled())
-        {
-            if (saveMessageBox() == QMessageBox::Cancel)
-            {
-                event->ignore();
-            }
-            return true;
-        }
+        if (saveMessageBox() == QMessageBox::Cancel) event->ignore();
+
+        return true;
     }
 
     return QObject::eventFilter(watched, event);
