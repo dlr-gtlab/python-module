@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+ - Fixed an error, when a subprocess tries to redirect messages to the GTlab console.
+   The missing fileno() method of has been implemented.
+   Note: the redirection using a file handle is not properly supported!
+   Instead, the messages will be printed to a system terminal - #277
+ 
 ## [1.7.1] - 2025-04-23
 
 ### Fixed
