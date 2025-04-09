@@ -208,6 +208,11 @@ protected:
     /// Python Context id
     int m_contextId;
 
+    /**
+     * To intercept closing events
+     */
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
     /// Python Context type
     GtpyContextManager::Context m_contextType;
 
@@ -280,7 +285,7 @@ private:
     /**
      * @brief saveMesssageBox
      */
-    void saveMesssageBox();
+    int saveMessageBox();
 
     /**
      * @brief Sets the window modality of the wizard to non modal. This allows
