@@ -423,6 +423,9 @@ GtPythonModule::findWidget(QStringList path, QWidget* parent)
                 return findWidget(path, wid);
             }
         }
+
+        gtWarning() << "Could not find target widget!";
+        return nullptr;
     }
 
     QString widId = path.takeFirst();
