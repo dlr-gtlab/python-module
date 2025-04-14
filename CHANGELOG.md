@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
  - Fixed python editor silently discard changes, when it is closed.
    Now, the user is asked whether to store these changes or not. - #592
+ - Fixed an error, when a subprocess tries to redirect messages to the GTlab console.
+   The missing fileno() method of has been implemented.
+   Note: the redirection using a file handle is not properly supported!
+   Instead, the messages will be printed to a system terminal - #277
 
 ## [1.7.0] - 2025-04-07
 

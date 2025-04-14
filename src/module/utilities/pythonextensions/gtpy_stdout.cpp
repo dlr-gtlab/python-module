@@ -14,6 +14,10 @@
 #include "gtpy_stdout.h"
 #include "gtpypp.h"
 
+#include <gt_logging.h>
+#include <gtpy_contextmanager.h>
+#include <mutex>
+
 static PyObjectAPIReturn
 GtpyStdOutRedirect_new(PyTypeObject* type, PyObject* /*args*/,
                        PyObject* /*kwds*/)
@@ -136,6 +140,24 @@ GtpyStdOutRedirect_isatty(PyObject* /*self*/, PyObject* /*args*/)
     return Py_False;
 }
 
+static PyObjectAPIReturn
+GtpyStdOutRedirect_fileno(PyObject* self, PyObject* /*args*/)
+{
+    static std::once_flag flag;
+
+    std::call_once(flag, [](){
+        const char * warning = "stdout/stderr redirect using fileno() "
+                              "is not supported by GTlab";
+        gtWarning() << warning;
+        gtpyContextManager().evalScript(GtpyContextManager::GlobalContext,
+            QString("print('Warning: %1')").arg(warning),
+            true, true, GtpyContextManager::EvalSingleString);
+    });
+
+    // Fall back to system stdout, which is the file handle 1
+    return PyPPObject::fromLong(1).release();
+}
+
 static PyMethodDef
 GtpyStdOutRedirect_methods[] =
 {
@@ -152,6 +174,10 @@ GtpyStdOutRedirect_methods[] =
         "isatty", (PyCFunction)GtpyStdOutRedirect_isatty,   METH_NOARGS,
         "return False since this object is not atty-like device. Needed for logging"
         " framework"
+    },
+    {
+        "fileno", (PyCFunction)GtpyStdOutRedirect_fileno,  METH_NOARGS,
+        "for compatibility with stdout api"
     },
     {NULL,    NULL, 0 , NULL} /* sentinel */
 };

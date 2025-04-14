@@ -2033,3 +2033,9 @@ GtpyTypeConversion::convertToQMapStringQString(PyObject *obj, void *outMap,
 {
     return pythonToMap<QString, QString>(obj, outMap);
 }
+
+GtpyContextManager&
+gtpyContextManager()
+{
+    return *GtpyContextManager::instance();
+}
