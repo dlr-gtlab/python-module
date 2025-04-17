@@ -240,8 +240,7 @@ GtpyAbstractScriptComponent::evalScript(int contextId)
 
     m_pyThreadId = GtpyContextManager::instance()->currentPyThreadId();
 
-    GtpyGlobals::StdOutMetaData metaData =
-        GtpyContextManager::instance()->threadDictMetaData();
+    auto metaData = GtpyContextManager::instance()->threadDictMetaData();
 
     gtInfo() << "running script...";
 

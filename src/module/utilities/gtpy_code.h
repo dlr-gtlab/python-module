@@ -32,27 +32,36 @@ constexpr const char* GT_LOGGING = "GtLogging";
 constexpr const char* GT_OBJECT_WRAPPER_MODULE = "GtObjectWrapperModuleC";
 constexpr const char* GT_CALCULATORS = "GtCalculators";
 
-} // namespace modules
+} /// namespace modules
 
 namespace classes
 {
 
 constexpr const char* GTPY_EXTENDED_WRAPPER = "GtpyExtendedWrapper";
 
-} // namespace classes
+} /// namespace classes
 
 namespace funcs
 {
 
+// shared functions api
+constexpr const char* CALL_SHARED_FUNC_F_NAME = "call_shared_function";
+constexpr const char* SHARED_FUNC_F_NAME = "shared_function";
+constexpr const char* SHARED_FUNC_IDS_F_NAME = "shared_function_ids";
+
+// predefined functions
+constexpr const char* PROJECT_PATH_F_NAME = "projectPath";
+constexpr const char* FOOTPRINT_F_NAME = "footprint";
 constexpr const char* IMPORT_GT_CALCULATORS = "importGtCalculators";
 
+// logging functions
 constexpr const char* GT_DEBUG = "gtDebug";
 constexpr const char* GT_INFO = "gtInfo";
 constexpr const char* GT_WARNING = "gtWarning";
 constexpr const char* GT_ERROR = "gtError";
 constexpr const char* GT_FATAL = "gtFatal";
 
-} // namespace funcs
+} /// namespace funcs
 
 namespace attrs
 {
@@ -60,7 +69,17 @@ namespace attrs
 constexpr const char* LOGGING_ENABLED = "__outputToAppConsole";
 constexpr const char* TASK = "__task";
 
-} // namespace attrs
+} /// namespace attrs
+
+
+namespace keys
+{
+
+constexpr const char* CONTEXT = "CONTEXT_NAME";
+constexpr const char* OUTPUT = "OUTPUT_TO_CONSOLE";
+constexpr const char* ERROR = "ERROR_TO_CONSOLE";
+
+} /// namespace keys
 
 namespace import
 {
@@ -100,7 +119,7 @@ QString calculatorModule();
  */
 QString loggingFunctions();
 
-} // namespace import
+} /// namespace import
 
 /**
  * @brief Generates Python code to enable or disable logging to the application
@@ -136,8 +155,8 @@ QString enableAppConsoleLogging(bool enable);
  */
 QString enableGTlabControl(const QString& gtlabPyIdent);
 
-} // namespace code
+} /// namespace code
 
-} // namespace gtpy
+} /// namespace gtpy
 
 #endif // GTPYCODE_H

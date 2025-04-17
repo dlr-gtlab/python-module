@@ -41,7 +41,7 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
     }
 
 
-    auto valItem = PyPPDict_GetItem(threadDict, GtpyGlobals::CONTEXT_KEY);
+    auto valItem = PyPPDict_GetItem(threadDict, gtpy::code::keys::CONTEXT);
     QString contextName;
 
     if (valItem && PyPPUnicode_Check(valItem))
@@ -49,7 +49,7 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
         contextName = PyPPString_AsQString(valItem);
     }
 
-    auto outputItem = PyPPDict_GetItem(threadDict, GtpyGlobals::OUTPUT_KEY);
+    auto outputItem = PyPPDict_GetItem(threadDict, gtpy::code::keys::OUTPUT);
 
     bool output = false;
 
@@ -58,7 +58,7 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
         output = (bool)PyPPLong_AsLong(outputItem);
     }
 
-    auto errorItem = PyPPDict_GetItem(threadDict, GtpyGlobals::ERROR_KEY);
+    auto errorItem = PyPPDict_GetItem(threadDict, gtpy::code::keys::ERROR);
 
     bool error = false;
 

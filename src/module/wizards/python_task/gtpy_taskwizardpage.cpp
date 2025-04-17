@@ -24,6 +24,7 @@
 #include "gtpy_scripteditor.h"
 #include "gtpy_objectmodel.h"
 #include "gtpy_transfer.h"
+#include "gtpy_globals.h"
 
 // GTlab framework includes
 #include "gt_stylesheets.h"
