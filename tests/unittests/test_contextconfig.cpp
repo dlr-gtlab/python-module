@@ -15,7 +15,6 @@
 #include "test_helper.h"
 
 #include <gtpypp.h>
-#include <gtpy_constants.h>
 #include <gtpy_code.h>
 #include <gtest/gtest.h>
 
@@ -39,14 +38,14 @@ TEST_P(TestDefaultContextConfig, DefaultFunctionality)
 
     // check if the context provides the projectPath() function
     auto projectPathFunc = PyPPObject_GetAttr(
-        ctxObj, gtpy::constants::PROJECT_PATH_F_NAME);
+        ctxObj, gtpy::code::funcs::PROJECT_PATH_F_NAME);
 
     ASSERT_TRUE(projectPathFunc);
     EXPECT_TRUE(PyPPCallable_Check(projectPathFunc));
 
     // check if the context provides the footprint() function
     auto footprintFunc = PyPPObject_GetAttr(
-        ctxObj, gtpy::constants::PROJECT_PATH_F_NAME);
+        ctxObj, gtpy::code::funcs::PROJECT_PATH_F_NAME);
 
     ASSERT_TRUE(footprintFunc);
     EXPECT_TRUE(PyPPCallable_Check(footprintFunc));
@@ -54,19 +53,19 @@ TEST_P(TestDefaultContextConfig, DefaultFunctionality)
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
     // check if the context provides the shared functions API
     auto sharedFuncGetter = PyPPObject_GetAttr(
-        ctxObj, gtpy::constants::SHARED_FUNC_F_NAME);
+        ctxObj, gtpy::code::funcs::SHARED_FUNC_F_NAME);
 
     ASSERT_TRUE(sharedFuncGetter);
     EXPECT_TRUE(PyPPCallable_Check(sharedFuncGetter));
 
     auto callSharedFunc = PyPPObject_GetAttr(
-        ctxObj, gtpy::constants::SHARED_FUNC_F_NAME);
+        ctxObj, gtpy::code::funcs::CALL_SHARED_FUNC_F_NAME);
 
     ASSERT_TRUE(callSharedFunc);
     EXPECT_TRUE(PyPPCallable_Check(callSharedFunc));
 
     auto sharedFuncIds = PyPPObject_GetAttr(
-        ctxObj, gtpy::constants::SHARED_FUNC_IDS_F_NAME);
+        ctxObj, gtpy::code::funcs::SHARED_FUNC_IDS_F_NAME);
 
     ASSERT_TRUE(sharedFuncIds);
     EXPECT_TRUE(PyPPCallable_Check(sharedFuncIds));

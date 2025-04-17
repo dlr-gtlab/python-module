@@ -14,11 +14,9 @@
 #include <QString>
 
 #include "PythonQtPythonInclude.h"
-#include "structmember.h"
-
-#include "gt_task.h"
 
 #include "gtpy_globals.h"
+#include "gtpy_code.h"
 
 namespace GtpyLoggingModule
 {
@@ -92,7 +90,7 @@ static PyModuleDef
 GtpyLogging_Module =
 {
     PyModuleDef_HEAD_INIT,
-    "GtLogging",
+    gtpy::code::modules::GT_LOGGING,
     NULL,
     -1,
     GtpyLoggingModule_StaticMethods,

@@ -37,9 +37,7 @@ findValue__task()
     auto globals = PyPPEval_GetGlobals();
     if (!globals || !PyPPDict_Check(globals)) return nullptr;
 
-    auto taskVar = PyPPDict_GetItem(globals,
-                        GtpyGlobals::ATTR_task.
-                        toStdString().data());
+    auto taskVar = PyPPDict_GetItem(globals, gtpy::code::attrs::TASK);
 
     if(!taskVar) return nullptr;
 
@@ -85,7 +83,7 @@ findTaskFromHigherFrame()
         auto frameGlobals = PyPPObject_GetAttr(fram, "f_globals");
         if (!frameGlobals || !PyPPDict_Check(frameGlobals)) continue;
 
-        auto taskVar = PyPPDict_GetItem(frameGlobals, GtpyGlobals::ATTR_task.toStdString().data());
+        auto taskVar = PyPPDict_GetItem(frameGlobals, gtpy::code::attrs::TASK);
         if (!taskVar) continue;
 
         if (taskVar->ob_type->tp_base ==
