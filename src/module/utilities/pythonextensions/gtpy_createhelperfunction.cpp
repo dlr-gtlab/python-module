@@ -181,9 +181,10 @@ GtpyCreateHelperFunction_New(PyTypeObject* type, PyObject* argsPy,
 
     if (secArg->ob_type != &GtpyExtendedWrapper_Type)
     {
-        QString error =  "GtpyCreateHelperFunction_New(helperName, self) --> "
-                         "self must be of type int " +
-                         GtpyGlobals::GTOBJECT_WRAPPER;
+        auto error = QStringLiteral(
+                         "GtpyCreateHelperFunction_New(helperName, self) --> "
+                         "self must be of type %1")
+                         .arg(gtpy::code::classes::GTPY_EXTENDED_WRAPPER);
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 

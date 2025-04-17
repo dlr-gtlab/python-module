@@ -29,7 +29,7 @@ constexpr const char* GT_CLASSES = "GtClasses";
 
 // custom modules
 constexpr const char* GT_LOGGING = "GtLogging";
-constexpr const char* GT_OBJECT_WRAPPER_MODULE_C = "GtObjectWrapperModuleC";
+constexpr const char* GT_OBJECT_WRAPPER_MODULE = "GtObjectWrapperModuleC";
 constexpr const char* GT_CALCULATORS = "GtCalculators";
 
 } // namespace modules
@@ -58,6 +58,7 @@ namespace attrs
 {
 
 constexpr const char* LOGGING_ENABLED = "__outputToAppConsole";
+constexpr const char* TASK = "__task";
 
 } // namespace attrs
 

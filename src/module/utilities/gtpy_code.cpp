@@ -18,7 +18,7 @@ gtpy::code::import::defaultImports()
             "from %1 import %2\n"
             "from %3 import %4\n"
             "from %5 import %6\n")
-        .arg(gtpy::code::modules::GT_OBJECT_WRAPPER_MODULE_C,
+        .arg(gtpy::code::modules::GT_OBJECT_WRAPPER_MODULE,
              gtpy::code::classes::GTPY_EXTENDED_WRAPPER)
         .arg(gtpy::code::modules::PYTHON_QT, gtpy::code::modules::GT_CLASSES)
         .arg(gtpy::code::modules::PYTHON_QT, gtpy::code::modules::QTCORE);

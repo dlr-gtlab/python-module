@@ -8,6 +8,8 @@
  * Author: Marvin Noethen (DLR AT-TWK)
  */
 
+#include "gt_logging.h"
+
 #include "gtpy_loggingmodule.h"
 
 #include "gt_logging.h"
