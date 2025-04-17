@@ -12,24 +12,9 @@
 
 namespace GtpyGlobals
 {
-///Environment Variables
-const QString PYTHONHOME_VAR = "PYTHONHOME";
 
-///Python Modules
-const QString MODULE_GtObjectWrapperModuleC = "GtObjectWrapperModuleC";
-const QString MODULE_GtLogging        = "GtLogging";
-const QString MODULE_GtLogging_C      = "GtLogging";
 
-///Python Classes
-const QString GTOBJECT_WRAPPER   = "GtpyExtendedWrapper";
-const QString CLASS_GtpyPyLogger = "GtpyPyLogger";
 
-///Python Attribute
-const QString ATTR_task = "__task";
-const QString ATTR_outputToApp = "__outputToAppConsole";
-
-///Python Functions
-const QString FUNC_importGtCalc   = "importGtCalculators";
 
 ///StdOut meta data
 const char* CONTEXT_KEY = "CONTEXT_NAME";

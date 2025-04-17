@@ -8,6 +8,8 @@
  * Author: Marvin Noethen (DLR AT-TWK)
  */
 
+#include "gt_logging.h"
+
 #include "gtpy_loggingmodule.h"
 #include "gtpypp.h"
 
@@ -225,9 +227,8 @@ GtpyPyLogger_lshift(PyObject* self, PyObject* arg)
 
     if (globals && PyPPDict_Check(globals))
     {
-        auto appOutputObj = PyPPDict_GetItem(globals,
-                                 QSTRING_TO_CHAR_PTR(
-                                     GtpyGlobals::ATTR_outputToApp));
+        auto appOutputObj = PyPPDict_GetItem(
+            globals,gtpy::code::attrs::LOGGING_ENABLED);
 
         if (appOutputObj && PyPPBool_Check(appOutputObj))
         {

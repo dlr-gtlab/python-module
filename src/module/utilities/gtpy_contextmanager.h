@@ -207,7 +207,7 @@ public:
     /**
     * @brief Checks whether the Python context indicated by contextId as access
     *  to calculators. If the context has access, this function deletes all
-    * calculator instances that are children of the task instance (TASK_VAR).
+    * calculator instances that are children of the task instance (__task).
     * @param contextId Python context identifier.
     */
     void deleteCalcsFromTask(int contextId);
@@ -336,7 +336,6 @@ private:
     static const QString LIST_DATATYPE;
     static const QString VARIANT_DATATYPE;
     static const QString FUNCTION_WARNING;
-    static const QString TASK_VAR;
     static const QString CLASS_WRAPPER_MODULE;
     static const QString CALC_MODULE;
 
