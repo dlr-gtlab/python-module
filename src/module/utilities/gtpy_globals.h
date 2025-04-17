@@ -11,7 +11,6 @@
 #ifndef GTPYGLOBALS_H
 #define GTPYGLOBALS_H
 
-
 #define PyObjectAPIReturn PyObject*
 
 #define gtDevMode() (gtApp && gtApp->devMode())
