@@ -24,7 +24,7 @@
 #include "gt_commandlinefunction.h"
 #endif
 
-#include "gtpy_constants.h"
+#include "gtpy_globals.h"
 #include "gtpy_icons_compat.h"
 
 // data model classes

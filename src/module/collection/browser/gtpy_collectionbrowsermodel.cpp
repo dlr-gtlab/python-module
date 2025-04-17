@@ -8,7 +8,7 @@
  * Author: Marvin Noethen (DLR AT-TWK)
  */
 
-#include "gtpy_constants.h"
+#include "gtpy_globals.h"
 #include "gtpy_icons_compat.h"
 #include "gtpy_browseritem.h"
 #include "gtpy_collapsiblebrowseritem.h"

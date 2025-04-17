@@ -11,28 +11,25 @@
 #ifndef GTPYGLOBALS_H
 #define GTPYGLOBALS_H
 
-#include <QString>
 
 #define PyObjectAPIReturn PyObject*
 
-namespace GtpyGlobals
-{
-
-
-///StdOut meta data
-extern const char* CONTEXT_KEY;
-extern const char* OUTPUT_KEY;
-extern const char* ERROR_KEY;
-
-struct StdOutMetaData
-{
-    QString contextName = QString();
-    bool output = false;
-    bool error = false;
-};
-
-
 #define gtDevMode() (gtApp && gtApp->devMode())
 
-}
+namespace gtpy
+{
+
+namespace constants
+{
+
+    /// Collection
+    constexpr const char* COLLECTION_ID = "Python Script Collection";
+    constexpr const char* COLLECTION_CAT = "category";
+    constexpr const char* COLLECTION_SUBCAT = "subcategory";
+
+} // namespace constants
+
+} // namespace gtpy
+
+
 #endif // GTPYGLOBALS_H
