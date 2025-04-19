@@ -1,6 +1,6 @@
 /* GTlab - Gas Turbine laboratory
  * Source File: gtpy_loggingmodule.cpp
- * 
+ *
  * SPDX-License-Identifier: Apache-2.0
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
@@ -9,17 +9,145 @@
  */
 
 #include "gtpy_loggingmodule.h"
+
+#include "gt_logging.h"
+
 #include "gtpypp.h"
 
 using namespace GtpyLoggingModule;
 
+namespace
+{
+
+bool isLoggingEnabled()
+{
+    auto globals = PyPPEval_GetGlobals();
+    if (!globals || !PyPPDict_Check(globals)) return false;
+
+    auto loggingEnabledObj = PyPPDict_GetItem(
+        globals, gtpy::code::attrs::LOGGING_ENABLED);
+
+    if (!loggingEnabledObj || !PyPPBool_Check(loggingEnabledObj)) return false;
+
+    return loggingEnabledObj.get() == Py_True;
+}
+
+void printToPyConsol(LogLevel type, const QString& msg)
+{
+    static const QMap<LogLevel, QString> prefixes = {
+        { DEBUG,   "[DEBUG]   " },
+        { INFO,    "[INFO]    " },
+        { ERROR,   "[ERROR]   " },
+        { FATAL,   "[FATAL]   " },
+        { WARNING, "[WARNING] " }
+    };
+
+    QString pyMsg{msg};
+    if (prefixes.contains(type)) pyMsg.prepend(prefixes[type]);
+
+    auto globals = PyPPEval_GetGlobals();
+    if (!globals || !PyPPDict_Check(globals)) return;
+
+    auto builtinsDict = PyPPDict_GetItem(globals, "__builtins__");
+    if (!builtinsDict || !PyPPDict_Check(builtinsDict)) return;
+
+    auto print = PyPPDict_GetItem(builtinsDict, "print");
+    if (!print || !PyPPCallable_Check(print)) return;
+
+    auto argsTuple = PyPPTuple_New(1);
+    PyPPTuple_SetItem(argsTuple, 0, PyPPObject::fromQString(pyMsg));
+
+    PyPPObject_Call(print, argsTuple);
+}
+
+void printToAppConsol(LogLevel type, const QString& msg)
+{
+    if (!isLoggingEnabled()) return;
+
+    switch (type)
+    {
+    case DEBUG:
+        gtDebug() << msg;
+        break;
+
+    case INFO:
+        gtInfo() << msg;
+        break;
+
+    case ERROR:
+        gtError() << msg;
+        break;
+
+    case FATAL:
+        gtFatal() << msg;
+        break;
+
+    case WARNING:
+        gtWarning() << msg;
+        break;
+
+    default:
+        break;
+    }
+}
+
+void printToConsols(LogLevel type, const QString& msg)
+{
+    printToPyConsol(type, msg);
+    printToAppConsol(type, msg);
+}
+
+PyObjectAPIReturn
+createLogger(LogLevel outputType)
+{
+    auto argsTuple = PyPPTuple_New(1);
+    PyPPTuple_SetItem(argsTuple, 0, PyPPObject::fromLong(outputType));
+
+    auto logger = PyPPObject::NewRef(
+        GtpyPyLogger_Type.tp_new(&GtpyPyLogger_Type, argsTuple.get(), NULL));
+
+    return logger.release();
+}
+
+PyObjectAPIReturn
+printLogMsg(LogLevel level, PyObject* args)
+{
+    if (!args) Py_RETURN_NONE;
+
+    PyObject* pyArg = nullptr;
+
+    // check if no argument or one argument is passed
+    if (!PyArg_ParseTuple(args, "|O", &pyArg)) return nullptr;
+
+    // if no argument is passed, return a logger instance to support
+    // the use of the lshift "<<" operator for logging
+    if (!pyArg) return createLogger(level);
+
+    auto arg = PyPPObject::Borrow(pyArg);
+
+    // convert the argument to a Python unicode object
+    // (equivalent to calling str(arg))
+    auto pyMsg = PyPPObject_Str(arg);
+    if (!pyMsg) return nullptr;
+
+    // convert the Python unicode object to a char pointer
+    const auto* msg = PyPPUnicode_AsUTF8(pyMsg);
+    if (!msg) return nullptr;
+
+    printToConsols(level, msg);
+
+    Py_RETURN_NONE;
+}
+
+}
+
 static void
 GtpyPyLogger_dealloc(GtpyPyLogger* self)
 {
-    if (self->m_outputType)
+    if (self->m_logLevel)
     {
-        Py_DECREF(self->m_outputType);
-        self->m_outputType = nullptr;
+        Py_DECREF(self->m_logLevel);
+        self->m_logLevel = nullptr;
     }
 
     Py_TYPE(self)->tp_free((PyObject*)self);
@@ -34,8 +162,8 @@ GtpyPyLogger_new(PyTypeObject* type, PyObject* argsPy,
 
     if (!argsPy)
     {
-        QString error =  "__init__(self, OutputType) missing 1 "
-                         "required positional argument: int";
+        QString error =  "__init__(self, LogLevel) missing 1 "
+                        "required positional argument: int";
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
@@ -48,8 +176,8 @@ GtpyPyLogger_new(PyTypeObject* type, PyObject* argsPy,
 
     if (argsCount < 1)
     {
-        QString error =  "__init__(self, OutputType) missing 1 "
-                         "required positional argument: int";
+        QString error =  "__init__(self, LogLevel) missing 1 "
+                        "required positional argument: int";
 
         PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
 
@@ -57,7 +185,7 @@ GtpyPyLogger_new(PyTypeObject* type, PyObject* argsPy,
     }
     else if (argsCount > 1)
     {
-        QString error = "__init__(self, OutputType) takes 2 positional "
+        QString error = "__init__(self, LogLevel) takes 2 positional "
                         "arguments but ";
         error += QString::number(argsCount);
         error += " were given";
@@ -73,7 +201,7 @@ GtpyPyLogger_new(PyTypeObject* type, PyObject* argsPy,
     {
         if (!PyPPLong_Check(outputType))
         {
-            QString error = "__init__(self, OutputType) given OutputType is no "
+            QString error = "__init__(self, LogLevel) given LogLevel is no "
                             "int value!";
 
             PyErr_SetString(PyExc_TypeError, error.toStdString().c_str());
@@ -81,283 +209,123 @@ GtpyPyLogger_new(PyTypeObject* type, PyObject* argsPy,
             // @TODO potential bug. shouldnt this return nullptr?
         }
 
-        self->m_outputType = outputType.release();
+        self->m_logLevel = outputType.release();
     }
 
     return (PyObjectAPIReturn)self;
 }
 
 PyObjectAPIReturn
-newLoggerInstance(OutputType outputType)
+GtpyLoggingModule::gtDebug_C_function(PyObject* /*self*/, PyObject* args)
 {
-    //    if (PyType_Ready(&GtpyPyLogger_Type) < 0)
-    //    {
-    //        gtError() << "could not initialize GtpyPyLogger_Type";
-    //    }
-
-    auto argsTuple = PyPPTuple_New(1);
-    PyPPTuple_SetItem(argsTuple, 0, PyPPObject::fromLong(outputType));
-
-    auto logger = PyPPObject::NewRef(
-        GtpyPyLogger_Type.tp_new(&GtpyPyLogger_Type, argsTuple.get(), NULL));
-
-    return logger.release();
+    return printLogMsg(DEBUG, args);
 }
 
 PyObjectAPIReturn
-GtpyLoggingModule::gtDebug_C_function()
+GtpyLoggingModule::gtInfo_C_function(PyObject* /*self*/, PyObject* args)
 {
-    return newLoggerInstance(DEBUG);
+    return printLogMsg(INFO, args);
 }
 
 PyObjectAPIReturn
-GtpyLoggingModule::gtInfo_C_function()
+GtpyLoggingModule::gtError_C_function(PyObject* /*self*/, PyObject* args)
 {
-    return newLoggerInstance(INFO);
+    return printLogMsg(ERROR, args);
 }
 
 PyObjectAPIReturn
-GtpyLoggingModule::gtError_C_function()
+GtpyLoggingModule::gtFatal_C_function(PyObject* /*self*/, PyObject* args)
 {
-    return newLoggerInstance(ERROR);
+    return printLogMsg(FATAL, args);
 }
 
 PyObjectAPIReturn
-GtpyLoggingModule::gtFatal_C_function()
+GtpyLoggingModule::gtWarning_C_function(PyObject* /*self*/, PyObject* args)
 {
-    return newLoggerInstance(FATAL);
-}
-
-PyObjectAPIReturn
-GtpyLoggingModule::gtWarning_C_function()
-{
-    return newLoggerInstance(WARNING);
-}
-
-static void
-printOutput(QString message)
-{
-    auto globals = PyPPEval_GetGlobals();
-    if (!globals || !PyPPDict_Check(globals)) return;
-
-    auto builtinsDict = PyPPDict_GetItem(globals, "__builtins__");
-    if (!builtinsDict || !PyPPDict_Check(builtinsDict)) return;
-
-    auto print = PyPPDict_GetItem(builtinsDict, "print");
-    if (!print || !PyPPCallable_Check(print)) return;
-
-
-    auto argsTuple = PyPPTuple_New(1);
-    PyPPTuple_SetItem(argsTuple, 0, PyPPObject::fromQString(message));
-
-    PyPPObject_Call(print, argsTuple);
-
-    //    PyObject* builtins = PyImport_ImportModule("builtins");
-
-    //    if (builtins)
-    //    {
-    //        if (PyModule_Check(builtins))
-    //        {
-    //            qDebug() << "builtins valid";
-    //            PyObject* dict = PyModule_GetDict(builtins);
-
-    //            if (dict)
-    //            {
-    //                qDebug() << "dict valid";
-    //                Py_INCREF(dict);
-
-    //                PyObject* print = PyDict_GetItemString(dict, "print");
-
-    //                if (print)
-    //                {
-    //                    qDebug() << "print valid";
-    //                    Py_INCREF(print);
-
-    //                    if (PyCallable_Check(print))
-    //                    {
-    //                        qDebug() << "print is callback";
-    //                        PyObject* argsTuple = PyTuple_New(1);
-    //                        PyTuple_SetItem(argsTuple, 0,
-    //                                        QSTRING_AS_PYSTRING(message));
-
-    //                        PyObject_Call(print, argsTuple, NULL);
-
-    //                        qDebug() << "call ready";
-    //                        Py_DECREF(argsTuple);
-    //                    }
-
-    //                    Py_DECREF(print);
-    //                }
-
-    //                Py_DECREF(dict);
-    //            }
-    //        }
-
-    //        Py_DECREF(builtins);
-    //    }
+    return printLogMsg(WARNING, args);
 }
 
 static PyObjectAPIReturn
 GtpyPyLogger_lshift(PyObject* self, PyObject* arg)
 {
-    if (self == nullptr || arg == nullptr)
-    {
-        Py_RETURN_NONE;
-    }
+    if (!self || !arg) Py_RETURN_NONE;
 
-    GtpyPyLogger* logger = (GtpyPyLogger*)self;
+    auto* logger = (GtpyPyLogger*)self;
+    auto pyppArg = PyPPObject::Borrow(arg);
 
+    // convert the argument to a Python unicode object
+    // (equivalent to calling str(arg))
+    auto pyMsg = PyPPObject_Str(pyppArg);
+    if (!pyMsg) return nullptr;
 
-    auto output = PyPPObject::Borrow(arg);
+    // convert the Python unicode object to a char pointer
+    const auto* msg = PyPPUnicode_AsUTF8(pyMsg);
+    if (!msg) return nullptr;
 
-    if (!PyPPUnicode_Check(output))
-    {
-        output = PyPPObject_Repr(output);
-    }
+    auto logLevel = static_cast<LogLevel>(PyInt_AsLong(logger->m_logLevel));
 
-    QString message(PyPPString_AsQString(output));
-
-    int outputType = PyInt_AsLong(logger->m_outputType);
-
-    bool outputToAppConsol = false;
-
-    auto globals = PyPPEval_GetGlobals();
-
-    if (globals && PyPPDict_Check(globals))
-    {
-        auto appOutputObj = PyPPDict_GetItem(globals,
-                                 QSTRING_TO_CHAR_PTR(
-                                     GtpyGlobals::ATTR_outputToApp));
-
-        if (appOutputObj && PyPPBool_Check(appOutputObj))
-        {
-            outputToAppConsol = (bool)PyPPLong_AsLong(appOutputObj);
-        }
-    }
-
-    switch (outputType)
-    {
-        case DEBUG:
-
-            if (outputToAppConsol)
-            {
-                gtDebug() << message;
-            }
-
-            printOutput(message.prepend("[DEBUG]   "));
-            break;
-
-        case INFO:
-
-            if (outputToAppConsol)
-            {
-                gtInfo() << message;
-            }
-
-            printOutput(message.prepend("[INFO]    "));
-            break;
-
-        case ERROR:
-
-            if (outputToAppConsol)
-            {
-                gtError() << message;
-            }
-
-            printOutput(message.prepend("[ERROR]   "));
-            break;
-
-        case FATAL:
-
-            if (outputToAppConsol)
-            {
-                gtFatal() << message;
-            }
-
-            printOutput(message.prepend("[FATAL]   "));
-            break;
-
-        case WARNING:
-
-            if (outputToAppConsol)
-            {
-                gtWarning() << message;
-            }
-
-            printOutput(message.prepend("[WARNING] "));
-            break;
-
-        default:
-
-            if (outputToAppConsol)
-            {
-                gtDebug() << message;
-            }
-
-            printOutput(message.prepend("[DEBUG] "));
-            break;
-    }
+    printToConsols(logLevel, msg);
 
     Py_RETURN_NONE;
 }
 
 static PyNumberMethods
-GtpyPyLogger_as_number =
-{
-    0,      /* nb_add */
-    0,      /* nb_subtract */
-    0,      /* nb_multiply */
+    GtpyPyLogger_as_number =
+    {
+        0,      /* nb_add */
+        0,      /* nb_subtract */
+        0,      /* nb_multiply */
 #ifndef PY3K
-    0,      /* nb_divide */
+        0,      /* nb_divide */
 #endif
-    0,      /* nb_remainder */
-    0,      /* nb_divmod */
-    0,      /* nb_power */
-    0,      /* nb_negative */
-    0,      /* nb_positive */
-    0,      /* nb_absolute */
-    0,      /* nb_nonzero / nb_bool in Py3K */
-    0,      /* nb_invert */
-    GtpyPyLogger_lshift,      /* nb_lshift */
-    0,      /* nb_rshift */
-    0,    /* nb_and */
-    0,    /* nb_xor */
-    0,    /* nb_or */
+        0,      /* nb_remainder */
+        0,      /* nb_divmod */
+        0,      /* nb_power */
+        0,      /* nb_negative */
+        0,      /* nb_positive */
+        0,      /* nb_absolute */
+        0,      /* nb_nonzero / nb_bool in Py3K */
+        0,      /* nb_invert */
+        GtpyPyLogger_lshift,      /* nb_lshift */
+        0,      /* nb_rshift */
+        0,    /* nb_and */
+        0,    /* nb_xor */
+        0,    /* nb_or */
 #ifndef PY3K
-    0,      /* nb_coerce */
+        0,      /* nb_coerce */
 #endif
-    0,      /* nb_int */
-    0,      /* nb_long  / nb_reserved in Py3K */
-    0,      /* nb_float */
+        0,      /* nb_int */
+        0,      /* nb_long  / nb_reserved in Py3K */
+        0,      /* nb_float */
 #ifndef PY3K
-    0,      /* nb_oct */
-    0,      /* nb_hex */
+        0,      /* nb_oct */
+        0,      /* nb_hex */
 #endif
-    0,      /* nb_inplace_add */
-    0,      /* nb_inplace_subtract */
-    0,      /* nb_inplace_multiply */
+        0,      /* nb_inplace_add */
+        0,      /* nb_inplace_subtract */
+        0,      /* nb_inplace_multiply */
 #ifndef PY3K
-    0,      /* nb_inplace_divide */
+        0,      /* nb_inplace_divide */
 #endif
-    0,      /* nb_inplace_remainder */
-    0,      /* nb_inplace_power */
-    0,      /* nb_inplace_lshift */
-    0,      /* nb_inplace_rshift */
-    0,      /* nb_inplace_and */
-    0,      /* nb_inplace_xor */
-    0,      /* nb_inplace_or */
-    0,      /* nb_floor_divide */
-    0,      /* nb_true_divide */
-    0,      /* nb_inplace_floor_divide */
-    0,      /* nb_inplace_true_divide */
+        0,      /* nb_inplace_remainder */
+        0,      /* nb_inplace_power */
+        0,      /* nb_inplace_lshift */
+        0,      /* nb_inplace_rshift */
+        0,      /* nb_inplace_and */
+        0,      /* nb_inplace_xor */
+        0,      /* nb_inplace_or */
+        0,      /* nb_floor_divide */
+        0,      /* nb_true_divide */
+        0,      /* nb_inplace_floor_divide */
+        0,      /* nb_inplace_true_divide */
 #ifdef PY3K
-    0,      /* nb_index in Py3K */
+        0,      /* nb_index in Py3K */
 #endif
 };
 
 PyTypeObject
-GtpyLoggingModule::GtpyPyLogger_Type =
-{
+    GtpyLoggingModule::GtpyPyLogger_Type =
+    {
     PyVarObject_HEAD_INIT(NULL, 0)
     "GtLogging.GtpyPyLogger",         /*tp_name*/
     sizeof(GtpyPyLogger),             /*tp_basicsize*/
@@ -377,9 +345,9 @@ GtpyLoggingModule::GtpyPyLogger_Type =
     0,  /*tp_getattro*/
     0,  /*tp_setattro*/
     0,  /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE /*tp_flags*/
+           Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE /*tp_flags*/
 #ifndef PY3K
-    | Py_TPFLAGS_CHECKTYPES,
+           | Py_TPFLAGS_CHECKTYPES,
 #else
     ,
 #endif

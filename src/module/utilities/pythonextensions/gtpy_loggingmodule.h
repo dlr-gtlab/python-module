@@ -14,16 +14,14 @@
 #include <QString>
 
 #include "PythonQtPythonInclude.h"
-#include "structmember.h"
-
-#include "gt_task.h"
 
 #include "gtpy_globals.h"
+#include "gtpy_code.h"
 
 namespace GtpyLoggingModule
 {
 
-enum OutputType
+enum LogLevel
 {
     DEBUG = 0,
     INFO,
@@ -37,51 +35,71 @@ extern PyTypeObject GtpyPyLogger_Type;
 typedef struct
 {
     PyObject_HEAD
-    PyObject* m_outputType;
+    PyObject* m_logLevel;
 } GtpyPyLogger;
 
 extern PyObjectAPIReturn
-gtDebug_C_function();
+gtDebug_C_function(PyObject* self, PyObject* args);
 
 extern PyObjectAPIReturn
-gtInfo_C_function();
+gtInfo_C_function(PyObject* self, PyObject* args);
 
 extern PyObjectAPIReturn
-gtError_C_function();
+gtError_C_function(PyObject* self, PyObject* args);
 
 extern PyObjectAPIReturn
-gtFatal_C_function();
+gtFatal_C_function(PyObject* self, PyObject* args);
 
 extern PyObjectAPIReturn
-gtWarning_C_function();
+gtWarning_C_function(PyObject* self, PyObject* args);
 
 static PyMethodDef
 GtpyLoggingModule_StaticMethods[] =
 {
     {
-        "gtDebug", (PyCFunction)gtDebug_C_function, METH_NOARGS,
-        "GtpyPyLogger gtDebug() --> Returns a GtpyPyLogger instance that "
-        "enables debug outputs"
+        gtpy::code::funcs::GT_DEBUG, (PyCFunction)gtDebug_C_function,
+        METH_VARARGS,
+        "gtDebug([message]) -> None | GtpyPyLogger\n"
+        "Logs a debug-level message if a message is provided.\n"
+        "Otherwise returns a GtpyPyLogger instance that allows logging using "
+        "the lshift operator (e.g. gtDebug() << 'debug message').\n"
+        "The recommended usage is: gtDebug('debug message')."
     },
     {
-        "gtInfo", (PyCFunction)gtInfo_C_function, METH_NOARGS,
-        "GtpyPyLogger gtInfo() --> Returns a GtpyPyLogger instance that "
-        "enables info outputs"
+        gtpy::code::funcs::GT_INFO, (PyCFunction)gtInfo_C_function,
+        METH_VARARGS,
+        "gtInfo([message]) -> None | GtpyPyLogger\n"
+        "Logs an info-level message if a message is provided.\n"
+        "Otherwise returns a GtpyPyLogger instance that allows logging using "
+        "the lshift operator (e.g. gtInfo() << 'info message').\n"
+        "The recommended usage is: gtInfo('info message')."
     },
     {
-        "gtError", (PyCFunction)gtError_C_function, METH_NOARGS,
-        "GtpyPyLogger gtError() --> Returns a GtpyPyLogger instance that "
-        "enables error outputs"
+        gtpy::code::funcs::GT_ERROR, (PyCFunction)gtError_C_function,
+        METH_VARARGS,
+        "gtError([message]) -> None | GtpyPyLogger\n"
+        "Logs an error-level message if a message is provided.\n"
+        "Otherwise returns a GtpyPyLogger instance that allows logging using "
+        "the lshift operator (e.g. gtError() << 'error message').\n"
+        "The recommended usage is: gtError('error message')."
     },
     {
-        "gtFatal", (PyCFunction)gtFatal_C_function, METH_NOARGS,
-        "GtpyPyLogger gtFatal() --> Returns a GtpyPyLogger instance that "
-        "enables fatal outputs"
+        gtpy::code::funcs::GT_FATAL, (PyCFunction)gtFatal_C_function,
+        METH_VARARGS,
+        "gtFatal([message]) -> None | GtpyPyLogger\n"
+        "Logs a fatal-level message if a message is provided.\n"
+        "Otherwise returns a GtpyPyLogger instance that allows logging using "
+        "the lshift operator (e.g. gtFatal() << 'fatal message').\n"
+        "The recommended usage is: gtFatal('fatal message')."
     },
     {
-        "gtWarning", (PyCFunction)gtWarning_C_function, METH_NOARGS,
-        "GtpyPyLogger gtWarning() --> Returns a GtpyPyLogger instance that "
-        "enables warning outputs"
+        gtpy::code::funcs::GT_WARNING, (PyCFunction)gtWarning_C_function,
+        METH_VARARGS,
+        "gtWarning([message]) -> None | GtpyPyLogger\n"
+        "Logs a warning-level message if a message is provided.\n"
+        "Otherwise returns a GtpyPyLogger instance that allows logging using "
+        "the lshift operator (e.g. gtWarning() << 'warning message').\n"
+        "The recommended usage is: gtWarning('warning message')."
     },
     { NULL, NULL, 0, NULL }
 };
