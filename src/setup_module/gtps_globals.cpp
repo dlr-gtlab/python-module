@@ -72,7 +72,7 @@ gtps::python::version::supportedVersions()
 
     QString moduleDir = QCoreApplication::applicationDirPath() + "/modules";
 
-    static QRegularExpression pymodRe("(lib)?GTlabPython([0-9])([0-9]+)(-d)?.(dll|so|dylib)$");
+    static QRegularExpression pymodRe("(lib)?(?i)(GTlabPython)([0-9])([0-9]+)(-d)?.(dll|so|dylib)$");
 
     QDirIterator it(moduleDir, QDir::Files, QDirIterator::Subdirectories);
 
@@ -86,8 +86,8 @@ gtps::python::version::supportedVersions()
 
         if (matcher.hasMatch())
         {
-            available.push_back(GtVersionNumber(matcher.captured(2).toInt(),
-                                                matcher.captured(3).toInt()));
+            available.push_back(GtVersionNumber(matcher.captured(3).toInt(),
+                                                matcher.captured(4).toInt()));
         }
     }
 
