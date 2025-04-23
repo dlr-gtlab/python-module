@@ -19,7 +19,7 @@ using namespace GtpyLoggingModule;
 namespace
 {
 
-bool isLoggingEnabled()
+bool isLoggingToAppConsolEnabled()
 {
     auto globals = PyPPEval_GetGlobals();
     if (!globals || !PyPPDict_Check(globals)) return false;
@@ -62,7 +62,7 @@ void printToPyConsol(LogLevel type, const QString& msg)
 
 void printToAppConsol(LogLevel type, const QString& msg)
 {
-    if (!isLoggingEnabled()) return;
+    if (!isLoggingToAppConsolEnabled()) return;
 
     switch (type)
     {
