@@ -301,6 +301,11 @@ inline PyPPObject PyPPObject_Repr(const PyPPObject& o)
     return PyPPObject::NewRef(PyObject_Repr(o.get()));
 }
 
+inline PyPPObject PyPPObject_Str(const PyPPObject& obj)
+{
+    return PyPPObject::NewRef(PyObject_Str(obj.get()));
+}
+
 inline PyPPObject PyPPObject_GenericGetAttr(const PyPPObject& o, const PyPPObject& name)
 {
     return PyPPObject::NewRef(PyObject_GenericGetAttr(o.get(), name.get()));
@@ -362,13 +367,7 @@ inline QString PyPPString_AsQString(const PyPPObject& obj)
 
 inline QString PyPPObject_AsQString(const PyPPObject& obj)
 {
-    auto strObj = obj;
-
-    if (!PyPPUnicode_Check(strObj))
-   {
-        strObj =  PyPPObject::NewRef(PyObject_Str(obj.get()));
-   }
-
+   auto strObj = PyPPUnicode_Check(obj) ? obj : PyPPObject_Str(obj);
    return PyPPString_AsQString(strObj);
 }
 

@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Fixed case-dependent python module detection - #601
  - Fixed error, when trying to redirect subprocess message - #277
 
+### Added
+ - Log messages in Python by passing an argument to the logging functions (e.g. gtDebug('debug message'), gtInfo('info message'), etc.). Logging via the lshift operator is still supported but is no longer recommended (e.g., gtDebug() << 'debug message'). - #595
+
 ## [1.7.0] - 2025-04-07
 
 ### Fixed
