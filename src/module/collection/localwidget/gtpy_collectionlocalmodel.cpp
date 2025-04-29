@@ -11,7 +11,7 @@
 #include <QDir>
 
 #include "gtpy_contextmanager.h"
-#include "gtpy_constants.h"
+#include "gtpy_globals.h"
 #include "gtpy_icons_compat.h"
 #include "gtpy_collapsiblelocalitem.h"
 #include "gtpy_localitem.h"
