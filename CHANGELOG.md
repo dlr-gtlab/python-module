@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+ - Log messages in Python by passing an argument to the logging functions (e.g. gtDebug('debug message'), gtInfo('info message'), etc.). Logging via the lshift operator is still supported but is no longer recommended (e.g., gtDebug() << 'debug message'). - #595
+
 ## [1.7.1] - 2025-04-23
 
 ### Fixed
@@ -11,9 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    Now, the user is asked whether to store these changes or not. - #592
  - Fixed case-dependent python module detection - #601
  - Fixed error, when trying to redirect subprocess message - #277
-
-### Added
- - Log messages in Python by passing an argument to the logging functions (e.g. gtDebug('debug message'), gtInfo('info message'), etc.). Logging via the lshift operator is still supported but is no longer recommended (e.g., gtDebug() << 'debug message'). - #595
 
 ## [1.7.0] - 2025-04-07
 
