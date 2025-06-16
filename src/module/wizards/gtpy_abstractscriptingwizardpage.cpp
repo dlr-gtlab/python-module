@@ -842,7 +842,7 @@ GtpyAbstractScriptingWizardPage::registerGeometry()
         if (wiz)
         {
 
-            QRect rect = wiz->frameGeometry();
+            QRect rect = wiz->geometry();
 
             GtpyWizardGeometries::instance()->registerGeometry(m_componentUuid,
                     rect);
