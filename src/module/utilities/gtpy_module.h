@@ -16,15 +16,17 @@
 #include <QString>
 #include <QObject>
 
-#include "PythonQtPythonInclude.h"
+#include <PythonQtPythonInclude.h>
 
-#include "gtpypp.h"
+#include <gtpypp.h>
+
+#include <gt_pythonmodule_exports.h>
 
 /**
  * @brief The GtpyModule class represents a C++ interface for a Python module.
  * A Python module corresponds to an importable *.py file.
  */
-class GtpyModule
+class GT_PYTHON_EXPORT GtpyModule
 {
 public:
     /**
@@ -100,7 +102,6 @@ public:
      */
     const QString& moduleName() const;
 
-protected:
     /**
      * @brief Adds a set of functions defined by the provided PyMethodDef
      * array to the Python module associated with this instance. The functions
@@ -112,6 +113,8 @@ protected:
      * @return True if the functions were successfully added, otherwise false.
      */
     bool addFunctions(PyMethodDef* def);
+
+protected:
 
     /**
      * @brief Returns the Python module object that is associated with the

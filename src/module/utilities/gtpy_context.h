@@ -13,7 +13,8 @@
 
 #include <QString>
 
-#include "gtpy_module.h"
+#include <gtpy_module.h>
+#include <gt_pythonmodule_exports.h>
 
 /**
  * @brief The GtpyContext class represents a C++ interface for a Python module
@@ -24,7 +25,7 @@
  * or executing tasks and calculators. The functionality provided by the context
  * depends on the ContextType passed to the constructor.
  */
-class GtpyContext : public GtpyModule
+class GT_PYTHON_EXPORT GtpyContext : public GtpyModule
 {
     // The friend relationship allows to integrate GtpyContext into the
     // GtpyContextManager without modifying its API. It will probably be
