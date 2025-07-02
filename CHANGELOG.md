@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
- - The Python Task and Calculator wizard no longer increases in height each time it is reopened. - #607
+ - Fixed an error, when a subprocess tries to redirect messages to the GTlab console.
+   The missing fileno() method of has been implemented.
+   Note: the redirection using a file handle is not properly supported!
+   Instead, the messages will be printed to a system terminal - #277
+- The Python Task and Calculator wizard no longer increases in height each time it is reopened. - #607
 
 ## [1.7.1] - 2025-04-23
 
