@@ -12,6 +12,7 @@
 
 #include "PythonQtConversion.h"
 
+#include "gt_environment.h"
 #include "gt_project.h"
 #include "gt_application.h"
 #include "gt_versionnumber.h"
@@ -36,6 +37,21 @@ gtpy::extension::func::projectPath(PyObject* /*self*/)
     }
 
     return PythonQtConv::QStringToPyObject(pro->path());
+}
+
+PyObjectAPIReturn
+gtpy::extension::func::envVars(PyObject* self)
+{
+    auto envVarsMap = PyPPDict_New();
+
+    for (const auto& id : gtEnvironment->varIds())
+    {
+        PyPPDict_SetItem(envVarsMap,
+                         PyPPObject::fromQString(id),
+                         PyPPObject::fromQVariant(gtEnvironment->value(id)));
+    }
+
+    return envVarsMap.release();
 }
 
 /**

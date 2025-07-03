@@ -29,6 +29,7 @@ namespace func
 PyObjectAPIReturn projectPath(PyObject* self);
 PyObjectAPIReturn footprint(PyObject* self, PyObject* args, PyObject* kwargs);
 
+PyObjectAPIReturn envVars(PyObject* self);
 
 static PyMethodDef PROJECT_PATH_F_DEF[] =
 {
@@ -37,6 +38,12 @@ static PyMethodDef PROJECT_PATH_F_DEF[] =
         (PyCFunction)projectPath,
         METH_NOARGS,
         "projectPath() returns the current project path."
+    },
+    {
+        "envVars",
+        (PyCFunction)envVars,
+        METH_NOARGS,
+        "envVars returns the GTlab environment variables."
     },
     {
         gtpy::constants::FOOTPRINT_F_NAME,
