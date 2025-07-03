@@ -15,8 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  ### Added
  - Log messages in Python by passing an argument to the logging functions (e.g. gtDebug('debug message'), gtInfo('info message'), etc.). Logging via the lshift operator is still supported but is no longer recommended (e.g., gtDebug() << 'debug message'). - #595
  - Added env_vars() function to access GTlab environment variables from Python code. - #604
+ - The Python Task and Calculator wizard no longer increases in height each time it is reopened. - #607
 
- 
 ## [1.7.1] - 2025-04-23
 
 ### Fixed
