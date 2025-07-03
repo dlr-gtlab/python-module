@@ -40,10 +40,10 @@ static PyMethodDef PROJECT_PATH_F_DEF[] =
         "projectPath() returns the current project path."
     },
     {
-        "env_vars",
+        "envVars",
         (PyCFunction)envVars,
         METH_NOARGS,
-        "envVars() returns the GTlab environment variables."
+        "envVars returns the GTlab environment variables."
     },
     {
         gtpy::constants::FOOTPRINT_F_NAME,
