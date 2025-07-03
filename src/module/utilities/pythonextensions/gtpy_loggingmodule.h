@@ -110,7 +110,7 @@ static PyModuleDef
 GtpyLogging_Module =
 {
     PyModuleDef_HEAD_INIT,
-    "GtLogging",
+    gtpy::code::modules::GT_LOGGING,
     NULL,
     -1,
     GtpyLoggingModule_StaticMethods,

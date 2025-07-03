@@ -16,7 +16,8 @@
 #include "PythonQtPythonInclude.h"
 #include "PythonQtInstanceWrapper.h"
 
-#include <gt_object.h>
+#include "gt_object.h"
+#include "gtpy_code.h"
 
 namespace GtpyExtendedWrapperModule
 {
@@ -41,7 +42,7 @@ static PyModuleDef
 GtpyExtendedWrapper_Module =
 {
     PyModuleDef_HEAD_INIT,
-    "GtObjectWrapperModuleC",
+    gtpy::code::modules::GT_OBJECT_WRAPPER_MODULE,
     NULL,
     -1,
     NULL,

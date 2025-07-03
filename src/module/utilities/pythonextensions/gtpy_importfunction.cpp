@@ -150,9 +150,10 @@ static PyMethodDef
 GtpyMyImport_methods[] =
 {
     {
-        "importGtCalculators", (PyCFunction)meth_importGtCalculators,
-        METH_NOARGS, "Imports GtCalculators without checking if it is "
-        "allowed."
+        gtpy::code::funcs::IMPORT_GT_CALCULATORS,
+        (PyCFunction)meth_importGtCalculators,
+        METH_NOARGS,
+        "Imports GtCalculators without checking if it is allowed."
     },
     {nullptr, nullptr, 0, nullptr}  /* Sentinel */
 };
