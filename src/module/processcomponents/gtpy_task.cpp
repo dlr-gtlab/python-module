@@ -57,6 +57,9 @@ GtpyTask::runIteration()
     int contextId = GtpyContextManager::instance()->createNewContext(
         GtpyContextManager::TaskRunContext, true);
 
+    auto * context = GtpyContextManager::instance()->context(contextId);
+    if (context) context->setLoggingPrefix(objectName());
+
     ///Initialize context with data model objects
     GtpyContextManager::instance()->addTaskValue(contextId, this);
     auto success = evalScript(contextId);

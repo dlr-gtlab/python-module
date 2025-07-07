@@ -59,6 +59,9 @@ GtpyScriptCalculator::run()
     int contextId = GtpyContextManager::instance()->createNewContext(
         GtpyContextManager::CalculatorRunContext, true);
 
+    auto * context = GtpyContextManager::instance()->context(contextId);
+    if (context) context->setLoggingPrefix(objectName());
+
     return evalScript(contextId);
 }
 
