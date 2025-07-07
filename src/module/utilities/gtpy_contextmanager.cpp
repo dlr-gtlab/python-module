@@ -1836,7 +1836,15 @@ GtpyContextManager::stdOutRedirectCB(const QString& contextName,
             return;
         }
 
-        emit GtpyContextManager::instance()->pythonMessage(message, contextId);
+        auto* context = GtpyContextManager::instance()->context(contextId);
+
+        QString prefix;
+        if (context && !context->loggingPrefix().isEmpty())
+        {
+            prefix = context->loggingPrefix();
+        }
+
+        emit GtpyContextManager::instance()->pythonMessage(message, contextId, prefix);
     }
 
     //    else
@@ -1861,7 +1869,16 @@ GtpyContextManager::stdErrRedirectCB(const QString& contextName,
         int contextId = GtpyContextManager::instance()->
                         contextIdByName(contextName);
 
-        emit GtpyContextManager::instance()->errorMessage(message, contextId);
+
+        auto * context = GtpyContextManager::instance()->context(contextId);
+
+        QString prefix;
+        if (context && !context->loggingPrefix().isEmpty())
+        {
+            prefix = context->loggingPrefix();
+        }
+
+        emit GtpyContextManager::instance()->errorMessage(message, contextId, prefix);
 
         int line = lineOutOfMessage(message);
 
@@ -1938,9 +1955,18 @@ GtpyContextManager::onErrorMessage(const QString& message)
         error = (bool)PyPPLong_AsLong(item);
     }
 
+
+    auto* context = GtpyContextManager::instance()->context(contextId);
+
+    QString prefix;
+    if (context && !context->loggingPrefix().isEmpty())
+    {
+        prefix = context->loggingPrefix();
+    }
+
     if (error && contextId > -1)
     {
-        emit errorMessage(message, contextId);
+        emit errorMessage(message, contextId, prefix);
     }
 }
 
