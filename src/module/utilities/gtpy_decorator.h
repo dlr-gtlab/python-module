@@ -172,10 +172,11 @@ public slots:
     /**
      * @brief openProject opens the project with the given projectId
      * @param app pointer to GtCoreApplication
-     * @param projectId id of the project that should be opened
+     * @param projectIdOrPath Id or the path of the project that should be opened
      * @return the opened project
      */
-    PyObjectAPIReturn openProject(GtCoreApplication* app, const QString& projectId);
+    PyObjectAPIReturn openProject(GtCoreApplication* app, const QString& projectIdOrPath);
+
 
     /**
      * @brief currentProject returns the current project

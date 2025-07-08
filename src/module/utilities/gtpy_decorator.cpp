@@ -14,6 +14,7 @@
 
 #include "PythonQtPythonInclude.h"
 
+#include <gt_projectprovider.h>
 #include "gt_coreapplication.h"
 #include "gt_coredatamodel.h"
 #include "gt_project.h"
@@ -40,6 +41,73 @@
 #include "gtpy_decorator.h"
 
 using namespace GtpyExtendedWrapperModule;
+
+namespace
+{
+    GtProject*
+    openProjectFromID(GtpyDecorator& decorator, GtCoreApplication* app,
+                      const QString& projectId)
+    {
+        if (projectId.isEmpty())
+        {
+            QString output = QStringLiteral("ERROR: ") +
+                             QObject::tr("project id is empty!");
+
+            qWarning() << output;
+            emit decorator.sendErrorMessage(output);
+            return nullptr;
+        }
+
+        gtDebug() << QString("Opening project '%1'").arg(projectId);
+
+        GtProject* project = app->findProject(projectId);
+
+        if (!project)
+        {
+            QString output = QStringLiteral("ERROR: ") +
+                             QObject::tr("project not found!") +
+                             QStringLiteral(" (") + projectId + QStringLiteral(")");
+
+            qWarning() << output;
+            emit decorator.sendErrorMessage(output);
+            return nullptr;
+        }
+
+        return project;
+    }
+
+    GtProject*
+    openProjectFromPath(GtpyDecorator& decorator, GtCoreApplication* app,
+                        const QString& projectPath)
+    {
+        if (!projectPath.endsWith(".gtlab"))
+        {
+            emit decorator.sendErrorMessage(
+                QObject::tr("ERROR: Invalid project file: %1").arg(projectPath));
+            return nullptr;
+        }
+
+        // project provider from file loader
+        if (projectPath.isEmpty())
+        {
+            return nullptr;
+        }
+
+        gtDebug() << QString("Opening project from path '%1'").arg(projectPath);
+
+        GtProjectProvider provider(projectPath);
+        GtProject* loadedProject = provider.project();
+
+        bool isNewProject = gtDataModel->newProject(loadedProject, false);
+
+        // the project already exists in the session, open this instead
+        auto projectInSession = gtDataModel->findProject(loadedProject->objectName());
+
+        if (!isNewProject) delete loadedProject;
+
+        return projectInSession;
+    }
+} // namespace
 
 GtpyDecorator::GtpyDecorator(QObject* parent) : QObject(parent)
 {
@@ -283,56 +351,36 @@ GtpyDecorator::switchSession(GtCoreApplication* app, const QString& id)
 }
 
 PyObjectAPIReturn GtpyDecorator::openProject(GtCoreApplication* app,
-                                     const QString& projectId)
+                                     const QString& projectIdOrPath)
 {
-    if (app == nullptr)
+    if (!app)
     {
         QString output = QStringLiteral("ERROR: ") +
-                         QObject::tr("helper is a null pointer!");
-
+                         QObject::tr("Application is a null pointer in openProject!");
         qWarning() << output;
-
         emit sendErrorMessage(output);
-
         return nullptr;
     }
 
-    qDebug() << "open project...     projectId == " << projectId;
 
-    if (projectId.isEmpty())
+    GtProject* project = nullptr;
+
+    if (QFile(projectIdOrPath).exists())
     {
-        QString output = QStringLiteral("ERROR: ") +
-                         QObject::tr("project id is empty!");
-
-        qWarning() << output;
-
-        emit sendErrorMessage(output);
-
-        return nullptr;
+        project = openProjectFromPath(*this, app, projectIdOrPath);
+    }
+    else
+    {
+        project = openProjectFromID(*this, app, projectIdOrPath);
     }
 
-    GtProject* project = app->findProject(projectId);
-
-    if (project == nullptr)
-    {
-        QString output = QStringLiteral("ERROR: ") +
-                         QObject::tr("project not found!") +
-                         QStringLiteral(" (") + projectId + QStringLiteral(")");
-
-        qWarning() << output;
-
-        emit sendErrorMessage(output);
-
-        return nullptr;
-    }
+    if (!project) return nullptr;
 
     if (!gtDataModel->GtCoreDatamodel::openProject(project))
     {
         QString output = QStringLiteral("ERROR: ") +
-                         QObject::tr("could not open project!") +
-                         QStringLiteral(" (") + projectId +
-                         QStringLiteral(")");
-
+                         QObject::tr("could not open project '%1'")
+                             .arg(project->objectName());
         qWarning() << output;
 
         emit sendErrorMessage(output);
