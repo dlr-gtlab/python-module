@@ -18,13 +18,11 @@
 #include <QFileSystemWatcher>
 
 #include "PythonQtObjectPtr.h"
-#include "PythonQtConversion.h"
 
 #include "gt_version.h"
 
 #include "gtpy_context.h"
 #include "gtpy_gilscope.h"
-#include "gtpy_globals.h"
 #include "gtpypp.h"
 
 class GtObject;
@@ -42,6 +40,16 @@ struct GtpyFunction
     QString completion;
     QString toolTip;
     int cursorOffset = 0;
+};
+
+/**
+ * @brief The StdOutMetaData class
+ */
+struct StdOutMetaData
+{
+    QString contextName{};
+    bool output = false;
+    bool error = false;
 };
 
 /**
@@ -207,7 +215,7 @@ public:
     /**
     * @brief Checks whether the Python context indicated by contextId as access
     *  to calculators. If the context has access, this function deletes all
-    * calculator instances that are children of the task instance (TASK_VAR).
+    * calculator instances that are children of the task instance (__task).
     * @param contextId Python context identifier.
     */
     void deleteCalcsFromTask(int contextId);
@@ -323,13 +331,13 @@ public:
      * @brief Retruns the meta data saved in thread dict.
      * @return The meta data saved in thread dict.
      */
-    GtpyGlobals::StdOutMetaData threadDictMetaData();
+    StdOutMetaData threadDictMetaData();
 
     /**
      * @brief Sets some meta data to the thread dict.
      * @param metaData
      */
-    void setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData mData);
+    void setMetaDataToThreadDict(const StdOutMetaData& mData);
 
     /**
      * @brief Adds a list of paths to the sys.path list.
@@ -370,7 +378,6 @@ private:
     static const QString LIST_DATATYPE;
     static const QString VARIANT_DATATYPE;
     static const QString FUNCTION_WARNING;
-    static const QString TASK_VAR;
     static const QString CLASS_WRAPPER_MODULE;
     static const QString CALC_MODULE;
 

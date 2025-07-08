@@ -48,7 +48,6 @@ set(HEADERS
     utilities/gtpy_calculatorfactory.h
     utilities/gtpy_code.h
     utilities/gtpy_codegen.h
-    utilities/gtpy_constants.h
     utilities/gtpy_context.h
     utilities/gtpy_contextmanager.h
     utilities/gtpy_convert.h
@@ -129,7 +128,6 @@ set(SOURCES
     utilities/gtpy_convert.cpp
     utilities/gtpy_decorator.cpp
     utilities/gtpy_gilscope.cpp
-    utilities/gtpy_globals.cpp
     utilities/gtpy_interruptrunnable.cpp
     utilities/gtpy_module.cpp
     utilities/gtpy_processdatadistributor.cpp

@@ -11,10 +11,11 @@
 #ifndef GTPY_PYTHONFUNCTIONS_H
 #define GTPY_PYTHONFUNCTIONS_H
 
-
 #include "PythonQtPythonInclude.h"
 
-#include "gtpy_constants.h"
+#include "gt_version.h"
+
+#include "gtpy_code.h"
 #include "gtpy_globals.h"
 
 namespace gtpy
@@ -34,19 +35,19 @@ PyObjectAPIReturn envVars(PyObject* self);
 static PyMethodDef PROJECT_PATH_F_DEF[] =
 {
     {
-        gtpy::constants::PROJECT_PATH_F_NAME,
+        gtpy::code::funcs::PROJECT_PATH_F_NAME,
         (PyCFunction)projectPath,
         METH_NOARGS,
         "projectPath() returns the current project path."
     },
     {
-        "envVars",
+        gtpy::code::funcs::ENV_VARS_F_NAME,
         (PyCFunction)envVars,
         METH_NOARGS,
         "envVars returns the GTlab environment variables."
     },
     {
-        gtpy::constants::FOOTPRINT_F_NAME,
+        gtpy::code::funcs::FOOTPRINT_F_NAME,
         (PyCFunction)footprint,
         METH_VARARGS | METH_KEYWORDS,
         "footprint(only_active=True)\n\n"
@@ -68,14 +69,14 @@ PyObjectAPIReturn sharedFuncIds(PyObject* self);
 static PyMethodDef SHARED_FUNC_F_DEF[] =
 {
     {
-        gtpy::constants::SHARED_FUNC_F_NAME,
+        gtpy::code::funcs::SHARED_FUNC_F_NAME,
         (PyCFunction)(void(*)(void))sharedFunc,
         METH_VARARGS | METH_KEYWORDS,
         "shared_function(module_id: str, function_id: str) returns the shared "
         "function identified by the given IDs as callable lambda function."
     },
     {
-        gtpy::constants::CALL_SHARED_FUNC_F_NAME,
+        gtpy::code::funcs::CALL_SHARED_FUNC_F_NAME,
         (PyCFunction)(void(*)(void))callSharedFunc,
         METH_VARARGS | METH_KEYWORDS,
         "call_shared_function(module_id: str, function_id: str, args: tuple) "
@@ -83,7 +84,7 @@ static PyMethodDef SHARED_FUNC_F_DEF[] =
         "tuple is passed to the shared function."
     },
     {
-        gtpy::constants::SHARED_FUNC_IDS_F_NAME,
+        gtpy::code::funcs::SHARED_FUNC_IDS_F_NAME,
         (PyCFunction)sharedFuncIds,
         METH_NOARGS,
         "shared_function_ids() retruns a list of the registered shared "

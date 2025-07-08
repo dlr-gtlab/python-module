@@ -38,7 +38,7 @@
 #include "gt_datazone0d.h"
 #endif
 
-#include "gtpy_constants.h"
+#include "gtpy_globals.h"
 #include "gtpy_code.h"
 #include "gtpy_stdout.h"
 #include "gtpy_decorator.h"
@@ -117,9 +117,6 @@ const QString GtpyContextManager::VARIANT_DATATYPE =
 
 const QString GtpyContextManager::FUNCTION_WARNING =
     QStringLiteral("WARNING: function not found");
-
-const QString GtpyContextManager::TASK_VAR =
-    QStringLiteral("__task");
 
 const QString GtpyContextManager::CLASS_WRAPPER_MODULE =
     QStringLiteral("GtClasses");
@@ -609,12 +606,12 @@ GtpyContextManager::addTaskValue(int contextId, GtTask* task)
 
     if (task != nullptr)
     {
-        addObject(contextId, TASK_VAR, task, false);
+        addObject(contextId, gtpy::code::attrs::TASK, task, false);
 
     }
     else
-    {
-        QString pyCode = TASK_VAR + " = None";
+    {        
+        auto pyCode = QStringLiteral("%1 = None").arg(gtpy::code::attrs::TASK);
 
         evalScript(contextId, pyCode, false);
     }
@@ -630,8 +627,10 @@ GtpyContextManager::deleteCalcsFromTask(int contextId)
         return;
     }
 
-    evalScript(contextId, TASK_VAR + QStringLiteral(".deleteAllCalculators()"),
-               false);
+    auto pyCode = QStringLiteral("%1.deleteAllCalculators()")
+                      .arg(gtpy::code::attrs::TASK);
+
+    evalScript(contextId, pyCode, false);
 }
 
 QString
@@ -828,35 +827,35 @@ GtpyContextManager::interruptPyThread(long id)
     tp->start(runnable);
 }
 
-GtpyGlobals::StdOutMetaData
+StdOutMetaData
 GtpyContextManager::threadDictMetaData()
 {
     GTPY_GIL_SCOPE
-
-    GtpyGlobals::StdOutMetaData retval;
 
     auto threadDict = PyPPThreadState_GetDict();
 
     if (!threadDict)
     {
-        return retval;
+        return {};
     }
 
-    auto valItem = PyPPDict_GetItem(threadDict, GtpyGlobals::CONTEXT_KEY);
+    StdOutMetaData retval;
+
+    auto valItem = PyPPDict_GetItem(threadDict, gtpy::code::keys::CONTEXT);
 
     if (valItem && PyPPUnicode_Check(valItem))
     {
         retval.contextName = PyPPString_AsQString(valItem);
     }
 
-    auto outputItem = PyPPDict_GetItem(threadDict, GtpyGlobals::OUTPUT_KEY);
+    auto outputItem = PyPPDict_GetItem(threadDict, gtpy::code::keys::OUTPUT);
 
     if (outputItem && PyPPLong_Check(outputItem))
     {
         retval.output = (bool)PyPPLong_AsLong(outputItem);
     }
 
-    auto errorItem = PyPPDict_GetItem(threadDict, GtpyGlobals::ERROR_KEY);
+    auto errorItem = PyPPDict_GetItem(threadDict, gtpy::code::keys::ERROR);
 
     if (errorItem && PyPPLong_Check(errorItem))
     {
@@ -1003,10 +1002,10 @@ GtpyContextManager::initLoggingModuleC()
     GTPY_GIL_SCOPE
 
 #ifdef PY3K
-    initExtensionModule(GtpyGlobals::MODULE_GtLogging_C,
+    initExtensionModule(gtpy::code::modules::GT_LOGGING,
                         &GtpyLoggingModule::GtpyLogging_Module);
 #else
-    initExtensionModule(GtpyGlobals::MODULE_GtLogging_C,
+    initExtensionModule(gtpy::code::modules::GT_LOGGING,
                         GtpyLoggingModule::GtpyLoggingModule_StaticMethods);
 #endif
 }
@@ -1071,19 +1070,17 @@ GtpyContextManager::initWrapperModule()
 
 #ifdef PY3K
     auto mod = initExtensionModule(
-        GtpyGlobals::MODULE_GtObjectWrapperModuleC,
-        &GtpyExtendedWrapperModule::GtpyExtendedWrapper_Module
-        );
+        gtpy::code::modules::GT_OBJECT_WRAPPER_MODULE,
+        &GtpyExtendedWrapperModule::GtpyExtendedWrapper_Module);
 #else
-    auto mod = initExtensionModule(GtpyGlobals::MODULE_GtObjectWrapperModuleC,
-                                   nullptr);
+    auto mod = initExtensionModule(
+        gtpy::code::modules::GT_OBJECT_WRAPPER_MODULE, nullptr);
 #endif
 
     auto wrapperType = PyPPObject::NewRef(
         (PyObject*)&GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type);
 
-    PyPPModule_AddObject(mod,
-                         QSTRING_TO_CHAR_PTR(GtpyGlobals::GTOBJECT_WRAPPER),
+    PyPPModule_AddObject(mod, gtpy::code::classes::GTPY_EXTENDED_WRAPPER,
                          std::move(wrapperType));
 }
 
@@ -1150,7 +1147,7 @@ GtpyContextManager::lineOutOfMessage(const QString& message)
 }
 
 void
-GtpyContextManager::setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData mData)
+GtpyContextManager::setMetaDataToThreadDict(const StdOutMetaData& mData)
 {
     GTPY_GIL_SCOPE
 
@@ -1163,17 +1160,17 @@ GtpyContextManager::setMetaDataToThreadDict(GtpyGlobals::StdOutMetaData mData)
 
     {
         const auto key = PyPPObject::fromQString(mData.contextName);
-        PyPPDict_SetItem(threadDict, GtpyGlobals::CONTEXT_KEY, key);
+        PyPPDict_SetItem(threadDict, gtpy::code::keys::CONTEXT, key);
     }
 
     {
         const auto outputVal = PyPPObject::fromLong(mData.output ? 1 : 0);
-        PyPPDict_SetItem(threadDict, GtpyGlobals::OUTPUT_KEY, outputVal);
+        PyPPDict_SetItem(threadDict, gtpy::code::keys::OUTPUT, outputVal);
     }
 
     {
         const auto errorVal = PyPPObject::fromLong(mData.error ? 1 : 0);
-        PyPPDict_SetItem(threadDict, GtpyGlobals::ERROR_KEY, errorVal);
+        PyPPDict_SetItem(threadDict, gtpy::code::keys::ERROR, errorVal);
     }
 
 }
@@ -1229,7 +1226,7 @@ void
 GtpyContextManager::setMetaDataToThreadDict(int contextId, bool output,
                                             bool error)
 {
-    GtpyGlobals::StdOutMetaData metaData;
+    StdOutMetaData metaData;
 
     metaData.contextName = contextNameById(contextId);
     metaData.output = output;
@@ -1958,7 +1955,7 @@ GtpyContextManager::onErrorMessage(const QString& message)
         return;
     }
 
-    auto item = PyPPDict_GetItem(threadDict, GtpyGlobals::CONTEXT_KEY);
+    auto item = PyPPDict_GetItem(threadDict, gtpy::code::keys::CONTEXT);
 
     int contextId = -1;
 
@@ -1967,7 +1964,7 @@ GtpyContextManager::onErrorMessage(const QString& message)
         contextId = contextIdByName(PyPPString_AsQString(item));
     }
 
-    item = PyPPDict_GetItem(threadDict, GtpyGlobals::ERROR_KEY);
+    item = PyPPDict_GetItem(threadDict, gtpy::code::keys::ERROR);
 
     bool error = false;
 
