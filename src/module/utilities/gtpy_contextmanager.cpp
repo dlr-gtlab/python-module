@@ -655,6 +655,33 @@ GtpyContextManager::setPropertyValueFuncName() const
 }
 
 void
+GtpyContextManager::setLoggingPrefix(int contextId, const QString &prefix)
+{
+    GtpyContext* ctx = context(contextId);
+    if (!ctx)
+    {
+        gtError() << QObject::tr("Invalid contextId in "
+                                 "GtpyContextManager::setLoggingPrefix");
+        return;
+    }
+
+    ctx->setLoggingPrefix(prefix);
+}
+
+QString GtpyContextManager::loggingPrefix(int contextId) const
+{
+    GtpyContext const* ctx = context(contextId);
+    if (!ctx)
+    {
+        gtError() << QObject::tr("Invalid contextId in "
+                                 "GtpyContextManager::loggingPrefix");
+        return {};
+    }
+
+    return ctx->loggingPrefix();
+}
+
+void
 GtpyContextManager::initContexts()
 {
     if (m_contextsInitialized) return;
@@ -859,11 +886,18 @@ GtpyContextManager::createCustomModule(
     return !PythonQt::self()->hadError();
 }
 
-GtpyContext*
+GtpyContext const *
 GtpyContextManager::context(int contextId) const
 {
     return m_contextMap.value(contextId, nullptr).get();
 }
+
+GtpyContext *
+GtpyContextManager::context(int contextId)
+{
+    return m_contextMap.value(contextId, nullptr).get();
+}
+
 
 #ifdef PY3K
 PyPPObject
@@ -1836,7 +1870,9 @@ GtpyContextManager::stdOutRedirectCB(const QString& contextName,
             return;
         }
 
-        emit GtpyContextManager::instance()->pythonMessage(message, contextId);
+        auto prefix = GtpyContextManager::instance()->loggingPrefix(contextId);
+
+        emit GtpyContextManager::instance()->pythonMessage(message, contextId, prefix);
     }
 
     //    else
@@ -1861,7 +1897,9 @@ GtpyContextManager::stdErrRedirectCB(const QString& contextName,
         int contextId = GtpyContextManager::instance()->
                         contextIdByName(contextName);
 
-        emit GtpyContextManager::instance()->errorMessage(message, contextId);
+
+        auto prefix = GtpyContextManager::instance()->loggingPrefix(contextId);
+        emit GtpyContextManager::instance()->errorMessage(message, contextId, prefix);
 
         int line = lineOutOfMessage(message);
 
@@ -1940,7 +1978,8 @@ GtpyContextManager::onErrorMessage(const QString& message)
 
     if (error && contextId > -1)
     {
-        emit errorMessage(message, contextId);
+        auto prefix = GtpyContextManager::instance()->loggingPrefix(contextId);
+        emit errorMessage(message, contextId, prefix);
     }
 }
 

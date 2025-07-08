@@ -20,7 +20,9 @@
 
 struct GtpyModule::Impl
 {
-    QString moduleName{};
+    QString moduleName{};   // The name of the module used to import the module
+    QString loggingPrefix{}; // An arbitrary prefix used currently for logging,
+                             // e.g. to distiguish different nodes or calculators
     PyPPObject module{};
     static QMutex evalMutex;
 
@@ -147,6 +149,18 @@ const QString&
 GtpyModule::moduleName() const
 {
     return pimpl->moduleName;
+}
+
+void
+GtpyModule::setLoggingPrefix(const QString & prefix)
+{
+    pimpl->loggingPrefix = prefix;
+}
+
+const QString &
+GtpyModule::loggingPrefix() const
+{
+    return pimpl->loggingPrefix;
 }
 
 bool

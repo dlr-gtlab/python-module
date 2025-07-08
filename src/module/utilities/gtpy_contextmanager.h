@@ -234,6 +234,31 @@ public:
     QString setPropertyValueFuncName() const;
 
     /**
+     * @brief Sets the logging prefix of the context
+     *
+     * The prefix is appended to messages that are
+     * created by pythons `print` function via
+     * GTlab's logging system.
+     *
+     * For example, the python console prints it like
+     *    [myprefix] This is a message
+     *
+     * By default, the prefix is empty.
+     *
+     * @param prefix The prefix to set
+     */
+    void setLoggingPrefix(int contextId, const QString& prefix);
+
+    /**
+     * @brief Returns the logging prefix
+     *
+     * It is used by calculators/ tasks and nodes
+     * such that it is easier to locate the source
+     * of a print message
+     */
+    QString loggingPrefix(int contextId) const;
+
+    /**
     * @brief Initializes a Python context for each value of the enum Context.
     */
     void initContexts();
@@ -324,12 +349,14 @@ public:
      */
     bool initMatplotlib();
 
+    GtpyContext const * context(int contextId) const;
+
     /**
     * @brief Returns a pointer to the Python context indicated by contextId.
     * @param contextId Python context identifier.
     * @return Pointer to Python Context, nullptr if contextid is invalid
     */
-    GtpyContext* context(int contextId) const;
+    GtpyContext* context(int contextId);
 
 protected:
     /**
@@ -610,14 +637,14 @@ signals:
     * @param message Error message.
     * @param contextId Python context in which the error occurred.
     */
-    void errorMessage(const QString& message, int contextId);
+    void errorMessage(const QString& message, int contextId, const QString& messagePrefix);
 
     /**
     * @brief Sends python messages.
     * @param message Python message.
     * @param contextId Python context in which the message was occurred.
     */
-    void pythonMessage(const QString& message, int contextId);
+    void pythonMessage(const QString& message, int contextId, const QString& messagePrefix);
 
     /**
     * @brief Emitted if script evaluation starts.

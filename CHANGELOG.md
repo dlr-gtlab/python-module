@@ -11,11 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    The missing fileno() method of has been implemented.
    Note: the redirection using a file handle is not properly supported!
    Instead, the messages will be printed to a system terminal - #277
- 
- ### Added
- - Log messages in Python by passing an argument to the logging functions (e.g. gtDebug('debug message'), gtInfo('info message'), etc.). Logging via the lshift operator is still supported but is no longer recommended (e.g., gtDebug() << 'debug message'). - #595
- - Added env_vars() function to access GTlab environment variables from Python code. - #604
  - The Python Task and Calculator wizard no longer increases in height each time it is reopened. - #607
+
+### Added
+ - Log messages in Python by passing an argument to the logging functions (e.g. gtDebug('debug message'), gtInfo('info message'), etc.). Logging via the lshift operator is still supported but is no longer recommended (e.g., gtDebug() << 'debug message'). - #595
+ - Python messages are now prefixed with the task / calculator, where they are created.
+   This results in a much better usability when debugging the source of potential errors. - #606, #614
+ - Added env_vars() function to access GTlab environment variables from Python code. - #604
 
 ## [1.7.1] - 2025-04-23
 
