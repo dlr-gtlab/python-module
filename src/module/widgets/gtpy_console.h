@@ -61,8 +61,11 @@ public slots:
      * @param message Error message which should be shown.
      * @param contextId Id of the python context that triggered the error
      * message.
+     * @param messagePrefix A prefix to be prepended to a message,
+                            for example the name of a task.
+                            It used used to determine the source of the message.
      */
-    void stdErr(const QString& message, int contextId);
+    void stdErr(const QString& message, int contextId, const QString& messagePrefix="");
 
     /**
      * @brief Clears the console text.
@@ -208,7 +211,7 @@ private slots:
      * @param message Message which should be shown.
      * @param contextId Id of the python context that triggered the message.
      */
-    void stdOut(const QString& message, int contextId);
+    void stdOut(const QString& message, int contextId, const QString& messagePrefix="");
 
     /**
      * @brief Sets the cursor to the end of the console.

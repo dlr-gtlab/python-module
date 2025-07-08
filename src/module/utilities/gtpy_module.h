@@ -103,6 +103,19 @@ public:
     const QString& moduleName() const;
 
     /**
+     * @brief Sets the logging prefix. If not empty, message to the python
+     *        console via print() are prefixed using this prefix
+     */
+    void setLoggingPrefix(const QString&);
+
+    /**
+     * @brief Returns the logging prefix of the module
+     *        By default, the prefix is an empty string, unless
+     *        specified otherwise.
+     */
+    const QString& loggingPrefix() const;
+
+    /**
      * @brief Adds a set of functions defined by the provided PyMethodDef
      * array to the Python module associated with this instance. The functions
      * will be accessible from Python code under the names defined in the

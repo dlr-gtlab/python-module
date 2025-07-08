@@ -25,6 +25,16 @@
 
 #include "gtpy_console.h"
 
+namespace
+{
+    QString consolePrefix(const QString& messagePrefix)
+    {
+        if (messagePrefix.isEmpty()) return "";
+
+        return "[" + messagePrefix + "] ";
+    }
+
+} // namespace
 
 const QRegularExpression GtpyConsole::RE_KEYBOARD_INTERRUPT
 ("Traceback.*\\n(\\s*File.*\\n)+(.*\\n)?KeyboardInterrupt");
@@ -56,10 +66,10 @@ GtpyConsole::GtpyConsole(int contextId,
 
     m_python = GtpyContextManager::instance();
 
-    connect(m_python, SIGNAL(pythonMessage(const QString&, int)), this,
-            SLOT(stdOut(const QString&, int)));
-    connect(m_python, SIGNAL(errorMessage(const QString&, int)),
-            this, SLOT(stdErr(const QString&, int)));
+    connect(m_python, SIGNAL(pythonMessage(const QString&, int, const QString&)), this,
+            SLOT(stdOut(const QString&, int, const QString&)));
+    connect(m_python, SIGNAL(errorMessage(const QString&, int, const QString&)),
+            this, SLOT(stdErr(const QString&, int, const QString&)));
     connect(m_python, SIGNAL(startedScriptEvaluation(int)), this,
             SLOT(cursorToEnd(int)));
     connect(m_python, SIGNAL(scriptEvaluated(int)),
@@ -104,7 +114,7 @@ GtpyConsole::removeAdditionalContextOutput(int contextId)
 }
 
 void
-GtpyConsole::stdErr(const QString& message, int contextId)
+GtpyConsole::stdErr(const QString& message, int contextId, const QString& messagePrefix)
 {
     if (m_contextId == contextId ||
             m_additionalContextOutput.contains(contextId))
@@ -114,10 +124,11 @@ GtpyConsole::stdErr(const QString& message, int contextId)
         m_stdErr += message;
         int idx;
 
+        auto prefix = consolePrefix(messagePrefix);
         while ((idx = m_stdErr.indexOf('\n')) != -1)
         {
-            consoleMessage(m_stdErr.left(idx));
-            std::cerr << m_stdErr.left(idx).toLatin1().data() << std::endl;
+            consoleMessage(prefix + m_stdErr.left(idx));
+            std::cerr << prefix.toStdString() << m_stdErr.left(idx).toLatin1().data() << std::endl;
             m_stdErr = m_stdErr.mid(idx + 1);
         }
     }
@@ -662,7 +673,7 @@ GtpyConsole::hideKeyboardInterruptException()
 }
 
 void
-GtpyConsole::stdOut(const QString& message, int contextId)
+GtpyConsole::stdOut(const QString& message, int contextId, const QString& messagePrefix)
 {
     if (m_contextId == contextId ||
             (m_additionalContextOutput.contains(contextId)))
@@ -670,10 +681,11 @@ GtpyConsole::stdOut(const QString& message, int contextId)
         m_stdOut += message;
         int idx;
 
+        auto prefix = consolePrefix(messagePrefix);
         while ((idx = m_stdOut.indexOf('\n')) != -1)
         {
-            consoleMessage(m_stdOut.left(idx));
-            std::cout << m_stdOut.left(idx).toLatin1().data() << std::endl;
+            consoleMessage(prefix + m_stdOut.left(idx));
+            std::cout <<  prefix.toStdString() << m_stdOut.left(idx).toLatin1().data() << std::endl;
             m_stdOut = m_stdOut.mid(idx + 1);
         }
     }
