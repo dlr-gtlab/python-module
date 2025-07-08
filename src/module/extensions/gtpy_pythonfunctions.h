@@ -41,13 +41,13 @@ static PyMethodDef PROJECT_PATH_F_DEF[] =
         "projectPath() returns the current project path."
     },
     {
-        "envVars",
+        gtpy::code::funcs::ENV_VARS_F_NAME,
         (PyCFunction)envVars,
         METH_NOARGS,
         "envVars returns the GTlab environment variables."
     },
     {
-        gtpy::constants::FOOTPRINT_F_NAME,
+        gtpy::code::funcs::FOOTPRINT_F_NAME,
         (PyCFunction)footprint,
         METH_VARARGS | METH_KEYWORDS,
         "footprint(only_active=True)\n\n"

@@ -52,6 +52,7 @@ constexpr const char* SHARED_FUNC_IDS_F_NAME = "shared_function_ids";
 // predefined functions
 constexpr const char* PROJECT_PATH_F_NAME = "projectPath";
 constexpr const char* FOOTPRINT_F_NAME = "footprint";
+constexpr const char* ENV_VARS_F_NAME = "envVars";
 constexpr const char* IMPORT_GT_CALCULATORS = "importGtCalculators";
 
 // logging functions
