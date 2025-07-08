@@ -110,18 +110,20 @@ GtpyAbstractScriptComponent::GtpyAbstractScriptComponent() :
     };
 
     m_inputArgs.registerAllowedType(
-                createStructDef("str", makeWildcardStringProperty()));
+        createStructDef("str", makeWildcardStringProperty()));
     m_inputArgs.registerAllowedType(
-                createStructDef("int", gt::makeIntProperty(0)));
+        createStructDef("int", gt::makeIntProperty(0)));
     m_inputArgs.registerAllowedType(
-                createStructDef("float", gt::makeDoubleProperty(0.0)));
+        createStructDef("float", gt::makeDoubleProperty(0.0)));
+    m_inputArgs.registerAllowedType(
+        createStructDef("bool", gt::makeBoolProperty(false)));
 
     m_outputArgs.registerAllowedType(
-                createStructDef("str", gt::makeStringMonitoringProperty()));
+        createStructDef("str", gt::makeStringMonitoringProperty()));
     m_outputArgs.registerAllowedType(
-                createStructDef("int", gt::makeIntMonitoringProperty(0)));
+        createStructDef("int", gt::makeIntMonitoringProperty(0)));
     m_outputArgs.registerAllowedType(
-                createStructDef("float", gt::makeDoubleMonitoringProperty(0.0)));
+        createStructDef("float", gt::makeDoubleMonitoringProperty(0.0)));
 #endif
 
     // cppcheck-suppress useInitializationList
