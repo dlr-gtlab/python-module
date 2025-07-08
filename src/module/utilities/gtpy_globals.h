@@ -22,10 +22,10 @@ namespace gtpy
 namespace constants
 {
 
-    /// Collection
-    constexpr const char* COLLECTION_ID = "Python Script Collection";
-    constexpr const char* COLLECTION_CAT = "category";
-    constexpr const char* COLLECTION_SUBCAT = "subcategory";
+/// Collection
+constexpr const char* COLLECTION_ID = "Python Script Collection";
+constexpr const char* COLLECTION_CAT = "category";
+constexpr const char* COLLECTION_SUBCAT = "subcategory";
 
 } // namespace constants
 
