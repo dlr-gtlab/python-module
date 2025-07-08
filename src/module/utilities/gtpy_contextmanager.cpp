@@ -858,10 +858,10 @@ GtpyContextManager::createCustomModule(
     return !PythonQt::self()->hadError();
 }
 
-std::shared_ptr<GtpyContext>
+GtpyContext*
 GtpyContextManager::context(int contextId) const
 {
-    return m_contextMap.value(contextId, nullptr);
+    return m_contextMap.value(contextId, nullptr).get();
 }
 
 #ifdef PY3K
@@ -2029,4 +2029,10 @@ GtpyTypeConversion::convertToQMapStringQString(PyObject *obj, void *outMap,
                                                int, bool)
 {
     return pythonToMap<QString, QString>(obj, outMap);
+}
+
+GtpyContextManager&
+gtpyContextManager()
+{
+    return *GtpyContextManager::instance();
 }

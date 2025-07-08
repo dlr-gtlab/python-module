@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+ - Fixed an error, when a subprocess tries to redirect messages to the GTlab console.
+   The missing fileno() method of has been implemented.
+   Note: the redirection using a file handle is not properly supported!
+   Instead, the messages will be printed to a system terminal - #277
+ 
+ ### Added
+ - Log messages in Python by passing an argument to the logging functions (e.g. gtDebug('debug message'), gtInfo('info message'), etc.). Logging via the lshift operator is still supported but is no longer recommended (e.g., gtDebug() << 'debug message'). - #595
+ - Added env_vars() function to access GTlab environment variables from Python code. - #604
+ - The Python Task and Calculator wizard no longer increases in height each time it is reopened. - #607
+
 ## [1.7.1] - 2025-04-23
 
 ### Fixed
@@ -11,9 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    Now, the user is asked whether to store these changes or not. - #592
  - Fixed case-dependent python module detection - #601
  - Fixed error, when trying to redirect subprocess message - #277
-
-### Added
- - Log messages in Python by passing an argument to the logging functions (e.g. gtDebug('debug message'), gtInfo('info message'), etc.). Logging via the lshift operator is still supported but is no longer recommended (e.g., gtDebug() << 'debug message'). - #595
 
 ## [1.7.0] - 2025-04-07
 

@@ -332,6 +332,13 @@ public:
      */
     bool initMatplotlib();
 
+    /**
+    * @brief Returns a pointer to the Python context indicated by contextId.
+    * @param contextId Python context identifier.
+    * @return Pointer to Python Context, nullptr if contextid is invalid
+    */
+    GtpyContext* context(int contextId) const;
+
 protected:
     /**
     * @brief The GtpyContextManager constructor.
@@ -363,12 +370,6 @@ private:
      */
     bool createCustomModule(const QString& moduleName, const QString& code);
 
-    /**
-    * @brief Returns a pointer to the Python context indicated by contextId.
-    * @param contextId Python context identifier.
-    * @return Pointer to Python Context.
-    */
-    std::shared_ptr<GtpyContext> context(int contextId) const;
 
 #ifdef PY3K
     /**
@@ -650,6 +651,12 @@ signals:
     void contextDeleted(int contextId);
 
 };
+
+/**
+ * @brief Returns the context manager instance
+ */
+GT_PYTHON_EXPORT GtpyContextManager& gtpyContextManager();
+
 
 Q_DECLARE_METATYPE(GtpyContextManager::Context);
 
