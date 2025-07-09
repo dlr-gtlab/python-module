@@ -42,6 +42,9 @@ struct GtpyFunction
     int cursorOffset = 0;
 };
 
+namespace gtpy
+{
+
 /**
  * @brief The StdOutMetaData class
  */
@@ -51,6 +54,14 @@ struct StdOutMetaData
     bool output = false;
     bool error = false;
 };
+
+}
+
+namespace [[deprecated("Use gtpy instead")]] GtpyGlobals
+{
+    // GtpyGlobals::StdOutMetaData should be replaced by gtpy::StdOutMetaData
+    using StdOutMetaData = gtpy::StdOutMetaData;
+}
 
 /**
 * @brief The GtpyContextManager class
@@ -331,13 +342,13 @@ public:
      * @brief Retruns the meta data saved in thread dict.
      * @return The meta data saved in thread dict.
      */
-    StdOutMetaData threadDictMetaData();
+    gtpy::StdOutMetaData threadDictMetaData();
 
     /**
      * @brief Sets some meta data to the thread dict.
      * @param metaData
      */
-    void setMetaDataToThreadDict(const StdOutMetaData& mData);
+    void setMetaDataToThreadDict(const gtpy::StdOutMetaData& mData);
 
     /**
      * @brief Adds a list of paths to the sys.path list.

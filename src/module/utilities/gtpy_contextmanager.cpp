@@ -827,7 +827,7 @@ GtpyContextManager::interruptPyThread(long id)
     tp->start(runnable);
 }
 
-StdOutMetaData
+gtpy::StdOutMetaData
 GtpyContextManager::threadDictMetaData()
 {
     GTPY_GIL_SCOPE
@@ -839,7 +839,7 @@ GtpyContextManager::threadDictMetaData()
         return {};
     }
 
-    StdOutMetaData retval;
+    gtpy::StdOutMetaData retval;
 
     auto valItem = PyPPDict_GetItem(threadDict, gtpy::code::keys::CONTEXT);
 
@@ -1147,7 +1147,7 @@ GtpyContextManager::lineOutOfMessage(const QString& message)
 }
 
 void
-GtpyContextManager::setMetaDataToThreadDict(const StdOutMetaData& mData)
+GtpyContextManager::setMetaDataToThreadDict(const gtpy::StdOutMetaData& mData)
 {
     GTPY_GIL_SCOPE
 
@@ -1226,7 +1226,7 @@ void
 GtpyContextManager::setMetaDataToThreadDict(int contextId, bool output,
                                             bool error)
 {
-    StdOutMetaData metaData;
+    gtpy::StdOutMetaData metaData;
 
     metaData.contextName = contextNameById(contextId);
     metaData.output = output;
