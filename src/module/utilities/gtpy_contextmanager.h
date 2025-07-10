@@ -29,6 +29,7 @@ class GtObject;
 class GtTask;
 class GtpyDecorator;
 class GtpyScriptRunnable;
+class GtProject;
 
 /**
 * @brief The GtpyFunction struct
@@ -641,6 +642,15 @@ private slots:
      * @param collectionPath Path to script collection.
      */
     void collectionChanged(const QString& collectionPath);
+
+    /**
+     * @brief Updates the Python sys.path based on the passed project.
+     * It removes all project-specific Python modules paths from sys.path and
+     * adds the modules path for the passed project.
+     * @param project Pointer to the GtProject. If nullptr, no new
+     * path is added after clearing.
+     */
+    void onProjectChanged(GtProject* project);
 
 signals:
     /**

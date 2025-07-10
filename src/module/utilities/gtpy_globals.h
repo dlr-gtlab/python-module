@@ -11,7 +11,6 @@
 #ifndef GTPYGLOBALS_H
 #define GTPYGLOBALS_H
 
-
 #define PyObjectAPIReturn PyObject*
 
 #define gtDevMode() (gtApp && gtApp->devMode())
@@ -26,6 +25,7 @@ namespace constants
 constexpr const char* COLLECTION_ID = "Python Script Collection";
 constexpr const char* COLLECTION_CAT = "category";
 constexpr const char* COLLECTION_SUBCAT = "subcategory";
+constexpr const char* PROJ_PY_MODULES_DIR_NAME = "python_modules";
 
 } // namespace constants
 

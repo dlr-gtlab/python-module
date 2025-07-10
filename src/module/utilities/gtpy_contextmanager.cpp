@@ -50,6 +50,7 @@
 #include "gtpy_propertysetter.h"
 #include "gtpy_importfunction.h"
 #include "gtpy_calculatorsmodule.h"
+#include "gtpy_utils.h"
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 #include "gtpy_matplotlib.h"
@@ -177,6 +178,9 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     m_pyThreadState = PyEval_SaveThread();
 
     GtpyCustomization::customizeSlotCalling();
+
+    connect(gtApp, &GtCoreApplication::currentProjectChanged, this,
+            &GtpyContextManager::onProjectChanged);
 }
 
 GtpyContextManager*
@@ -1187,26 +1191,9 @@ GtpyContextManager::addModulePaths(const QStringList& paths)
 void
 GtpyContextManager::addModulePath(const QString& path)
 {
-    GTPY_GIL_SCOPE
-
-        auto pyPath = PyPPSys_GetObject("path");
-
-    if (!pyPath) return;
-
-    const auto pathObj = PyPPObject::fromQString(path);
-    bool equal = false;
-
-    for (int i = 0; !equal && i < Py_SIZE(pyPath.get()); i++)
-    {
-        const auto item = PyPPList_GetItem(pyPath, i);
-        equal = PyPPObject_RichCompareBool(item, pathObj, Py_EQ);
-    }
-
-    if (!equal)
-    {
-        PyPPList_Append(pyPath, pathObj);
-    }
+    gtpy::utils::addToSysPath(path);
 }
+
 
 bool GtpyContextManager::initMatplotlib()
 {
@@ -2016,6 +2003,23 @@ GtpyContextManager::collectionChanged(const QString& collectionPath)
 
         addModulePath(nativePath);
     }
+}
+
+void
+GtpyContextManager::onProjectChanged(GtProject* project)
+{
+    auto session = gtApp->session();
+    if (!session) return;
+
+    for (const auto* proj : session->projects())
+    {
+        if (!proj || proj == project) continue;
+        gtpy::utils::removeFromSysPath(gtpy::utils::projectPyModulesPath(proj));
+    }
+
+    if (!project) return;
+
+    gtpy::utils::addToSysPath(gtpy::utils::projectPyModulesPath(project));
 }
 
 PyObject*
