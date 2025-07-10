@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Python messages are now prefixed with the task / calculator, where they are created.
    This results in a much better usability when debugging the source of potential errors. - #606, #614
  - input_args for Python Tasks and Calculators supports boolean values. - #265
+ - The python_modules subdirectory of the current GTlab project is automatically added to Python’s sys.path.  
+   When the current project changes, the previous path is removed from sys.path and the new one is added. - #618
+
 
 ## [1.7.1] - 2025-04-23
 
