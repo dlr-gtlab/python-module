@@ -18,7 +18,6 @@
 
 #include "gtpy_regexp.h"
 #include "gtpy_contextmanager.h"
-#include "gtpy_contextmanager.h"
 
 namespace {
 
