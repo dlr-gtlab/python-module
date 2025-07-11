@@ -44,69 +44,71 @@ using namespace GtpyExtendedWrapperModule;
 
 namespace
 {
-    GtProject*
-    openProjectFromID(GtpyDecorator& decorator, GtCoreApplication* app,
-                      const QString& projectId)
+
+GtProject*
+openProjectFromID(GtpyDecorator& decorator, GtCoreApplication* app,
+                  const QString& projectId)
+{
+    if (projectId.isEmpty())
     {
-        if (projectId.isEmpty())
-        {
-            QString output = QStringLiteral("ERROR: ") +
-                             QObject::tr("project id is empty!");
+        QString output = QStringLiteral("ERROR: ") +
+                         QObject::tr("project id is empty!");
 
-            qWarning() << output;
-            emit decorator.sendErrorMessage(output);
-            return nullptr;
-        }
-
-        gtDebug() << QString("Opening project '%1'").arg(projectId);
-
-        GtProject* project = app->findProject(projectId);
-
-        if (!project)
-        {
-            QString output = QStringLiteral("ERROR: ") +
-                             QObject::tr("project not found!") +
-                             QStringLiteral(" (") + projectId + QStringLiteral(")");
-
-            qWarning() << output;
-            emit decorator.sendErrorMessage(output);
-            return nullptr;
-        }
-
-        return project;
+        qWarning() << output;
+        emit decorator.sendErrorMessage(output);
+        return nullptr;
     }
 
-    GtProject*
-    openProjectFromPath(GtpyDecorator& decorator, GtCoreApplication* app,
-                        const QString& projectPath)
+    gtDebug() << QString("Opening project '%1'").arg(projectId);
+
+    GtProject* project = app->findProject(projectId);
+
+    if (!project)
     {
-        if (!projectPath.endsWith(".gtlab"))
-        {
-            emit decorator.sendErrorMessage(
-                QObject::tr("ERROR: Invalid project file: %1").arg(projectPath));
-            return nullptr;
-        }
+        QString output = QStringLiteral("ERROR: ") +
+                         QObject::tr("project not found!") +
+                         QStringLiteral(" (") + projectId + QStringLiteral(")");
 
-        // project provider from file loader
-        if (projectPath.isEmpty())
-        {
-            return nullptr;
-        }
-
-        gtDebug() << QString("Opening project from path '%1'").arg(projectPath);
-
-        GtProjectProvider provider(projectPath);
-        GtProject* loadedProject = provider.project();
-
-        bool isNewProject = gtDataModel->newProject(loadedProject, false);
-
-        // the project already exists in the session, open this instead
-        auto projectInSession = gtDataModel->findProject(loadedProject->objectName());
-
-        if (!isNewProject) delete loadedProject;
-
-        return projectInSession;
+        qWarning() << output;
+        emit decorator.sendErrorMessage(output);
+        return nullptr;
     }
+
+    return project;
+}
+
+GtProject*
+openProjectFromPath(GtpyDecorator& decorator, GtCoreApplication* app,
+                    const QString& projectPath)
+{
+    if (!projectPath.endsWith(".gtlab"))
+    {
+        emit decorator.sendErrorMessage(
+            QObject::tr("ERROR: Invalid project file: %1").arg(projectPath));
+        return nullptr;
+    }
+
+    // project provider from file loader
+    if (projectPath.isEmpty())
+    {
+        return nullptr;
+    }
+
+    gtDebug() << QString("Opening project from path '%1'").arg(projectPath);
+
+    GtProjectProvider provider(projectPath);
+    GtProject* loadedProject = provider.project();
+
+    bool isNewProject = gtDataModel->newProject(loadedProject, false);
+
+    // the project already exists in the session, open this instead
+    auto projectInSession = gtDataModel->findProject(loadedProject->objectName());
+
+    if (!isNewProject) delete loadedProject;
+
+    return projectInSession;
+}
+
 } // namespace
 
 GtpyDecorator::GtpyDecorator(QObject* parent) : QObject(parent)
