@@ -650,7 +650,7 @@ private slots:
      * @param project Pointer to the GtProject. If nullptr, no new
      * path is added after clearing.
      */
-    void onProjectChanged(GtProject* project);
+    void onProjectChanged(GtProject* project) const;
 
 signals:
     /**

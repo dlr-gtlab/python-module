@@ -39,12 +39,12 @@ void addToSysPath(const QString& path);
 void removeFromSysPath(const QString& path);
 
 /**
- * @brief Returns the absolute path to the python modules directory inside the
+ * @brief Returns the absolute path to the python scripts directory inside the
  * given project's root directory.
  * @param project Pointer to the GtProject instance.
- * @return Absolute path to the python_modules directory.
+ * @return Absolute path to the python scripts directory.
  */
-QString projectPyModulesPath(const GtProject* project);
+QString projectPyScriptsPath(const GtProject* project);
 
 
 } // namespace utils

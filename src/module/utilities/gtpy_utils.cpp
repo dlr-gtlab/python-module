@@ -44,7 +44,7 @@ gtpy::utils::removeFromSysPath(const QString& path)
 {
     GTPY_GIL_SCOPE
 
-        auto pyPath = PyPPSys_GetObject("path");
+    auto pyPath = PyPPSys_GetObject("path");
     if (!pyPath) return;
 
     const auto pathObj = PyPPObject::fromQString(path);
@@ -65,10 +65,11 @@ gtpy::utils::removeFromSysPath(const QString& path)
 }
 
 QString
-gtpy::utils::projectPyModulesPath(const GtProject* project)
+gtpy::utils::projectPyScriptsPath(const GtProject* project)
 {
     if (!project) return {};
 
     QDir dir{project->path()};
-    return dir.absoluteFilePath(gtpy::constants::PROJ_PY_MODULES_DIR_NAME);
+    auto path = dir.absoluteFilePath(gtpy::constants::PROJ_PY_SCRIPTS_DIR);
+    return QDir::toNativeSeparators(path);
 }

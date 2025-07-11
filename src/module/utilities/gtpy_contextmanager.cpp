@@ -2006,7 +2006,7 @@ GtpyContextManager::collectionChanged(const QString& collectionPath)
 }
 
 void
-GtpyContextManager::onProjectChanged(GtProject* project)
+GtpyContextManager::onProjectChanged(GtProject* project) const
 {
     auto session = gtApp->session();
     if (!session) return;
@@ -2014,12 +2014,12 @@ GtpyContextManager::onProjectChanged(GtProject* project)
     for (const auto* proj : session->projects())
     {
         if (!proj || proj == project) continue;
-        gtpy::utils::removeFromSysPath(gtpy::utils::projectPyModulesPath(proj));
+        gtpy::utils::removeFromSysPath(gtpy::utils::projectPyScriptsPath(proj));
     }
 
     if (!project) return;
 
-    gtpy::utils::addToSysPath(gtpy::utils::projectPyModulesPath(project));
+    gtpy::utils::addToSysPath(gtpy::utils::projectPyScriptsPath(project));
 }
 
 PyObject*
