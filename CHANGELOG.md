@@ -22,7 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - The scripts/python subdirectory of the current GTlab project is now automatically added to Python’s sys.path.
    Python modules placed in this directory can be imported via the embedded Python interpreter in GTlab.
    When the current project changes, the previous path is removed from sys.path and the new one is added. - #618
- - Added env_vars() function to access GTlab environment variables from Python code. - #604
  - The Python function `GTlab.openProject` can now be used also with the project path argument.
    This automatically imports a project into the current session, if it is not yet imported.
    Example: `GTlab.openProject('/home/user/myproject/project.gtlab')` - #565
