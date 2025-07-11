@@ -14,7 +14,6 @@
 #include <QString>
 
 class GtProject;
-class GtSession;
 
 /**
  * Namespace for utility functions related to Python environment management.
