@@ -665,14 +665,14 @@ signals:
     * @param message Error message.
     * @param contextId Python context in which the error occurred.
     */
-    void errorMessage(const QString& message, int contextId, const QString& messagePrefix);
+    void errorMessage(const QString& message, int contextId, const QString& messagePrefix = {});
 
     /**
     * @brief Sends python messages.
     * @param message Python message.
     * @param contextId Python context in which the message was occurred.
     */
-    void pythonMessage(const QString& message, int contextId, const QString& messagePrefix);
+    void pythonMessage(const QString& message, int contextId, const QString& messagePrefix = {});
 
     /**
     * @brief Emitted if script evaluation starts.
