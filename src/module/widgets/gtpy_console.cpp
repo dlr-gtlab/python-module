@@ -767,6 +767,11 @@ GtpyConsole::onCodeExecuted(int contextId)
             append({});
             appendCommandPrompt(m_contextId);
         }
+        // check if the code was evaluated directly via the console's context
+        else if (contextId == m_contextId)
+        {
+            appendCommandPrompt(m_contextId);
+        }
     }
 }
 
