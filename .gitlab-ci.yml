@@ -102,8 +102,8 @@ testWin_2.0:
 
 testLinux_2.0:
   stage: test_2.0
-  tags: ["linux", "docker"]
-  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster:2.0.14
+  extends:
+    - .linuxdocker
   needs: ["linuxBuildDebug_2.0"]
   before_script:
     # update to latest dev tools
@@ -122,9 +122,7 @@ testLinux_2.0:
 
 code-coverage:
   stage: codequality
-  tags: ["linux", "docker"]
-  image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-buster:2.0.14
-  extends: 
+  extends:
     - .build-linux_20
   script:
     - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS -DBUILD_UNITTESTS=ON -DBUILD_WITH_COVERAGE=ON
@@ -149,7 +147,7 @@ check-license:
    stage: codequality
    tags: ["docker", "linux"]
    needs: []
-   image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/buster-dev
+   image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/bullseye-dev
    before_script:
     - python3 -m pip install reuse
    script:
@@ -161,7 +159,7 @@ check-license:
   stage: package
   tags: ["docker", "linux"]
   extends: [".run-master-and-tags"]
-  image: debian:buster
+  image: debian:bullseye-slim
   script:
     - cp -r install-$toolchain-dbg/* install-$toolchain
     - mv install-$toolchain gtlabpython-$toolchain
