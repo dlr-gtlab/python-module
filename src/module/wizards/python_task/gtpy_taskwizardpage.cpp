@@ -726,8 +726,8 @@ GtpyTaskWizardPage::addElement()
             GtCalculatorData calcData =
                 gtCalculatorFactory->calculatorData(entry);
 
-            if (calcData->isValid())
-            {
+            // if (calcData->isValid())
+            // {
                 if (gtDevMode() ||
                         calcData->status == GtCalculatorDataImpl::RELEASE)
                 {
@@ -752,7 +752,7 @@ GtpyTaskWizardPage::addElement()
                         act->setIcon(extendedData->icon);
                     }
                 }
-            }
+            // }
         }
     }
 
@@ -791,10 +791,10 @@ GtpyTaskWizardPage::actionTriggered(QObject* obj)
         GtCalculatorData calcData =
             gtCalculatorFactory->calculatorData(className);
 
-        if (!calcData->isValid())
-        {
-            return;
-        }
+        // if (!calcData->isValid())
+        // {
+        //     return;
+        // }
 
         QObject* newObj = calcData->metaData().newInstance();
 
