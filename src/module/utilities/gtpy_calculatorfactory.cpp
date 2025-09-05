@@ -15,6 +15,7 @@
 #include "gt_processfactory.h"
 #include "gt_calculatorfactory.h"
 #include "gt_task.h"
+#include "gtpy_threadscope.h"
 
 #include "gtpy_calculatorfactory.h"
 
@@ -31,14 +32,13 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
 {
     GtCalculator* calc = nullptr;
 
-    Py_BEGIN_ALLOW_THREADS
+    auto _ = GtpyThreadScope{};
 
     GtCalculatorData calcData =
         gtCalculatorFactory->calculatorData(className);
 
     if (!calcData)
     {
-        Py_BLOCK_THREADS
         return nullptr;
     }
 
@@ -49,7 +49,6 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
     // check here and only check whether the calculator is instantiable.
     // if (!calcData->isValid())
     // {
-    //     Py_BLOCK_THREADS
     //     return nullptr;
     // }
 
@@ -57,7 +56,6 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
 
     if (!newObj)
     {
-        Py_BLOCK_THREADS
         return nullptr;
     }
 
@@ -65,7 +63,6 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
 
     if (!calc)
     {
-        Py_BLOCK_THREADS
         delete newObj;
         return nullptr;
     }
@@ -94,9 +91,6 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
             parent->appendChild(calc);
         }, Qt::BlockingQueuedConnection);
     }
-
-    // cppcheck-suppress unknownMacro
-    Py_END_ALLOW_THREADS
 
     return calc;
 }
