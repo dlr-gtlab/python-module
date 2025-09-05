@@ -33,45 +33,39 @@ GtpyCalculatorFactory::createCalculator(const QString& className,
 
     Py_BEGIN_ALLOW_THREADS
 
-    //    if (parent != nullptr)
-    //    {
-    //        QList<GtCalculator*> calculators =
-    //                parent->findChildren<GtCalculator*>(objName);
-
-    //        foreach (GtCalculator* calculator, calculators)
-    //        {
-    //            if (className == QString::fromUtf8(calculator->
-    //                                     metaObject()->className()))
-    //            {
-    //                return calculator;
-    //            }
-    //        }
-    //    }
-
     GtCalculatorData calcData =
         gtCalculatorFactory->calculatorData(className);
 
-    if (calcData == nullptr)
+    if (!calcData)
     {
+        Py_BLOCK_THREADS
         return nullptr;
     }
 
-    if (!calcData->isValid())
-    {
-        return nullptr;
-    }
+    // GtCalculatorData::isValid() returns false if the version is null,
+    // or if the id or author of a calculator is empty. At this point, it is
+    // ok if no author is specified, e.g. this is the case for core calculators
+    // like GtExportToMementoCalculator. Therefore, we should remove this
+    // check here and only check whether the calculator is instantiable.
+    // if (!calcData->isValid())
+    // {
+    //     Py_BLOCK_THREADS
+    //     return nullptr;
+    // }
 
     QObject* newObj = calcData->metaData().newInstance();
 
-    if (newObj == nullptr)
+    if (!newObj)
     {
+        Py_BLOCK_THREADS
         return nullptr;
     }
 
     calc = qobject_cast<GtCalculator*>(newObj);
 
-    if (calc == nullptr)
+    if (!calc)
     {
+        Py_BLOCK_THREADS
         delete newObj;
         return nullptr;
     }
