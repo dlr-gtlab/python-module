@@ -55,10 +55,13 @@ gtpy::extension::func::envVars(PyObject* self)
 }
 
 /**
- * @brief return footprint of GTlab
- * @param only_active : true -> shows all active modules within the project
- *                      false ->shows all available modules within GTlab
- * @return map of module names and versions
+ * @brief By default, it returns the application footprint of GTlab, which is a
+ * map of loaded module names and their versions. If only_active is true,
+ * it returns only the modules that are part of the data model of the current
+ * project.
+ * @param only_active If true it returns the project footprint, otherwise
+ * it returns the application footprint. Defaults to false.
+ * @return A map of module names and their versions.
  */
 PyObjectAPIReturn
 gtpy::extension::func::footprint(PyObject* self, PyObject* args, PyObject* kwargs)
@@ -68,7 +71,7 @@ gtpy::extension::func::footprint(PyObject* self, PyObject* args, PyObject* kwarg
     static const char* kwlist[] = {"only_active", nullptr};
 
     // Parse the arguments
-    int onlyActive = 1; // Default value
+    int onlyActive = 0; // Default value
 
     // Parse the arguments
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|p:footprint",
@@ -82,11 +85,18 @@ gtpy::extension::func::footprint(PyObject* self, PyObject* args, PyObject* kwarg
                                                          GT_VERSION_MINOR,
                                                          GT_VERSION_PATCH).toString()));
 
-    const auto modules = onlyActive > 0 ?
-                         gtApp->moduleDatamodelInterfaceIds() :
-                         gtApp->moduleIds();
+    QStringList modules{};
 
-    for (const auto& mod : modules)
+    if (onlyActive == 0)
+    {
+        modules = gtApp->moduleIds();
+    }
+    else if (auto* proj = gtApp->currentProject())
+    {
+        modules = proj->moduleIds();
+    }
+
+    for (const auto& mod : qAsConst(modules))
     {
         PyPPDict_SetItem(versionMap,
                          PyPPObject::fromQString(mod),
