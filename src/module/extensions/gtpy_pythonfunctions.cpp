@@ -91,9 +91,9 @@ gtpy::extension::func::footprint(PyObject* self, PyObject* args, PyObject* kwarg
     {
         modules = gtApp->moduleIds();
     }
-    else if (auto* p = gtApp->currentProject())
+    else if (auto* proj = gtApp->currentProject())
     {
-        modules = p->moduleIds();
+        modules = proj->moduleIds();
     }
 
     for (const auto& mod : qAsConst(modules))
