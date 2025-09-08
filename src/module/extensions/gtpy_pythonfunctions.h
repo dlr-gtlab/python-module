@@ -50,10 +50,15 @@ static PyMethodDef PROJECT_PATH_F_DEF[] =
         gtpy::code::funcs::FOOTPRINT_F_NAME,
         (PyCFunction)footprint,
         METH_VARARGS | METH_KEYWORDS,
-        "footprint(only_active=True)\n\n"
-        "Returns the current application footprint map.\n"
+        "footprint(only_active=False)\n\n"
+        "Returns a map of module names and their versions.\n"
+        "By default, it returns the application footprint, which includes "
+        "all\navailable modules in GTlab.\n\n"
         "Optional keyword arguments:\n"
-        "only_active: If 'True', on the currently active modules are included"
+        "only_active : bool, optional\n"
+        "    If True, it returns only the modules that are part of the "
+        "current project's\n"
+        "    data model (project footprint). Defaults to False."
     },
     { nullptr, nullptr, 0, nullptr }
 };
