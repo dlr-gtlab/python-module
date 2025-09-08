@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+ - footprint() now correctly distinguishes between the application and project footprint.
+   By default, it returns the application footprint. When called with only_active=True,
+   it returns only the modules that are part of the data model of the current project. - #630
+
 ## [1.8.0] - 2025-07-11
 
 ### Fixed

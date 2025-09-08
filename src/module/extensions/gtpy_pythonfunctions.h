@@ -57,8 +57,8 @@ static PyMethodDef PROJECT_PATH_F_DEF[] =
         "Optional keyword arguments:\n"
         "only_active : bool, optional\n"
         "    If True, it returns only the modules that are part of the "
-        "current project's\n"
-        "    data model (project footprint). Defaults to False."
+        "data model\n"
+        "    of the current project. Defaults to False."
     },
     { nullptr, nullptr, 0, nullptr }
 };
