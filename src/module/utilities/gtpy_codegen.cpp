@@ -64,7 +64,7 @@ GtObjectMemento defaultCalcMemento(GtCalculator* calc)
     const auto calcData = gtCalculatorFactory->calculatorData(
         calc->metaObject()->className());
 
-    if (!calcData->isValid()) return GtObjectMemento{};
+    // if (!calcData->isValid()) return GtObjectMemento{};
 
     // create a new calculator instance to get the default memento
     std::unique_ptr<GtCalculator> defaultCalc(qobject_cast<GtCalculator*>(
