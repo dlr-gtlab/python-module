@@ -143,6 +143,31 @@ GtPythonModule::init()
     pyToolLayout->setSpacing(0);
     pyToolLayout->addStretch(1);
 
+
+    // start typing simulation button
+    // It's an invisible button located to the left of the Python console's
+    // clear button.
+    QPushButton* startTypingSimulationButton = new QPushButton;
+    startTypingSimulationButton->setMaximumSize(QSize(20, 20));
+    startTypingSimulationButton->setToolTip(tr("Start"));
+
+    startTypingSimulationButton->setStyleSheet(
+        "QPushButton {"
+        "  background: transparent;"
+        "  border: none;"
+        "  color: transparent;"
+        "}"
+        "QPushButton:hover { background: transparent; }"
+        );
+
+    startTypingSimulationButton->setIconSize(QSize(0, 0));
+
+    pyToolLayout->addWidget(startTypingSimulationButton);
+
+    connect(startTypingSimulationButton, SIGNAL(clicked(bool)), pythonConsole,
+            SLOT(startTypingSimulation()));
+
+
     // clear python console button
     QPushButton* pyClearButton = new QPushButton;
     pyClearButton->setIcon(GTPY_ICON(clear));
@@ -156,6 +181,7 @@ GtPythonModule::init()
     connect(pyClearButton, SIGNAL(clicked(bool)), pythonConsole,
             SLOT(clearConsole()));
 
+    pythonConsoleLayout->addLayout(pyToolLayout);
 
     if (!GtpyContextManager::instance()->initMatplotlib())
     {

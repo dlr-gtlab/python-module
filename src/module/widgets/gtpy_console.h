@@ -72,6 +72,8 @@ public slots:
      */
     void clearConsole();
 
+    void startTypingSimulation();
+
 protected:
     /**
      * @brief keyPressEvent Will be called after user pressed a key.

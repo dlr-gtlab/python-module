@@ -10,6 +10,12 @@
 
 #include "iostream"
 
+
+#include <QTimer>
+#include <QTest>
+#include <QTextEdit>
+#include <QRandomGenerator>
+
 #include <QAbstractItemView>
 #include <QToolTip>
 #include <QClipboard>
@@ -27,13 +33,93 @@
 
 namespace
 {
-    QString consolePrefix(const QString& messagePrefix)
-    {
-        if (messagePrefix.isEmpty()) return "";
 
-        return "[" + messagePrefix + "] ";
-    }
+QString consolePrefix(const QString& messagePrefix)
+{
+    if (messagePrefix.isEmpty()) return "";
 
+    return "[" + messagePrefix + "] ";
+}
+
+// Typing simulator with support for Enter, Shift+Enter, Down Arrow (↓),
+// Left Arrow (←) and Right Arrow (→)
+void simulateTyping(QTextEdit* console, QCompleter* completer,
+                    const QString& text, int startDelayMs = 3000)
+{
+    console->setFocus();
+    int index = 0;
+
+    QTimer* timer = new QTimer(console);
+
+    QObject::connect(timer, &QTimer::timeout, [=]() mutable {
+
+        if (index >= text.size())
+        {
+            timer->stop();
+            timer->deleteLater();
+            return;
+        }
+
+        QChar c = text[index];
+
+        QTextCursor cursor = console->textCursor();
+
+        if (c == '\n') // Enter
+        {
+            QTest::keyClick(console, Qt::Key_Return);
+        }
+        else if (c == '\r') // Shift+Enter
+        {
+            QTest::keyClick(console, Qt::Key_Return, Qt::ShiftModifier);
+        }
+        else if (c == QChar(0x2193)) // ↓ arrow symbol
+        {
+            if (completer && completer->popup()->isVisible())
+            {
+                QTest::keyClick(completer->popup(), Qt::Key_Down);
+                timer->setInterval(1000); // 1s pause after ↓
+                index++;
+                return;
+            }
+        }
+        else if (c == QChar(0x2190)) // ← arrow symbol
+        {
+            cursor.movePosition(QTextCursor::Left);
+            console->setTextCursor(cursor);
+        }
+        else if (c == QChar(0x2192)) // → arrow symbol
+        {
+            cursor.movePosition(QTextCursor::Right);
+            console->setTextCursor(cursor);
+        }
+        else
+        {
+            QTest::keyClick(console, c.toLatin1());
+        }
+
+        index++;
+
+        // Randomized human-like delay
+        int baseDelay = 120;
+        int randomExtra = QRandomGenerator::global()->bounded(200);
+        int delay = baseDelay + randomExtra;
+
+        if (c == ':' || c == ')' || c == ',' || c == '{' || c == '}')
+        {
+            delay += QRandomGenerator::global()->bounded(100, 250);
+        }
+        if (c == '\n' || c == '\r' || c == QChar(0x2193))
+        {
+            delay += QRandomGenerator::global()->bounded(200, 400);
+        }
+
+        timer->setInterval(delay);
+    });
+
+    QTimer::singleShot(startDelayMs, [=]() {
+        timer->start(150);
+    });
+}
 } // namespace
 
 const QRegularExpression GtpyConsole::RE_KEYBOARD_INTERRUPT
@@ -139,6 +225,17 @@ GtpyConsole::clearConsole()
 {
     QTextEdit::clear();
     appendCommandPrompt(m_contextId);
+}
+
+void
+GtpyConsole::startTypingSimulation()
+{
+    simulateTyping(this, m_cpl,
+                   "graphs = cur↓\n.Intell↓\n.Gra↓\n\n"
+                   "my_graph = graphs.my↓\n\n"
+                   "my_\n.objectn↓\n\n"
+                   "my_\n.objectn\n = 'Graph'\n"
+                   "my_\n.is↓↓\n←False\n", 2000);
 }
 
 void
