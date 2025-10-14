@@ -23,7 +23,6 @@
 #include "gtpy_calculatorfactory.h"
 #include "gtpy_decorator.h"
 #include "gtpy_gilscope.h"
-#include "gtpy_extendedwrapper.h"
 
 #include "gtpy_calculatorsmodule.h"
 #include "gtpypp.h"
@@ -293,10 +292,10 @@ GtpyCreateCalculator_Call(PyObject* func, PyObject* args_py,
         }
     }
 
-    GtpyCalculatorFactory fac;
+    GtpyCalculatorFactory fac{};
 
-    GtCalculator* calc =
-        fac.createCalculator(calcClassName(f), objName, parentTask);
+    auto* calc = fac.createCalculator(calcClassName(f), objName, parentTask);
+    if (!calc) Py_RETURN_NONE;
 
     return GtpyDecorator::wrapGtObject(calc).release();
 }
