@@ -700,6 +700,8 @@ GtpyConsole::cursorToEnd(int contextId)
         QTextCursor cursor = this->textCursor();
         cursor.movePosition(QTextCursor::End);
         setTextCursor(cursor);
+
+        m_cursorPosition = textCursor().position();
     }
 }
 
@@ -757,15 +759,19 @@ GtpyConsole::onCodeExecuted(int contextId)
             stdErr("\n", m_contextId);
         }
 
-        bool messageInserted = (textCursor().position() != m_cursorPosition);
+        cache.flush();
 
-        if (messageInserted)
+        // check if anything has been printed
+        if ((textCursor().position() != m_cursorPosition))
         {
-            cache.flush();
-            append(QString());
+            append({});
+            appendCommandPrompt(m_contextId);
         }
-
-        appendCommandPrompt(m_contextId);
+        // check if the code was evaluated directly via the console's context
+        else if (contextId == m_contextId)
+        {
+            appendCommandPrompt(m_contextId);
+        }
     }
 }
 
