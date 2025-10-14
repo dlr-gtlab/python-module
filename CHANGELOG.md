@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+ - footprint() now correctly distinguishes between the application and project footprint.
+   By default, it returns the application footprint. When called with only_active=True,
+   it returns only the modules that are part of the data model of the current project. - #630
  - Fixed a crash when creating a calculator with missing author information in a Python Task - #627
-   
+
 ## [1.8.0] - 2025-07-11
 
 ### Fixed
