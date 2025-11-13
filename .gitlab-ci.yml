@@ -40,7 +40,7 @@ windowsBuildDebug_2.0:
   script:
     - $env:path = "$env:GTLAB_DEV_TOOLS\ThirdPartyLibraries\Python\Python_39;$env:path"
     - $env:PATH+=(";.\build;"+$env:GTLAB_DEV_TOOLS+"\binDebug;"+$env:GTLAB_DEV_TOOLS+"\binDebug\modules;")
-    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2019-dbg -DGTLAB_DEVTOOLS_DIR="$env:GTLAB_DEV_TOOLS" -DBUILD_UNITTESTS=ON
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-msvc2019-dbg -DGTlabDevtools_ROOT="$env:GTLAB_DEV_TOOLS" -DBUILD_UNITTESTS=ON
     - cmake --build build --target install
 
 windowsBuildRelease_2.0:
@@ -49,7 +49,7 @@ windowsBuildRelease_2.0:
     - .build-win_20
     - .run-master-and-tags
   script:
-    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-msvc2019 -DGTLAB_DEVTOOLS_DIR="$env:GTLAB_DEV_TOOLS"
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-msvc2019 -DGTlabDevtools_ROOT="$env:GTLAB_DEV_TOOLS"
     - cmake --build build --target install
     
 linuxBuildDebug_2.0:
@@ -57,7 +57,7 @@ linuxBuildDebug_2.0:
   extends: 
     - .build-linux_20
   script:
-    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-linux-dbg -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS  -DBUILD_UNITTESTS=ON
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install-linux-dbg -DGTlabDevtools_ROOT=$GTLAB_DEV_TOOLS  -DBUILD_UNITTESTS=ON
     - cmake --build build --target install
  
 linuxBuildRelease_2.0:
@@ -66,7 +66,7 @@ linuxBuildRelease_2.0:
     - .build-linux_20
     - .run-master-and-tags
   script:
-    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-linux -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS 
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install-linux -DGTlabDevtools_ROOT=$GTLAB_DEV_TOOLS 
     - cmake --build build --target install
 
 # run tests using the binary built before
@@ -125,7 +125,7 @@ code-coverage:
   extends:
     - .build-linux_20
   script:
-    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DGTLAB_DEVTOOLS_DIR=$GTLAB_DEV_TOOLS -DBUILD_UNITTESTS=ON -DBUILD_WITH_COVERAGE=ON
+    - cmake -B build -S . -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DGTlabDevtools_ROOT=$GTLAB_DEV_TOOLS -DBUILD_UNITTESTS=ON -DBUILD_WITH_COVERAGE=ON
     - cd build
     - LD_LIBRARY_PATH="$GTLAB_DEV_TOOLS/binDebug" ninja test-coverage
     - mv test-coverage ..
