@@ -108,6 +108,10 @@ gtpy::module_upgrader::to_2_0_0::run(QDomElement& root,
     QList<QDomElement> calcElements;
     findElementsByClass(root, {"GtpyScriptCalculator", "GtpyTask"}, calcElements);
 
+    if (calcElements.isEmpty()) return true;
+
+    gtTrace() << QObject::tr("Update task file") << targetPath;
+
     for (auto e : calcElements)
     {
         normalizePropertyContainer(e);
