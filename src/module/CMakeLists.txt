@@ -217,6 +217,7 @@ target_link_libraries(GTlabPython
     Qt5::Svg
     GTlab::Logging
     GTlab::Core
+    GTlab::ResourceModule
     PUBLIC
     PythonQt::PythonQt
 )
