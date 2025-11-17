@@ -13,49 +13,54 @@
 #include "gt_logging.h"
 
 namespace {
-
+    // internal helper
     void findElementsByClass(const QDomNode& node,
-                             const QStringList& classNames,
-                             QList<QDomElement>& results)
+                                    const QStringList& classNames,
+                                    QList<QDomElement>& results)
     {
         QDomNode child = node.firstChild();
-        while (!child.isNull()) {
-
-            if (child.isElement()) {
+        while (!child.isNull())
+        {
+            if (child.isElement())
+            {
                 QDomElement elem = child.toElement();
+                if (!elem.isNull())
+                {
+                    QString c = elem.attribute("class");
 
-                if (!elem.isNull()) {
-                    QString classValue = elem.attribute("class");
-
-                    if (classNames.contains(classValue)) {
+                    if (classNames.contains(c))
+                    {
                         results.append(elem);
-                        // laut deiner Anforderung:
-                        // solche Einträge haben KEINE weiteren relevanten Untereinträge,
-                        // aber wir durchsuchen trotzdem nicht den Baum *innerhalb* dieses Elements:
+
+                        // depth is enough
                         child = child.nextSibling();
                         continue;
                     }
                 }
             }
 
-            // rekursiv in die nächste Ebene
             findElementsByClass(child, classNames, results);
-
             child = child.nextSibling();
         }
     }
 
-    void normalizePropertyContainer(QDomElement container)
+    void normalizePropertyContainer(QDomElement container,
+                                    QMap<QString, QString>& replaceMap)
     {
         QDomNode child = container.firstChild();
 
-        while (!child.isNull()) {
-            if (child.isElement()) {
+        while (!child.isNull())
+        {
+            if (child.isElement())
+            {
                 QDomElement prop = child.toElement();
 
-                if (prop.tagName() == "property") {
+                if (prop.tagName() == "property")
+                {
 
-                    // 1. find sub propety "name"
+                    QString oldUUID = prop.attribute("name");
+
+                    // Search for sub element <property name="name">NewName</property>
                     QDomElement nameElem;
                     QDomNode sub = prop.firstChild();
 
@@ -77,10 +82,13 @@ namespace {
                     {
                         QString newName = nameElem.text().trimmed();
 
-                        // 2. name="UUID" → name="OP"
+                        // keep connection info
+                        replaceMap.insert(oldUUID, newName);
+
+                        // Replace UUID in name attribute
                         prop.setAttribute("name", newName);
 
-                        // 3. Remove sub property <property name="name">…</property>
+                        // Remove subelement
                         prop.removeChild(nameElem);
                     }
                 }
@@ -90,6 +98,66 @@ namespace {
         }
     }
 
+    void replaceUUIDsInTextNodes(QDomNode node,
+                                 const QMap<QString, QString>& replaceMap)
+    {
+        QDomNode child = node.firstChild();
+
+        while (!child.isNull())
+        {
+
+            if (child.isText())
+            {
+                QString txt = child.nodeValue();
+                QString newTxt = txt;
+
+                for (auto it = replaceMap.begin(); it != replaceMap.end(); ++it)
+                {
+                    newTxt.replace(it.key(), it.value());
+                }
+
+                if (newTxt != txt)
+                    child.setNodeValue(newTxt);
+            }
+
+            replaceUUIDsInTextNodes(child, replaceMap);
+            child = child.nextSibling();
+        }
+    }
+
+    // Main function:
+    // root: documentElement()
+    // classNames: z.B. {"MyCalc", "MyTask"}
+    void process(QDomElement root,
+                 const QStringList& classNames)
+    {
+        QList<QDomElement> found;
+
+        // Step 1: Find elements with class=...
+        findElementsByClass(root, classNames, found);
+
+        // Step 2: Replace UUIDs in input/output_args and build map
+        QMap<QString, QString> replaceMap;
+
+        for (QDomElement& elem : found)
+        {
+            QDomElement c = elem.firstChildElement("property-container");
+            while (!c.isNull()) {
+                QString name = c.attribute("name");
+
+                if (name == "input_args" ||
+                    name == "output_args")
+                {
+                    normalizePropertyContainer(c, replaceMap);
+                }
+
+                c = c.nextSiblingElement("property-container");
+            }
+        }
+
+        // Step 3: Replace all uuids in the document
+        replaceUUIDsInTextNodes(root, replaceMap);
+    }
 }
 
 bool
@@ -105,17 +173,7 @@ gtpy::module_upgrader::to_2_0_0::run(QDomElement& root,
         return false;
     }
 
-    QList<QDomElement> calcElements;
-    findElementsByClass(root, {"GtpyScriptCalculator", "GtpyTask"}, calcElements);
-
-    if (calcElements.isEmpty()) return true;
-
-    gtTrace() << QObject::tr("Update task file") << targetPath;
-
-    for (auto e : calcElements)
-    {
-        normalizePropertyContainer(e);
-    }
+    process(root, {"GtpyScriptCalculator", "GtpyTask"});
 
     return true;
 }
