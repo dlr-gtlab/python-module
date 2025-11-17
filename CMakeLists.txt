@@ -51,6 +51,7 @@ endif(BUILD_WITH_COVERAGE)
 add_subdirectory(src/module)
 add_subdirectory(src/setup_module)
 add_subdirectory(src/batch)
+add_subdirectory(src/resource_module)
 
 if (BUILD_UNITTESTS)
     enable_testing()

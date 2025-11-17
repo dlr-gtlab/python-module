@@ -27,7 +27,10 @@
 #include "gtpy_globals.h"
 #include "gtpy_icons_compat.h"
 
+#include "gt/resource/module.h"
+
 // data model classes
+#include "gtpy_scriptpackage.h"
 
 // calculator classes
 #include "gtpy_scriptcalculator.h"
@@ -37,6 +40,7 @@
 
 // ui classes
 #include "gtpy_console.h"
+#include "gtpy_scriptpackageui.h"
 
 // mdi items
 #include "gt_extendedcalculatordata.h"
@@ -225,9 +229,7 @@ GtPythonModule::tasks()
 QList<QMetaObject>
 GtPythonModule::mdiItems()
 {
-    QList<QMetaObject> metaData;
-
-    return metaData;
+    return gt::resource::Module{}.mdiItems();
 }
 
 QList<QMetaObject>
@@ -241,7 +243,18 @@ GtPythonModule::dockWidgets()
 QMap<const char*, QMetaObject>
 GtPythonModule::uiItems()
 {
-    return {};
+    QMap<const char*, QMetaObject> map;
+
+    map.insert(GT_CLASSNAME(GtpyScriptPackage),
+               GT_METADATA(GtpyScriptPackageUI));
+
+    auto resModUiItems = gt::resource::Module{}.uiItems();
+    for (auto it = resModUiItems.cbegin(); it != resModUiItems.cend(); ++it)
+    {
+        map.insert(it.key(), it.value());
+    }
+
+    return map;
 }
 
 QList<QMetaObject>
@@ -325,7 +338,26 @@ QList<gt::SharedFunction> GtPythonModule::sharedFunctions() const
 
     return result;
 }
+
 #endif
+
+QMetaObject
+GtPythonModule::package()
+{
+    return GT_METADATA(GtpyScriptPackage);
+}
+
+QList<QMetaObject>
+GtPythonModule::data()
+{
+    return gt::resource::Module{}.data();
+}
+
+bool
+GtPythonModule::standAlone()
+{
+    return true;
+}
 
 namespace PythonExecution
 {

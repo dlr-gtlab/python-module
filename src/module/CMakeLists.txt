@@ -28,12 +28,14 @@ set(HEADERS
     collection/localwidget/items/gtpy_abstractlocalitem.h
     collection/localwidget/items/gtpy_collapsiblelocalitem.h
     collection/localwidget/items/gtpy_localitem.h
+    data/gtpy_scriptpackage.h
     extensions/gtpy_pythonfunctions.h
     gt_compat.h
     gt_python.h
     gt_pythonmodule_exports.h
     gtpy_icons_compat.h
     gtpy_stylesheet_compat.h
+    gui/ui/gtpy_scriptpackageui.h
     models/gtpy_completermodel.h
     models/gtpy_objectmodel.h
     models/gtpy_taskstylemodel.h
@@ -108,8 +110,10 @@ set(SOURCES
     collection/localwidget/items/gtpy_abstractlocalitem.cpp
     collection/localwidget/items/gtpy_collapsiblelocalitem.cpp
     collection/localwidget/items/gtpy_localitem.cpp
+    data/gtpy_scriptpackage.cpp
     extensions/gtpy_pythonfunctions.cpp
     gt_python.cpp
+    gui/ui/gtpy_scriptpackageui.cpp
     models/gtpy_completermodel.cpp
     models/gtpy_objectmodel.cpp
     models/gtpy_taskstylemodel.cpp
@@ -193,7 +197,9 @@ target_include_directories(GTlabPython PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/collection/itemwidget>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/collection/localwidget>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/collection/localwidget/items>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/data>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/extensions>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gui/ui>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/models>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/post>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/processcomponents>

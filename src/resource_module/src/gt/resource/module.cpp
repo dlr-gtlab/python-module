@@ -98,10 +98,8 @@ Module::mdiItems()
 
 QList<QMetaObject>
 Module::dockWidgets()
-{
-    QList<QMetaObject> list;
-
-    return list;
+{   
+    return {};
 }
 
 QMap<const char*, QMetaObject>
