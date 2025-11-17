@@ -15,8 +15,9 @@
 namespace {
     // internal helper
     void findElementsByClass(const QDomNode& node,
-                                    const QStringList& classNames,
-                                    QList<QDomElement>& results)
+                             const QStringList& classNames,
+                             QList<QDomElement>& results,
+                             bool allowNestedClassElements = false)
     {
         QDomNode child = node.firstChild();
         while (!child.isNull())
@@ -32,20 +33,23 @@ namespace {
                     {
                         results.append(elem);
 
-                        // depth is enough
-                        child = child.nextSibling();
-                        continue;
+                        if (!allowNestedClassElements)
+                        {
+                            child = child.nextSibling();
+                            continue;
+                        }
                     }
                 }
             }
 
-            findElementsByClass(child, classNames, results);
+            findElementsByClass(child, classNames, results, allowNestedClassElements);
             child = child.nextSibling();
         }
     }
 
-    void normalizePropertyContainer(QDomElement container,
-                                    QMap<QString, QString>& replaceMap)
+    void normalizePropertyContainerId(
+        QDomElement container, QString const& formerNameKey,
+        QMap<QString, QString>& replaceMap)
     {
         QDomNode child = container.firstChild();
 
@@ -57,10 +61,9 @@ namespace {
 
                 if (prop.tagName() == "property")
                 {
-
                     QString oldUUID = prop.attribute("name");
 
-                    // Search for sub element <property name="name">NewName</property>
+                    // Search for sub element <property name="$$formerNameKey$$">NewName</property>
                     QDomElement nameElem;
                     QDomNode sub = prop.firstChild();
 
@@ -69,7 +72,7 @@ namespace {
                         if (sub.isElement())
                         {
                             QDomElement e = sub.toElement();
-                            if (e.attribute("name") == "name")
+                            if (e.attribute("name") == formerNameKey)
                             {
                                 nameElem = e;
                                 break;
@@ -124,40 +127,6 @@ namespace {
             child = child.nextSibling();
         }
     }
-
-    // Main function:
-    // root: documentElement()
-    // classNames: z.B. {"MyCalc", "MyTask"}
-    void process(QDomElement root,
-                 const QStringList& classNames)
-    {
-        QList<QDomElement> found;
-
-        // Step 1: Find elements with class=...
-        findElementsByClass(root, classNames, found);
-
-        // Step 2: Replace UUIDs in input/output_args and build map
-        QMap<QString, QString> replaceMap;
-
-        for (QDomElement& elem : found)
-        {
-            QDomElement c = elem.firstChildElement("property-container");
-            while (!c.isNull()) {
-                QString name = c.attribute("name");
-
-                if (name == "input_args" ||
-                    name == "output_args")
-                {
-                    normalizePropertyContainer(c, replaceMap);
-                }
-
-                c = c.nextSiblingElement("property-container");
-            }
-        }
-
-        // Step 3: Replace all uuids in the document
-        replaceUUIDsInTextNodes(root, replaceMap);
-    }
 }
 
 bool
@@ -173,7 +142,32 @@ gtpy::module_upgrader::to_2_0_0::run(QDomElement& root,
         return false;
     }
 
-    process(root, {"GtpyScriptCalculator", "GtpyTask"});
+    QList<QDomElement> found;
+
+    // Step 1: Find elements with class=...
+    findElementsByClass(root, {"GtpyScriptCalculator", "GtpyTask"}, found);
+
+    // Step 2: Replace UUIDs in input/output_args and build map
+    QMap<QString, QString> replaceMap;
+
+    for (QDomElement& elem : found)
+    {
+        QDomElement c = elem.firstChildElement("property-container");
+        while (!c.isNull()) {
+            QString name = c.attribute("name");
+
+            if (name == "input_args" ||
+                name == "output_args")
+            {
+                normalizePropertyContainerId(c, "name", replaceMap);
+            }
+
+            c = c.nextSiblingElement("property-container");
+        }
+    }
+
+    // Step 3: Replace all uuids in the document
+    replaceUUIDsInTextNodes(root, replaceMap);
 
     return true;
 }
