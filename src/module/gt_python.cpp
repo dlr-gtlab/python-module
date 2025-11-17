@@ -332,20 +332,12 @@ QList<gt::SharedFunction> GtPythonModule::sharedFunctions() const
 QList<gt::VersionUpgradeRoutine>
 GtPythonModule::upgradeRoutines() const
 {
-    GtVersionNumber current = const_cast<GtPythonModule*>(this)->version();
-
-    if(current >= GtVersionNumber(2, 0, 0))
-    {
-        return
-            {
+    return {
 #if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
                 gt::VersionUpgradeRoutine {GtVersionNumber(2, 0, 0),
                                           &gtpy::module_upgrader::to_2_0_0::run}
 #endif
-            };
-    }
-
-    return {};
+    };
 }
 
 
