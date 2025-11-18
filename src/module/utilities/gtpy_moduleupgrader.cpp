@@ -19,6 +19,22 @@ namespace {
                              QList<QDomElement>& results,
                              bool allowNestedClassElements = false)
     {
+        if (node.isElement())
+        {
+            QDomElement elem = node.toElement();
+            if (!elem.isNull())
+            {
+                QString c = elem.attribute("class");
+
+                if (classNames.contains(c))
+                {
+                    results.append(elem);
+
+                    if (!allowNestedClassElements) return;
+                }
+            }
+        }
+
         QDomNode child = node.firstChild();
         while (!child.isNull())
         {
