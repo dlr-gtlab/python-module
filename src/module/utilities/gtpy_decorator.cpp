@@ -1037,6 +1037,59 @@ GtpyDecorator::getPropertyContainerVal(GtObject* obj, QString const& id,
 
     return structCon.getMemberValToVariant(memberId);
 }
+QVariant
+GtpyDecorator::getPropertyContainerVal (GtObject* obj,
+                                        const QString& id,
+                                        const QString& entryId,
+                                        const QString& memberId)
+{
+    GtPropertyStructContainer* s = structContainerOfObject(obj, id);
+
+    if (!s)
+    {
+        gtError() << __func__ << " -> PropertyStruct container of "
+                                 "object not found!";
+        return {};
+    }
+
+    for (int index = 0; index < s->size(); ++index)
+    {
+        if (s->at(index).ident() == entryId)
+        {
+            GtPropertyStructInstance& structCon = s->at(index);
+
+            return structCon.getMemberValToVariant(memberId);
+        }
+    }
+
+    gtError() << __func__ << tr("-> Cannot get parameter %1 of entry %2"
+                                "in container %3").arg(memberId, entryId, id);
+
+    return {};
+}
+
+QStringList
+GtpyDecorator::getPropertyContainerEntryIds(GtObject* obj,
+                                            const QString& containerId)
+{
+    GtPropertyStructContainer* s = structContainerOfObject(obj, containerId);
+
+    if (!s)
+    {
+        gtError() << __func__ << " -> PropertyStruct container of "
+                                 "object not found!";
+        return {};
+    }
+
+    QStringList retVal;
+
+    for (int var = 0; var < s->size(); ++var)
+    {
+        retVal << s->at(var).ident();
+    }
+
+    return retVal;
+}
 
 bool
 GtpyDecorator::setPropertyContainerVal(GtObject* obj, const QString& id,
@@ -1059,11 +1112,42 @@ GtpyDecorator::setPropertyContainerVal(GtObject* obj, const QString& id,
         return false;
     }
 
-
     GtPropertyStructInstance& structCon = s->at(index);
 
     return structCon.setMemberVal(memberId, val);
 }
+
+bool
+GtpyDecorator::setPropertyContainerVal(GtObject* obj, const QString& id,
+                                       const QString& entryId,
+                                       const QString& memberId,
+                                       const QVariant& val)
+{
+    GtPropertyStructContainer* s = structContainerOfObject(obj, id);
+
+    if (!s)
+    {
+        gtError() << __func__ << " -> PropertyStruct container of "
+                                 "object not found!";
+        return false;
+    }
+
+    for (int index = 0; index < s->size(); ++index)
+    {
+        if (s->at(index).ident() == entryId)
+        {
+            GtPropertyStructInstance& structCon = s->at(index);
+
+            return structCon.setMemberVal(memberId, val);
+        }
+    }
+
+    gtError() << __func__ << tr("-> Cannot set parameter %1 of entry %2"
+                                "in container %3").arg(memberId, entryId, id);
+
+    return false;
+}
+
 #endif
 QList<GtAbstractProperty*>
 GtpyDecorator::findGtProperties(GtObject* obj)
