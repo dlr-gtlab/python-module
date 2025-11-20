@@ -12,7 +12,9 @@
 
 #include "gt/resource/data/package.h"
 #include "gt/resource/data/file.h"
+#include "gt/resource/data/projectfile.h"
 #include "gt/resource/data/directory.h"
+#include "gt/resource/data/projectdirectory.h"
 #include "gt/resource/data/httpresource.h"
 #include "gt/resource/data/helper/filecontent.h"
 
@@ -71,8 +73,10 @@ Module::data()
     QList<QMetaObject> list;
 
     list << GT_METADATA(File);
+    list << GT_METADATA(ProjectFile);
     list << GT_METADATA(helper::FileContent);
     list << GT_METADATA(Directory);
+    list << GT_METADATA(ProjectDirectory);
     list << GT_METADATA(HttpResource);
 
     return list;
@@ -112,7 +116,9 @@ Module::uiItems()
 
     map.insert(GT_CLASSNAME(Package), GT_METADATA(PackageUI));
     map.insert(GT_CLASSNAME(File), GT_METADATA(FileUI));
+    map.insert(GT_CLASSNAME(ProjectFile), GT_METADATA(FileUI));
     map.insert(GT_CLASSNAME(Directory),GT_METADATA(DirectoryUI));
+    map.insert(GT_CLASSNAME(ProjectDirectory),GT_METADATA(DirectoryUI));
     map.insert(GT_CLASSNAME(HttpResource),GT_METADATA(HttpResourceUI));
 
     return map;

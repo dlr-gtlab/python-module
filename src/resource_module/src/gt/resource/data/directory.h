@@ -38,26 +38,42 @@ public:
 
     bool exists() const;
 
+    bool isOpen() const;
+
     bool open();
 
     void close();
 
-    bool isOpen() const;
+    void clean();
 
-    const QStringList& fileFilters() const;
+    QFileInfo info() const;
+
+    Q_INVOKABLE QString path() const;
+
+    Q_INVOKABLE QStringList fileFilters() const;
 
     void setFileFilters(const QStringList& filters);
 
+    void hideFileFiltersProperty(bool hide = true);
+
 protected:
-    virtual void refresh();
+    void refresh();
+
+    void setIsOpen(bool isOpen = true);
 
     virtual std::unique_ptr<File> createFileResource(const QFileInfo& file);
+
+    virtual QString toPath(const QUrl& url) const;
 
 private:
     struct Impl;
     std::unique_ptr<Impl> m_pimpl;
 
-    void clearChildren();
+    void clearFileList();
+
+    void initFileWatcher();
+
+    QList<File*> fileList();
 };
 
 } // namespace data

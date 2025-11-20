@@ -41,7 +41,7 @@ public:
     bool writeAll(const QByteArray& content) override;
 
 protected:
-    QUrl toUrl(const QString& urlStr) const override;
+    QString toPath(const QUrl& url) const override;
 
 private:
     struct Impl;

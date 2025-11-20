@@ -37,16 +37,16 @@ PackageUI::PackageUI()
 
         if (dirPath.isEmpty()) return;
 
-        auto* res = new gt::resource::data::Directory{dirPath};
-        res->setObjectName("Directory");
-        gtDataModel->appendChild(res, obj);
+        auto* dir = new gt::resource::data::Directory{dirPath};
+        dir->setObjectName("Directory");
+        gtDataModel->appendChild(dir, obj);
 
     }).setIcon(gt::gui::icon::folder());
 
     addSingleAction(tr("Create HTTP Resource"), [](GtObject* obj) {
-        auto* res = new gt::resource::data::HttpResource{};
-        res->setObjectName("HttpResource");
-        gtDataModel->appendChild(res, obj);
+        auto* httpRes = new gt::resource::data::HttpResource{};
+        httpRes->setObjectName("HttpResource");
+        gtDataModel->appendChild(httpRes, obj);
     }).setIcon(gt::gui::icon::web());
 }
 

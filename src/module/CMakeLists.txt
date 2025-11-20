@@ -28,6 +28,7 @@ set(HEADERS
     collection/localwidget/items/gtpy_abstractlocalitem.h
     collection/localwidget/items/gtpy_collapsiblelocalitem.h
     collection/localwidget/items/gtpy_localitem.h
+    data/gtpy_directory.cpp
     data/gtpy_scriptpackage.h
     extensions/gtpy_pythonfunctions.h
     gt_compat.h
@@ -35,6 +36,7 @@ set(HEADERS
     gt_pythonmodule_exports.h
     gtpy_icons_compat.h
     gtpy_stylesheet_compat.h
+    gui/ui/gtpy_directoryui.h
     gui/ui/gtpy_scriptpackageui.h
     models/gtpy_completermodel.h
     models/gtpy_objectmodel.h
@@ -110,9 +112,11 @@ set(SOURCES
     collection/localwidget/items/gtpy_abstractlocalitem.cpp
     collection/localwidget/items/gtpy_collapsiblelocalitem.cpp
     collection/localwidget/items/gtpy_localitem.cpp
+    data/gtpy_directory.cpp
     data/gtpy_scriptpackage.cpp
     extensions/gtpy_pythonfunctions.cpp
     gt_python.cpp
+    gui/ui/gtpy_directoryui.cpp
     gui/ui/gtpy_scriptpackageui.cpp
     models/gtpy_completermodel.cpp
     models/gtpy_objectmodel.cpp

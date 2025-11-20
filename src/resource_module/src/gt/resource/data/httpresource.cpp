@@ -63,8 +63,7 @@ HttpResource::exists() const
 QByteArray
 HttpResource::readAll()
 {
-    return request(
-        QNetworkRequest{url()}, QNetworkAccessManager::GetOperation);
+    return request(QNetworkRequest{url()}, QNetworkAccessManager::GetOperation);
 }
 
 std::unique_ptr<QIODevice>

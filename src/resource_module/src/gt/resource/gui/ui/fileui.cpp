@@ -37,23 +37,23 @@ FileUI::FileUI()
     using File = gt::resource::data::File;
 
     auto open = [](GtObject* obj, bool location) {
-        auto* res = qobject_cast<File*>(obj);
-        if (!res) return;
+        auto* file = qobject_cast<File*>(obj);
+        if (!file) return;
 
-        QFileInfo info{res->url().toLocalFile()};
+        QFileInfo info = file->info();
         QDesktopServices::openUrl(
             location ? QUrl::fromLocalFile(info.dir().absolutePath()) :
                 QUrl::fromLocalFile(info.absoluteFilePath()));
     };
 
     auto fileExists = [](GtObject* obj) {
-        auto* res = qobject_cast<File*>(obj);
-        return res ? QFileInfo::exists(res->url().toLocalFile()) : false;
+        auto* file = qobject_cast<File*>(obj);
+        return file ? QFileInfo::exists(file->path()) : false;
     };
 
     auto dirExists = [](GtObject* obj) {
-        auto* res = qobject_cast<File*>(obj);
-        return res ? QFileInfo{res->url().toLocalFile()}.dir().exists() : false;
+        auto* file = qobject_cast<File*>(obj);
+        return file ? file->info().dir().exists() : false;
     };
 
     addSingleAction(tr("Open in Default Application"),
@@ -72,25 +72,25 @@ FileUI::icon(GtObject* obj) const
 {
     auto color = gt::gui::color::text();
 
-    if (auto* res = qobject_cast<gt::resource::data::File*>(obj))
+    if (auto* file = qobject_cast<gt::resource::data::File*>(obj))
     {
-        color = res->exists() ? color : gt::gui::color::disabled();
+        color = file->exists() ? color : gt::gui::color::disabled();
     }
 
     return gt::gui::colorize(gt::gui::icon::file(), color);
 }
 
 QStringList
-FileUI::openWith(GtObject *obj)
+FileUI::openWith(GtObject* obj)
 {
     using File = gt::resource::data::File;
     using FileViewer = gt::resource::gui::mdi::FileViewer;
 
     QStringList list;
 
-    if (auto* res = qobject_cast<File*>(obj))
+    if (auto* file = qobject_cast<File*>(obj))
     {
-        if (res->exists()) list << GT_CLASSNAME(FileViewer);
+        if (file->exists()) list << GT_CLASSNAME(FileViewer);
     }
 
     return list;
@@ -105,8 +105,8 @@ FileUI::validatorRegExp()
 QVariant
 FileUI::specificData(GtObject* obj, int role, int column) const
 {
-    auto* res = qobject_cast<gt::resource::data::File*>(obj);
-    if (!res) return {};
+    auto* file = qobject_cast<gt::resource::data::File*>(obj);
+    if (!file) return {};
 
     if (column == 0)
     {
@@ -115,14 +115,14 @@ FileUI::specificData(GtObject* obj, int role, int column) const
 
         case Qt::ToolTipRole:
         {
-            if (!res->exists()) return tr("File does not exist!");
+            if (!file->exists()) return tr("File does not exist!");
 
             break;
         }
 
         case Qt::ForegroundRole:
         {
-            if (!res->exists()) return gt::gui::color::disabled();
+            if (!file->exists()) return gt::gui::color::disabled();
 
             break;
         }

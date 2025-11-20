@@ -13,6 +13,7 @@
 #include <gt_datamodel.h>
 
 #include "gt/resource/url.h"
+#include "gt/resource/data/helper.h"
 
 namespace gt
 {
@@ -55,7 +56,7 @@ ProjectFile::ProjectFile(const QUrl& url) : File(url),
 }
 
 ProjectFile::ProjectFile(const QString& relPath) :
-    ProjectFile(gt::resource::url::fromProjFile(relPath)) { }
+    ProjectFile(gt::resource::url::fromProjRelPath(relPath)) { }
 
 ProjectFile::~ProjectFile() = default;
 
@@ -72,20 +73,14 @@ ProjectFile::writeAll(const QByteArray& content)
     return true;
 }
 
-QUrl
-ProjectFile::toUrl(const QString& urlStr) const
+QString
+ProjectFile::toPath(const QUrl& url) const
 {
     // TODO: The 'this' pointer cannot be used to find the parent project,
     // because when accessing the URL while executing a task,
     // the instance has no parent of type GtProject.
     // Consider storing the project as a member variable of type QPointer.
-    auto* obj = gtDataModel->objectByUuid(uuid());
-    if (!obj) return {};
-
-    auto* proj = obj->findParent<GtProject*>();
-    if (!proj) return {};
-
-    return gt::resource::url::toAbsoluteFileUrl(proj, urlStr);
+    return gt::resource::url::toAbsPath(helper::findProject(uuid()), url);
 }
 
 helper::FileContent&

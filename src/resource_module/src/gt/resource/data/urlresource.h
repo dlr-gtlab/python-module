@@ -36,8 +36,6 @@ public:
     QUrl url() const;
 
 protected:
-    virtual QUrl toUrl(const QString& urlStr) const;
-
     void setUrlLocked(bool readOnly);
 
 signals:

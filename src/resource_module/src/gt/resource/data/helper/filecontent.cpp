@@ -83,6 +83,18 @@ FileContent::set(const QByteArray& content)
     emit contentChanged();
 }
 
+const QByteArray&
+FileContent::contentValue()
+{
+    return m_pimpl->content;
+}
+
+void
+FileContent::setContentValue(const QByteArray& content)
+{
+    m_pimpl->content = content;
+}
+
 bool
 FileContent::isDataValid() const
 {

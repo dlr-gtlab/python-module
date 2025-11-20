@@ -44,8 +44,7 @@ class FileContent : public GtExternalizedObject
 {
     Q_OBJECT
 
-    // TODO: Verify if this still works
-    Q_PROPERTY(QByteArray content READ get WRITE set NOTIFY contentChanged)
+    Q_PROPERTY(QByteArray content READ contentValue WRITE setContentValue NOTIFY contentChanged)
 
     GT_DECL_DATACLASS(FileContentData)
 
@@ -73,6 +72,10 @@ private:
     std::unique_ptr<Impl> m_pimpl;
 
     ::gt::resource::data::File* filePtr() const;
+
+    const QByteArray& contentValue();
+
+    void setContentValue(const QByteArray& content);
 
 signals:
     void contentChanged();

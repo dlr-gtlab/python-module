@@ -10,6 +10,8 @@
 
 #include "gt/resource/data/file.h"
 
+#include <QFileInfo>
+
 #include "gt/resource/url.h"
 
 namespace gt
@@ -21,34 +23,47 @@ namespace resource
 namespace data
 {
 
-gt::resource::data::File::File(const QUrl& url) : StreamResource(url)
+File::File(const QUrl& url) : StreamResource(url)
 {
-    setObjectName(url.fileName());
-    setFlag(GtObject::UserRenamable, true);
     setFlag(GtObject::UserDeletable, true);
+
+    setObjectName(url.fileName());
 }
 
-File::File(const QString &localPath) :
-    File(gt::resource::url::fromLocalFile(localPath)) { }
+File::File(const QString& localPath) :
+    File(gt::resource::url::fromAbsPath(localPath)) { }
 
 File::~File() = default;
 
-bool File::exists() const
+bool
+File::exists() const
 {
-    QFileInfo info{url().toLocalFile()};
-    return info.exists() && info.isFile();
+    QFileInfo fi = info();
+    return fi.exists() && fi.isFile();
 }
 
-QString File::path() const { return url().toLocalFile(); }
+QString File::path() const { return toPath(url()); }
 
-std::unique_ptr<QIODevice> File::open(QIODevice::OpenMode mode) const
+QFileInfo
+File::info() const
 {
-    auto file = std::make_unique<QFile>(url().toLocalFile());
+    return {path()};
+}
+
+std::unique_ptr<QIODevice>
+File::open(QIODevice::OpenMode mode) const
+{
+    auto file = std::make_unique<QFile>(path());
     if (!file->open(mode)) return nullptr;
 
     return file;
 }
 
+QString
+File::toPath(const QUrl& url) const
+{
+    return QDir::cleanPath(url.toLocalFile());
+}
 
 } // namespace data
 

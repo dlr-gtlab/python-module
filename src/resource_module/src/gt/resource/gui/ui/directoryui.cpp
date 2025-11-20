@@ -11,7 +11,6 @@
 #include "gt/resource/gui/ui/directoryui.h"
 
 #include <QDir>
-#include <QFileInfo>
 #include <QDesktopServices>
 
 #include <gt_icons.h>
@@ -36,41 +35,59 @@ DirectoryUI::DirectoryUI()
     using Directory = gt::resource::data::Directory;
 
     auto isOpen = [](GtObject* obj) {
-        auto* res = qobject_cast<Directory*>(obj);
-        return res ? res->isOpen() : false;
+        auto* dir = qobject_cast<Directory*>(obj);
+        return dir ? dir->isOpen() : false;
+    };
+
+    auto isNotOpenButExists = [](GtObject* obj) {
+        auto* dir = qobject_cast<Directory*>(obj);
+        return dir ? dir->exists() && !dir->isOpen() : false;
+    };
+
+    auto isOpenAndExists = [](GtObject* obj) {
+        auto* dir = qobject_cast<Directory*>(obj);
+        return dir ? dir->exists() && dir->isOpen() : false;
     };
 
     addSingleAction(tr("Open Directory"), [](GtObject* obj) {
-        auto* res = qobject_cast<Directory*>(obj);
-        if (res) res->open();
+        auto* dir = qobject_cast<Directory*>(obj);
+        if (dir) dir->open();
     })
-        .setIcon(gt::gui::icon::file())
-        .setVerificationMethod([isOpen](GtObject* obj){ return !isOpen(obj); });
+        .setIcon(gt::gui::icon::folderOpen())
+        .setVerificationMethod(isNotOpenButExists);
 
     addSingleAction(tr("Close Directory"), [](GtObject* obj) {
-        auto* res = qobject_cast<Directory*>(obj);
-        if (res) res->close();
+        auto* dir = qobject_cast<Directory*>(obj);
+        if (dir) dir->close();
     })
-        .setIcon(gt::gui::icon::file())
+        .setIcon(gt::gui::icon::folder())
         .setVerificationMethod(isOpen);
 
     addSeparator();
 
+    addSingleAction(tr("Clean"), [](GtObject* obj) {
+        auto* dir = qobject_cast<Directory*>(obj);
+        if (dir) dir->clean();
+    })
+        .setIcon(gt::gui::icon::clear())
+        .setVerificationMethod(isOpenAndExists);
+
+    addSeparator();
+
     auto dirExists = [](GtObject* obj) {
-        auto* res = qobject_cast<Directory*>(obj);
-        if (!res) return false;
-        return res->exists();
+        auto* dir = qobject_cast<Directory*>(obj);
+        return dir ? dir->exists() : false;
     };
 
     addSingleAction(tr("Show in Explorer"),  [](GtObject* obj) {
-        auto* res = qobject_cast<Directory*>(obj);
-        if (!res) return;
+        auto* dir = qobject_cast<Directory*>(obj);
+        if (!dir) return;
 
-        QDir dir{res->url().toLocalFile()};
-        QDesktopServices::openUrl(QUrl::fromLocalFile(dir.absolutePath()));
+        QDesktopServices::openUrl(
+            QUrl::fromLocalFile(QDir{dir->path()}.absolutePath()));
     })
-        .setIcon(gt::gui::icon::folderOpen()).
-        setVerificationMethod(dirExists);
+        .setIcon(gt::gui::icon::folderOpen())
+        .setVerificationMethod(dirExists);
 }
 
 QIcon

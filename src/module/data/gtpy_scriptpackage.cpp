@@ -10,7 +10,15 @@
 
 #include "gtpy_scriptpackage.h"
 
+#include "gtpy_directory.h"
+
 GtpyScriptPackage::GtpyScriptPackage()
 {
     setObjectName("Scripts");
+
+    auto* pyDirObj = new GtpyDirectory{};
+    pyDirObj->setDefault(true);
+    pyDirObj->setFlag(GtObject::UserRenamable, false);
+    // pyDirObj->setFlag(GtObject::UserDeletable, false);
+    appendChild(pyDirObj);
 }

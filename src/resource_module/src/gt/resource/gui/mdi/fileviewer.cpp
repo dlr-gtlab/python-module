@@ -73,7 +73,7 @@ FileViewer::setData(GtObject* obj)
     m_textEdit->setPlainText(m_file->readAll());
 
     auto objName = m_file->objectName();
-    auto fileName = m_file->url().fileName();
+    auto fileName = m_file->info().fileName();
 
     setObjectName(objName == fileName ? objName : objName + " - " + fileName);
 

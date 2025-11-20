@@ -27,10 +27,11 @@
 #include "gtpy_globals.h"
 #include "gtpy_icons_compat.h"
 
-#include "gt/resource/module.h"
+#include <gt/resource/module.h>
 
 // data model classes
 #include "gtpy_scriptpackage.h"
+#include "gtpy_directory.h"
 
 // calculator classes
 #include "gtpy_scriptcalculator.h"
@@ -41,6 +42,7 @@
 // ui classes
 #include "gtpy_console.h"
 #include "gtpy_scriptpackageui.h"
+#include "gtpy_directoryui.h"
 
 // mdi items
 #include "gt_extendedcalculatordata.h"
@@ -61,6 +63,17 @@
 #include "gtpy_scriptcollectionsettings.h"
 
 #include "gt_python.h"
+
+namespace
+{
+
+static gt::resource::Module& resourceModule()
+{
+    static gt::resource::Module instance;
+    return instance;
+}
+
+}
 
 #if GT_VERSION >= 0x010700
 GtVersionNumber
@@ -229,7 +242,7 @@ GtPythonModule::tasks()
 QList<QMetaObject>
 GtPythonModule::mdiItems()
 {
-    return gt::resource::Module{}.mdiItems();
+    return resourceModule().mdiItems();
 }
 
 QList<QMetaObject>
@@ -243,16 +256,12 @@ GtPythonModule::dockWidgets()
 QMap<const char*, QMetaObject>
 GtPythonModule::uiItems()
 {
-    QMap<const char*, QMetaObject> map;
+    auto map = resourceModule().uiItems();
 
     map.insert(GT_CLASSNAME(GtpyScriptPackage),
                GT_METADATA(GtpyScriptPackageUI));
-
-    auto resModUiItems = gt::resource::Module{}.uiItems();
-    for (auto it = resModUiItems.cbegin(); it != resModUiItems.cend(); ++it)
-    {
-        map.insert(it.key(), it.value());
-    }
+    map.insert(GT_CLASSNAME(GtpyDirectory),
+               GT_METADATA(GtpyDirectoryUI));
 
     return map;
 }
@@ -350,7 +359,11 @@ GtPythonModule::package()
 QList<QMetaObject>
 GtPythonModule::data()
 {
-    return gt::resource::Module{}.data();
+    auto metaObjs = resourceModule().data();
+
+    metaObjs << GT_METADATA(GtpyDirectory);
+
+    return metaObjs;
 }
 
 bool

@@ -15,6 +15,8 @@
 
 #include "gt/resource/data/streamresource.h"
 
+class QFileInfo;
+
 namespace gt
 {
 
@@ -38,7 +40,12 @@ public:
 
     Q_INVOKABLE QString path() const;
 
+    QFileInfo info() const;
+
     std::unique_ptr<QIODevice> open(QIODevice::OpenMode mode) const override;
+
+protected:
+    virtual QString toPath(const QUrl& url) const;
 };
 
 } // namespace data

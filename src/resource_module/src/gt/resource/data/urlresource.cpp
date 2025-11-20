@@ -10,7 +10,7 @@
 
 #include "gt/resource/data/urlresource.h"
 
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 #include <gt_stringproperty.h>
 
@@ -27,8 +27,8 @@ namespace data
 
 struct UrlResource::Impl
 {
-    Impl(const QUrl& url)
-        : urlProp{"URL", "URL", "", "", new QRegExpValidator{QRegExp{".*"}}}
+    Impl(const QUrl& url) : urlProp{"URL", "URL", "", "",
+                  new QRegularExpressionValidator{QRegularExpression{".*"}}}
     {
         urlProp = gt::resource::url::fullyEncoded(url);
     }
@@ -50,10 +50,10 @@ UrlResource::UrlResource(const QUrl& url) :
 UrlResource::~UrlResource() = default;
 
 QUrl
-UrlResource::url() const { return toUrl(m_pimpl->urlProp); }
-
-QUrl
-UrlResource::toUrl(const QString& urlStr) const { return QUrl {urlStr}; }
+UrlResource::url() const
+{
+    return {m_pimpl->urlProp};
+}
 
 void
 UrlResource::setUrlLocked(bool readOnly)
