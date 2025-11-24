@@ -372,7 +372,6 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
         return nullptr;
     }
 
-
     auto args = PyPPObject::Borrow(args_py);
     int argsCount = PyPPTuple_Size(args);
 
@@ -441,6 +440,8 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
     if (!task)
     {
         QString error = "findGtTask(name) --> no task is named " + taskName;
+
+        if (!groupName.isEmpty()) error += " in taskgroup " + groupName;
 
         PyErr_SetString(PyExc_SystemError, error.toLatin1().data());
 

@@ -12,6 +12,7 @@
 #include "gt_processdata.h"
 #include "gt_project.h"
 #include "gt_task.h"
+#include "gt_logging.h"
 
 #include "gtpy_processdatadistributor.h"
 
@@ -40,27 +41,47 @@ GtpyProcessDataDistributor::taskElement(const QString& name,
     }
     else
     {
-        if (!data->customGroupIds().contains(groupName))
+        GtTaskGroup::SCOPE scope = GtTaskGroup::UNDEFINED;
+        QString scopeKey = "";
+
+        if (!data->initAllTaskGroups(gtApp->currentProject()->path()))
         {
             return nullptr;
         }
 
-        QList<GtTask const*> l = data->processList(groupName);
-        if (l.isEmpty()) return nullptr;
-
-        group = const_cast<GtTaskGroup*>(l.first()->findParent<GtTaskGroup*>());
-
-        if (!group->isInitialized())
+        if (data->customGroupIds().contains(groupName))
         {
-            if (gtApp && gtApp->currentProject())
-            {
-                data->initAllTaskGroups(gtApp->currentProject()->path());
-            }
+            scope = GtTaskGroup::CUSTOM;
+            scopeKey = "_custom";
+        }
+        else if(data->userGroupIds().contains(groupName))
+        {
+            scope = GtTaskGroup::USER;
+            scopeKey = "_user";
+        }
+
+        if (scope == GtTaskGroup::UNDEFINED)
+        {
+            return nullptr;
+        }
+
+        auto* scopeElement = data->findDirectChild<GtObjectGroup*>(scopeKey);
+
+        if (!scopeElement)
+        {
+            return nullptr;
+        }
+
+        group = scopeElement->findDirectChild<GtTaskGroup*>(groupName);
+
+        if (!group)
+        {
+            return nullptr;
         }
 
         if (!group->isInitialized())
         {
-            gtError() << QObject::tr("Usage of uninitialized task "
+            gtDebug() << QObject::tr("Usage of uninitialized task "
                                      "group %1").arg(groupName);
             return nullptr;
         }
@@ -77,7 +98,7 @@ GtpyProcessDataDistributor::taskElement(const QString& name,
 #endif
     if (!task)
     {
-        return task;
+        return nullptr;
     }
 
     //    QList<GtTask*> children = m_pythonTask->findDirectChildren<GtTask*>();
