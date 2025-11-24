@@ -386,9 +386,9 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
 
         return nullptr;
     }
-    else if (argsCount > 1)
+    else if (argsCount > 2)
     {
-        QString error = "findGtTask(name) takes 1 positional argument but ";
+        QString error = "findGtTask(name) takes 2 positional argument but ";
         error += QString::number(argsCount);
         error += " were given";
 
@@ -398,6 +398,7 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
     }
 
     auto arg = PyPPTuple_GetItem(args, 0);
+    auto arg2 = PyPPTuple_GetItem(args, 1);
 
     if (!arg)
     {
@@ -418,14 +419,28 @@ GtpyCalculatorsModule::findGtTask_C_function(PyObject* /*self*/,
     }
 
     QString taskName = PyPPString_AsQString(arg);
+    QString groupName = {};
+
+    if (arg2)
+    {
+        if (!PyPPUnicode_Check(arg2))
+        {
+            QString error =  "findGtTask(name, groupname) "
+                            "--> groupname has to be a string";
+
+            PyErr_SetString(PyExc_TypeError, error.toLatin1().data());
+            return nullptr;
+        }
+        groupName = PyPPString_AsQString(arg2);
+    }
 
     GtpyProcessDataDistributor distributor(parentTask);
 
-    GtTask* task = distributor.taskElement(taskName);
+    GtTask* task = distributor.taskElement(taskName, groupName);
 
     if (!task)
     {
-        QString error =  "findGtTask(name) --> no task is named " + taskName;
+        QString error = "findGtTask(name) --> no task is named " + taskName;
 
         PyErr_SetString(PyExc_SystemError, error.toLatin1().data());
 

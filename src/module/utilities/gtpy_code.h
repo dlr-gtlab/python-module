@@ -100,12 +100,12 @@ QString defaultImports();
 
 /**
  * @brief Returns the Python code to import the GtCalculator classes and the
- * findGtTask(name: str) function. This code allows a GtpyModule or GtpyContext
- * to interact with GTlab process data and to create a process chain using
- * Python code.
+ * findGtTask(name: str, group: str) function. This code allows a GtpyModule or
+ * GtpyContext to interact with GTlab process data and to create a process chain
+ * using Python code.
  *
  * @return The Python code to import the GtCalculator classes and the
- * findGtTask(name: str) function.
+ * findGtTask(name: str, group: str) function.
  */
 QString calculatorModule();
 

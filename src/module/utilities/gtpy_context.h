@@ -65,7 +65,7 @@ public:
      *   - Imports PythonQt, QCore, GtClasses and GtpyExtendedWrapper
      *   - Imports gtDebug(), gtInfo(), gtWarning(), gtError() and gtFatal()
      *     from GtLogging
-     *   - Imports Calculator classes and the findGtTask(taskName) function
+     *   - Imports Calculator classes and the findGtTask(taskName, (groupname)) function
      * - TaskRunContext:
      *   - Same as TaskEditorContext
      *   - Allows sending logging messages to the application console and the

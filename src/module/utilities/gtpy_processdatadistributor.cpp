@@ -21,7 +21,8 @@ GtpyProcessDataDistributor::GtpyProcessDataDistributor(GtTask* pythonTask)
 }
 
 GtTask*
-GtpyProcessDataDistributor::taskElement(const QString& name)
+GtpyProcessDataDistributor::taskElement(const QString& name,
+                                        const QString groupName)
 {
     GtProcessData* data = gtApp->currentProject()->processData();
 
@@ -31,7 +32,31 @@ GtpyProcessDataDistributor::taskElement(const QString& name)
     }
 
 #if GT_VERSION >= 0x020000
-    GtTaskGroup* group = data->taskGroup();
+    GtTaskGroup* group = nullptr;
+
+    if (groupName.isEmpty())
+    {
+        data->taskGroup();
+    }
+    else
+    {
+        if (!data->customGroupIds().contains(groupName))
+        {
+            return nullptr;
+        }
+
+        QList<GtTask const*> l = data->processList(groupName);
+        if (l.isEmpty()) return nullptr;
+
+        group = const_cast<GtTaskGroup*>(l.first()->findParent<GtTaskGroup*>());
+
+        if (!group->isInitialized())
+        {
+            gtError() << QObject::tr("Usage of uninitialized task "
+                                     "group %1").arg(groupName);
+            return nullptr;
+        }
+    }
 
     if (!group)
     {
