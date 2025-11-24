@@ -52,6 +52,14 @@ GtpyProcessDataDistributor::taskElement(const QString& name,
 
         if (!group->isInitialized())
         {
+            if (gtApp && gtApp->currentProject())
+            {
+                data->initAllTaskGroups(gtApp->currentProject()->path());
+            }
+        }
+
+        if (!group->isInitialized())
+        {
             gtError() << QObject::tr("Usage of uninitialized task "
                                      "group %1").arg(groupName);
             return nullptr;
