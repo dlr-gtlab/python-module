@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/resourcemodule-icons">
+        <file>fileMissing.svg</file>
+    </qresource>
+</RCC>

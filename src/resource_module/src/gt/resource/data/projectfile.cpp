@@ -44,7 +44,8 @@ struct ProjectFile::Impl
     QPointer<helper::FileContent> fileContent;
 };
 
-ProjectFile::ProjectFile(const QUrl& url) : File(url),
+ProjectFile::ProjectFile(const QUrl& url) :
+    File(url),
     m_pimpl(std::make_unique<Impl>(this))
 {
     // append the helper as a child
@@ -80,7 +81,17 @@ ProjectFile::toPath(const QUrl& url) const
     // because when accessing the URL while executing a task,
     // the instance has no parent of type GtProject.
     // Consider storing the project as a member variable of type QPointer.
-    return gt::resource::url::toAbsPath(helper::findProject(uuid()), url);
+
+    auto* proj = helper::findProject(uuid());
+    if (!proj)
+    {
+        gtError() << tr("Unable to resolve the parent project for %1. "
+                        "The absolute path of the file cannot be determined.")
+                         .arg(objectName()) << " (" << this << ")";
+        return {};
+    }
+
+    return gt::resource::url::toAbsPath(proj, url);
 }
 
 helper::FileContent&

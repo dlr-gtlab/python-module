@@ -174,7 +174,11 @@ set(SOURCES
 
 set(MODULE_ID "Python Module (Python ${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})")
 
-add_gtlab_module(GTlabPython SOURCES ${HEADERS} ${SOURCES}
+qt5_add_resources(RCC_SOURCES
+    ./../resource_module/src/resources/icons.qrc
+)
+
+add_gtlab_module(GTlabPython SOURCES ${HEADERS} ${SOURCES} ${RCC_SOURCES}
     MODULE_ID ${MODULE_ID}
     README_FILE "${PROJECT_SOURCE_DIR}/README.md"
     CHANGELOG_FILE "${PROJECT_SOURCE_DIR}/CHANGELOG.md"

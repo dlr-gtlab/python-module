@@ -77,6 +77,7 @@ inline QUrl fromProjRelPath(const QString& relPath)
 
     QUrl url{};
     url.setScheme("proj");
+    url.setAuthority("");
     url.setPath(path);
 
     return url;

@@ -27,30 +27,30 @@ GtpyScriptPackageUI::GtpyScriptPackageUI()
     addSingleAction(tr("Create Directory Resource"), [](GtObject* obj) {
         QString dirPath = GtFileDialog::getExistingDirectory(
             nullptr, tr("Choose Directory"));
-
         if (dirPath.isEmpty()) return;
 
-        auto* res = new gt::resource::data::Directory{dirPath};
-        res->setObjectName("Directory");
+        auto* dir = new gt::resource::data::Directory{dirPath};
+        dir->setObjectName("Directory");
 
-        gtDataModel->appendChild(res, obj);
+        gtDataModel->appendChild(dir, obj);
+        dir->open();
 
     }).setIcon(gt::gui::icon::folder());
 
     addSingleAction(tr("Create Project Directory Resource"), [](GtObject* obj) {
         QString dirPath = GtFileDialog::getExistingDirectory(
             nullptr, tr("Choose Directory"));
-
         if (dirPath.isEmpty()) return;
 
         using namespace gt::resource;
         auto projUrl = url::toProjFileUrl(
             data::helper::findProject(obj), dirPath);
 
-        auto* res = new data::ProjectDirectory{projUrl};
-        res->setObjectName("ProjectDirectory");
+        auto* dir = new data::ProjectDirectory{projUrl};
+        dir->setObjectName("ProjectDirectory");
 
-        gtDataModel->appendChild(res, obj);
+        gtDataModel->appendChild(dir, obj);
+        dir->open();
 
     }).setIcon(gt::gui::icon::folder());
 

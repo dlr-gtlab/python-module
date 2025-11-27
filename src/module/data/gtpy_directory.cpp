@@ -18,7 +18,8 @@ GtpyDirectory::GtpyDirectory() :
     setObjectName("Python");
 
     setIsOpen();
-    hideFileFiltersProperty();
-
     setFileFilters({"*.py"});
+
+    hideFileFiltersProperty();
+    hideDeleteFilteredOutProperty();
 }

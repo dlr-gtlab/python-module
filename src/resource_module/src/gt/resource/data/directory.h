@@ -36,15 +36,17 @@ public:
 
     ~Directory() override;
 
-    bool exists() const;
-
-    bool isOpen() const;
-
     bool open();
 
     void close();
 
-    void clean();
+    void refresh();
+
+    bool exists() const;
+
+    bool isOpen() const;
+
+    bool isRefreshRequired() const;
 
     QFileInfo info() const;
 
@@ -54,12 +56,14 @@ public:
 
     void setFileFilters(const QStringList& filters);
 
+protected:
+    void setIsOpen(bool isOpen = true);
+
     void hideFileFiltersProperty(bool hide = true);
 
-protected:
-    void refresh();
+    void hideDeleteFilteredOutProperty(bool hide = true);
 
-    void setIsOpen(bool isOpen = true);
+    void hideDeleteMissingProperty(bool hide = true);
 
     virtual std::unique_ptr<File> createFileResource(const QFileInfo& file);
 
@@ -69,11 +73,20 @@ private:
     struct Impl;
     std::unique_ptr<Impl> m_pimpl;
 
-    void clearFileList();
+    QList<File*> fileList();
+    QList<const File*> fileList() const;
+
+    QSet<QString> filteredDiskPaths() const;
+
+    QSet<QString> pathsInModel() const;
+
+    QSet<QString> pathsNotInModel() const;
 
     void initFileWatcher();
 
-    QList<File*> fileList();
+    void populateFileObjects();
+
+    void updateRefreshRequired();
 };
 
 } // namespace data

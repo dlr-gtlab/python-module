@@ -36,8 +36,10 @@ public:
 
     QRegExp validatorRegExp() override;
 
+    void doubleClicked(GtObject* obj) override;
+
 protected:
-    QVariant specificData(GtObject* obj, int role, int column) const override;
+    QVariant specificData(GtObject* obj, int role, int col) const override;
 
 };
 

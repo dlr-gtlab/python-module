@@ -18,6 +18,7 @@
 #include <gt_colors.h>
 
 #include "gt/resource/data/file.h"
+#include "gt/resource/gui/icons.h"
 #include "gt/resource/gui/mdi/fileviewer.h"
 
 namespace gt
@@ -70,14 +71,16 @@ FileUI::FileUI()
 QIcon
 FileUI::icon(GtObject* obj) const
 {
-    auto color = gt::gui::color::text();
+    auto* file = qobject_cast<gt::resource::data::File*>(obj);
+    if (!file) return {};
 
-    if (auto* file = qobject_cast<gt::resource::data::File*>(obj))
+    if (!file->exists())
     {
-        color = file->exists() ? color : gt::gui::color::disabled();
+        return gt::gui::colorize(gt::resource::gui::icon::fileMissing(),
+                                 gt::gui::color::disabled());
     }
 
-    return gt::gui::colorize(gt::gui::icon::file(), color);
+    return gt::gui::icon::file();
 }
 
 QStringList
@@ -102,32 +105,42 @@ FileUI::validatorRegExp()
     return QRegExp{".*"};
 }
 
+
 QVariant
 FileUI::specificData(GtObject* obj, int role, int column) const
 {
     auto* file = qobject_cast<gt::resource::data::File*>(obj);
     if (!file) return {};
 
-    if (column == 0)
+    switch (role)
     {
-        switch (role)
-        {
 
-        case Qt::ToolTipRole:
-        {
-            if (!file->exists()) return tr("File does not exist!");
+    case Qt::ToolTipRole:
+    {
+        if (!file->exists()) return tr("File does not exist!");
+        break;
+    }
 
-            break;
+    case Qt::ForegroundRole:
+    {
+        if (!file->exists()) return gt::gui::color::disabled();
+        break;
+    }
+
+    case Qt::DecorationRole:
+    {
+        if (column == 1 && !file->exists())
+        {
+            return gt::gui::colorize(gt::gui::icon::exclamationmark(),
+                                     gt::gui::color::disabled());
         }
 
-        case Qt::ForegroundRole:
-        {
-            if (!file->exists()) return gt::gui::color::disabled();
+        break;
+    }
 
-            break;
-        }
+    default:
+        break;
 
-        }
     }
 
     return {};

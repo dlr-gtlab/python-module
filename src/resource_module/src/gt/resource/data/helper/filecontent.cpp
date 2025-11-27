@@ -31,7 +31,8 @@ using File = gt::resource::data::File;
 
 struct FileContent::Impl
 {
-    Impl(File* f, GtObject* parent) : file{f},
+    Impl(File* f, GtObject* parent) :
+        file{f},
         fileLink{"fileLink", QObject::tr("fileLink"), QObject::tr("fileLink"),
                    parent, QStringList{GT_CLASSNAME(File)}}
     {
@@ -87,12 +88,6 @@ const QByteArray&
 FileContent::contentValue()
 {
     return m_pimpl->content;
-}
-
-void
-FileContent::setContentValue(const QByteArray& content)
-{
-    m_pimpl->content = content;
 }
 
 bool

@@ -49,6 +49,12 @@ DirectoryUI::DirectoryUI()
         return dir ? dir->exists() && dir->isOpen() : false;
     };
 
+    auto isRefreshRequired = [](GtObject* obj) {
+        auto* dir = qobject_cast<Directory*>(obj);
+        return dir ? dir->exists() && dir->isOpen() && dir->isRefreshRequired()
+                   : false;
+    };
+
     addSingleAction(tr("Open Directory"), [](GtObject* obj) {
         auto* dir = qobject_cast<Directory*>(obj);
         if (dir) dir->open();
@@ -65,12 +71,13 @@ DirectoryUI::DirectoryUI()
 
     addSeparator();
 
-    addSingleAction(tr("Clean"), [](GtObject* obj) {
+    addSingleAction(tr("Refresh"), [isRefreshRequired](GtObject* obj) {
         auto* dir = qobject_cast<Directory*>(obj);
-        if (dir) dir->clean();
+        if (dir && isRefreshRequired(dir)) dir->refresh();
     })
-        .setIcon(gt::gui::icon::clear())
-        .setVerificationMethod(isOpenAndExists);
+        .setIcon(gt::gui::icon::reload())
+        .setVerificationMethod(isRefreshRequired)
+        .setShortCut(QKeySequence{Qt::Key_F5});
 
     addSeparator();
 
@@ -93,12 +100,12 @@ DirectoryUI::DirectoryUI()
 QIcon
 DirectoryUI::icon(GtObject* obj) const
 {
-    auto* res = qobject_cast<gt::resource::data::Directory*>(obj);
-    if (!res) return gt::gui::icon::folder();
+    auto* dir = qobject_cast<gt::resource::data::Directory*>(obj);
+    if (!dir) return gt::gui::icon::folder();
 
-    auto color = res->exists() ? gt::gui::color::text() :
+    auto color = dir->exists() ? gt::gui::color::text() :
                      gt::gui::color::disabled();
-    auto icon = res->isOpen() ? gt::gui::icon::folderOpen() :
+    auto icon = dir->isOpen() ? gt::gui::icon::folderOpen() :
                     gt::gui::icon::folder();
 
     return gt::gui::colorize(icon, color);
@@ -110,32 +117,66 @@ DirectoryUI::validatorRegExp()
     return QRegExp{".*"};
 }
 
-QVariant
-DirectoryUI::specificData(GtObject* obj, int role, int column) const
+void
+DirectoryUI::doubleClicked(GtObject* obj)
 {
-    auto* res = qobject_cast<gt::resource::data::Directory*>(obj);
-    if (!res) return {};
+    auto* dir = qobject_cast<gt::resource::data::Directory*>(obj);
+    if (!dir) return;
 
-    if (column == 0)
+    if (dir->isOpen()) dir->close();
+    else dir->open();
+}
+
+QVariant
+DirectoryUI::specificData(GtObject* obj, int role, int col) const
+{
+    auto* dir = qobject_cast<gt::resource::data::Directory*>(obj);
+    if (!dir) return {};
+
+    switch (role)
     {
-        switch (role)
-        {
 
-        case Qt::ToolTipRole:
+    case Qt::ToolTipRole:
+    {
+        if (!dir->exists()) return tr("Directory does not exist!");
+        else if (col == 1 && dir->isRefreshRequired())
         {
-            if (!res->exists()) return tr("Directory does not exist!");
-
-            break;
+            return tr("%1 needs to be refreshed.").arg(dir->objectName());
         }
 
-        case Qt::ForegroundRole:
+        break;
+    }
+
+    case Qt::ForegroundRole:
+    {
+        if (!dir->exists()) return gt::gui::color::disabled();
+        break;
+    }
+
+    case Qt::DecorationRole:
+    {
+        if (col != 1) break;
+
+        if (!dir->exists())
         {
-            if (!res->exists()) return gt::gui::color::disabled();
+            return gt::gui::colorize(gt::gui::icon::exclamationmark(),
+                                     gt::gui::color::disabled());
+        }
+        else if (dir->isRefreshRequired())
+        {
+            auto c = dir->hasChanges()
+                         ? gt::gui::color::changedObjectForeground()
+                         : gt::gui::color::text();
 
-            break;
+            return gt::gui::colorize(gt::gui::icon::reload(), c);
         }
 
-        }
+        break;
+    }
+
+    default:
+        break;
+
     }
 
     return {};
