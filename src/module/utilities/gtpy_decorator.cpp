@@ -1037,11 +1037,12 @@ GtpyDecorator::getPropertyContainerVal(GtObject* obj, QString const& id,
 
     return structCon.getMemberValToVariant(memberId);
 }
+
 QVariant
-GtpyDecorator::getPropertyContainerVal (GtObject* obj,
-                                        const QString& id,
-                                        const QString& entryId,
-                                        const QString& memberId)
+GtpyDecorator::getPropertyContainerVal(GtObject* obj,
+                                       const QString& id,
+                                       const QString& entryId,
+                                       const QString& memberId)
 {
     GtPropertyStructContainer* s = structContainerOfObject(obj, id);
 

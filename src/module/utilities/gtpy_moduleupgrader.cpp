@@ -11,138 +11,139 @@
 #include "gtpy_moduleupgrader.h"
 
 #include "gt_logging.h"
+#include "gt_xmlexpr.h"
 
 namespace {
-    // internal helper
-    void findElementsByClass(const QDomNode& node,
-                             const QStringList& classNames,
-                             QList<QDomElement>& results,
-                             bool allowNestedClassElements = false)
+// internal helper
+void findElementsByClass(const QDomNode& node,
+                         const QStringList& classNames,
+                         QList<QDomElement>& results,
+                         bool allowNestedClassElements = false)
+{
+    if (node.isElement())
     {
-        if (node.isElement())
+        QDomElement elem = node.toElement();
+        if (!elem.isNull())
         {
-            QDomElement elem = node.toElement();
+            QString c = elem.attribute(gt::xml::S_CLASS_TAG);
+
+            if (classNames.contains(c))
+            {
+                results.append(elem);
+
+                if (!allowNestedClassElements) return;
+            }
+        }
+    }
+
+    QDomNode child = node.firstChild();
+    while (!child.isNull())
+    {
+        if (child.isElement())
+        {
+            QDomElement elem = child.toElement();
             if (!elem.isNull())
             {
-                QString c = elem.attribute("class");
+                QString c = elem.attribute(gt::xml::S_CLASS_TAG);
 
                 if (classNames.contains(c))
                 {
                     results.append(elem);
 
-                    if (!allowNestedClassElements) return;
+                    if (!allowNestedClassElements)
+                    {
+                        child = child.nextSibling();
+                        continue;
+                    }
                 }
             }
         }
 
-        QDomNode child = node.firstChild();
-        while (!child.isNull())
+        findElementsByClass(child, classNames, results, allowNestedClassElements);
+        child = child.nextSibling();
+    }
+}
+
+void normalizePropertyContainerId(
+    QDomElement container, QString const& formerNameKey,
+    QMap<QString, QString>& replaceMap)
+{
+    QDomNode child = container.firstChild();
+
+    while (!child.isNull())
+    {
+        if (child.isElement())
         {
-            if (child.isElement())
+            QDomElement prop = child.toElement();
+
+            if (prop.tagName() == gt::xml::S_PROPERTY_TAG)
             {
-                QDomElement elem = child.toElement();
-                if (!elem.isNull())
+                QString oldUUID = prop.attribute(gt::xml::S_NAME_TAG);
+
+                // Search for sub element <property name="$$formerNameKey$$">NewName</property>
+                QDomElement nameElem;
+                QDomNode sub = prop.firstChild();
+
+                while (!sub.isNull())
                 {
-                    QString c = elem.attribute("class");
-
-                    if (classNames.contains(c))
+                    if (sub.isElement())
                     {
-                        results.append(elem);
-
-                        if (!allowNestedClassElements)
+                        QDomElement e = sub.toElement();
+                        if (e.attribute(gt::xml::S_NAME_TAG) == formerNameKey)
                         {
-                            child = child.nextSibling();
-                            continue;
+                            nameElem = e;
+                            break;
                         }
                     }
+                    sub = sub.nextSibling();
                 }
-            }
 
-            findElementsByClass(child, classNames, results, allowNestedClassElements);
-            child = child.nextSibling();
-        }
-    }
-
-    void normalizePropertyContainerId(
-        QDomElement container, QString const& formerNameKey,
-        QMap<QString, QString>& replaceMap)
-    {
-        QDomNode child = container.firstChild();
-
-        while (!child.isNull())
-        {
-            if (child.isElement())
-            {
-                QDomElement prop = child.toElement();
-
-                if (prop.tagName() == "property")
+                if (!nameElem.isNull())
                 {
-                    QString oldUUID = prop.attribute("name");
+                    QString newName = nameElem.text().trimmed();
 
-                    // Search for sub element <property name="$$formerNameKey$$">NewName</property>
-                    QDomElement nameElem;
-                    QDomNode sub = prop.firstChild();
+                    // keep connection info
+                    replaceMap.insert(oldUUID, newName);
 
-                    while (!sub.isNull())
-                    {
-                        if (sub.isElement())
-                        {
-                            QDomElement e = sub.toElement();
-                            if (e.attribute("name") == formerNameKey)
-                            {
-                                nameElem = e;
-                                break;
-                            }
-                        }
-                        sub = sub.nextSibling();
-                    }
+                    // Replace UUID in name attribute
+                    prop.setAttribute(gt::xml::S_NAME_TAG, newName);
 
-                    if (!nameElem.isNull())
-                    {
-                        QString newName = nameElem.text().trimmed();
-
-                        // keep connection info
-                        replaceMap.insert(oldUUID, newName);
-
-                        // Replace UUID in name attribute
-                        prop.setAttribute("name", newName);
-
-                        // Remove subelement
-                        prop.removeChild(nameElem);
-                    }
+                    // Remove subelement
+                    prop.removeChild(nameElem);
                 }
             }
-
-            child = child.nextSibling();
         }
-    }
 
-    void replaceUUIDsInTextNodes(QDomNode node,
-                                 const QMap<QString, QString>& replaceMap)
+        child = child.nextSibling();
+    }
+}
+
+void replaceUUIDsInTextNodes(QDomNode node,
+                             const QMap<QString, QString>& replaceMap)
+{
+    QDomNode child = node.firstChild();
+
+    while (!child.isNull())
     {
-        QDomNode child = node.firstChild();
 
-        while (!child.isNull())
+        if (child.isText())
         {
+            QString txt = child.nodeValue();
+            QString newTxt = txt;
 
-            if (child.isText())
+            for (auto it = replaceMap.begin(); it != replaceMap.end(); ++it)
             {
-                QString txt = child.nodeValue();
-                QString newTxt = txt;
-
-                for (auto it = replaceMap.begin(); it != replaceMap.end(); ++it)
-                {
-                    newTxt.replace(it.key(), it.value());
-                }
-
-                if (newTxt != txt)
-                    child.setNodeValue(newTxt);
+                newTxt.replace(it.key(), it.value());
             }
 
-            replaceUUIDsInTextNodes(child, replaceMap);
-            child = child.nextSibling();
+            if (newTxt != txt)
+                child.setNodeValue(newTxt);
         }
+
+        replaceUUIDsInTextNodes(child, replaceMap);
+        child = child.nextSibling();
     }
+}
 }
 
 bool
@@ -168,17 +169,17 @@ gtpy::module_upgrader::to_2_0_0::run(QDomElement& root,
 
     for (QDomElement& elem : found)
     {
-        QDomElement c = elem.firstChildElement("property-container");
-        while (!c.isNull()) {
-            QString name = c.attribute("name");
+        QDomElement c = elem.firstChildElement(gt::xml::S_PROPERTYCONT_TAG);
+        while (!c.isNull())
+        {
+            QString name = c.attribute(gt::xml::S_NAME_TAG);
 
-            if (name == "input_args" ||
-                name == "output_args")
+            if (name == "input_args" || name == "output_args")
             {
-                normalizePropertyContainerId(c, "name", replaceMap);
+                normalizePropertyContainerId(c, gt::xml::S_NAME_TAG, replaceMap);
             }
 
-            c = c.nextSiblingElement("property-container");
+            c = c.nextSiblingElement(gt::xml::S_PROPERTYCONT_TAG);
         }
     }
 
