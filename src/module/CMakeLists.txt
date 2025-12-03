@@ -28,12 +28,19 @@ set(HEADERS
     collection/localwidget/items/gtpy_abstractlocalitem.h
     collection/localwidget/items/gtpy_collapsiblelocalitem.h
     collection/localwidget/items/gtpy_localitem.h
+    data/gtpy_directory.h
+    data/gtpy_file.h
+    data/gtpy_scriptpackage.h
     extensions/gtpy_pythonfunctions.h
     gt_compat.h
     gt_python.h
     gt_pythonmodule_exports.h
     gtpy_icons_compat.h
     gtpy_stylesheet_compat.h
+    gui/ui/gtpy_directoryui.h
+    gui/ui/gtpy_fileui.h
+    gui/ui/gtpy_scriptpackageui.h
+    gui/mdi/gtpy_scripteditormdi.h
     models/gtpy_completermodel.h
     models/gtpy_objectmodel.h
     models/gtpy_taskstylemodel.h
@@ -62,6 +69,7 @@ set(HEADERS
     utilities/gtpy_processdatadistributor.h
     utilities/gtpy_regexp.h
     utilities/gtpy_scriptrunnable.h
+    utilities/gtpy_shortcut.h
     utilities/gtpy_utils.h
     utilities/gtpy_tempdir.h
     utilities/gtpy_transfer.h
@@ -108,8 +116,15 @@ set(SOURCES
     collection/localwidget/items/gtpy_abstractlocalitem.cpp
     collection/localwidget/items/gtpy_collapsiblelocalitem.cpp
     collection/localwidget/items/gtpy_localitem.cpp
+    data/gtpy_directory.cpp
+    data/gtpy_file.cpp
+    data/gtpy_scriptpackage.cpp
     extensions/gtpy_pythonfunctions.cpp
     gt_python.cpp
+    gui/ui/gtpy_directoryui.cpp
+    gui/ui/gtpy_fileui.cpp
+    gui/ui/gtpy_scriptpackageui.cpp
+    gui/mdi/gtpy_scripteditormdi.cpp
     models/gtpy_completermodel.cpp
     models/gtpy_objectmodel.cpp
     models/gtpy_taskstylemodel.cpp
@@ -134,6 +149,7 @@ set(SOURCES
     utilities/gtpy_processdatadistributor.cpp
     utilities/gtpy_regexp.cpp
     utilities/gtpy_scriptrunnable.cpp
+    utilities/gtpy_shortcut.cpp
     utilities/gtpy_utils.cpp
     utilities/gtpy_tempdir.cpp
     utilities/gtpy_transfer.cpp
@@ -166,7 +182,11 @@ set(SOURCES
 
 set(MODULE_ID "Python Module (Python ${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})")
 
-add_gtlab_module(GTlabPython SOURCES ${HEADERS} ${SOURCES}
+qt5_add_resources(RCC_SOURCES
+    ./../resource_module/src/resources/icons.qrc
+)
+
+add_gtlab_module(GTlabPython SOURCES ${HEADERS} ${SOURCES} ${RCC_SOURCES}
     MODULE_ID ${MODULE_ID}
     README_FILE "${PROJECT_SOURCE_DIR}/README.md"
     CHANGELOG_FILE "${PROJECT_SOURCE_DIR}/CHANGELOG.md"
@@ -193,7 +213,10 @@ target_include_directories(GTlabPython PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/collection/itemwidget>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/collection/localwidget>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/collection/localwidget/items>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/data>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/extensions>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gui/mdi>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gui/ui>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/models>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/post>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/processcomponents>
@@ -217,6 +240,7 @@ target_link_libraries(GTlabPython
     Qt5::Svg
     GTlab::Logging
     GTlab::Core
+    GTlab::ResourceModule
     PUBLIC
     PythonQt::PythonQt
 )

@@ -1,0 +1,25 @@
+/* GTlab - Gas Turbine laboratory
+ * Source File: ResourcesModule
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
+ *
+ * Created on: 04.11.2025
+ * Author: Marvin Nöthen (DLR AT-TWK)
+ */
+
+#include "gtest/gtest.h"
+
+#include <QCoreApplication>
+
+int main(int argc, char **argv)
+{
+    QCoreApplication app(argc, argv);
+
+    ::testing::InitGoogleTest(&argc, argv);
+
+    int retval = RUN_ALL_TESTS();
+
+    return retval;
+}
+
