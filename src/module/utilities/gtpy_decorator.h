@@ -423,13 +423,29 @@ public slots:
      * @param id of the property struct container
      * @param index of the element of the items of the container
      * @param memberId of the property to call
-     * @return the value as a variant
+     * @return the value as a variant - empty for invalid inputs
      *
      * Example call in python:
      *  task.getPropertyContainerVal("args_input", 0, "name")
      */
     QVariant getPropertyContainerVal (GtObject* obj, const QString& id,
-                                    int index, const QString& memberId);
+                                      int index, const QString& memberId);
+
+    /**
+     * Same as above, but uses the ident of the property entry to find it
+     */
+    QVariant getPropertyContainerVal(GtObject* obj, const QString& id,
+                                     const QString& entryId,
+                                     const QString& memberId);
+
+    /**
+     * @brief getPropertyContainerEntryIds
+     * @param obj - object which has the property container
+     * @param containerId - Id of the property container to evaluate
+     * @return a ist of all ids of the contained properties
+     */
+    QStringList getPropertyContainerEntryIds(GtObject* obj,
+                                             const QString& containerId);
 
     /**
      * @brief setPropertyContainerVal
@@ -443,6 +459,13 @@ public slots:
      * @return true in case of success, else false
      */
     bool setPropertyContainerVal(GtObject* obj, QString const& id, int index,
+                                 QString const& memberId, const QVariant& val);
+
+    /**
+     * Same as above, but uses the ident of the property entry to find it
+     */
+    bool setPropertyContainerVal(GtObject* obj, QString const& id,
+                                 const QString& entryId,
                                  QString const& memberId, const QVariant& val);
 #endif
     /**

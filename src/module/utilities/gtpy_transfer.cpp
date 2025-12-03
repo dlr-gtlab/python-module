@@ -65,7 +65,11 @@ gtpy::transfer::propStructToPython(
 
     for (const auto& instance : container)
     {
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+        auto name = instance.ident();
+#else
         auto name = instance.getMemberVal<QString>("name");
+#endif
 
         if (!name.isEmpty())
         {
@@ -92,8 +96,11 @@ gtpy::transfer::propStructFromPython(
 
     for (auto& entry : container)
     {
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+        auto argName = entry.ident();
+#else
         auto argName = entry.getMemberVal<QString>("name");
-
+#endif
         auto iter = dict.find(argName);
         if (iter != dict.end())
         {

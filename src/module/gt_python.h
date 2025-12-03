@@ -177,6 +177,9 @@ public:
     QList<GtCommandLineFunction> commandLineFunctions() const override;
 
     QList<gt::SharedFunction> sharedFunctions() const override;
+
+    /** We are providing routines to upgrade the datamodel */
+    QList<gt::VersionUpgradeRoutine> upgradeRoutines() const override;
 #endif
 
 private:
