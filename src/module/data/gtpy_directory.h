@@ -11,6 +11,7 @@
 #ifndef GTPY_DIRECTORY_H
 #define GTPY_DIRECTORY_H
 
+#include "gt/resource/data/file.h"
 #include <gt/resource/data/projectdirectory.h>
 
 class GtpyDirectory : public gt::resource::data::ProjectDirectory
@@ -19,6 +20,10 @@ class GtpyDirectory : public gt::resource::data::ProjectDirectory
 
 public:
     Q_INVOKABLE GtpyDirectory();
+
+protected:
+    std::unique_ptr<gt::resource::data::File> createFileResource(
+        const QFileInfo& file) override;
 };
 
 #endif // GTPY_DIRECTORY_H

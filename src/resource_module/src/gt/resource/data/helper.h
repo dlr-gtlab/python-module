@@ -2,7 +2,7 @@
  * Source File: helper.h
  *
  * SPDX-License-Identifier: Apache-2.0
- * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
+ * SPDX-FileCopyrightText: 2025 German Aerospace Center (DLR)
  *
  * Created on: 17.11.2025
  * Author: Marvin Noethen (DLR AT-TWK)

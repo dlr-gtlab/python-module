@@ -19,6 +19,6 @@ GtpyScriptPackage::GtpyScriptPackage()
     auto* pyDirObj = new GtpyDirectory{};
     pyDirObj->setDefault(true);
     pyDirObj->setFlag(GtObject::UserRenamable, false);
-    // pyDirObj->setFlag(GtObject::UserDeletable, false);
+    pyDirObj->setFlag(GtObject::UserDeletable, false);
     appendChild(pyDirObj);
 }

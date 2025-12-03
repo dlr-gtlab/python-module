@@ -10,15 +10,17 @@
 
 #include "gt/resource/module.h"
 
-#include "gt/resource/data/package.h"
 #include "gt/resource/data/file.h"
-#include "gt/resource/data/projectfile.h"
+#include "gt/resource/data/package.h"
+#include "gt/resource/data/scripts.h"
 #include "gt/resource/data/directory.h"
-#include "gt/resource/data/projectdirectory.h"
+#include "gt/resource/data/projectfile.h"
 #include "gt/resource/data/httpresource.h"
+#include "gt/resource/data/projectdirectory.h"
 #include "gt/resource/data/helper/filecontent.h"
 
 #include "gt/resource/gui/ui/fileui.h"
+#include "gt/resource/gui/ui/scriptsui.h"
 #include "gt/resource/gui/ui/packageui.h"
 #include "gt/resource/gui/ui/directoryui.h"
 #include "gt/resource/gui/ui/httpresourceui.h"
@@ -72,6 +74,7 @@ Module::data()
 
     QList<QMetaObject> list;
 
+    list << GT_METADATA(Scripts);
     list << GT_METADATA(File);
     list << GT_METADATA(ProjectFile);
     list << GT_METADATA(helper::FileContent);
@@ -115,6 +118,7 @@ Module::uiItems()
     QMap<const char*, QMetaObject> map;
 
     map.insert(GT_CLASSNAME(Package), GT_METADATA(PackageUI));
+    map.insert(GT_CLASSNAME(Scripts), GT_METADATA(ScriptsUI));
     map.insert(GT_CLASSNAME(File), GT_METADATA(FileUI));
     map.insert(GT_CLASSNAME(ProjectFile), GT_METADATA(FileUI));
     map.insert(GT_CLASSNAME(Directory),GT_METADATA(DirectoryUI));

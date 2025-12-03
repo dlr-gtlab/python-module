@@ -13,13 +13,14 @@
 #include <QUrl>
 #include <QMenu>
 #include <QTimer>
-#include <QFileInfo>
 #include <QHBoxLayout>
 #include <QPlainTextEdit>
 
 #include <gt_logging.h>
 
 #include <gt_icons.h>
+#include <gt_project.h>
+#include <gt_datamodel.h>
 #include <gt_application.h>
 
 #include "gt/resource/data/projectfile.h"
@@ -62,7 +63,7 @@ FileViewer::icon() const
 void
 FileViewer::setData(GtObject* obj)
 {
-    m_file  = qobject_cast<gt::resource::data::File*>(obj);
+    m_file = qobject_cast<gt::resource::data::File*>(obj);
     if (!m_file)
     {
         gtError().verbose() << tr("Not a file resource!") << " ( "
@@ -103,6 +104,11 @@ FileViewer::setData(GtObject* obj)
                 SLOT(updateText()));
 
         m_textEdit->setReadOnly(false);
+    }
+    else
+    {
+        connect(gtDataModel, &GtDataModel::projectSaved, this,
+                [this](GtProject*){ updateText(); } );
     }
 }
 

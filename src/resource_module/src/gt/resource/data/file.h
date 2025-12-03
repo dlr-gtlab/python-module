@@ -12,10 +12,10 @@
 #define FILE_H
 
 #include <QUrl>
+#include <QFileInfo>
 
 #include "gt/resource/data/streamresource.h"
 
-class QFileInfo;
 
 namespace gt
 {

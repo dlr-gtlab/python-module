@@ -394,7 +394,7 @@ Directory::populateFileObjects()
     {
         for (auto* f : qAsConst(fileObjs))
         {
-            if (!fileMatchesFilter(f->path(), filters)) f->setUserHidden(true);
+            f->setUserHidden(!fileMatchesFilter(f->path(), filters));
         }
     }
 

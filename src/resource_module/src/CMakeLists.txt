@@ -15,36 +15,42 @@ target_sources(ResourceModule
 
     gt/resource/url.h
     gt/resource/data/directory.h
+    gt/resource/data/extension.h
     gt/resource/data/file.h
     gt/resource/data/helper.h
     gt/resource/data/httpresource.h
     gt/resource/data/package.h
     gt/resource/data/projectdirectory.h
     gt/resource/data/projectfile.h
+    gt/resource/data/scripts.h
     gt/resource/data/streamresource.h
     gt/resource/data/urlresource.h
     gt/resource/data/helper/filecontent.h
     gt/resource/gui/icons.h
+    gt/resource/gui/mdi/fileviewer.h
     gt/resource/gui/ui/directoryui.h
     gt/resource/gui/ui/fileui.h
-    gt/resource/gui/mdi/fileviewer.h
+    gt/resource/gui/ui/scriptsui.h
     gt/resource/gui/ui/httpresourceui.h
     gt/resource/gui/ui/packageui.h
     gt/resource/module.h
 
     gt/resource/data/directory.cpp
+    gt/resource/data/extension.cpp
     gt/resource/data/file.cpp
     gt/resource/data/httpresource.cpp
     gt/resource/data/package.cpp
     gt/resource/data/projectdirectory.cpp
     gt/resource/data/projectfile.cpp
+    gt/resource/data/scripts.cpp
     gt/resource/data/streamresource.cpp
     gt/resource/data/urlresource.cpp
     gt/resource/data/helper/filecontent.cpp
     gt/resource/gui/icons.cpp
+    gt/resource/gui/mdi/fileviewer.cpp
     gt/resource/gui/ui/directoryui.cpp
     gt/resource/gui/ui/fileui.cpp
-    gt/resource/gui/mdi/fileviewer.cpp
+    gt/resource/gui/ui/scriptsui.cpp
     gt/resource/gui/ui/httpresourceui.cpp
     gt/resource/gui/ui/packageui.cpp
     gt/resource/module.cpp

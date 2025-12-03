@@ -10,8 +10,6 @@
 
 #include "gt/resource/data/file.h"
 
-#include <QFileInfo>
-
 #include "gt/resource/url.h"
 
 namespace gt
@@ -26,6 +24,7 @@ namespace data
 File::File(const QUrl& url) : StreamResource(url)
 {
     setFlag(GtObject::UserDeletable, true);
+    setFlag(GtObject::UserRenamable, false);
 
     setObjectName(url.fileName());
 }

@@ -16,6 +16,9 @@
 
 #include "gt/resource/data/httpresource.h"
 #include "gt/resource/data/directory.h"
+#include "gt/resource/data/projectdirectory.h"
+#include "gt/resource/data/helper.h"
+#include "gt/resource/url.h"
 
 namespace gt
 {
@@ -34,19 +37,38 @@ PackageUI::PackageUI()
     addSingleAction(tr("Create Directory Resource"), [](GtObject* obj) {
         QString dirPath = GtFileDialog::getExistingDirectory(
             nullptr, tr("Choose Directory"));
-
         if (dirPath.isEmpty()) return;
 
         auto* dir = new gt::resource::data::Directory{dirPath};
         dir->setObjectName("Directory");
+
         gtDataModel->appendChild(dir, obj);
+        dir->open();
+
+    }).setIcon(gt::gui::icon::folder());
+
+    addSingleAction(tr("Create Project Directory Resource"), [](GtObject* obj) {
+        QString dirPath = GtFileDialog::getExistingDirectory(
+            nullptr, tr("Choose Directory"));
+        if (dirPath.isEmpty()) return;
+
+        using namespace gt::resource;
+        auto projUrl = url::toProjFileUrl(
+            data::helper::findProject(obj), dirPath);
+
+        auto* dir = new data::ProjectDirectory{projUrl};
+        dir->setObjectName("ProjectDirectory");
+
+        gtDataModel->appendChild(dir, obj);
+        dir->open();
 
     }).setIcon(gt::gui::icon::folder());
 
     addSingleAction(tr("Create HTTP Resource"), [](GtObject* obj) {
-        auto* httpRes = new gt::resource::data::HttpResource{};
-        httpRes->setObjectName("HttpResource");
-        gtDataModel->appendChild(httpRes, obj);
+        auto* res = new gt::resource::data::HttpResource{};
+        res->setObjectName("HttpResource");
+
+        gtDataModel->appendChild(res, obj);
     }).setIcon(gt::gui::icon::web());
 }
 

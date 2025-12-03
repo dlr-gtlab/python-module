@@ -15,6 +15,44 @@
 #include "gt/resource/url.h"
 #include "gt/resource/data/helper.h"
 
+namespace
+{
+
+QString makeUniqueFileName(const QString& newName, const QFileInfo& fi)
+{
+    QString baseName = newName;
+    QDir dir = fi.absoluteDir();
+    const QString suffix = fi.suffix();
+    const QStringList fileList = dir.entryList(QDir::Files);
+
+    if (baseName.endsWith("." + suffix, Qt::CaseInsensitive))
+    {
+        baseName.chop(suffix.length() + 1);
+    }
+
+    QSet<QString> existing;
+    for (const auto& f :fileList ) existing.insert(f.toLower());
+
+    QString candidate = baseName + "." + suffix;
+    if (!existing.contains(candidate.toLower())) return candidate;
+
+    int counter = 1;
+
+    while (true)
+    {
+        candidate = QString{"%1[%2]"}.arg(baseName).arg(counter);
+        candidate += "." + suffix;
+
+        if (!existing.contains(candidate.toLower())) break;
+
+        counter++;
+    }
+
+    return candidate;
+}
+
+}
+
 namespace gt
 {
 
@@ -48,12 +86,22 @@ ProjectFile::ProjectFile(const QUrl& url) :
     File(url),
     m_pimpl(std::make_unique<Impl>(this))
 {
+    setFlag(GtObject::UserRenamable, true);
+
     // append the helper as a child
     appendChild(m_pimpl->fileContent);
 
     // set up connections
     connect(m_pimpl->fileContent, &helper::FileContent::contentChanged, this,
             &ProjectFile::changed);
+    connect(this, &ProjectFile::objectNameChanged, this,
+            [this](const QString& name) {
+
+        if (!isRenamable()) return;
+
+        QSignalBlocker blocker{this};
+        renameFile(name);
+    });
 }
 
 ProjectFile::ProjectFile(const QString& relPath) :
@@ -85,9 +133,9 @@ ProjectFile::toPath(const QUrl& url) const
     auto* proj = helper::findProject(uuid());
     if (!proj)
     {
-        gtError() << tr("Unable to resolve the parent project for %1. "
-                        "The absolute path of the file cannot be determined.")
-                         .arg(objectName()) << " (" << this << ")";
+        // gtError() << tr("Unable to resolve the parent project for %1. "
+        //                 "The absolute path of the file cannot be determined.")
+        //                  .arg(objectName()) << " (" << this << ")";
         return {};
     }
 
@@ -99,6 +147,36 @@ ProjectFile::fileContent() const
 {
     assert(m_pimpl->fileContent);
     return *m_pimpl->fileContent;
+}
+
+void
+ProjectFile::renameFile(const QString& newName)
+{
+    const QFileInfo fi = info();
+    if (!fi.exists() || !fi.isFile()) return;
+
+    QString uniqueName = makeUniqueFileName(newName, fi);
+
+    gtDebug() << uniqueName;
+    QString newFilePath = fi.absolutePath() + QDir::separator() + uniqueName;
+
+    QFile file{fi.absoluteFilePath()};
+
+    QUrl oldUrl = url();
+    QUrl newUrl = gt::resource::url::toProjFileUrl(
+        helper::findProject(uuid()), newFilePath);
+
+    setUrl(newUrl);
+
+    if (file.rename(newFilePath))
+    {
+        setObjectName(uniqueName);
+    }
+    else
+    {
+        setObjectName(fi.fileName());
+        setUrl(oldUrl);
+    }
 }
 
 } // namespace data

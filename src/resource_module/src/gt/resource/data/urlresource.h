@@ -36,6 +36,8 @@ public:
     QUrl url() const;
 
 protected:
+    void setUrl(const QUrl& url);
+
     void setUrlLocked(bool readOnly);
 
 signals:

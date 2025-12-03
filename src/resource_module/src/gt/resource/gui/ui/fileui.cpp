@@ -11,7 +11,6 @@
 #include "gt/resource/gui/ui/fileui.h"
 
 #include <QDir>
-#include <QFileInfo>
 #include <QDesktopServices>
 
 #include <gt_icons.h>

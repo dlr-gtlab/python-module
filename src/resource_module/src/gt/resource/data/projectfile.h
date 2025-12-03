@@ -48,6 +48,9 @@ private:
     std::unique_ptr<Impl> m_pimpl;
 
     helper::FileContent& fileContent() const;
+
+private slots:
+    void renameFile(const QString& newName);
 };
 
 } // namespace data

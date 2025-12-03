@@ -28,10 +28,12 @@
 #include "gtpy_icons_compat.h"
 
 #include <gt/resource/module.h>
+#include <gt/resource/data/extension.h>
 
 // data model classes
 #include "gtpy_scriptpackage.h"
 #include "gtpy_directory.h"
+#include "gtpy_file.h"
 
 // calculator classes
 #include "gtpy_scriptcalculator.h"
@@ -43,8 +45,11 @@
 #include "gtpy_console.h"
 #include "gtpy_scriptpackageui.h"
 #include "gtpy_directoryui.h"
+#include "gtpy_fileui.h"
 
 // mdi items
+#include "gtpy_scripteditormdi.h"
+
 #include "gt_extendedcalculatordata.h"
 #include "gt_extendedtaskdata.h"
 #include "gt_customprocesswizard.h"
@@ -61,6 +66,7 @@
 #include "gt_accessdataconnection.h"
 
 #include "gtpy_scriptcollectionsettings.h"
+#include "gtpy_shortcut.h"
 
 #include "gt_python.h"
 
@@ -178,6 +184,10 @@ GtPythonModule::init()
     {
         gtError() << "Unable to register matplotlib backend. Is matplotlib installed?";
     }
+
+    gt::resource::data::extension::registerChildForScripts<GtpyDirectory>();
+
+    gtpy::shortcut::registerShortCuts();
 }
 
 QList<GtCalculatorData>
@@ -242,7 +252,11 @@ GtPythonModule::tasks()
 QList<QMetaObject>
 GtPythonModule::mdiItems()
 {
-    return resourceModule().mdiItems();
+    auto items = resourceModule().mdiItems();
+
+    items <<  GT_METADATA(GtpyScriptEditorMdi);
+
+    return items;
 }
 
 QList<QMetaObject>
@@ -262,6 +276,8 @@ GtPythonModule::uiItems()
                GT_METADATA(GtpyScriptPackageUI));
     map.insert(GT_CLASSNAME(GtpyDirectory),
                GT_METADATA(GtpyDirectoryUI));
+    map.insert(GT_CLASSNAME(GtpyFile),
+               GT_METADATA(GtpyFileUI));
 
     return map;
 }
@@ -353,7 +369,7 @@ QList<gt::SharedFunction> GtPythonModule::sharedFunctions() const
 QMetaObject
 GtPythonModule::package()
 {
-    return GT_METADATA(GtpyScriptPackage);
+    return resourceModule().package();
 }
 
 QList<QMetaObject>
@@ -362,6 +378,7 @@ GtPythonModule::data()
     auto metaObjs = resourceModule().data();
 
     metaObjs << GT_METADATA(GtpyDirectory);
+    metaObjs << GT_METADATA(GtpyFile);
 
     return metaObjs;
 }

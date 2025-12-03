@@ -56,6 +56,15 @@ UrlResource::url() const
 }
 
 void
+UrlResource::setUrl(const QUrl& url)
+{
+    QString encoded = gt::resource::url::fullyEncoded(url);
+    if (m_pimpl->urlProp == encoded) return;
+
+    m_pimpl->urlProp = encoded;
+}
+
+void
 UrlResource::setUrlLocked(bool readOnly)
 {
     m_pimpl->urlProp.setReadOnly(readOnly);

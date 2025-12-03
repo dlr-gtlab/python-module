@@ -21,6 +21,9 @@ public:
     Q_INVOKABLE GtpyDirectoryUI();
 
     QIcon icon(GtObject* obj) const override;
+
+protected:
+    QVariant specificData(GtObject* obj, int role, int col) const override;
 };
 
 #endif // GTPY_DIRECTORYUI_H

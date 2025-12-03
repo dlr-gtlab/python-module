@@ -1,18 +1,17 @@
 /* GTlab - Gas Turbine laboratory
- * Source File: ResourcesModule
+ * Source File: scripts.cpp
  *
  * SPDX-License-Identifier: Apache-2.0
  * SPDX-FileCopyrightText: 2025 German Aerospace Center (DLR)
  *
- * Created on: 04.11.2025
- * Author: Marvin Nöthen (DLR AT-TWK)
+ * Created on: 28.11.2025
+ * Author: Marvin Noethen (DLR AT-TWK)
  */
 
-#include "gt/resource/data/package.h"
+#include "scripts.h"
 
 #include <gt_logging.h>
 
-#include "gt/resource/data/scripts.h"
 #include "gt/resource/data/extension.h"
 
 namespace gt
@@ -24,15 +23,16 @@ namespace resource
 namespace data
 {
 
-Package::Package()
+Scripts::Scripts()
 {
-    setObjectName("Resources");
-
-    auto scripts = std::make_unique<Scripts>();
-    scripts->setDefault(true);
-    if (appendChild(scripts.get())) scripts.release();
+    setObjectName("Scripts");
+    setUserHidden(true);
 
     gt::resource::data::extension::appendDefaultChildren(this);
+
+    connect(this, &Scripts::childAppended, this, [this](GtObject*, GtObject*){
+        setUserHidden(false);
+    });
 }
 
 } // namespace data
