@@ -20,7 +20,7 @@ class GtpyProcessDataDistributor
 public:
     explicit GtpyProcessDataDistributor(GtTask* pythonTask);
 
-    GtTask* taskElement(const QString& name);
+    GtTask* taskElement(const QString& name, const QString groupName = {});
 
 private:
     GtTask* m_pythonTask;

@@ -41,8 +41,8 @@ GtpyCalculatorsModule_StaticMethods[] =
 {
     {
         "findGtTask", (PyCFunction)findGtTask_C_function, METH_VARARGS,
-        "GtTask* findGtTask(name) --> finds an existing GtTask by objectname "
-        "and returns it"
+        "GtTask* findGtTask(name, groupname) --> finds an existing GtTask "
+             "by objectname and optional groupname and returns it"
     },
     { NULL, NULL, 0, NULL }
 };
