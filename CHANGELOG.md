@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    it returns only the modules that are part of the data model of the current project. - #630
  - Fixed a crash when creating a calculator with missing author information in a Python Task - #627
 
+### Added
+ - Python Module shortcuts are now registered in GTlab’s shortcut list.
+
 ## [1.8.0] - 2025-07-11
 
 ### Fixed
