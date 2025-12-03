@@ -22,12 +22,13 @@ void registerShortCuts()
 #if GT_VERSION >= 0x020100
         gtApp->addShortCut(id, cat::PY_MODULE, shortcut, true);
 #else
-        gtApp->extendShortCuts({id, cat::PY_MODULE, shortcut, true});
+        gtApp->extendShortCuts({id, category::PY_MODULE, shortcut, true});
 #endif
     };
 
     registerShortCut(id::EVAL, {Qt::CTRL + Qt::Key_E});
     registerShortCut(id::INTERRUPT, {Qt::CTRL + Qt::Key_I});
+    registerShortCut(id::SAVE, {Qt::CTRL + Qt::Key_S});
 }
 
 } // shortcut
