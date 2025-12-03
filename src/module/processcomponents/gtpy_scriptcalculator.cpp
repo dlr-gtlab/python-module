@@ -37,6 +37,8 @@ GtpyScriptCalculator::GtpyScriptCalculator()
         registerProperty(*pathProp);
     }
 
+    hideLabelProperty(true);
+
     connect(this, SIGNAL(stateChanged(GtProcessComponent::STATE)), this,
             SLOT(onStateChanged(GtProcessComponent::STATE)));
 
