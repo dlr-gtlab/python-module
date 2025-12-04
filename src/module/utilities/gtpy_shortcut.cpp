@@ -19,8 +19,8 @@ namespace shortcut
 void registerShortCuts()
 {
     auto registerShortCut = [](auto id, QKeySequence shortcut) {
-#if GT_VERSION >= 0x020100
-        gtApp->addShortCut(id, cat::PY_MODULE, shortcut, true);
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+        gtApp->addShortCut(id, category::PY_MODULE, shortcut, true);
 #else
         gtApp->extendShortCuts({id, category::PY_MODULE, shortcut, true});
 #endif
