@@ -18,6 +18,7 @@
 #include <QFileSystemWatcher>
 #include <QRegularExpressionValidator>
 
+#include <gt_version.h>
 #include <gt_datamodel.h>
 #include <gt_application.h>
 #include <gt_boolproperty.h>
@@ -32,6 +33,15 @@
 
 namespace
 {
+
+inline auto createRegExp(const QString& regExpStr)
+{
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+    return QRegularExpression{regExpStr};
+#else
+    return new QRegularExpressionValidator{QRegularExpression{regExpStr}};
+#endif
+}
 
 bool fileMatchesFilter(const QString& filePath, const QStringList& filters)
 {
@@ -78,8 +88,7 @@ struct Directory::Impl
     GtBoolProperty isRefreshRequired{"refreshRequired", "refreshRequired"};
 
     GtStringProperty fileFilters{
-        "fileFilters", tr("File Filters"), "", "*",
-        new QRegularExpressionValidator{QRegularExpression{".*"}}
+        "fileFilters", tr("File Filters"), "", "*", createRegExp(".*")
     };
 
     GtBoolProperty deleteFilteredOutFiles{

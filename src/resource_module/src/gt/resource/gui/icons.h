@@ -11,6 +11,7 @@
 #ifndef ICONS_H
 #define ICONS_H
 
+#include <gt_version.h>
 #include <gt_icons.h>
 
 namespace gt
@@ -22,7 +23,13 @@ namespace gui
 namespace icon
 {
 
-const QIcon& fileMissing();
+#if GT_VERSION >= GT_VERSION_CHECK(2 ,1, 0)
+using IconType = gt::gui::Icon;
+#else
+using IconType = QIcon;
+#endif
+
+const IconType& fileMissing();
 
 }
 

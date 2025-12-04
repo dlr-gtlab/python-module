@@ -76,7 +76,7 @@ FileUI::icon(GtObject* obj) const
     if (!file->exists())
     {
         return gt::gui::colorize(gt::resource::gui::icon::fileMissing(),
-                                 gt::gui::color::disabled());
+                                 gt::gui::color::disabled);
     }
 
     return gt::gui::icon::file();

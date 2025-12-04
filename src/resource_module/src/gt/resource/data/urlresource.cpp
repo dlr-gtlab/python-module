@@ -12,9 +12,24 @@
 
 #include <QRegularExpressionValidator>
 
+#include <gt_version.h>
 #include <gt_stringproperty.h>
 
 #include "gt/resource/url.h"
+
+namespace
+{
+
+inline auto createRegExp(const QString& regExpStr)
+{
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+    return QRegularExpression{regExpStr};
+#else
+    return new QRegularExpressionValidator{QRegularExpression{regExpStr}};
+#endif
+}
+
+}
 
 namespace gt
 {
@@ -27,13 +42,12 @@ namespace data
 
 struct UrlResource::Impl
 {
-    Impl(const QUrl& url) : urlProp{"URL", "URL", "", "",
-                  new QRegularExpressionValidator{QRegularExpression{".*"}}}
+    Impl(const QUrl& url)
     {
         urlProp = gt::resource::url::fullyEncoded(url);
     }
 
-    GtStringProperty urlProp;
+    GtStringProperty urlProp{"URL", "URL", "", "", createRegExp(".*")};
 };
 
 UrlResource::UrlResource(const QUrl& url) :

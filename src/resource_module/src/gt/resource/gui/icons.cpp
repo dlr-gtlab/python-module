@@ -10,10 +10,26 @@
 
 #include "gt/resource/gui/icons.h"
 
-const QIcon&
-gt::resource::gui::icon::fileMissing()
+namespace gt
 {
-    static QIcon icon = gt::gui::getIcon(
+namespace resource
+{
+namespace gui
+{
+namespace icon
+{
+
+const IconType& fileMissing()
+{
+    static IconType icon = gt::gui::getIcon(
         QStringLiteral(":/resourcemodule-icons/fileMissing.svg"));
     return icon;
 }
+
+}
+
+} // namespace icon
+
+} // namespace gui
+
+} // namespace gt
