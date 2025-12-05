@@ -34,13 +34,13 @@
 #include "gtpy_editorsettingsdialog.h"
 #include "gtpy_packageiteration.h"
 #include "gtpy_transfer.h"
+#include "gtpy_abstractscriptcomponent.h"
 
 // GTlab framework includes
 #include "gt_object.h"
 #include "gt_project.h"
 #include "gt_datamodel.h"
 #include "gt_filedialog.h"
-#include "gt_saveprojectmessagebox.h"
 
 #include "gt_pyhighlighter.h"
 #include "gt_searchwidget.h"
@@ -57,7 +57,6 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     m_editorSettings(nullptr),
     m_isEvaluating(false),
     m_runnable(nullptr),
-    m_savingEnabled(true),
     m_componentUuid(QString())
 {
     setTitle(tr("Python Script Editor"));
@@ -156,7 +155,6 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     fontClearOutput.setItalic(true);
     fontClearOutput.setPointSize(7);
     shortCutClearOutput->setFont(fontClearOutput);
-    shortCutClearOutput->installEventFilter(this);
 
     QVBoxLayout* clearButtonLay = new QVBoxLayout;
 
@@ -184,25 +182,6 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     toolBarLayout->addLayout(evalButtonLay);
 
     toolBarLayout->addStretch(1);
-
-    //Save Button
-    m_shortCutSave = new QLabel("<font color='grey'>  Ctrl+S</font>");
-    QFont fontSave = m_shortCutSave->font();
-    fontSave.setItalic(true);
-    fontSave.setPointSize(7);
-    m_shortCutSave->setFont(fontSave);
-
-    m_saveButton = new QPushButton;
-    m_saveButton->setIcon(GTPY_ICON(save));
-    m_saveButton->setToolTip(tr("Save Script"));
-
-    QVBoxLayout* saveButtonLay = new QVBoxLayout;
-    saveButtonLay->addWidget(m_saveButton);
-    saveButtonLay->addWidget(m_shortCutSave);
-
-    toolBarLayout->addLayout(saveButtonLay);
-
-    enableSaveButton(false);
 
     //Import Button
     QLabel* shortCutImport = new QLabel("<font color='grey'></font>");
@@ -311,12 +290,11 @@ void
 GtpyAbstractScriptingWizardPage::initializePage()
 {
     // we want to react, when the wizard should be closed
-    if (wizard()) wizard()->installEventFilter(this);
-
-    /// Can not be connected in the constructor because onSaveButtonClicked()
-    /// calls the pure virtual function saveScript()
-    connect(m_saveButton, SIGNAL(clicked(bool)), this,
-            SLOT(onSaveButtonClicked()));
+    if (auto* wiz = wizard())
+    {
+        wiz->setOption(QWizard::NoCancelButton, true);
+        wiz->installEventFilter(this);
+    }
 
     setWizardNonModal();
 
@@ -332,20 +310,22 @@ GtpyAbstractScriptingWizardPage::initializePage()
 
     loadPackages();
 
-    GtObject* component = gtDataModel->objectByUuid(m_componentUuid);
+    GtObject* obj = gtDataModel->objectByUuid(m_componentUuid);
+    if (!obj) return;
 
-    if (!component)
-    {
-        enableSaving(false);
-    }
-    else
-    {
-        setTitle(component->objectName());
-        connect(component, SIGNAL(objectNameChanged(QString)), this,
-                SLOT(componentRenamed(QString)));
-    }
+    setTitle(obj->objectName());
 
-    connect(m_editor, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
+    connect(obj, &GtObject::objectNameChanged, this,
+            &GtpyAbstractScriptingWizardPage::componentRenamed);
+
+    auto* comp = dynamic_cast<GtpyAbstractScriptComponent*>(obj);
+    if (!comp) return;
+
+    using DataChanged = void (GtObject::*)(GtObject*, GtAbstractProperty*);
+    connect(obj, static_cast<DataChanged>(&GtObject::dataChanged),
+            this, [this, c = comp](GtObject* obj, GtAbstractProperty* prop) {
+        if (c && prop == &c->scriptProp()) setPlainTextToEditor(c->script());
+    });
 }
 
 bool
@@ -364,16 +344,6 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
         case Qt::Key_Return:
             // Ignore return
             return;
-
-        case Qt::Key_Escape:
-
-            if (m_saveButton->isEnabled())
-            {
-                saveMessageBox();
-                return;
-            }
-
-            break;
 
         default:
             break;
@@ -397,14 +367,6 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
             onEvalButtonClicked();
         }
 
-        return;
-    }
-
-    // Save shortcut
-    if (((e->modifiers() & Qt::ControlModifier) &&
-            e->key() == Qt::Key_S))
-    {
-        onSaveButtonClicked();
         return;
     }
 
@@ -457,16 +419,16 @@ GtpyAbstractScriptingWizardPage::defaultFrameStyle()
 void
 GtpyAbstractScriptingWizardPage::setPlainTextToEditor(const QString& text)
 {
-    if (!m_editor)
-    {
-        return;
-    }
+    assert(m_editor);
+    assert(m_searchWidget);
 
     m_editor->setPlainText(text);
+    m_editor->setExtraSelections({});
+    m_editor->searchHighlighting(m_searchWidget->text());
 }
 
 QString
-GtpyAbstractScriptingWizardPage::editorText()
+GtpyAbstractScriptingWizardPage::editorText() const
 {
     if (!m_editor)
     {
@@ -711,21 +673,6 @@ GtpyAbstractScriptingWizardPage::onEvalShortCutTriggered()
 }
 
 void
-GtpyAbstractScriptingWizardPage::onSaveButtonClicked()
-{
-    connect(m_editor, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
-    saveScript();
-    enableSaveButton(false);
-}
-
-void
-GtpyAbstractScriptingWizardPage::onTextChanged()
-{
-    enableSaveButton(true);
-    disconnect(m_editor, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
-}
-
-void
 GtpyAbstractScriptingWizardPage::initialization()
 {
     return;
@@ -738,66 +685,26 @@ GtpyAbstractScriptingWizardPage::validation()
 }
 
 void
-GtpyAbstractScriptingWizardPage::enableSaveButton(bool enable)
+GtpyAbstractScriptingWizardPage::saveScript()
 {
-    if (!m_savingEnabled)
-    {
-        enable = false;
-    }
-
-    m_saveButton->setEnabled(enable);
-
-    if (enable)
-    {
-        m_shortCutSave->setText("<font color='grey'>  Ctrl+S</font>");
-    }
-    else
-    {
-        m_shortCutSave->setText("");
-    }
+    applyScriptToDataModel();
 }
 
-int
-GtpyAbstractScriptingWizardPage::saveMessageBox()
+void
+GtpyAbstractScriptingWizardPage::applyScriptToDataModel() const
 {
-    QWidget* wiz = wizard();
+    GtObject* obj = gtDataModel->objectByUuid(componentUuid());
+    if (!obj) return;
 
-    if (!wiz)
-    {
-        return QMessageBox::Cancel;
-    }
+    auto* comp = dynamic_cast<GtpyAbstractScriptComponent*>(obj);
+    if (!comp) return;
 
-    QString text =
-        tr("Do you want to ") +
-        tr("save your changes before closing the wizard?");
+    const QString script = editorText();
+    if (comp->script() == script) return;
 
-    GtSaveProjectMessageBox mb(text);
-
-    mb.setWindowFlags(mb.windowFlags() | Qt::WindowStaysOnTopHint);
-
-    int ret;
-
-    ret = mb.exec();
-
-    switch (ret)
-    {
-        case QMessageBox::Yes:
-            onSaveButtonClicked();
-            wiz->close();
-            break;
-
-        case QMessageBox::No:
-            wiz->close();
-            break;
-
-        case QMessageBox::Cancel:
-            break;
-
-        default:
-            break;
-    }
-
-    return ret;
+    auto _ = gtApp->makeCommand(obj, tr("%1 code changed")
+                                         .arg(obj->objectName()));
+    comp->setScript(script);
 }
 
 void
@@ -961,24 +868,23 @@ GtpyAbstractScriptingWizardPage::cursorToNewLine()
     m_editor->setTextCursor(cur);
 }
 
-void
-GtpyAbstractScriptingWizardPage::enableSaving(bool enable)
-{
-    m_savingEnabled = enable;
-}
-
-
 bool
-GtpyAbstractScriptingWizardPage::eventFilter(QObject *watched, QEvent *event)
+GtpyAbstractScriptingWizardPage::eventFilter(QObject* watched, QEvent* event)
 {
-    if (event && event->type() == QEvent::Close && m_saveButton->isEnabled())
-    {
-        if (saveMessageBox() == QMessageBox::Cancel) event->ignore();
+    if (!event) return GtProcessWizardPage::eventFilter(watched, event);
 
-        return true;
+    switch (event->type())
+    {
+    // this event occurs when the wizard loses focus
+    case QEvent::WindowDeactivate:
+        if (watched == wizard()) applyScriptToDataModel();
+        break;
+
+    default:
+        break;
     }
 
-    return QObject::eventFilter(watched, event);
+    return GtProcessWizardPage::eventFilter(watched, event);
 }
 
 void

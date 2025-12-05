@@ -108,6 +108,12 @@ public:
     QVariant outputArg(const QString& argName) const;
 #endif
 
+    /**
+     * @brief Returns the script property.
+     * @return Constant reference to the script property.
+     */
+    const GtStringProperty& scriptProp() const;
+
 protected:
     /**
      * @brief GtpyComponentAssistant
