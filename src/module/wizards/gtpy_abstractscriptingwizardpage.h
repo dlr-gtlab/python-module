@@ -204,7 +204,7 @@ protected:
     /**
      * To intercept closing events
      */
-    bool eventFilter(QObject *watched, QEvent *event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
     /// Python Context type
     GtpyContextManager::Context m_contextType;
@@ -235,13 +235,13 @@ private:
     virtual bool validation();
 
     /**
-     * @brief Calls applyScriptToDataModel() to apply the current script
+     * @brief Calls storeScriptInDataModel() to apply the current script
      * from the editor to the data model.
      *
      * This method is retained for backward compatibility.
-     * Use applyScriptToDataModel() directly instead.
+     * Use storeScriptInDataModel() directly instead.
      */
-    [[deprecated("Use applyScriptToDataModel() instead")]]
+    [[deprecated("Use storeScriptInDataModel() instead")]]
     virtual void saveScript() final;
 
     /**
@@ -275,7 +275,7 @@ private:
     /**
      * @brief Applies the current script from the editor to the data model.
      */
-    void applyScriptToDataModel() const;
+    void storeScriptInDataModel() const;
 
     /**
      * @brief Sets the window modality of the wizard to non modal. This allows

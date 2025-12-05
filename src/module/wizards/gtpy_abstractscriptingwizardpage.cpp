@@ -687,11 +687,11 @@ GtpyAbstractScriptingWizardPage::validation()
 void
 GtpyAbstractScriptingWizardPage::saveScript()
 {
-    applyScriptToDataModel();
+    storeScriptInDataModel();
 }
 
 void
-GtpyAbstractScriptingWizardPage::applyScriptToDataModel() const
+GtpyAbstractScriptingWizardPage::storeScriptInDataModel() const
 {
     GtObject* obj = gtDataModel->objectByUuid(componentUuid());
     if (!obj) return;
@@ -871,13 +871,16 @@ GtpyAbstractScriptingWizardPage::cursorToNewLine()
 bool
 GtpyAbstractScriptingWizardPage::eventFilter(QObject* watched, QEvent* event)
 {
-    if (!event) return GtProcessWizardPage::eventFilter(watched, event);
+    if (!watched || !event)
+    {
+        return GtProcessWizardPage::eventFilter(watched, event);
+    }
 
     switch (event->type())
     {
     // this event occurs when the wizard loses focus
     case QEvent::WindowDeactivate:
-        if (watched == wizard()) applyScriptToDataModel();
+        if (watched == wizard()) storeScriptInDataModel();
         break;
 
     default:
