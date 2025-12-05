@@ -65,15 +65,6 @@ inline QKeySequence interrupt()
 }
 
 /**
- * @brief Returns the QKeySequence for the "Save Script" shortcut.
- * @return The currently configured key sequence.
- */
-inline QKeySequence save()
-{
-    return gtApp->getShortCutSequence(id::SAVE, category::PY_MODULE);
-}
-
-/**
  * @brief Returns the "Evaluate Script" shortcut as a QString.
  * @return The currently configured shortcut as a string.
  */
@@ -89,15 +80,6 @@ inline QString evalStr()
 inline QString interruptStr()
 {
     return interrupt().toString();
-}
-
-/**
- * @brief Returns the "Save Script" shortcut as a QString.
- * @return The currently configured shortcut as a string.
- */
-inline QString saveStr()
-{
-    return save().toString();
 }
 
 /**
@@ -129,16 +111,6 @@ inline QString evalLabelText()
 inline QString interruptLabelText()
 {
     return labelText(interruptStr());
-}
-
-/**
- * @brief Returns the "Save Script" shortcut as an HTML-formatted string.
- * @return The currently configured "Save Script" shortcut formatted for
- * display.
- */
-inline QString saveLabelText()
-{
-    return labelText(saveStr());
 }
 
 } // shortcut

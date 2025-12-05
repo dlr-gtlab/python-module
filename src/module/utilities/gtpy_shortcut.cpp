@@ -28,7 +28,6 @@ void registerShortCuts()
 
     registerShortCut(id::EVAL, {Qt::CTRL + Qt::Key_E});
     registerShortCut(id::INTERRUPT, {Qt::CTRL + Qt::Key_I});
-    registerShortCut(id::SAVE, {Qt::CTRL + Qt::Key_S});
 }
 
 } // shortcut

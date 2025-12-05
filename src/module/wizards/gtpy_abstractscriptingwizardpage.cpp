@@ -187,7 +187,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     toolBarLayout->addStretch(1);
 
     //Save Button
-    m_shortCutSave = new QLabel(gtpy::shortcut::saveLabelText());
+    m_shortCutSave = new QLabel("<font color='grey'> Ctrl+S</font>");
     QFont fontSave = m_shortCutSave->font();
     fontSave.setItalic(true);
     fontSave.setPointSize(7);
@@ -750,7 +750,7 @@ GtpyAbstractScriptingWizardPage::enableSaveButton(bool enable)
 
     if (enable)
     {
-        m_shortCutSave->setText(gtpy::shortcut::saveLabelText());
+        m_shortCutSave->setText("<font color='grey'> Ctrl+S</font>");
     }
     else
     {
