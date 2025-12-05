@@ -55,6 +55,7 @@
 #include "gt_accessdataconnection.h"
 
 #include "gtpy_scriptcollectionsettings.h"
+#include "gtpy_shortcut.h"
 
 #include "gt_python.h"
 
@@ -161,6 +162,8 @@ GtPythonModule::init()
     {
         gtError() << "Unable to register matplotlib backend. Is matplotlib installed?";
     }
+
+    gtpy::shortcut::registerShortCuts();
 }
 
 QList<GtCalculatorData>
