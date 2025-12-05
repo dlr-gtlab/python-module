@@ -13,8 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Fixed a crash when creating a calculator with missing author information in a Python Task - #627
 
 ### Changed
- - Python Task and Calculator wizards now automatically save changes from the editor to
-   the corresponding data model whenever the wizard loses focus or is closed.
+ - Python Task and Calculator wizards now automatically transfer changes from the editor to
+   the corresponding data model object whenever the wizard loses focus or is closed.
  - Removed the `Save` and `Cancel` buttons as well as the "Do you want to save..." message box,
    since manual saving is no longer required. All changes can be undone via GTlab's Undo/Redo system. - #86
  - The script editor in the wizard now updates automatically when Undo/Redo is performed in the main GUI.
