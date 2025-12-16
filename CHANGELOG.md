@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    By default, it returns the application footprint. When called with only_active=True,
    it returns only the modules that are part of the data model of the current project. - #630
  - Fixed a crash when creating a calculator with missing author information in a Python Task - #627
- - Fixed printing of empty lines to the Python console in cases where the evaluated script did not contain any print statements. - #622 
+ - Fixed an issue where empty lines were printed to the Python console even when the evaluated script did not contain any print statements. - #622 
 
 ## [1.8.0] - 2025-07-11
 
