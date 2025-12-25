@@ -1,0 +1,24 @@
+#  GTlab Resource Module
+#
+#  CMake config file for the GTlabResourceModule package 
+#
+#  SPDX-License-Identifier: BSD-3-Clause
+#  SPDX-FileCopyrightText: 2025 German Aerospace Center
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(Qt5 COMPONENTS Core Widgets Xml)
+
+if (NOT TARGET GTlab::Core)
+    find_package(GTlab)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/GTlabResourceModule-targets.cmake")
+
+if (NOT TARGET GTlab::ResourceModule)
+    add_library(GTlab::ResourceModule INTERFACE IMPORTED)
+
+    set_target_properties(GTlab::ResourceModule PROPERTIES
+      INTERFACE_LINK_LIBRARIES "GTlabResourceModule"
+    )
+endif()

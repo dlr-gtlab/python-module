@@ -11,33 +11,35 @@
 #ifndef GTPYTHON_H
 #define GTPYTHON_H
 
-#include "gt_pythonmodule_exports.h"
+#include <gt_pythonmodule_exports.h>
 
-#include "gt_moduleinterface.h"
-#include "gt_processinterface.h"
-#include "gt_mdiinterface.h"
-#include "gt_collectioninterface.h"
-#include "gt_networkinterface.h"
-#include "gt_globals.h"
+#include <gt_moduleinterface.h>
+#include <gt_processinterface.h>
+#include <gt_mdiinterface.h>
+#include <gt_collectioninterface.h>
+#include <gt_networkinterface.h>
+#include <gt_datamodelinterface.h>
+#include <gt_globals.h>
 
 #if GT_VERSION >= GT_VERSION_CHECK(1, 7, 0)
 #include "gt_versionnumber.h"
 #endif
 
 #if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
-#include "gt_initmoduleinterface.h"
+#include <gt_initmoduleinterface.h>
 #else
-#include "gt_commandlinefunction.h"
+#include <gt_commandlinefunction.h>
 #endif
 
-#include "gt_compat.h"
+#include <gt_compat.h>
 
 /**
  * @brief The GtPythonModule class
  */
 class GtPythonModule: public QObject, public GtModuleInterface,
     public GtProcessInterface, public GtMdiInterface,
-    public GtCollectionInterface, public GtNetworkInterface
+    public GtCollectionInterface, public GtNetworkInterface,
+    public GtDatamodelInterface
 #if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
     , public GtInitModuleInterface
 #endif
@@ -55,6 +57,7 @@ class GtPythonModule: public QObject, public GtModuleInterface,
     Q_INTERFACES(GtMdiInterface)
     Q_INTERFACES(GtCollectionInterface)
     Q_INTERFACES(GtNetworkInterface)
+    Q_INTERFACES(GtDatamodelInterface)
 
 #if GT_VERSION < GT_VERSION_CHECK(2, 0, 0)
     Q_INTERFACES(GtInitModuleInterface)
@@ -178,6 +181,27 @@ public:
 
     QList<gt::SharedFunction> sharedFunctions() const override;
 #endif
+
+    /**
+     * @brief Returns static meta objects of datamodel package.
+     * @return package meta object
+     */
+    QMetaObject package() override;
+
+    /**
+     * @brief Returns static meta objects of datamodel classes.
+     * @return list including meta objects
+     */
+    QList<QMetaObject> data() override;
+
+    /**
+     * @brief Returns true if module is a standalone module with own data
+     * model structure. Otherwise module only extends the overall application
+     * with additional functionalities like classes, calculators or
+     * graphical user interfaces.
+     * @return Standalone indicator.
+     */
+    bool standAlone() override;
 
 private:
     /**

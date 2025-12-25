@@ -670,6 +670,11 @@ GtpyScriptEditor::keyPressEvent(QKeyEvent* event)
 
                 return;
 
+            case Qt::Key_I:
+                emit interruptShortcutTriggered();
+                m_cpl->getPopup()->hide();
+                return;
+
             default:
                 break;
         }

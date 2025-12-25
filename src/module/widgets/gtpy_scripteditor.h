@@ -341,12 +341,17 @@ private:
 
 signals:
     /**
-     * @brief Will emited if eval shortcut (ctrl+E) has been received.
+     * @brief Is emitted when the eval shortcut (Ctrl+E) is received.
      */
     void evalShortcutTriggered();
 
     /**
-     * @brief Will emited if find shortcut (ctrl+F) has been received.
+     * @brief Is emitted when the interrupt shortcut (Ctrl+I) is received.
+     */
+    void interruptShortcutTriggered();
+
+    /**
+     * @brief Is emitted when the find shortcut (Ctrl+F) is received.
      * @param text Selected text.
      */
     void searchShortcutTriggered(const QString& text);
