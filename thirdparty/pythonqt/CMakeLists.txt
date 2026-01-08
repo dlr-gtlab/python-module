@@ -8,9 +8,15 @@ cmake_minimum_required(VERSION 3.15)
 
 project(PythonQt)
 
+set(PythonQT_VERSION Qt6.5)
+
 #----------------------------------------------------------------------------
-set(PythonQt_QT_VERSION 5)
-set(PythonQT_VERSION 3.4.2)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+include(RequireQt)
+require_qt(COMPONENTS Core Widgets Network OpenGL Sql Svg UiTools Xml)
+
+set(PythonQt_QT_VERSION ${QT_VERSION_MAJOR})
 
 set(CMAKE_AUTOMOC ON)
 
@@ -18,17 +24,12 @@ set(CMAKE_AUTOMOC ON)
 set(minimum_required_qt5_version "5.3.0")
 set(minimum_required_qt_version ${minimum_required_qt${PythonQt_QT_VERSION}_version})
 
-find_package(Qt5 ${minimum_required_qt_version} QUIET)
-set(QT_VERSION_MAJOR ${Qt5_VERSION_MAJOR})
-set(QT_VERSION_MINOR ${Qt5_VERSION_MINOR})
-
-
 # Download pythonqt source code
 include(FetchContent)
 FetchContent_Declare(
     pythonqt
-    GIT_REPOSITORY https://github.com/MeVisLab/pythonqt.git
-    GIT_TAG v${PythonQT_VERSION}
+    GIT_REPOSITORY https://github.com/dlr-gtlab/pythonqt.git
+    GIT_TAG ${PythonQT_VERSION}
 )
 
 if(NOT pythonqt_POPULATED)
@@ -162,7 +163,7 @@ endif()
 list(REMOVE_DUPLICATES qt_required_components)
 
 message(STATUS "${PROJECT_NAME}: Required Qt components [${qt_required_components}]")
-find_package(Qt5 ${minimum_required_qt_version} COMPONENTS ${qt_required_components} REQUIRED)
+require_qt(COMPONENTS ${qt_required_components})
 
 if(UNIX)
   find_package(OpenGL)
@@ -177,10 +178,13 @@ endif()
 
 set(generated_cpp_suffix_52 _50)
 set(generated_cpp_suffix_51 _50)
+set(generated_cpp_suffix_65 _65)
 
 set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
 if(DEFINED generated_cpp_suffix_${QT_VERSION_MAJOR}${QT_VERSION_MINOR})
   set(generated_cpp_suffix "${generated_cpp_suffix_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}}")
+elseif("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "6.4")
+  set(generated_cpp_suffix "_65")
 elseif("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.10")
   set(generated_cpp_suffix "_511")
 elseif("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.5")

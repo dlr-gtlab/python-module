@@ -925,7 +925,6 @@ GtpyContextManager::context(int contextId)
 }
 
 
-#ifdef PY3K
 PyPPObject
 GtpyContextManager::initExtensionModule(const QString& moduleName,
                                         PyModuleDef* def)
@@ -955,24 +954,7 @@ GtpyContextManager::initExtensionModule(const QString& moduleName,
 
     return myMod;
 }
-#else
-PyPPObject
-GtpyContextManager::initExtensionModule(const QString& moduleName,
-                                        PyMethodDef* methods)
-{
-    GTPY_GIL_SCOPE
 
-            QByteArray name = moduleName.toUtf8();
-    PyObject* myMod = nullptr;
-
-    myMod = Py_InitModule(name.constData(), methods);
-    Py_INCREF(myMod);
-
-    modulenameToBuiltins(moduleName);
-
-    return PyPPObject::NewRef(myMod);
-}
-#endif
 
 void
 GtpyContextManager::modulenameToBuiltins(QString name)
@@ -1013,13 +995,8 @@ void
 GtpyContextManager::initCalculatorsModule()
 {
     GTPY_GIL_SCOPE
-#ifdef PY3K
     initExtensionModule(gtpy::code::modules::GT_CALCULATORS,
                         &GtpyCalculatorsModule::GtpyCalculators_Module);
-#else
-    initExtensionModule(gtpy::code::modules::GT_CALCULATORS,
-                        GtpyCalculatorsModule::GtpyCalculatorsModule_StaticMethods);
-#endif
     GtpyCalculatorsModule::createCalcConstructors();
 }
 
@@ -1028,13 +1005,8 @@ GtpyContextManager::initLoggingModuleC()
 {
     GTPY_GIL_SCOPE
 
-#ifdef PY3K
     initExtensionModule(gtpy::code::modules::GT_LOGGING,
                         &GtpyLoggingModule::GtpyLogging_Module);
-#else
-    initExtensionModule(gtpy::code::modules::GT_LOGGING,
-                        GtpyLoggingModule::GtpyLoggingModule_StaticMethods);
-#endif
 }
 
 void
@@ -1095,14 +1067,9 @@ GtpyContextManager::initWrapperModule()
 {
     GTPY_GIL_SCOPE
 
-#ifdef PY3K
     auto mod = initExtensionModule(
         gtpy::code::modules::GT_OBJECT_WRAPPER_MODULE,
         &GtpyExtendedWrapperModule::GtpyExtendedWrapper_Module);
-#else
-    auto mod = initExtensionModule(
-        gtpy::code::modules::GT_OBJECT_WRAPPER_MODULE, nullptr);
-#endif
 
     auto wrapperType = PyPPObject::NewRef(
         (PyObject*)&GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type);
@@ -1724,7 +1691,7 @@ GtpyContextManager::setImportableModulesCompletions(int contextId)
 
     foreach (QString name, modules)
     {
-        if (name.startsWith(name.startsWith(QStringLiteral("_"))))
+        if (name.startsWith(QStringLiteral("_")))
         {
             continue;
         }

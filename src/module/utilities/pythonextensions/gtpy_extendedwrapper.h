@@ -37,7 +37,6 @@ struct GtpyExtendedWrapper
     QObject* getObject() const;
 };
 
-#ifdef PY3K
 static PyModuleDef
 GtpyExtendedWrapper_Module =
 {
@@ -51,7 +50,6 @@ GtpyExtendedWrapper_Module =
     NULL,
     NULL
 };
-#endif
 }
 
 namespace GtpyCustomization

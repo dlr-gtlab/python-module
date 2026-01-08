@@ -83,22 +83,7 @@ GtpyStdOutRedirect_write(PyObject* self, PyObject* args)
 
             if (PyPPUnicode_Check(obj))
             {
-#ifdef PY3K
                 message = PyPPString_AsQString(obj);
-#else
-                PyObject* tmp = PyUnicode_AsUTF8String(obj.get());
-
-                if (tmp)
-                {
-                    message = QString::fromUtf8(PyString_AS_STRING(tmp));
-                    Py_DECREF(tmp);
-                }
-                else
-                {
-                    return NULL;
-                }
-
-#endif
             }
             else
             {
