@@ -96,5 +96,4 @@ function(require_qt)
     # actually find qt
     find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${RQT_COMPONENTS})
     set (QT_VERSION_MAJOR ${QT_VERSION_MAJOR} PARENT_SCOPE)
-    set (QT_VERSION_MINOR ${Qt${QT_VERSION_MAJOR}_VERSION_MINOR} PARENT_SCOPE)
 endfunction()
