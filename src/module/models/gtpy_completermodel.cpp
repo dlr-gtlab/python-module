@@ -50,7 +50,7 @@ GtpyCompleterModel::data(const QModelIndex& index, int role) const
 }
 
 void
-GtpyCompleterModel::setFound(const QMap<QString, GtpyFunction>& found)
+GtpyCompleterModel::setFound(const QMultiMap<QString, GtpyFunction>& found)
 {
     m_found = found;
 

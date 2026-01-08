@@ -172,7 +172,7 @@ void
 GtPythonPreferencePage::setStatusTextColor(const QColor& color)
 {
     auto palette = ui->lbPythonStatus->palette();
-    palette.setColor(QPalette::Foreground, color);
+    palette.setColor(QPalette::WindowText, color);
     ui->lbPythonStatus->setPalette(palette);
 }
 

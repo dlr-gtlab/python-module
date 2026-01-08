@@ -22,12 +22,14 @@
 #include "gtpy_extendedwrapper.h"
 #include "gtpypp.h"
 
+#include <QRegularExpression>
+
 using namespace GtpyExtendedWrapperModule;
 
 static QString
 pyValidGtPropertyId(QString id)
 {
-    return id.replace(QRegExp("[^A-Za-z0-9]+"), "");
+    return id.replace(QRegularExpression("[^A-Za-z0-9]+"), "");
 }
 
 static QString
@@ -236,7 +238,7 @@ GtpyExtendedWrapper_methods[] =
 static int
 GtpyExtendedWrapper_setattro(PyObject* obj, PyObject* name, PyObject* value)
 {
-    QString strName = QString(PyString_AsString(name));
+    QString strName = QString(PyUnicode_AsUTF8(name));
 
     if (strName.isEmpty())
     {
@@ -336,13 +338,13 @@ GtpyExtendedWrapper_getattro(PyObject* obj, PyObject* name)
     }
 
     // Check if the given name is a string object
-    if (!PyString_Check(name))
+    if (!PyUnicode_Check(name))
     {
         PyErr_SetString(PyExc_AttributeError, "invalid attribute name");
         return nullptr;
     }
 
-    QString strName{PyString_AsString(name)};
+    QString strName{PyUnicode_AsUTF8(name)};
 
     if(strName.isEmpty())
     {
@@ -541,9 +543,6 @@ GtpyExtendedWrapper_as_number =
     0,      /* nb_add */
     0,      /* nb_subtract */
     0,      /* nb_multiply */
-#ifndef PY3K
-    0,      /* nb_divide */
-#endif
     0,      /* nb_remainder */
     0,      /* nb_divmod */
     0,      /* nb_power */
@@ -557,22 +556,12 @@ GtpyExtendedWrapper_as_number =
     0,    /* nb_and */
     0,    /* nb_xor */
     0,    /* nb_or */
-#ifndef PY3K
-    0,      /* nb_coerce */
-#endif
     0,      /* nb_int */
     0,      /* nb_long  / nb_reserved in Py3K */
     0,      /* nb_float */
-#ifndef PY3K
-    0,      /* nb_oct */
-    0,      /* nb_hex */
-#endif
     0,      /* nb_inplace_add */
     0,      /* nb_inplace_subtract */
     0,      /* nb_inplace_multiply */
-#ifndef PY3K
-    0,      /* nb_inplace_divide */
-#endif
     0,      /* nb_inplace_remainder */
     0,      /* nb_inplace_power */
     0,      /* nb_inplace_lshift */
@@ -584,9 +573,7 @@ GtpyExtendedWrapper_as_number =
     0,      /* nb_true_divide */
     0,      /* nb_inplace_floor_divide */
     0,      /* nb_inplace_true_divide */
-#ifdef PY3K
     0,      /* nb_index in Py3K */
-#endif
 };
 
 PyTypeObject
@@ -612,9 +599,6 @@ GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type =
     GtpyExtendedWrapper_setattro, /*tp_setattro*/
     0,                            /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE
-#ifndef PY3K
-    | Py_TPFLAGS_CHECKTYPES
-#endif
     , /*tp_flags*/
     "GtpyExtendedWrapper object", /* tp_doc */
     0, /* tp_traverse */
@@ -623,11 +607,7 @@ GtpyExtendedWrapperModule::GtpyExtendedWrapper_Type =
     0, /* tp_weaklistoffset */
     0, /* tp_iter */
     0, /* tp_iternext */
-#ifdef PY3K
-    GtpyExtendedWrapper_methods,
-#else
     GtpyExtendedWrapper_methods, /* tp_methods */
-#endif
     0, /* tp_members */
     0, /* tp_getset */
     0, /* tp_base */

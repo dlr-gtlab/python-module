@@ -11,7 +11,7 @@
 #ifndef GTPYCONVERT_H
 #define GTPYCONVERT_H
 
-#include "gt_globals.h"
+#include <gt_version.h>
 
 #include <Python.h>
 #include "gtpypp.h"

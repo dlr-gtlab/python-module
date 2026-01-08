@@ -146,9 +146,9 @@ calcClassName(GtpyCreateCalculator* func)
 
     if (func->m_calcClassName)
     {
-        if (PyString_Check(func->m_calcClassName))
+        if (PyUnicode_Check(func->m_calcClassName))
         {
-            className = PyString_AsString(func->m_calcClassName);
+            className = PyUnicode_AsUTF8(func->m_calcClassName);
         }
     }
 

@@ -78,7 +78,6 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
     QVBoxLayout* treeViewLay = new QVBoxLayout;
 
     treeViewLay->setSpacing(1);
-    treeViewLay->setMargin(0);
     treeViewLay->setContentsMargins(0, 0, 0, 0);
 
     treeViewLay->addWidget(addElementButton);
@@ -690,7 +689,7 @@ GtpyTaskWizardPage::onProcessComponentRenamed(QString const& className,
     QString pattern = "(" + className + "\\( *\"" + oldName + "\" *\\))";
     QString replace = className + "(\"" + newName + "\")";
 
-    searchAndReplaceEditorText(QRegExp(pattern), replace, true);
+    searchAndReplaceEditorText(QRegularExpression(pattern), replace, true);
 }
 
 void

@@ -49,7 +49,6 @@ GtpyCalculatorsModule_StaticMethods[] =
 
 void createCalcConstructors();
 
-#ifdef PY3K
 static PyModuleDef
 GtpyCalculators_Module =
 {
@@ -63,7 +62,6 @@ GtpyCalculators_Module =
     NULL,
     NULL
 };
-#endif
 
 }
 
