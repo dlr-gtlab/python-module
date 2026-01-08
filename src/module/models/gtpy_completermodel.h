@@ -48,7 +48,7 @@ public:
      * @brief Sets the data to the model.
      * @param found Found completions.
      */
-    void setFound(const QMap<QString, GtpyFunction>& found);
+    void setFound(const QMultiMap<QString, GtpyFunction>& found);
 
     /**
      * @brief Returns the completion for the given index.
@@ -80,7 +80,7 @@ public:
 
 private:
     /// Found Completions
-    QMap<QString, GtpyFunction> m_found;
+    QMultiMap<QString, GtpyFunction> m_found;
 };
 
 #endif // GTPY_COMPLETERMODEL_H

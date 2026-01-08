@@ -138,16 +138,24 @@ GtpyScriptEditor::wheelEvent(QWheelEvent* event)
 {
     if (event->modifiers() == Qt::ControlModifier && !isReadOnly())
     {
-        if (event->delta() > 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        const int dy = event->angleDelta().y();
+#else
+        const int dy = event->delta();
+#endif
+
+        if (dy > 0)
         {
             zoomIn(2);
         }
-        else
+        else if (dy < 0)
         {
             zoomOut(2);
         }
 
         setTabSize(m_tabSize);
+
+        event->accept();
     }
     else
     {
@@ -293,10 +301,10 @@ GtpyScriptEditor::replaceBlockHeaders(const QString& oldHeader,
 }
 
 void
-GtpyScriptEditor::searchAndReplace(const QRegExp& searchRegExp, const
+GtpyScriptEditor::searchAndReplace(const QRegularExpression& searchRegExp, const
                                    QString& replaceBy, bool all)
 {
-    if (searchRegExp.isEmpty() || !searchRegExp.isValid())
+    if (!searchRegExp.isValid() || searchRegExp.pattern().isEmpty())
     {
         return;
     }
@@ -1217,7 +1225,7 @@ GtpyScriptEditor::isSelectionIndentable()
     QString selection = cursor.selectedText();
 
     QStringList lines = selection.split(QChar::ParagraphSeparator,
-                                        QString::SkipEmptyParts);
+                                        Qt::SkipEmptyParts);
 
     int count = lines.count();
 

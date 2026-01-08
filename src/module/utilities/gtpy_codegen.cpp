@@ -224,17 +224,17 @@ gtpy::codegen::pyIdentifier(const QString& str)
 
         // if the match is not at the start of the string and there is not
         // already an underscore before the match, prepend an underscore
-        if (startPos > 0 && ident.at(startPos - 1) != "_")
+        if (startPos > 0 && ident.at(startPos - 1) != '_')
         {
-            matchedStr.prepend("_");
+            matchedStr.prepend('_');
         }
 
         // if the match is not at the end of the string and it consists of
         // more than one letter, append an underscore
         if (!singleLetter && endPos < ident.length() &&
-            ident.at(endPos) != "_")
+            ident.at(endPos) != '_')
         {
-            matchedStr.append("_");
+            matchedStr.append('_');
         }
 
         ident.replace(startPos, endPos - startPos, matchedStr);

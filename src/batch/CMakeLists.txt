@@ -27,8 +27,8 @@ target_compile_definitions(GTlabPythonConsole PRIVATE
 
 target_link_libraries(GTlabPythonConsole
     PRIVATE
-    Qt5::Widgets
-    Qt5::Xml
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Xml
     GTlab::Python
 )
 

@@ -53,14 +53,14 @@ meth_repr(GtpyPropertySetterObject* f)
     if (f->m_self->ob_type == &GtpyExtendedWrapper_Type)
     {
         QString repr = "<Function to set " + QString(
-                           PyString_AsString(f->m_propId)) +
+                           PyUnicode_AsUTF8(f->m_propId)) +
                        " value>";
 
-        return PyString_FromFormat(repr.toStdString().c_str());
+        return PyUnicode_FromFormat(repr.toStdString().c_str());
     }
     else
     {
-        return PyString_FromFormat("<invalid function>");
+        return PyUnicode_FromFormat("<invalid function>");
     }
 }
 
@@ -89,7 +89,7 @@ GtpyPropertySetter_Call(PyObject* func, PyObject* args,
 
     Py_ssize_t argc = PyTuple_Size(args);
 
-    QString propId = QString(PyString_AsString(f->m_propId));
+    QString propId = QString(PyUnicode_AsUTF8(f->m_propId));
 
     if (argc != 1)
     {
@@ -252,11 +252,7 @@ GtpyPropertySetter_Type =
     0,          /* tp_print */
     0,          /* tp_getattr */
     0,          /* tp_setattr */
-#ifdef PY3K
     0,
-#else
-    (cmpfunc)meth_compare,      /* tp_compare */
-#endif
     (reprfunc)meth_repr,      /* tp_repr */
     0,          /* tp_as_number */
     0,          /* tp_as_sequence */

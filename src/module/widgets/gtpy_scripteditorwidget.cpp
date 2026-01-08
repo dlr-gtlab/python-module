@@ -47,7 +47,6 @@ GtpyScriptEditorWidget::GtpyScriptEditorWidget(int contextId, QWidget* parent) :
     /// top layout
     auto* topLayout = new QHBoxLayout();
     topLayout->setSpacing(0);
-    topLayout->setMargin(0);
     topLayout->setContentsMargins(0, 0, 0, 0);
 
     m_pimpl->m_undoButton = new QPushButton;
