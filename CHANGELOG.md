@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Fixed a crash when creating a calculator with missing author information in a Python Task - #627
  - Fixed an issue where empty lines were printed to the Python console even when the evaluated script did not contain any print statements. - #622 
 
+### Added
+ - Python Module shortcuts are now registered in GTlab’s shortcut list.
+
 ## [1.8.0] - 2025-07-11
 
 ### Fixed

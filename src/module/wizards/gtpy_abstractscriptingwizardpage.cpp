@@ -34,6 +34,7 @@
 #include "gtpy_editorsettingsdialog.h"
 #include "gtpy_packageiteration.h"
 #include "gtpy_transfer.h"
+#include "gtpy_shortcut.h"
 
 // GTlab framework includes
 #include "gt_object.h"
@@ -170,7 +171,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     m_evalButton->setIcon(GTPY_ICON(play));
     m_evalButton->setToolTip(tr("Evaluate Python script"));
 
-    m_shortCutEval = new QLabel("<font color='grey'>  Ctrl+E</font>");
+    m_shortCutEval = new QLabel(gtpy::shortcut::evalLabelText());
     QFont font = m_shortCutEval->font();
     font.setItalic(true);
     font.setPointSize(7);
@@ -186,7 +187,7 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     toolBarLayout->addStretch(1);
 
     //Save Button
-    m_shortCutSave = new QLabel("<font color='grey'>  Ctrl+S</font>");
+    m_shortCutSave = new QLabel("<font color='grey'> Ctrl+S</font>");
     QFont fontSave = m_shortCutSave->font();
     fontSave.setItalic(true);
     fontSave.setPointSize(7);
@@ -749,7 +750,7 @@ GtpyAbstractScriptingWizardPage::enableSaveButton(bool enable)
 
     if (enable)
     {
-        m_shortCutSave->setText("<font color='grey'>  Ctrl+S</font>");
+        m_shortCutSave->setText("<font color='grey'> Ctrl+S</font>");
     }
     else
     {
@@ -928,14 +929,14 @@ GtpyAbstractScriptingWizardPage::showEvalButton(bool show)
         m_evalButton->setIcon(GTPY_ICON(play));
         m_evalButton->setToolTip(tr("Evaluate Python script"));
 
-        m_shortCutEval->setText("<font color='grey'>  Ctrl+E</font>");
+        m_shortCutEval->setText(gtpy::shortcut::evalLabelText());
     }
     else
     {
         m_evalButton->setIcon(GTPY_ICON(stop));
         m_evalButton->setToolTip(tr("Interrupt evaluation"));
 
-        m_shortCutEval->setText("<font color='grey'>  Ctrl+I</font>");
+        m_shortCutEval->setText(gtpy::shortcut::interruptLabelText());
     }
 }
 
