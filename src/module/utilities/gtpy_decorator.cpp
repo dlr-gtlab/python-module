@@ -1053,14 +1053,11 @@ GtpyDecorator::getPropertyContainerVal(GtObject* obj,
         return {};
     }
 
-    for (int index = 0; index < s->size(); ++index)
-    {
-        if (s->at(index).ident() == entryId)
-        {
-            GtPropertyStructInstance& structCon = s->at(index);
+    GtPropertyStructContainer::const_iterator it = s->findEntry(entryId);
 
-            return structCon.getMemberValToVariant(memberId);
-        }
+    if (it != s->end())
+    {
+        return it->getMemberValToVariant(memberId);
     }
 
     gtError() << __func__ << tr("-> Cannot get parameter %1 of entry %2"
@@ -1084,10 +1081,11 @@ GtpyDecorator::getPropertyContainerEntryIds(GtObject* obj,
 
     QStringList retVal;
 
-    for (int var = 0; var < s->size(); ++var)
-    {
-        retVal << s->at(var).ident();
-    }
+    std::transform(s->begin(), s->end(), std::back_inserter(retVal),
+                   [](const auto& v)
+                   {
+                       return v.ident();
+                   });
 
     return retVal;
 }
@@ -1133,14 +1131,11 @@ GtpyDecorator::setPropertyContainerVal(GtObject* obj, const QString& id,
         return false;
     }
 
-    for (int index = 0; index < s->size(); ++index)
-    {
-        if (s->at(index).ident() == entryId)
-        {
-            GtPropertyStructInstance& structCon = s->at(index);
+    GtPropertyStructContainer::iterator it = s->findEntry(entryId);
 
-            return structCon.setMemberVal(memberId, val);
-        }
+    if (it != s->end())
+    {
+        return it->setMemberVal(memberId, val);
     }
 
     gtError() << __func__ << tr("-> Cannot set parameter %1 of entry %2"

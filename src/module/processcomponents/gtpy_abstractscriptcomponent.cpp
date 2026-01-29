@@ -95,13 +95,11 @@ GtpyAbstractScriptComponent::GtpyAbstractScriptComponent() :
     m_pyThreadId{-1},
     m_replaceTabBySpaces{"replaceTab", "Replace tab by spaces"},
     m_tabSize{"tabSize", "Tab size"},
-    m_script{"script", "Script"}
+    m_script{"script", "Script"},
 #if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
-    ,
     m_inputArgs{"input_args",  GtPropertyStructContainer::Associative},
     m_outputArgs{"output_args",  GtPropertyStructContainer::Associative}
 #elif GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-    ,
     m_inputArgs{"input_args"},
     m_outputArgs{"output_args"}
 #endif

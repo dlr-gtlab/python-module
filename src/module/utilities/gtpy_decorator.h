@@ -434,12 +434,29 @@ public slots:
     /**
      * Same as above, but uses the ident of the property entry to find it
      */
+
+    /**
+     * @brief getPropertyContainerVal
+     * Find a struct container property and return a value of
+     * a defined propety
+     * @param obj - parent object of the struct propety
+     * @param id of the property struct container
+     * @param entryId - id of the entry to read the value from.
+     * In contrast to function above this function does not use the index
+     * @param memberId of the property to call
+     * @return the value as a variant - empty for invalid inputs
+     *
+     * Example call in python:
+     *  task.getPropertyContainerVal("constraints", "minEta", "value")
+     */
     QVariant getPropertyContainerVal(GtObject* obj, const QString& id,
                                      const QString& entryId,
                                      const QString& memberId);
 
     /**
      * @brief getPropertyContainerEntryIds
+     * Returns a list with all property entry ids of a given container element
+     * The container element is specified by its containerId
      * @param obj - object which has the property container
      * @param containerId - Id of the property container to evaluate
      * @return a ist of all ids of the contained properties
@@ -462,7 +479,16 @@ public slots:
                                  QString const& memberId, const QVariant& val);
 
     /**
-     * Same as above, but uses the ident of the property entry to find it
+     * @brief setPropertyContainerVal
+     * Find a struct container property and sets a value of
+     * a defined propety
+     * @param obj - parent object of the struct propety
+     * @param id of the property struct container
+     * @param entryId - Id of the container element to modify. Incontrast to the
+     * function above the elment is determined by id and not by index
+     * @param memberId of the property to call
+     * @param val - value to set
+     * @return true in case of success, else false
      */
     bool setPropertyContainerVal(GtObject* obj, QString const& id,
                                  const QString& entryId,

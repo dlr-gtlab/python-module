@@ -23,17 +23,16 @@ void findElementsByClass(const QDomNode& node,
     if (node.isElement())
     {
         QDomElement elem = node.toElement();
-        if (!elem.isNull())
+
+        QString c = elem.attribute(gt::xml::S_CLASS_TAG);
+
+        if (classNames.contains(c))
         {
-            QString c = elem.attribute(gt::xml::S_CLASS_TAG);
+            results.append(elem);
 
-            if (classNames.contains(c))
-            {
-                results.append(elem);
-
-                if (!allowNestedClassElements) return;
-            }
+            if (!allowNestedClassElements) return;
         }
+
     }
 
     QDomNode child = node.firstChild();
@@ -64,54 +63,75 @@ void findElementsByClass(const QDomNode& node,
     }
 }
 
+/**
+ * @brief normalizePropertyContainerId
+ * Important change of the update is the replacement of the names
+ * of the property elements.
+ * Therefore a map is used to collect the old and new names of the entries.
+ * @param container - QDomElement of the container property
+ * @param formerNameKey - identifier if the property in the old structure
+ * @param replaceMap - map to collect the required renamings
+ */
 void normalizePropertyContainerId(
-    QDomElement container, QString const& formerNameKey,
+    QDomElement const& container, QString const& formerNameKey,
     QMap<QString, QString>& replaceMap)
 {
     QDomNode child = container.firstChild();
 
     while (!child.isNull())
     {
-        if (child.isElement())
+        if (child.isElement() == false)
         {
-            QDomElement prop = child.toElement();
+            child = child.nextSibling();
+            continue;
+        }
 
-            if (prop.tagName() == gt::xml::S_PROPERTY_TAG)
+        QDomElement prop = child.toElement();
+
+        if (prop.tagName() != gt::xml::S_PROPERTY_TAG)
+        {
+            child = child.nextSibling();
+            continue;
+        }
+
+        QString oldUUID = prop.attribute(gt::xml::S_NAME_TAG);
+
+        if (oldUUID.isEmpty())
+        {
+            child = child.nextSibling();
+            continue;
+        }
+
+        // Search for sub element <property name="$$formerNameKey$$">NewName</property>
+        QDomElement nameElem;
+        QDomNode sub = prop.firstChild();
+
+        while (!sub.isNull())
+        {
+            QDomElement e = sub.toElement();
+            if (!e.isNull() && e.tagName() == gt::xml::S_PROPERTY_TAG)
             {
-                QString oldUUID = prop.attribute(gt::xml::S_NAME_TAG);
-
-                // Search for sub element <property name="$$formerNameKey$$">NewName</property>
-                QDomElement nameElem;
-                QDomNode sub = prop.firstChild();
-
-                while (!sub.isNull())
+                if (e.attribute(gt::xml::S_NAME_TAG) == formerNameKey)
                 {
-                    if (sub.isElement())
-                    {
-                        QDomElement e = sub.toElement();
-                        if (e.attribute(gt::xml::S_NAME_TAG) == formerNameKey)
-                        {
-                            nameElem = e;
-                            break;
-                        }
-                    }
-                    sub = sub.nextSibling();
-                }
-
-                if (!nameElem.isNull())
-                {
-                    QString newName = nameElem.text().trimmed();
-
-                    // keep connection info
-                    replaceMap.insert(oldUUID, newName);
-
-                    // Replace UUID in name attribute
-                    prop.setAttribute(gt::xml::S_NAME_TAG, newName);
-
-                    // Remove subelement
-                    prop.removeChild(nameElem);
+                    nameElem = e;
+                    break;
                 }
             }
+            sub = sub.nextSibling();
+        }
+
+        if (!nameElem.isNull())
+        {
+            QString newName = nameElem.text().trimmed();
+
+            // keep connection info
+            replaceMap.insert(oldUUID, newName);
+
+            // Replace UUID in name attribute
+            prop.setAttribute(gt::xml::S_NAME_TAG, newName);
+
+            // Remove subelement
+            prop.removeChild(nameElem);
         }
 
         child = child.nextSibling();
