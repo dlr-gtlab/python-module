@@ -41,13 +41,14 @@ setStructContainerValue(GtPropertyStructContainer& con, const QString& argName,
 {
     auto entry = std::find_if(con.begin(), con.end(),
                               [&argName](const GtPropertyStructInstance& entry){
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+        return entry.ident() == argName;
+#elif GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
         return entry.getMemberVal<QString>("name") == argName;
+#endif
     });
 
-    if (entry == con.end())
-    {
-        return false;
-    }
+    if (entry == con.end()) return false;
 
     return entry->setMemberVal("value", value);
 }
@@ -57,13 +58,15 @@ structContainerValue(const GtPropertyStructContainer& con, const QString& argNam
 {
     auto entry = std::find_if(con.begin(), con.end(),
                               [&argName](const GtPropertyStructInstance& entry){
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+        return entry.ident() == argName;
+#elif GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
         return entry.getMemberVal<QString>("name") == argName;
+#endif
+
     });
 
-    if (entry == con.end())
-    {
-        return {};
-    }
+    if (entry == con.end()) return {};
 
     return entry->getMemberValToVariant("value");
 }
@@ -92,9 +95,11 @@ GtpyAbstractScriptComponent::GtpyAbstractScriptComponent() :
     m_pyThreadId{-1},
     m_replaceTabBySpaces{"replaceTab", "Replace tab by spaces"},
     m_tabSize{"tabSize", "Tab size"},
-    m_script{"script", "Script"}
-#if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
-    ,
+    m_script{"script", "Script"},
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+    m_inputArgs{"input_args",  GtPropertyStructContainer::Associative},
+    m_outputArgs{"output_args",  GtPropertyStructContainer::Associative}
+#elif GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
     m_inputArgs{"input_args"},
     m_outputArgs{"output_args"}
 #endif
@@ -104,7 +109,9 @@ GtpyAbstractScriptComponent::GtpyAbstractScriptComponent() :
     auto createStructDef =
             [](const QString& typeName, gt::PropertyFactoryFunction f){
         GtPropertyStructDefinition structDef(typeName);
+    #if GT_VERSION < GT_VERSION_CHECK(2, 1, 0)
         structDef.defineMember("name", gt::makeStringProperty());
+    #endif // GT_VERSION < GT_VERSION_CHECK(2, 1, 0)
         structDef.defineMember("value", f);
         return structDef;
     };

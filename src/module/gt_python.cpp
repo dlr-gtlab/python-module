@@ -55,8 +55,10 @@
 #include "gt_accessdataconnection.h"
 
 #include "gtpy_scriptcollectionsettings.h"
+#include "gtpy_moduleupgrader.h"
 
 #include "gt_python.h"
+
 
 #if GT_VERSION >= 0x010700
 GtVersionNumber
@@ -327,6 +329,18 @@ QList<gt::SharedFunction> GtPythonModule::sharedFunctions() const
 }
 #endif
 
+QList<gt::VersionUpgradeRoutine>
+GtPythonModule::upgradeRoutines() const
+{
+    return {
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+                gt::VersionUpgradeRoutine {GtVersionNumber(2, 0, 0),
+                                          &gtpy::module_upgrader::to_2_0_0::run}
+#endif
+    };
+}
+
+
 namespace PythonExecution
 {
 
@@ -349,6 +363,7 @@ parseScriptFile(QFile& file)
 
     return out.readAll();
 }
+
 
 int
 runPythonInterpreter(const QStringList& args)

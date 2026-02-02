@@ -90,6 +90,7 @@ set(HEADERS
     wizards/gtpy_wizardgeometryitem.h
     wizards/python_task/gtpy_taskwizardpage.h
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.h
+    utilities/gtpy_moduleupgrader.h
 )
 
 set(SOURCES
@@ -162,6 +163,7 @@ set(SOURCES
     wizards/gtpy_wizardgeometryitem.cpp
     wizards/python_task/gtpy_taskwizardpage.cpp
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.cpp
+    utilities/gtpy_moduleupgrader.cpp
 )
 
 set(MODULE_ID "Python Module (Python ${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})")

@@ -423,13 +423,40 @@ public slots:
      * @param id of the property struct container
      * @param index of the element of the items of the container
      * @param memberId of the property to call
-     * @return the value as a variant
-     *
+     * @return the value as a variant - empty for invalid inputs
      * Example call in python:
      *  task.getPropertyContainerVal("args_input", 0, "name")
      */
     QVariant getPropertyContainerVal (GtObject* obj, const QString& id,
-                                    int index, const QString& memberId);
+                                      int index, const QString& memberId);
+
+    /**
+     * @brief Find a struct container property and return a value of
+     * a defined property. This function uses the id string of the
+     * container element.
+     *
+     * @param obj - parent object of the struct propety
+     * @param id of the property struct container
+     * @param entryId - id of the entry to read the value from.
+     * @param memberId of the property to call
+     * @return the value as a variant - empty for invalid inputs
+     * Example call in python:
+     *  task.getPropertyContainerVal("constraints", "minEta", "value")
+     */
+    QVariant getPropertyContainerVal(GtObject* obj, const QString& id,
+                                     const QString& entryId,
+                                     const QString& memberId);
+
+    /**
+     * @brief getPropertyContainerEntryIds
+     * Returns a list with all property entry ids of a given container element
+     * The container element is specified by its containerId
+     * @param obj - object which has the property container
+     * @param containerId - Id of the property container to evaluate
+     * @return a ist of all ids of the contained properties
+     */
+    QStringList getPropertyContainerEntryIds(GtObject* obj,
+                                             const QString& containerId);
 
     /**
      * @brief setPropertyContainerVal
@@ -443,6 +470,20 @@ public slots:
      * @return true in case of success, else false
      */
     bool setPropertyContainerVal(GtObject* obj, QString const& id, int index,
+                                 QString const& memberId, const QVariant& val);
+
+    /**
+     * @brief Find a struct container property and sets a value of
+     * a defined propety
+     * @param obj - parent object of the struct propety
+     * @param id of the property struct container
+     * @param entryId - Id of the container element to modify.
+     * @param memberId of the property to call
+     * @param val - value to set
+     * @return true in case of success, else false
+     */
+    bool setPropertyContainerVal(GtObject* obj, QString const& id,
+                                 const QString& entryId,
                                  QString const& memberId, const QVariant& val);
 #endif
     /**
