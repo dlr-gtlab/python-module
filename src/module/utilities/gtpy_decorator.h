@@ -431,12 +431,9 @@ public slots:
                                       int index, const QString& memberId);
 
     /**
-     * Same as above, but uses the ident of the property entry to find it
-     */
-
-    /**
      * @brief Find a struct container property and return a value of
-     * a defined propety
+     * a defined property. This function uses the id string of the
+     * container element.
      *
      * @param obj - parent object of the struct propety
      * @param id of the property struct container
