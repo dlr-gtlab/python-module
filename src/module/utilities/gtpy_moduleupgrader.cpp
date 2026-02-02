@@ -14,6 +14,25 @@
 #include "gt_xmlexpr.h"
 
 namespace {
+
+
+bool handleElement(const QDomNode& node,
+                   const QStringList& classNames,
+                   QList<QDomElement>& results,
+                   bool allowNestedClassElements)
+{
+    QDomElement elem = node.toElement();
+    QString c = elem.attribute(gt::xml::S_CLASS_TAG);
+
+    if (classNames.contains(c))
+    {
+        results.append(elem);
+        return allowNestedClassElements;
+    }
+    return true;
+}
+
+
 // internal helper
 void findElementsByClass(const QDomNode& node,
                          const QStringList& classNames,
@@ -22,17 +41,10 @@ void findElementsByClass(const QDomNode& node,
 {
     if (node.isElement())
     {
-        QDomElement elem = node.toElement();
-
-        QString c = elem.attribute(gt::xml::S_CLASS_TAG);
-
-        if (classNames.contains(c))
+        if (!handleElement(node, classNames, results, allowNestedClassElements))
         {
-            results.append(elem);
-
-            if (!allowNestedClassElements) return;
+            return;
         }
-
     }
 
     QDomNode child = node.firstChild();
@@ -40,21 +52,10 @@ void findElementsByClass(const QDomNode& node,
     {
         if (child.isElement())
         {
-            QDomElement elem = child.toElement();
-            if (!elem.isNull())
+            if (!handleElement(child, classNames, results, allowNestedClassElements))
             {
-                QString c = elem.attribute(gt::xml::S_CLASS_TAG);
-
-                if (classNames.contains(c))
-                {
-                    results.append(elem);
-
-                    if (!allowNestedClassElements)
-                    {
-                        child = child.nextSibling();
-                        continue;
-                    }
-                }
+                child = child.nextSibling();
+                continue;
             }
         }
 
@@ -109,13 +110,12 @@ void normalizePropertyContainerId(
         while (!sub.isNull())
         {
             QDomElement e = sub.toElement();
-            if (!e.isNull() && e.tagName() == gt::xml::S_PROPERTY_TAG)
+            if (!e.isNull()
+                && e.tagName() == gt::xml::S_PROPERTY_TAG
+                && e.attribute(gt::xml::S_NAME_TAG) == formerNameKey)
             {
-                if (e.attribute(gt::xml::S_NAME_TAG) == formerNameKey)
-                {
-                    nameElem = e;
-                    break;
-                }
+                nameElem = e;
+                break;
             }
             sub = sub.nextSibling();
         }

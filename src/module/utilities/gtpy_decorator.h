@@ -424,7 +424,6 @@ public slots:
      * @param index of the element of the items of the container
      * @param memberId of the property to call
      * @return the value as a variant - empty for invalid inputs
-     *
      * Example call in python:
      *  task.getPropertyContainerVal("args_input", 0, "name")
      */
@@ -436,16 +435,14 @@ public slots:
      */
 
     /**
-     * @brief getPropertyContainerVal
-     * Find a struct container property and return a value of
+     * @brief Find a struct container property and return a value of
      * a defined propety
+     *
      * @param obj - parent object of the struct propety
      * @param id of the property struct container
      * @param entryId - id of the entry to read the value from.
-     * In contrast to function above this function does not use the index
      * @param memberId of the property to call
      * @return the value as a variant - empty for invalid inputs
-     *
      * Example call in python:
      *  task.getPropertyContainerVal("constraints", "minEta", "value")
      */
@@ -479,13 +476,11 @@ public slots:
                                  QString const& memberId, const QVariant& val);
 
     /**
-     * @brief setPropertyContainerVal
-     * Find a struct container property and sets a value of
+     * @brief Find a struct container property and sets a value of
      * a defined propety
      * @param obj - parent object of the struct propety
      * @param id of the property struct container
-     * @param entryId - Id of the container element to modify. Incontrast to the
-     * function above the elment is determined by id and not by index
+     * @param entryId - Id of the container element to modify.
      * @param memberId of the property to call
      * @param val - value to set
      * @return true in case of success, else false
