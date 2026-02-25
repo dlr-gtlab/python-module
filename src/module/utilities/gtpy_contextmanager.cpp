@@ -126,6 +126,7 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     QObject(parent), m_decorator(nullptr),
     m_errorEmitted(false),
     m_pyThreadState(nullptr),
+    m_ownsPythonInterpreter{true},
     m_contextsInitialized(false)
 {
     qRegisterMetaType<GtpyContextManager::Context>
@@ -139,7 +140,18 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     dlopen(PYTHON_LIBRARY, RTLD_LAZY | RTLD_GLOBAL);
 #endif
 
-    PythonQt::init(PythonQt::RedirectStdOut);
+    // In the embedded case, we are owning the python interpreter, so we
+    // need to create it first.
+    //
+    // When the python module is running from inside a normal python interpreter
+    // we are not allowed to reinit. Also, we don't want to redirect std out in this case
+    const bool pythonAlreadyInitialized = (Py_IsInitialized() != 0);
+    m_ownsPythonInterpreter = !pythonAlreadyInitialized;
+
+    int pythonQtFlags = m_ownsPythonInterpreter ? PythonQt::RedirectStdOut : PythonQt::PythonAlreadyInitialized;
+
+    PythonQt::init(pythonQtFlags);
+
     GtpyGilScope::setGILScopeEnabled(true);
 
 
@@ -175,7 +187,14 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     connect(PythonQt::self(), SIGNAL(systemExitExceptionRaised(int)), this,
             SLOT(onSystemExitExceptionRaised(int)));
 
-    m_pyThreadState = PyEval_SaveThread();
+    if (m_ownsPythonInterpreter)
+    {
+        m_pyThreadState = PyEval_SaveThread();
+    }
+    else
+    {
+        m_pyThreadState = nullptr;
+    }
 
     GtpyCustomization::customizeSlotCalling();
 
@@ -186,8 +205,10 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
 GtpyContextManager*
 GtpyContextManager::instance()
 {
-    static GtpyContextManager mgr(nullptr);
-    return &mgr;
+    // Intentionally leaked singleton: in external-Python mode, shutdown order
+    // between Python/PythonQt/Qt and static destruction is fragile.
+    static GtpyContextManager* mgr = new GtpyContextManager(nullptr);
+    return mgr;
 }
 
 GtpyContextManager::~GtpyContextManager()
@@ -716,7 +737,9 @@ GtpyContextManager::initContexts()
         }
     }
 
-    initStdOut();
+    // if we own the python interpreter, we need to redirect print message to stdout / stderro
+    // Otherwise, python will take care of it
+    if (m_ownsPythonInterpreter) initStdOut();
 
     m_contextsInitialized = true;
 }
