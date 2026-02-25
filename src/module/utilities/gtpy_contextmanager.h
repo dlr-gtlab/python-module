@@ -610,6 +610,9 @@ private:
     /// Python main thread state
     PyThreadState* m_pyThreadState;
 
+    /// True if this module initialized/owns the Python interpreter lifecycle
+    bool m_ownsPythonInterpreter;
+
     bool m_contextsInitialized;
 
     QMutex m_evalMutex;
