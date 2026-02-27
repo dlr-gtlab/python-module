@@ -1,6 +1,6 @@
 /* GTlab - Gas Turbine laboratory
  * Source File:
- * 
+ *
  * SPDX-License-Identifier: Apache-2.0
  * SPDX-FileCopyrightText: 2024 German Aerospace Center (DLR)
  *
@@ -56,6 +56,7 @@
 
 #include "gtpy_scriptcollectionsettings.h"
 #include "gtpy_moduleupgrader.h"
+#include "gtpy_typeconv.h"
 
 #include "gt_python.h"
 
@@ -312,6 +313,15 @@ QList<gt::SharedFunction> GtPythonModule::sharedFunctions() const
 {
     auto result = QList<gt::SharedFunction>();
 
+    // allows to map source and target Qt metatypes for
+    // C++ to Python value conversion
+    result.append(gt::interface::makeSharedFunction(
+        "map_meta_type_to_python_target_type",
+        [](const QString& sourceTypeName, const QString& targetTypeName) {
+            return gtpy::typeconv::mapMetaTypeToPythonTargetType(
+                sourceTypeName, targetTypeName);
+        }));
+
     // add some shared methods for testing
     if(gtApp->devMode())
     {
@@ -455,4 +465,3 @@ GtPythonModule::findWidget(QStringList path, QWidget* parent)
 
     return findWidget(path, child);
 }
-

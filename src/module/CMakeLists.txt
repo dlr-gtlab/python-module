@@ -91,6 +91,7 @@ set(HEADERS
     wizards/python_task/gtpy_taskwizardpage.h
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.h
     utilities/gtpy_moduleupgrader.h
+    utilities/gtpy_typeconv.h
 )
 
 set(SOURCES
@@ -164,6 +165,7 @@ set(SOURCES
     wizards/python_task/gtpy_taskwizardpage.cpp
     wizards/script_calculator/gtpy_scriptcalculatorwizardpage.cpp
     utilities/gtpy_moduleupgrader.cpp
+    utilities/gtpy_typeconv.cpp
 )
 
 set(MODULE_ID "Python Module (Python ${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})")
@@ -264,4 +266,3 @@ install (FILES
   DESTINATION ${CONFIG_INSTALL_DIR})
 
 ######################################################################
-

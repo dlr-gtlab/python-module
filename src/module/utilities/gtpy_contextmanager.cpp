@@ -51,6 +51,7 @@
 #include "gtpy_importfunction.h"
 #include "gtpy_calculatorsmodule.h"
 #include "gtpy_utils.h"
+#include "gtpy_typeconv.h"
 
 #if GT_VERSION >= GT_VERSION_CHECK(2, 0, 0)
 #include "gtpy_matplotlib.h"
@@ -1806,37 +1807,7 @@ GtpyContextManager::setStandardCompletions(int contextId)
 void
 GtpyContextManager::registerTypeConverters() const
 {
-    int objectPtrMapId = qRegisterMetaType<QMap<int, double>>(
-        "QMap<int, double>");
-
-    PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
-                                                    GtpyTypeConversion::convertFromQMapIntDouble);
-    PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
-                                                    GtpyTypeConversion::convertToQMapIntDouble);
-
-    objectPtrMapId = qRegisterMetaType<QMap<QString, double>>(
-        "QMap<QString, double>");
-
-    PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
-                                                    GtpyTypeConversion::convertFromQMapStringDouble);
-    PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
-                                                    GtpyTypeConversion::convertToQMapStringDouble);
-
-    objectPtrMapId = qRegisterMetaType<QMap<QString, int>>(
-        "QMap<QString, int>");
-
-    PythonQtConv::registerMetaTypeToPythonConverter(objectPtrMapId,
-                                                    GtpyTypeConversion::convertFromQMapStringInt);
-    PythonQtConv::registerPythonToMetaTypeConverter(objectPtrMapId,
-                                                    GtpyTypeConversion::convertToQMapStringInt);
-
-    objectPtrMapId = qRegisterMetaType<QMap<QString, QString>>(
-        "QMap<QString, QString>");
-
-    PythonQtConv::registerMetaTypeToPythonConverter(
-        objectPtrMapId, GtpyTypeConversion::convertFromQMapStringQString);
-    PythonQtConv::registerPythonToMetaTypeConverter(
-        objectPtrMapId, GtpyTypeConversion::convertToQMapStringQString);
+    gtpy::typeconv::registerBuiltinConverters();
 }
 
 QString

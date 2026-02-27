@@ -153,6 +153,12 @@ private:
 
 using PyPPObject = PyPPObjectT<PyObject>;
 
+/// Python None
+
+inline PyPPObject PyPPNone()
+{
+    return PyPPObject::Borrow(Py_None);
+}
 
 /// List functions
 
