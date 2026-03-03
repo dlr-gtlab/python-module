@@ -19,13 +19,21 @@ find_package(Python3 REQUIRED COMPONENTS Development)
 
 set(Python3_VERSION_SUFFIX "${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
 
-include(GTlab)
-gtlab_standard_setup()
-enable_gtlab_devtools()
+# Try to find DevTools (optionally)
+if (GTLAB_DEVTOOLS_DIR AND NOT GTlabDevtools_ROOT)
+    message(WARNING "GTLAB_DEVTOOLS_DIR is deprecated. Use GTlabDevtools_ROOT instead.")
+    set(GTlabDevtools_ROOT ${GTLAB_DEVTOOLS_DIR})
+endif()
+
+# set via GTlabDevtools_ROOT=<path/to/devtools>
+find_package(GTlabDevtools QUIET) # optional
 
 if(NOT TARGET GTlab::Core)
     find_package(GTlab REQUIRED)
 endif()
+
+include(${GTlab_DIR}/GTlab.cmake)
+gtlab_standard_setup()
 
 if (GTlab_VERSION_MAJOR LESS 2)
     if (NOT TARGET GTlab::Numerics)
