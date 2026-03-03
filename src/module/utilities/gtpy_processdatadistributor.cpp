@@ -14,6 +14,7 @@
 #include "gt_task.h"
 
 #include "gtpy_processdatadistributor.h"
+#include "gtpy_taskapi.h"
 
 GtpyProcessDataDistributor::GtpyProcessDataDistributor(GtTask* pythonTask)
 {
@@ -30,34 +31,13 @@ GtpyProcessDataDistributor::taskElement(const QString& name)
         return nullptr;
     }
 
-#if GT_VERSION >= 0x020000
-    GtTaskGroup* group = data->taskGroup();
+    auto taskSpec = gtpy::parseTaskSpec(name);
+    GtTask* task = getTask(data, taskSpec);
 
-    if (!group)
-    {
-        return nullptr;
-    }
-
-    GtTask* task = group->findDirectChild<GtTask*>(name);
-#else
-    GtTask* task = data->findDirectChild<GtTask*>(name);
-#endif
     if (!task)
     {
         return task;
     }
-
-    //    QList<GtTask*> children = m_pythonTask->findDirectChildren<GtTask*>();
-
-    //    foreach (GtTask* child, children)
-    //    {
-    //        if(child->uuid() == task->uuid())
-    //        {
-    //            delete child;
-    //            child = nullptr;
-    //            break;
-    //        }
-    //    }
 
     task = qobject_cast<GtTask*>(task->clone());
 

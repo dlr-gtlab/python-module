@@ -37,6 +37,7 @@
 #include "gtpy_scriptcalculator.h"
 #include "gtpy_convert.h"
 #include "gtpy_threadscope.h"
+#include "gtpy_taskapi.h"
 
 #include "gtpy_decorator.h"
 
@@ -497,7 +498,8 @@ GtpyDecorator::runProcess(GtProject* pro, const QString& processId,
     qDebug() << "process run starts...      processId == " << processId;
     // run process
 
-    GtTask* process = pro->findProcess(processId);
+    auto spec = gtpy::parseTaskSpec(processId);
+    GtTask* process = gtpy::getTask(pro->processData(), spec);
 
     if (process == nullptr)
     {

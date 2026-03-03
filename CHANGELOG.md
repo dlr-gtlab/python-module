@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    it returns only the modules that are part of the data model of the current project. - #630
  - Fixed a crash when creating a calculator with missing author information in a Python Task - #627
  - Fixed an issue where empty lines were printed to the Python console even when the evaluated script did not contain any print statements. - #622 
+ - Fixed accessing tasks from other task groups. This can be done via `findGtTask("groupname/taskname")` or `runProcess("groupname/taskname")`. - #639
 
 ## [1.8.0] - 2025-07-11
 
