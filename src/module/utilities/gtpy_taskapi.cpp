@@ -15,7 +15,7 @@ namespace gtpy
 {
 
 TaskSpec
-parseTaskSpec(const QString &spec)
+parseTaskSpec(const QString& spec)
 {
     TaskSpec out;
     const int slash = spec.indexOf('/');
@@ -28,8 +28,8 @@ parseTaskSpec(const QString &spec)
     }
 
     out.hasExplicitGroup = true;
-    out.groupId = spec.left(slash).trimmed();
-    out.taskId = spec.mid(slash + 1).trimmed();
+    out.groupId = spec.left(slash);
+    out.taskId = spec.mid(slash + 1);
 
     return out;
 }
@@ -43,6 +43,8 @@ parseTaskSpec(const QString &spec)
 bool
 initTaskGroup(GtTaskGroup* group, GtTaskGroup::SCOPE scope)
 {
+    if (!group) return false;
+
     if (group->isInitialized()) return true;
 
     if (!gtApp || !gtApp->currentProject() || !group) return false;
@@ -74,8 +76,10 @@ initTaskGroup(GtTaskGroup* group, GtTaskGroup::SCOPE scope)
 
 #if GT_VERSION >= 0x020000
 GtTaskGroup*
-getTaskGroup(GtProcessData *data, TaskSpec spec)
+getTaskGroup(GtProcessData* data, TaskSpec spec)
 {
+    if  (!data) return nullptr;
+
     GtTaskGroup* group = nullptr;
 
     auto& groupName = spec.groupId;
@@ -83,17 +87,14 @@ getTaskGroup(GtProcessData *data, TaskSpec spec)
     if (groupName.isEmpty()) return data->taskGroup();
 
     GtTaskGroup::SCOPE scope = GtTaskGroup::UNDEFINED;
-    QString scopeKey = "";
 
     if (data->customGroupIds().contains(groupName))
     {
         scope = GtTaskGroup::CUSTOM;
-        scopeKey = "_custom";
     }
     else if(data->userGroupIds().contains(groupName))
     {
         scope = GtTaskGroup::USER;
-        scopeKey = "_user";
     }
 
     if (scope == GtTaskGroup::UNDEFINED)
@@ -101,7 +102,8 @@ getTaskGroup(GtProcessData *data, TaskSpec spec)
         return nullptr;
     }
 
-    auto* scopeElement = data->findDirectChild<GtObjectGroup*>(scopeKey);
+    auto* scopeElement = data->findDirectChild<GtObjectGroup*>(
+        GtTaskGroup::scopeId(scope));
 
     if (!scopeElement)
     {
@@ -122,8 +124,10 @@ getTaskGroup(GtProcessData *data, TaskSpec spec)
 #endif
 
 GtTask*
-getTask(GtProcessData *data, TaskSpec spec)
+getTask(GtProcessData* data, TaskSpec spec)
 {
+    if (!data) return nullptr;
+
 #if GT_VERSION >= 0x020000
     GtTaskGroup* group = getTaskGroup(data, spec);
 
