@@ -63,6 +63,7 @@ set(HEADERS
     utilities/gtpy_regexp.h
     utilities/gtpy_scriptrunnable.h
     utilities/gtpy_utils.h
+    utilities/gtpy_taskapi.h
     utilities/gtpy_tempdir.h
     utilities/gtpy_transfer.h
     utilities/pythonextensions/gtpy_createhelperfunction.h
@@ -136,6 +137,7 @@ set(SOURCES
     utilities/gtpy_regexp.cpp
     utilities/gtpy_scriptrunnable.cpp
     utilities/gtpy_utils.cpp
+    utilities/gtpy_taskapi.cpp
     utilities/gtpy_tempdir.cpp
     utilities/gtpy_transfer.cpp
     utilities/pythonextensions/gtpy_calculatorsmodule.cpp
