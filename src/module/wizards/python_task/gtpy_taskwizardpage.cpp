@@ -70,7 +70,7 @@ GtpyTaskWizardPage::GtpyTaskWizardPage() :
 #if GT_VERSION < GT_VERSION_CHECK(2, 0, 0) 
     addElementButton->setStyleSheet(GtStyleSheets::buttonStyleSheet());
 #else
-    addElementButton->setStyleSheet(gt::gui::stylesheet::buttonStyleSheet());
+    addElementButton->setStyleSheet(gt::gui::stylesheet::button());
 #endif
 
     addElementButton->setIcon(GTPY_ICON(add));
