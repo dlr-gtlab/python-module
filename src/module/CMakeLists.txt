@@ -87,6 +87,7 @@ set(HEADERS
     wizards/editor_settings/pages/gtpy_abstractsettingspage.h
     wizards/editor_settings/pages/gtpy_generalpage.h
     wizards/gtpy_abstractscriptingwizardpage.h
+    wizards/gtpy_scriptevalworker.h
     wizards/gtpy_wizardgeometries.h
     wizards/gtpy_wizardgeometryitem.h
     wizards/python_task/gtpy_taskwizardpage.h
@@ -161,6 +162,7 @@ set(SOURCES
     wizards/editor_settings/pages/gtpy_abstractsettingspage.cpp
     wizards/editor_settings/pages/gtpy_generalpage.cpp
     wizards/gtpy_abstractscriptingwizardpage.cpp
+    wizards/gtpy_scriptevalworker.cpp
     wizards/gtpy_wizardgeometries.cpp
     wizards/gtpy_wizardgeometryitem.cpp
     wizards/python_task/gtpy_taskwizardpage.cpp
@@ -266,4 +268,3 @@ install (FILES
   DESTINATION ${CONFIG_INSTALL_DIR})
 
 ######################################################################
-

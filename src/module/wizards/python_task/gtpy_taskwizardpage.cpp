@@ -14,7 +14,6 @@
 #include <QPushButton>
 #include <QMenu>
 #include <QSignalMapper>
-
 // python includes
 #include "gtpy_codegen.h"
 #include "gtpy_icons_compat.h"
@@ -161,7 +160,7 @@ GtpyTaskWizardPage::initialization()
         enableSaving(false);
     }
 
-    enableCalculators(m_task);
+    GtpyContextManager::instance()->addTaskValue(m_contextId, m_task);
 
     m_task->setFlag(GtObject::NewlyCreated, false);
     m_task->setFlag(GtObject::HasOwnChanges, false);

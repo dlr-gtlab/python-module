@@ -52,10 +52,10 @@ signals:
 
 private:
     /// Python context used by this worker.
-    int m_contextId;
+    int m_contextId{-1};
 
     /// Active Python thread id of the current evaluation, or 0 if inactive.
-    long m_threadId;
+    long m_threadId{0};
 
     /// Protects access to m_threadId.
     QMutex m_mutex;

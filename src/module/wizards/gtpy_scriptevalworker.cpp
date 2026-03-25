@@ -15,7 +15,7 @@
 
 
 GtpyScriptEvalWorker::GtpyScriptEvalWorker(int contextId, QObject* parent) :
-    QObject(parent), m_contextId(contextId), m_threadId(0){ }
+    QObject(parent), m_contextId(contextId) { }
 
 void
 GtpyScriptEvalWorker::evaluate(const QString& script, bool outputToConsole)
