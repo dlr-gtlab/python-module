@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+ - Fixed thread-related errors and assertion messages during script evaluation in scripting wizards when accessing GTlab packages. Code completion is now temporarily paused while a script is running because live completion could otherwise trigger the same thread-related issues. - #650
+
 ## [1.8.1] - 2026-03-12
 
 ### Fixed
