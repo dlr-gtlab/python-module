@@ -61,7 +61,6 @@ set(HEADERS
     utilities/gtpy_packageiteration.h
     utilities/gtpy_processdatadistributor.h
     utilities/gtpy_regexp.h
-    utilities/gtpy_scriptrunnable.h
     utilities/gtpy_utils.h
     utilities/gtpy_taskapi.h
     utilities/gtpy_tempdir.h
@@ -136,7 +135,6 @@ set(SOURCES
     utilities/gtpy_module.cpp
     utilities/gtpy_processdatadistributor.cpp
     utilities/gtpy_regexp.cpp
-    utilities/gtpy_scriptrunnable.cpp
     utilities/gtpy_utils.cpp
     utilities/gtpy_taskapi.cpp
     utilities/gtpy_tempdir.cpp

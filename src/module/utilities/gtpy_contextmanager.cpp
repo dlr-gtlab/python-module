@@ -43,7 +43,6 @@
 #include "gtpy_stdout.h"
 #include "gtpy_decorator.h"
 #include "gtpy_interruptrunnable.h"
-#include "gtpy_scriptrunnable.h"
 #include "gtpy_loggingmodule.h"
 #include "gtpy_extendedwrapper.h"
 #include "gtpy_createhelperfunction.h"
@@ -831,16 +830,6 @@ GtpyContextManager::currentPyThreadId()
     GTPY_GIL_SCOPE
 
     return PyThreadState_Get()->thread_id;
-}
-
-void
-GtpyContextManager::autoDeleteRunnable(GtpyScriptRunnable* runnable)
-{
-    if (runnable && !runnable->autoDelete())
-    {
-        connect(runnable, SIGNAL(runnableFinished()), this,
-                SLOT(deleteRunnable()));
-    }
 }
 
 void
@@ -1994,21 +1983,6 @@ void
 GtpyContextManager::onSystemExitExceptionRaised(const int /*exep*/) const
 {
     //Has to exist to keep GTlab running when a python script calls sys.exit()
-}
-
-void
-GtpyContextManager::deleteRunnable()
-{
-    GtpyScriptRunnable* runnable = qobject_cast<GtpyScriptRunnable*>(sender());
-
-    if (runnable != nullptr)
-    {
-        // connect runnable signals to task runner slots
-        disconnect(runnable, &GtpyScriptRunnable::runnableFinished,
-                   this, &GtpyContextManager::deleteRunnable);
-
-        delete runnable;
-    }
 }
 
 void
