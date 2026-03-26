@@ -40,11 +40,6 @@ private:
     virtual bool validation() override;
 
     /**
-     * @brief Saves the script into the calculator instance.
-     */
-    virtual void saveScript() override;
-
-    /**
      * @brief Returns the uuid of the restored GtpyScriptCalculator.
      * @return uuid of the restored GtpyScriptCalculator
      */

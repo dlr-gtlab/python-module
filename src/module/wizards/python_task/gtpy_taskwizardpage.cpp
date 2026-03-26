@@ -38,7 +38,6 @@
 #include "gt_project.h"
 #include "gt_calculatorprovider.h"
 #include "gt_processwizard.h"
-#include "gt_command.h"
 #include "gt_application.h"
 #include "gt_deleteitemmessagebox.h"
 #include "gt_calculator.h"
@@ -156,11 +155,6 @@ GtpyTaskWizardPage::initialization()
     gtpy::transfer::propStructToPython(m_contextId, m_task->outputArgs());
 #endif
 
-    if (!gtDataModel->objectByUuid(m_task->uuid()))
-    {
-        enableSaving(false);
-    }
-
     enableCalculators(m_task);
 
     m_task->setFlag(GtObject::NewlyCreated, false);
@@ -233,36 +227,6 @@ GtpyTaskWizardPage::validation()
     provider()->setComponentData(m_task->toMemento());
 
     return true;
-}
-
-void
-GtpyTaskWizardPage::saveScript()
-{
-    if (!m_task)
-    {
-        return;
-    }
-
-    m_task->setScript(editorText());
-
-    GtObjectMemento memento = m_task->toMemento();
-
-    if (memento.isNull())
-    {
-        return;
-    }
-
-    GtObject* obj = gtDataModel->objectByUuid(m_task->uuid());
-
-    if (GtTask* task = qobject_cast<GtTask*>(obj))
-    {
-        GtCommand command =
-            gtApp->startCommand(gtApp->currentProject(),
-                                task->objectName() +
-                                tr(" configuration changed"));
-        task->fromMemento(memento);
-        gtApp->endCommand(command);
-    }
 }
 
 QString
