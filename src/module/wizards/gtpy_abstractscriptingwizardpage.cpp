@@ -980,9 +980,24 @@ GtpyAbstractScriptingWizardPage::movePackagesToEvalThread()
 void
 GtpyAbstractScriptingWizardPage::movePackagesToGuiThread()
 {
+    QThread* guiThread = thread();
+
     for (const auto& pkg : qAsConst(m_packages))
     {
-        if (pkg) pkg->moveToThread(thread());
+        if (!pkg || pkg->thread() == guiThread) continue;
+
+        if (pkg->parent())
+        {
+            gtWarning() << tr("Cannot move package with parent: ") << pkg;
+            continue;
+        }
+
+        QPointer<GtObject> safePkg{pkg.get()};
+
+        QMetaObject::invokeMethod(safePkg.data(), [safePkg, guiThread]() {
+            if (!safePkg || safePkg->thread() == guiThread) return;
+            safePkg->moveToThread(guiThread);
+        }, Qt::BlockingQueuedConnection);
     }
 }
 
