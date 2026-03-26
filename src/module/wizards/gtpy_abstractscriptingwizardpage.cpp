@@ -995,8 +995,6 @@ GtpyAbstractScriptingWizardPage::setEvaluationUiState(bool evaluating)
     // cross-thread introspection of those objects.
     if (m_editor) m_editor->enableCompletion(!evaluating);
 
-    if (m_consoleClearButton) m_consoleClearButton->setEnabled(!evaluating);
-
     if (m_saveButton)
     {
         if (evaluating)
