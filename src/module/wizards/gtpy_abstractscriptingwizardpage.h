@@ -28,7 +28,8 @@ class GtAbstractProperty;
 class GtProcessComponent;
 class GtpyScriptEditor;
 class GtpyConsole;
-class GtpyScriptRunnable;
+class GtpyScriptEvalWorker;
+class QThread;
 
 /**
  * @brief The GtpyAbstractScriptingWizardPage class
@@ -69,12 +70,6 @@ protected:
      * @param e Event which was send by pressing a key.
      */
     virtual void keyPressEvent(QKeyEvent* e) override;
-
-    /**
-     * @brief Enables to create calculator instances into scripting environment.
-     * @param task The calculator children will be append to this task.
-     */
-    void enableCalculators(GtTask* task);
 
     /**
      * @brief Will be called after script evaluation. By default the function
@@ -314,11 +309,25 @@ private:
     void loadPackages();
 
     /**
-     * @brief If the runnable is not null, this functions connects it to the
-     * context manager by calling GtpyContextManager::autoDeleteRunnable().
-     * After that this function interrupts the execution of the runnable.
+     * @brief Stops the background evaluation and waits until the worker
+     * thread becomes idle.
      */
-    void deleteRunnable();
+    bool stopEvaluation();
+
+    /**
+     * @brief Moves cloned package objects to the evaluation thread.
+     */
+    void movePackagesToEvalThread();
+
+    /**
+     * @brief Moves cloned package objects back to the gui thread.
+     */
+    void movePackagesToGuiThread();
+
+    /**
+     * @brief Updates the ui state while an evaluation is running.
+     */
+    void setEvaluationUiState(bool evaluating);
 
     /// Search Widget
     GtSearchWidget* m_searchWidget;
@@ -364,17 +373,23 @@ private:
 
     GtpyEditorSettings* m_editorSettings;
 
-    /// Package Names
-    QStringList m_packageNames;
+    /// Package objects exposed to the wizard context
+    std::vector<std::unique_ptr<GtObject>> m_packages;
 
     /// Is Evaluating
     bool m_isEvaluating;
 
-    /// Script runnable for evaluation
-    QPointer<GtpyScriptRunnable> m_runnable;
+    /// Dedicated thread for wizard script evaluation
+    QThread* m_evalThread;
+
+    /// Worker object executing scripts on the evaluation thread
+    QPointer<GtpyScriptEvalWorker> m_evalWorker;
 
     /// Saving the script
     bool m_savingEnabled;
+
+    /// Save button state before evaluation
+    bool m_saveButtonEnabledBeforeEval;
 
     /// Process component uuid
     QString m_componentUuid;
@@ -456,7 +471,7 @@ private slots:
     /**
      * @brief Checks if the evaluation was successful.
      */
-    void evaluationFinished();
+    void evaluationFinished(bool success);
 
     /**
      * @brief Emits the signal calculatorDropReceived().

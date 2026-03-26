@@ -21,15 +21,17 @@
 #include <QTextOption>
 #include <QMetaProperty>
 #include <QTabBar>
-#include <QThreadPool>
+#include <QEventLoop>
+#include <QTimer>
 #include <QMainWindow>
 #include <QApplication>
+#include <QThread>
 
 // python includes
 #include "gtpy_icons_compat.h"
 #include "gtpy_scripteditor.h"
 #include "gtpy_console.h"
-#include "gtpy_scriptrunnable.h"
+#include "gtpy_scriptevalworker.h"
 #include "gtpy_wizardgeometries.h"
 #include "gtpy_editorsettingsdialog.h"
 #include "gtpy_packageiteration.h"
@@ -39,6 +41,7 @@
 #include "gt_object.h"
 #include "gt_project.h"
 #include "gt_datamodel.h"
+#include "gt_logging.h"
 #include "gt_filedialog.h"
 #include "gt_saveprojectmessagebox.h"
 
@@ -56,13 +59,25 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     m_tabWidget(nullptr),
     m_editorSettings(nullptr),
     m_isEvaluating(false),
-    m_runnable(nullptr),
+    m_evalThread(new QThread{this}),
+    m_evalWorker(nullptr),
     m_savingEnabled(true),
+    m_saveButtonEnabledBeforeEval(false),
     m_componentUuid(QString())
 {
     setTitle(tr("Python Script Editor"));
 
     m_contextId = GtpyContextManager::instance()->createNewContext(type);
+
+    m_evalWorker = new GtpyScriptEvalWorker{m_contextId};
+    m_evalWorker->moveToThread(m_evalThread);
+
+    connect(m_evalThread, &QThread::finished,
+            m_evalWorker, &QObject::deleteLater);
+    connect(m_evalWorker, &GtpyScriptEvalWorker::evaluationFinished,
+            this, &GtpyAbstractScriptingWizardPage::evaluationFinished);
+
+    m_evalThread->start();
 
     QVBoxLayout* layout = new QVBoxLayout;
 
@@ -301,7 +316,41 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
 
 GtpyAbstractScriptingWizardPage::~GtpyAbstractScriptingWizardPage()
 {
-    deleteRunnable();
+    bool stoppedCleanly = stopEvaluation();
+
+    if (!stoppedCleanly)
+    {
+        gtWarning() << tr("Python wizard evaluation did not stop. "
+                          "Skipping cleanup to avoid blocking shutdown.");
+
+        if (m_evalWorker)
+        {
+            disconnect(m_evalWorker, nullptr, this, nullptr);
+            m_evalWorker->setParent(nullptr);
+            m_evalWorker = nullptr;
+        }
+
+        if (m_evalThread)
+        {
+            m_evalThread->setParent(nullptr);
+            m_evalThread = nullptr;
+        }
+
+        registerGeometry();
+        return;
+    }
+
+    if (m_evalThread && m_evalThread->isRunning())
+    {
+        if (m_evalWorker)
+        {
+            m_evalWorker->deleteLater();
+            m_evalWorker = nullptr;
+        }
+
+        m_evalThread->quit();
+        m_evalThread->wait();
+    }
 
     GtpyContextManager::instance()->deleteContext(m_contextId);
     registerGeometry();
@@ -351,7 +400,10 @@ GtpyAbstractScriptingWizardPage::initializePage()
 bool
 GtpyAbstractScriptingWizardPage::validatePage()
 {
-    deleteRunnable();
+    if (!stopEvaluation())
+    {
+        return false;
+    }
 
     return validation();
 }
@@ -412,21 +464,14 @@ GtpyAbstractScriptingWizardPage::keyPressEvent(QKeyEvent* e)
 }
 
 void
-GtpyAbstractScriptingWizardPage::enableCalculators(GtTask* task)
-{
-    GtpyContextManager::instance()->addTaskValue(m_contextId, task);
-}
-
-void
 GtpyAbstractScriptingWizardPage::endEval(bool /*success*/)
 {
     return;
 }
 
 void
-GtpyAbstractScriptingWizardPage::insertWidgetNextToEditor(QWidget* widget,
-        int index,
-        int stretchFactor)
+GtpyAbstractScriptingWizardPage::insertWidgetNextToEditor(
+    QWidget* widget, int index, int stretchFactor)
 {
     if (!m_editorSplitter)
     {
@@ -664,25 +709,12 @@ GtpyAbstractScriptingWizardPage::evalScript(const QString& script,
     }
 
     m_isEvaluating = true;
+    movePackagesToEvalThread();
+    setEvaluationUiState(true);
 
-    m_runnable = new GtpyScriptRunnable(m_contextId);
-
-    m_runnable->setScript(script);
-    m_runnable->setOutputToConsole(outputToConsole);
-
-    // make runnable not delete itself
-    m_runnable->setAutoDelete(false);
-
-    // connect runnable signals to wizard slots
-    connect(m_runnable, SIGNAL(runnableFinished()),
-            this, SLOT(evaluationFinished()));
-
-    QThreadPool* tp = QThreadPool::globalInstance();
-
-    // start runnable
-    tp->start(m_runnable);
-
-    return;
+    QMetaObject::invokeMethod(
+        m_evalWorker, "evaluate", Qt::QueuedConnection,
+        Q_ARG(QString, script), Q_ARG(bool, outputToConsole));
 }
 
 void
@@ -690,9 +722,9 @@ GtpyAbstractScriptingWizardPage::onEvalButtonClicked()
 {
     if (m_isEvaluating)
     {
-        if (m_runnable)
+        if (m_evalWorker)
         {
-            m_runnable->interrupt();
+            m_evalWorker->interrupt();
             return;
         }
     }
@@ -897,21 +929,98 @@ GtpyAbstractScriptingWizardPage::loadPackages()
     gtpy::package::forEachPackage([&](const GtPackage* pkg){
         if (pkg)
         {
-            auto* clone = pkg->clone();
-            clone->setParent(this);
-            gtpy::transfer::gtObjectToPython(m_contextId, clone);
+            auto clone = std::unique_ptr<GtObject>(pkg->clone());
+            gtpy::transfer::gtObjectToPython(m_contextId, clone.get());
+            m_packages.push_back(std::move(clone));
         }
     });
 }
 
-void
-GtpyAbstractScriptingWizardPage::deleteRunnable()
+bool
+GtpyAbstractScriptingWizardPage::stopEvaluation()
 {
-    if (m_runnable)
+    if (!m_evalWorker || !m_isEvaluating) return true;
+
+    QEventLoop loop;
+    QTimer timeout;
+    bool timedOut = false;
+
+    timeout.setSingleShot(true);
+
+    connect(m_evalWorker, &GtpyScriptEvalWorker::evaluationFinished,
+            &loop, &QEventLoop::quit);
+    connect(&timeout, &QTimer::timeout, &loop, [&]() {
+        timedOut = true;
+        loop.quit();
+    });
+
+    timeout.start(3000);
+    m_evalWorker->interrupt();
+    loop.exec();
+
+    if (timedOut && m_isEvaluating)
     {
-        GtpyContextManager::instance()->autoDeleteRunnable(m_runnable);
-        m_runnable->interrupt();
-        m_runnable = nullptr;
+        gtWarning() << tr("Timeout while waiting for python wizard evaluation "
+                          "to stop.");
+        return false;
+    }
+
+    return true;
+}
+
+void
+GtpyAbstractScriptingWizardPage::movePackagesToEvalThread()
+{
+    for (const auto& pkg : qAsConst(m_packages))
+    {
+        if (pkg) pkg->moveToThread(m_evalThread);
+    }
+}
+
+void
+GtpyAbstractScriptingWizardPage::movePackagesToGuiThread()
+{
+    QThread* guiThread = thread();
+
+    for (const auto& pkg : qAsConst(m_packages))
+    {
+        if (!pkg || pkg->thread() == guiThread) continue;
+
+        if (pkg->parent())
+        {
+            gtWarning() << tr("Cannot move package with parent: ") << pkg;
+            continue;
+        }
+
+        QPointer<GtObject> safePkg{pkg.get()};
+
+        QMetaObject::invokeMethod(safePkg.data(), [safePkg, guiThread]() {
+            if (!safePkg || safePkg->thread() == guiThread) return;
+            safePkg->moveToThread(guiThread);
+        }, Qt::BlockingQueuedConnection);
+    }
+}
+
+void
+GtpyAbstractScriptingWizardPage::setEvaluationUiState(bool evaluating)
+{
+    // Live completion inspects the shared Python context from the GUI
+    // thread. While evaluation is running, the bound package objects live
+    // on the evaluation thread, so completion must stay disabled to avoid
+    // cross-thread introspection of those objects.
+    if (m_editor) m_editor->enableCompletion(!evaluating);
+
+    if (m_saveButton)
+    {
+        if (evaluating)
+        {
+            m_saveButtonEnabledBeforeEval = m_saveButton->isEnabled();
+            m_saveButton->setEnabled(false);
+        }
+        else
+        {
+            m_saveButton->setEnabled(m_saveButtonEnabledBeforeEval);
+        }
     }
 }
 
@@ -1120,25 +1229,13 @@ GtpyAbstractScriptingWizardPage::onSearchTextEdit()
 }
 
 void
-GtpyAbstractScriptingWizardPage::evaluationFinished()
+GtpyAbstractScriptingWizardPage::evaluationFinished(bool success)
 {
+    movePackagesToGuiThread();
     showEvalButton(true);
-
     m_isEvaluating = false;
-
-    if (m_runnable)
-    {
-        bool success = m_runnable->successful();
-
-        // connect runnable signals to task runner slots
-        disconnect(m_runnable, &GtpyScriptRunnable::runnableFinished,
-                   this, &GtpyAbstractScriptingWizardPage::evaluationFinished);
-
-        delete m_runnable;
-        m_runnable = nullptr;
-
-        endEval(success);
-    }
+    setEvaluationUiState(false);
+    endEval(success);
 }
 
 void

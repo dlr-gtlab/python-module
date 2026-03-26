@@ -61,7 +61,6 @@ set(HEADERS
     utilities/gtpy_packageiteration.h
     utilities/gtpy_processdatadistributor.h
     utilities/gtpy_regexp.h
-    utilities/gtpy_scriptrunnable.h
     utilities/gtpy_utils.h
     utilities/gtpy_taskapi.h
     utilities/gtpy_tempdir.h
@@ -87,6 +86,7 @@ set(HEADERS
     wizards/editor_settings/pages/gtpy_abstractsettingspage.h
     wizards/editor_settings/pages/gtpy_generalpage.h
     wizards/gtpy_abstractscriptingwizardpage.h
+    wizards/gtpy_scriptevalworker.h
     wizards/gtpy_wizardgeometries.h
     wizards/gtpy_wizardgeometryitem.h
     wizards/python_task/gtpy_taskwizardpage.h
@@ -135,7 +135,6 @@ set(SOURCES
     utilities/gtpy_module.cpp
     utilities/gtpy_processdatadistributor.cpp
     utilities/gtpy_regexp.cpp
-    utilities/gtpy_scriptrunnable.cpp
     utilities/gtpy_utils.cpp
     utilities/gtpy_taskapi.cpp
     utilities/gtpy_tempdir.cpp
@@ -161,6 +160,7 @@ set(SOURCES
     wizards/editor_settings/pages/gtpy_abstractsettingspage.cpp
     wizards/editor_settings/pages/gtpy_generalpage.cpp
     wizards/gtpy_abstractscriptingwizardpage.cpp
+    wizards/gtpy_scriptevalworker.cpp
     wizards/gtpy_wizardgeometries.cpp
     wizards/gtpy_wizardgeometryitem.cpp
     wizards/python_task/gtpy_taskwizardpage.cpp
@@ -266,4 +266,3 @@ install (FILES
   DESTINATION ${CONFIG_INSTALL_DIR})
 
 ######################################################################
-

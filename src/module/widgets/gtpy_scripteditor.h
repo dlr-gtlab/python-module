@@ -134,6 +134,12 @@ public:
 
     void replaceTabsBySpaces(bool enable = true);
 
+    /**
+     * @brief Enables or disables live tab completion.
+     * @param enable True to enable completion, false to disable it.
+     */
+    void enableCompletion(bool enable = true);
+
 public slots:
     /**
      * @brief Searchs for the given text and highlights this.
@@ -244,6 +250,9 @@ private:
 
     /// Whether the text search is activated
     bool m_searchActivated;
+
+    /// Indicates whether live completion is enabled.
+    bool m_completionEnabled{true};
 
     /// Text that was last searched for
     QString m_lastSearch;
