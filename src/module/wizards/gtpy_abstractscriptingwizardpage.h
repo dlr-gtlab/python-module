@@ -140,7 +140,7 @@ protected:
      * @param all If it is true, all founds in the document will be replaced.
      * Otherwise it replaces only the first one found.
      */
-    void searchAndReplaceEditorText(const QRegExp& searchFor,
+    void searchAndReplaceEditorText(const QRegularExpression& searchFor,
                                     const QString& replaceBy, bool all);
 
     /**

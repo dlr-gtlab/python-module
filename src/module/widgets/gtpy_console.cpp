@@ -82,7 +82,12 @@ GtpyConsole::GtpyConsole(int contextId,
 
     const int tabStop = 4;
     QFontMetrics metrics(font);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    setTabStopDistance(tabStop * metrics.horizontalAdvance(' '));
+#else
     setTabStopWidth(tabStop * metrics.width(' '));
+#endif
 }
 
 void

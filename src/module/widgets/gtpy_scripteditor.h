@@ -16,6 +16,8 @@
 #include "gt_calculator.h"
 #include "gt_codeeditor.h"
 
+#include <QRegularExpression>
+
 class GtpyCompleter;
 
 /**
@@ -91,7 +93,7 @@ public:
      * @param all If it is true, all strings in the document will be replaced.
      * Otherwise it only replaces the first one found.
      */
-    void searchAndReplace(const QRegExp& searchRegExp, const QString& replaceBy,
+    void searchAndReplace(const QRegularExpression& searchRegExp, const QString& replaceBy,
                           bool all = true);
     /**
      * @brief Searchs for the given string searchFor and replaces it

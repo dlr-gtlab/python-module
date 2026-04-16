@@ -105,7 +105,6 @@ GtpyLoggingModule_StaticMethods[] =
 };
 
 
-#ifdef PY3K
 static PyModuleDef
 GtpyLogging_Module =
 {
@@ -119,7 +118,6 @@ GtpyLogging_Module =
     NULL,
     NULL
 };
-#endif
 
 }
 

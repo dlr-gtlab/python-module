@@ -14,7 +14,6 @@ project(GTlab-Python VERSION 1.5.0)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-find_package(Qt5 REQUIRED COMPONENTS Widgets Core Gui Xml Svg)
 find_package(Python3 REQUIRED COMPONENTS Development)
 
 set(Python3_VERSION_SUFFIX "${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
@@ -34,6 +33,13 @@ endif()
 
 include(${GTlab_DIR}/GTlab.cmake)
 gtlab_standard_setup()
+
+require_qt(COMPONENTS Widgets Core Gui Xml Svg)
+
+# include SvgWidget, if Qt major version is 6 or higher
+if (QT_VERSION_MAJOR GREATER_EQUAL 6)
+    require_qt(COMPONENTS SvgWidgets)
+endif()
 
 if (GTlab_VERSION_MAJOR LESS 2)
     if (NOT TARGET GTlab::Numerics)

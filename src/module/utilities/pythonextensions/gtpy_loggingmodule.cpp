@@ -264,7 +264,7 @@ GtpyPyLogger_lshift(PyObject* self, PyObject* arg)
     const auto* msg = PyPPUnicode_AsUTF8(pyMsg);
     if (!msg) return nullptr;
 
-    auto logLevel = static_cast<LogLevel>(PyInt_AsLong(logger->m_logLevel));
+    auto logLevel = static_cast<LogLevel>(PyLong_AsLong(logger->m_logLevel));
 
     printToConsols(logLevel, msg);
 
@@ -277,9 +277,6 @@ static PyNumberMethods
         0,      /* nb_add */
         0,      /* nb_subtract */
         0,      /* nb_multiply */
-#ifndef PY3K
-        0,      /* nb_divide */
-#endif
         0,      /* nb_remainder */
         0,      /* nb_divmod */
         0,      /* nb_power */
@@ -293,22 +290,12 @@ static PyNumberMethods
         0,    /* nb_and */
         0,    /* nb_xor */
         0,    /* nb_or */
-#ifndef PY3K
-        0,      /* nb_coerce */
-#endif
         0,      /* nb_int */
         0,      /* nb_long  / nb_reserved in Py3K */
         0,      /* nb_float */
-#ifndef PY3K
-        0,      /* nb_oct */
-        0,      /* nb_hex */
-#endif
         0,      /* nb_inplace_add */
         0,      /* nb_inplace_subtract */
         0,      /* nb_inplace_multiply */
-#ifndef PY3K
-        0,      /* nb_inplace_divide */
-#endif
         0,      /* nb_inplace_remainder */
         0,      /* nb_inplace_power */
         0,      /* nb_inplace_lshift */
@@ -320,9 +307,7 @@ static PyNumberMethods
         0,      /* nb_true_divide */
         0,      /* nb_inplace_floor_divide */
         0,      /* nb_inplace_true_divide */
-#ifdef PY3K
-        0,      /* nb_index in Py3K */
-#endif
+        0,      /* nb_index */
 };
 
 PyTypeObject
@@ -348,11 +333,7 @@ PyTypeObject
     0,  /*tp_setattro*/
     0,  /*tp_as_buffer*/
            Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE /*tp_flags*/
-#ifndef PY3K
-           | Py_TPFLAGS_CHECKTYPES,
-#else
     ,
-#endif
     "GtpyPyLogger doc",/* tp_doc */
     0,  /* tp_traverse */
     0,  /* tp_clear */

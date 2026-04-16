@@ -101,7 +101,6 @@ GtpyAbstractScriptingWizardPage::GtpyAbstractScriptingWizardPage(
     QHBoxLayout* separatorLay = new QHBoxLayout(this);
 
     separatorLay->setSpacing(0);
-    separatorLay->setMargin(0);
     separatorLay->setContentsMargins(0, 0, 0, 0);
 
     QLabel* label = new QLabel("Output Console:", this);
@@ -542,7 +541,7 @@ GtpyAbstractScriptingWizardPage::replaceBlockHeaders(const QString& oldHeader,
 
 void
 GtpyAbstractScriptingWizardPage::searchAndReplaceEditorText(
-    const QRegExp& searchFor, const QString& replaceBy, bool all)
+    const QRegularExpression& searchFor, const QString& replaceBy, bool all)
 {
     if (!m_editor)
     {
@@ -586,28 +585,9 @@ GtpyAbstractScriptingWizardPage::setConsoleVisible(bool visible)
 QString
 GtpyAbstractScriptingWizardPage::indentation(const QString& codeLine) const
 {
-    QString indent;
-    QRegExp spacesRegExp("^ +\t*");
-    QRegExp tabRegExp("^\t+ *");
-    QRegExp regExp;
-
-    if (codeLine.contains(spacesRegExp))
-    {
-        regExp = spacesRegExp;
-    }
-    else if (codeLine.contains(tabRegExp))
-    {
-        regExp = tabRegExp;
-    }
-
-    int pos = regExp.indexIn(codeLine);
-
-    if (pos > -1)
-    {
-        indent = regExp.cap(0);
-    }
-
-    return indent;
+    static const QRegularExpression leadingIndent(R"(^[ \t]+)");
+    const QRegularExpressionMatch match = leadingIndent.match(codeLine);
+    return match.hasMatch() ? match.captured(0) : QString{};
 }
 
 void

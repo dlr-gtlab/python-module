@@ -11,7 +11,6 @@
 #ifndef GTPYREGEXP_H
 #define GTPYREGEXP_H
 
-#include <QRegExp>
 #include <QRegularExpression>
 
 /**
@@ -26,7 +25,7 @@ namespace re
  * @brief Everything except letters and numbers.
  * @return Returns a QRegExp instance.
  */
-QRegExp exceptLettersAndNumbers();
+QRegularExpression exceptLettersAndNumbers();
 
 /**
  * @brief Returns a regular expression that matches valid Python identifiers.

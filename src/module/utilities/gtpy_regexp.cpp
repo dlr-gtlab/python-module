@@ -10,10 +10,10 @@
 
 #include "gtpy_regexp.h"
 
-QRegExp
+QRegularExpression
 gtpy::re::exceptLettersAndNumbers()
 {
-    return QRegExp{"[^A-Za-z0-9]+"};
+    return QRegularExpression{"[^A-Za-z0-9]+"};
 }
 
 

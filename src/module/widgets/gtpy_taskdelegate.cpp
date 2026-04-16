@@ -29,12 +29,12 @@ GtpyTaskDelegate::createEditor(QWidget* parent,
     QLineEdit* lineEdit = new QLineEdit(parent);
 
 #if GT_VERSION < 0x020000
-    QRegExp regExp = GtRegExp::onlyLettersAndNumbersAndSpace();
+    QRegExp onlyLettersAndNumbersAndSpaceExp = GtRegExp::onlyLettersAndNumbersAndSpace();
 #else
-    QRegExp regExp = gt::re::onlyLettersAndNumbersAndSpace();
+    static QRegularExpression onlyLettersAndNumbersAndSpaceExp("[A-Za-z0-9\\_\\-\\[\\]\\s\\␣]+");
 #endif
 
-    QValidator* validator = new QRegExpValidator(regExp, this->parent());;
+    QValidator* validator = new QRegularExpressionValidator(onlyLettersAndNumbersAndSpaceExp, this->parent());;
 
     lineEdit->setValidator(validator);
 

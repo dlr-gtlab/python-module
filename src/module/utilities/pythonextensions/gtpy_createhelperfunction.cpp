@@ -52,7 +52,7 @@ GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args_py,
     auto args = PyPPObject::Borrow(args_py);
     Py_ssize_t argc = PyPPTuple_Size(args);
 
-    if (!f->m_helperName || !PyString_Check(f->m_helperName))
+    if (!f->m_helperName || !PyUnicode_Check(f->m_helperName))
     {
         QString error = "GtpyCreateHelperFunction is invalid!";
 
@@ -61,7 +61,7 @@ GtpyCreateHelperFunction_Call(PyObject* func, PyObject* args_py,
         return nullptr;
     }
 
-    QString helperName = QString(PyString_AsString(f->m_helperName));
+    QString helperName = QString(PyUnicode_AsUTF8(f->m_helperName));
 
     if (argc == 1)
     {
