@@ -435,6 +435,12 @@ GtpyScriptEditor::replaceTabsBySpaces(bool enable)
     }
 }
 
+void
+GtpyScriptEditor::enableCompletion(bool enable)
+{
+    m_completionEnabled = enable;
+    if (!m_completionEnabled && m_cpl) m_cpl->getPopup()->hide();
+}
 
 void
 GtpyScriptEditor::searchHighlighting(const QString& searchText,
@@ -1099,6 +1105,12 @@ void GtpyScriptEditor::commentOutBlock()
 
 void GtpyScriptEditor::handleCompletion()
 {
+    if (!m_completionEnabled)
+    {
+        if (m_cpl) m_cpl->getPopup()->hide();
+        return;
+    }
+
     QTextCursor c = this->textCursor();
     QRect cr = cursorRect(c);
 
