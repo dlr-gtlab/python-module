@@ -27,6 +27,14 @@ constexpr const char* COLLECTION_CAT = "category";
 constexpr const char* COLLECTION_SUBCAT = "subcategory";
 constexpr const char* PROJ_PY_SCRIPTS_DIR = "scripts/python";
 
+/// Environment
+namespace env
+{
+constexpr const char* PYTHON_OWNER_ENV_VAR = "GTLAB_PYTHON_INTERPRETER_OWNER";
+constexpr const char* PYTHON_OWNER_GTLAB = "gtlab";
+constexpr const char* PYTHON_OWNER_EXTERNAL = "external";
+}
+
 } // namespace constants
 
 } // namespace gtpy

@@ -63,6 +63,38 @@
 namespace
 {
 
+void ensurePythonOwnerEnvVar()
+{
+    if (qEnvironmentVariableIsSet(gtpy::constants::env::PYTHON_OWNER_ENV_VAR))
+    {
+        return;
+    }
+
+    auto exeBaseName = QFileInfo(QCoreApplication::applicationFilePath())
+                           .completeBaseName()
+                           .toLower();
+
+    bool gtlabOwnsPython = (exeBaseName == QStringLiteral("gtlab") ||
+                            exeBaseName == QStringLiteral("gtlabconsole"));
+
+    qputenv(gtpy::constants::env::PYTHON_OWNER_ENV_VAR,
+            gtlabOwnsPython
+                ? gtpy::constants::env::PYTHON_OWNER_GTLAB
+                : gtpy::constants::env::PYTHON_OWNER_EXTERNAL);
+}
+
+bool isGtlabPythonOwner()
+{
+    ensurePythonOwnerEnvVar();
+
+    auto owner = qEnvironmentVariable(
+                     gtpy::constants::env::PYTHON_OWNER_ENV_VAR)
+                     .trimmed()
+                     .toLower();
+
+    return owner == QLatin1String(gtpy::constants::env::PYTHON_OWNER_GTLAB);
+}
+
 GtpyContext::ContextType contextTypeEnumConvert(
         GtpyContextManager::Context type)
 {
@@ -140,15 +172,15 @@ GtpyContextManager::GtpyContextManager(QObject* parent) :
     dlopen(PYTHON_LIBRARY, RTLD_LAZY | RTLD_GLOBAL);
 #endif
 
-    // In the embedded case, we are owning the python interpreter, so we
-    // need to create it first.
-    //
-    // When the python module is running from inside a normal python interpreter
-    // we are not allowed to reinit. Also, we don't want to redirect std out in this case
-    const bool pythonAlreadyInitialized = (Py_IsInitialized() != 0);
-    m_ownsPythonInterpreter = !pythonAlreadyInitialized;
+    // Determine interpreter ownership via GTLAB_PYTHON_INTERPRETER_OWNER.
+    // Ownership controls whether we initialize Python in embedded mode
+    // or attach to an externally hosted Python interpreter.
+    m_ownsPythonInterpreter = isGtlabPythonOwner();
 
-    int pythonQtFlags = m_ownsPythonInterpreter ? PythonQt::RedirectStdOut : PythonQt::PythonAlreadyInitialized;
+    const bool pythonAlreadyInitialized = (Py_IsInitialized() != 0);
+    int pythonQtFlags = pythonAlreadyInitialized
+                            ? PythonQt::PythonAlreadyInitialized
+                            : PythonQt::RedirectStdOut;
 
     PythonQt::init(pythonQtFlags);
 
