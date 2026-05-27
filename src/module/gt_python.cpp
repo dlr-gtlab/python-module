@@ -59,6 +59,7 @@
 
 #include "gt_python.h"
 
+#include "gt_project.h"
 
 #if GT_VERSION >= 0x010700
 GtVersionNumber
@@ -123,21 +124,21 @@ GtPythonModule::init()
     pythonConsoleLayout->setSpacing(0);
     pythonConsoleTab->setLayout(pythonConsoleLayout);
 
-    GtpyConsole* pythonConsole =
+    m_pythonConsole =
         new GtpyConsole(GtpyContextManager::GlobalContext,
                         pythonConsoleTab);
 
-    pythonConsole->showAdditionalContextOutput(
+    m_pythonConsole->showAdditionalContextOutput(
         GtpyContextManager::CalculatorRunContext);
-    pythonConsole->showAdditionalContextOutput(
+    m_pythonConsole->showAdditionalContextOutput(
         GtpyContextManager::TaskRunContext);
 
     connect(GtpyContextManager::instance(), SIGNAL(newContextCreated(int)),
-            pythonConsole, SLOT(showAdditionalContextOutput(int)));
+            m_pythonConsole, SLOT(showAdditionalContextOutput(int)));
     connect(GtpyContextManager::instance(), SIGNAL(contextDeleted(int)),
-            pythonConsole, SLOT(removeAdditionalContextOutput(int)));
+            m_pythonConsole, SLOT(removeAdditionalContextOutput(int)));
 
-    pythonConsoleLayout->addWidget(pythonConsole);
+    pythonConsoleLayout->addWidget(m_pythonConsole);
 
     // python console tools layout
     QHBoxLayout* pyToolLayout = new QHBoxLayout;
@@ -155,7 +156,7 @@ GtPythonModule::init()
 
     pythonConsoleLayout->addLayout(pyToolLayout);
 
-    connect(pyClearButton, SIGNAL(clicked(bool)), pythonConsole,
+    connect(pyClearButton, SIGNAL(clicked(bool)), m_pythonConsole,
             SLOT(clearConsole()));
 
 
@@ -324,6 +325,16 @@ QList<gt::SharedFunction> GtPythonModule::sharedFunctions() const
             return a+b;
         }));
     }
+
+    // JetCode Python CLI
+    result.append(gt::interface::makeSharedFunction("executeCode", [this](const QString& code) ->QString {
+        if (code.isEmpty()) return {};
+        m_pythonConsole->clearConsole(); // should just clear stdout and stderr
+        m_pythonConsole->executeCode(code);
+        QString response =  m_pythonConsole->getStdOut()+'\n' + m_pythonConsole->getStdErr();
+        response.replace("stdout/stderr redirect using fileno()","");
+        return response;
+    }));
 
     return result;
 }

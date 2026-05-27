@@ -41,6 +41,17 @@ public:
      */
     void setCommandPrompt(const QString& commandPrompt);
 
+    // For Shared Function
+    /**
+     * @brief Executes the given python code.
+     * @param code Python code.
+     */
+    void executeCode(const QString& code);
+
+    QString getStdOut();
+
+    QString getStdErr();
+
 public slots:
     /**
      * @brief Enables the registration of a context whose output is displayed
@@ -105,6 +116,10 @@ private:
     /// Error Message
     QString m_stdErr;
 
+    QString m_capturedStdOut;
+    QString m_capturedStdErr;
+
+
     /// Python Context Manager
     GtpyContextManager* m_python;
 
@@ -147,11 +162,11 @@ private:
      */
     void executeLine(bool storeOnly);
 
-    /**
-     * @brief Executes the given python code.
-     * @param code Python code.
-     */
-    void executeCode(const QString& code);
+    // /**
+    //  * @brief Executes the given python code.
+    //  * @param code Python code.
+    //  */
+    // void executeCode(const QString& code);
 
     /**
      * @brief Returns the position of the command prompt.

@@ -127,6 +127,7 @@ GtpyConsole::stdErr(const QString& message, int contextId, const QString& messag
         setTextColor(QColor(214, 0, 0));
 
         m_stdErr += message;
+        m_capturedStdErr += message;
         int idx;
 
         auto prefix = consolePrefix(messagePrefix);
@@ -475,6 +476,16 @@ GtpyConsole::executeCode(const QString& code)
     gtApp->endCommand(com);
 }
 
+QString GtpyConsole::getStdOut()
+{
+    return m_capturedStdOut;
+}
+
+QString GtpyConsole::getStdErr()
+{
+    return m_capturedStdErr;
+}
+
 int
 GtpyConsole::commandPromptPosition()
 {
@@ -684,6 +695,7 @@ GtpyConsole::stdOut(const QString& message, int contextId, const QString& messag
             (m_additionalContextOutput.contains(contextId)))
     {
         m_stdOut += message;
+        m_capturedStdOut += message;
         int idx;
 
         auto prefix = consolePrefix(messagePrefix);

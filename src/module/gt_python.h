@@ -19,6 +19,7 @@
 #include "gt_collectioninterface.h"
 #include "gt_networkinterface.h"
 #include "gt_globals.h"
+#include "gtpy_console.h"
 
 #if GT_VERSION >= GT_VERSION_CHECK(1, 7, 0)
 #include "gt_versionnumber.h"
@@ -193,6 +194,7 @@ private:
      */
     QWidget* findWidget(QStringList path, QWidget* parent = nullptr);
 
+    GtpyConsole* m_pythonConsole;
 };
 
 namespace PythonExecution
