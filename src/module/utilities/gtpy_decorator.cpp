@@ -560,6 +560,14 @@ GtpyDecorator::runProcess(GtProject* pro, const QString& processId,
     return true;
 }
 
+QByteArray
+GtpyDecorator::toMemento(GtObject * object)
+{
+    if (!object) return {};
+
+    return object->toMemento().toByteArray();
+}
+
 PyObjectAPIReturn
 GtpyDecorator::findProcess(GtProject* pro, const QString& processId)
 {
