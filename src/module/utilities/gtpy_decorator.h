@@ -219,6 +219,12 @@ public slots:
                     bool save = false);
 
     /**
+     * @brief toMemento returns the memento for a given GtObject
+     * @return QByteArray of Gtobject memento
+     */
+    QByteArray toMemento(GtObject* object);
+
+    /**
      * @brief findProcess returns process with the given id
      * @param pro pointer to GtProject
      * @param processId id of process that should be returned
