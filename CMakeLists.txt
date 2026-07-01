@@ -31,7 +31,6 @@ if(NOT TARGET GTlab::Core)
     find_package(GTlab REQUIRED)
 endif()
 
-include(${GTlab_DIR}/GTlab.cmake)
 gtlab_standard_setup()
 
 require_qt(COMPONENTS Widgets Core Gui Xml Svg)
