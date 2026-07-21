@@ -224,6 +224,9 @@ public slots:
      */
     QByteArray toMemento(GtObject* object);
 
+    bool
+    newlyCreated(GtObject * object);
+
     /**
      * @brief findProcess returns process with the given id
      * @param pro pointer to GtProject
@@ -565,6 +568,13 @@ public slots:
      * @return See GtObject class documentation.
      */
     bool hasChanges(GtObject* obj);
+
+    /**
+     * @brief Decorator function to hasChanges function of GtObject.
+     * @param obj Pointer to GtObject.
+     * @return See GtObject class documentation.
+     */
+    bool hasChildChanged(GtObject* obj);
 
     /**
      * @brief Decorator function to acceptChangesRecursively function of

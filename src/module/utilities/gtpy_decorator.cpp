@@ -568,6 +568,14 @@ GtpyDecorator::toMemento(GtObject * object)
     return object->toMemento().toByteArray();
 }
 
+bool
+GtpyDecorator::newlyCreated(GtObject * object)
+{
+    if (!object) return {};
+
+    return object->newlyCreated();
+}
+
 PyObjectAPIReturn
 GtpyDecorator::findProcess(GtProject* pro, const QString& processId)
 {
@@ -1339,6 +1347,11 @@ bool
 GtpyDecorator::hasChanges(GtObject* obj)
 {
     return obj->hasChanges();
+}
+
+bool GtpyDecorator::hasChildChanged(GtObject *obj)
+{
+    return obj->hasChildChanged();
 }
 
 void
