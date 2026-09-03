@@ -131,8 +131,11 @@ GtpyAbstractScriptComponent::GtpyAbstractScriptComponent() :
         createStructDef("int", gt::makeIntMonitoringProperty(0)));
     m_outputArgs.registerAllowedType(
         createStructDef("float", gt::makeDoubleMonitoringProperty(0.0)));
+    #if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
     m_outputArgs.registerAllowedType(
         createStructDef("bool", gt::makeMonitoring(gt::makeBoolProperty(false))));
+    #endif
+
 #endif
 
     // cppcheck-suppress useInitializationList
