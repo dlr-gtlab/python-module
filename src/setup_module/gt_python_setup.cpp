@@ -190,7 +190,7 @@ void
 GtPythonSetupModule::acceptPythonModule(const GtVersionNumber& version)
 {
     auto versions = gtps::python::version::supportedVersions();
-    versions.removeOne(GtVersionNumber{version.major(), version.minor()});
+    versions.removeAll(GtVersionNumber{version.major(), version.minor()});
     suppressPythonModules(versions);
 }
 
