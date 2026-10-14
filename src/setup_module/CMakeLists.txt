@@ -45,6 +45,22 @@ target_compile_definitions(GTlabPythonSetup PRIVATE
     GT_PYTHON_SETUP_DLL
 )
 
+# The module ABI is independent of the Core version. Pass the actual value
+# exported by Core so runtime discovery accepts only compatible modules.
+set(_gtlab_python_module_abi "${GTLAB_MODULE_ABI}")
+if (NOT _gtlab_python_module_abi)
+    get_property(_gtlab_python_module_abi GLOBAL PROPERTY GTLAB_MODULE_ABI)
+endif()
+
+if (_gtlab_python_module_abi)
+    target_compile_definitions(GTlabPythonSetup PRIVATE
+        "GTLAB_MODULE_ABI=\"${_gtlab_python_module_abi}\"")
+elseif (DEFINED GTLAB_CORE_VERSION AND
+        GTLAB_CORE_VERSION VERSION_GREATER_EQUAL "2.1")
+    message(FATAL_ERROR
+        "GTlab ${GTLAB_CORE_VERSION} requires GTLAB_MODULE_ABI for Python module discovery")
+endif()
+
 target_include_directories(GTlabPythonSetup PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/.>
 )

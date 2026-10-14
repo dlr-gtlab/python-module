@@ -11,6 +11,7 @@
 #include <QVector>
 #include <QString>
 
+#include "gt_version.h"
 #include "gt_globals.h"
 #include "gt_moduleinterface.h"
 #include "gt_settings.h"
@@ -72,7 +73,23 @@ gtps::python::version::supportedVersions()
 
     QString moduleDir = QCoreApplication::applicationDirPath() + "/modules";
 
-    static QRegularExpression pymodRe("(lib)?(?i)(GTlabPython)([0-9])([0-9]+)(-d)?.(dll|so|dylib)$");
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+    // GTlab 2.1 and newer include the module ABI in the filename.
+#ifndef GTLAB_MODULE_ABI
+#error "GTLAB_MODULE_ABI must be provided by the GTlab CMake package"
+#endif
+    const QString escapedAbi = QRegularExpression::escape(
+        QStringLiteral(GTLAB_MODULE_ABI));
+    const QRegularExpression pymodRe(
+        QStringLiteral("(lib)?(?i)(GTlabPython)([0-9])([0-9]+)(-d)?"
+                       "\\.gtm\\.%1\\.(dll|so|dylib)$")
+            .arg(escapedAbi));
+#else
+    // Older GTlab versions use filenames without an ABI suffix.
+    static QRegularExpression pymodRe(
+        "(lib)?(?i)(GTlabPython)([0-9])([0-9]+)(-d)?"
+        "\\.(dll|so|dylib)$");
+#endif
 
     QDirIterator it(moduleDir, QDir::Files);
 
