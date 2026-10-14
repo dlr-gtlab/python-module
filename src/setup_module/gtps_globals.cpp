@@ -74,7 +74,7 @@ gtps::python::version::supportedVersions()
 
     static QRegularExpression pymodRe("(lib)?(?i)(GTlabPython)([0-9])([0-9]+)(-d)?.(dll|so|dylib)$");
 
-    QDirIterator it(moduleDir, QDir::Files, QDirIterator::Subdirectories);
+    QDirIterator it(moduleDir, QDir::Files);
 
     while (it.hasNext())
     {
