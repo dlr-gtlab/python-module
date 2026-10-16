@@ -10,10 +10,6 @@
 
 
 // GTlab framework includes
-#include "gt_datamodel.h"
-#include "gt_command.h"
-#include "gt_application.h"
-#include "gt_project.h"
 #include "gt_processfactory.h"
 #include "gt_objectmemento.h"
 #include "gt_abstractprocessprovider.h"
@@ -58,11 +54,6 @@ GtpyScriptCalculatorWizardPage::initialization()
     gtpy::transfer::propStructToPython(m_contextId, m_calc->outputArgs());
 #endif
 
-    if (!gtDataModel->objectByUuid(m_calc->uuid()))
-    {
-        enableSaving(false);
-    }
-
     setPlainTextToEditor(m_calc->script());
 }
 
@@ -78,36 +69,6 @@ GtpyScriptCalculatorWizardPage::validation()
     provider()->setComponentData(m_calc->toMemento());
 
     return true;
-}
-
-void
-GtpyScriptCalculatorWizardPage::saveScript()
-{
-    if (!m_calc)
-    {
-        return;
-    }
-
-    m_calc->setScript(editorText());
-
-    GtObjectMemento memento = m_calc->toMemento();
-
-    if (memento.isNull())
-    {
-        return;
-    }
-
-    auto* obj = gtDataModel->objectByUuid(m_calc->uuid());
-
-    if (auto* calc = qobject_cast<GtCalculator*>(obj))
-    {
-        GtCommand command =
-            gtApp->startCommand(gtApp->currentProject(),
-                                calc->objectName() +
-                                tr(" configuration changed"));
-        calc->fromMemento(memento);
-        gtApp->endCommand(command);
-    }
 }
 
 QString

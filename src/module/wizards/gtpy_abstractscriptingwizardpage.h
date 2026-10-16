@@ -107,7 +107,7 @@ protected:
      * @brief Returns current text in editor widget.
      * @return current text in editor widget
      */
-    QString editorText();
+    QString editorText() const;
 
     /**
      * @brief Replaces the calculator settings between header and caption with
@@ -198,20 +198,13 @@ protected:
      */
     void cursorToNewLine();
 
-    /**
-     * @brief Enable or disable the saving functionality.
-     * @param enable Whether the saving functionality should be enabled or
-     *  disabled.
-     */
-    void enableSaving(bool enable = true);
-
     /// Python Context id
     int m_contextId;
 
     /**
      * To intercept closing events
      */
-    bool eventFilter(QObject *watched, QEvent *event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
     /// Python Context type
     GtpyContextManager::Context m_contextType;
@@ -242,10 +235,14 @@ private:
     virtual bool validation();
 
     /**
-     * @brief In this pure virtual function the routine for saving a script
-     * must be implemented.
+     * @brief Calls storeScriptInDataModel() to apply the current script
+     * from the editor to the data model.
+     *
+     * This method is retained for backward compatibility.
+     * Use storeScriptInDataModel() directly instead.
      */
-    virtual void saveScript() = 0;
+    [[deprecated("Use storeScriptInDataModel() instead")]]
+    virtual void saveScript() final;
 
     /**
      * @brief This pure virtual function must return the uuid of the restored
@@ -276,16 +273,9 @@ private:
     virtual void saveSettings(GtpyEditorSettings* pref) = 0;
 
     /**
-     * @brief Enables of disables the save button.
-     * @param enable If true, the Save button is enabled, otherwise it is
-     *  disabled.
+     * @brief Applies the current script from the editor to the data model.
      */
-    void enableSaveButton(bool enable = true);
-
-    /**
-     * @brief saveMesssageBox
-     */
-    int saveMessageBox();
+    void storeScriptInDataModel() const;
 
     /**
      * @brief Sets the window modality of the wizard to non modal. This allows
@@ -341,12 +331,6 @@ private:
     /// Interrupt shortcut lable
     QLabel* m_shortCutInterrupt;
 
-    /// Save Button
-    QPushButton* m_saveButton;
-
-    /// Save shortcut label
-    QLabel* m_shortCutSave;
-
     /// Console Clear Button
     QPushButton* m_consoleClearButton;
 
@@ -372,9 +356,6 @@ private:
 
     /// Script runnable for evaluation
     QPointer<GtpyScriptRunnable> m_runnable;
-
-    /// Saving the script
-    bool m_savingEnabled;
 
     /// Process component uuid
     QString m_componentUuid;
@@ -442,16 +423,6 @@ private slots:
      * function.
      */
     void onEvalShortCutTriggered();
-
-    /**
-     * @brief It saves the current script.
-     */
-    void onSaveButtonClicked();
-
-    /**
-     * @brief Enables the save button.
-     */
-    void onTextChanged();
 
     /**
      * @brief Checks if the evaluation was successful.

@@ -238,6 +238,12 @@ GtpyAbstractScriptComponent::outputArg(const QString& argName) const
 }
 #endif
 
+const GtStringProperty&
+GtpyAbstractScriptComponent::scriptProp() const
+{
+    return m_script;
+}
+
 bool
 GtpyAbstractScriptComponent::evalScript(int contextId)
 {
