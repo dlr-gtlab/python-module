@@ -592,6 +592,14 @@ public slots:
      */
     QString className(GtObject* obj);
 
+    /**
+     * @brief Decorator function to properties function of GtObject.
+     * Unlike findGtProperties, only the top-level properties are returned.
+     * @param obj Pointer to GtObject.
+     * @return Properties registered at the object.
+     */
+    QList<GtAbstractProperty*> properties(GtObject* obj);
+
     ///-------> functions of GtAbstractProperty <-------\\\
 
     /**
@@ -635,6 +643,20 @@ public slots:
      * @return Identification string.
      */
     QString ident(GtAbstractProperty* prop);
+
+    /**
+     * @brief Decorator function to properties function of GtAbstractProperty.
+     * @param prop pointer to GtAbstractProperty
+     * @return Direct sub-properties of the property.
+     */
+    QList<GtAbstractProperty*> properties(GtAbstractProperty* prop);
+
+    /**
+     * @brief Decorator function to brief function of GtAbstractProperty.
+     * @param prop pointer to GtAbstractProperty
+     * @return Brief description of the property.
+     */
+    QString brief(GtAbstractProperty* prop);
 
     /**
      * @brief Decorator function to isActive function of GtAbstractProperty.

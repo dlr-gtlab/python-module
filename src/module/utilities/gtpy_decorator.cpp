@@ -1372,6 +1372,17 @@ GtpyDecorator::className(GtObject* obj)
 }
 
 QList<GtAbstractProperty*>
+GtpyDecorator::properties(GtObject* obj)
+{
+    if (obj == nullptr)
+    {
+        return QList<GtAbstractProperty*>();
+    }
+
+    return obj->properties();
+}
+
+QList<GtAbstractProperty*>
 GtpyDecorator::findGtProperties(GtAbstractProperty* prop)
 {
     if (prop == nullptr)
@@ -1534,6 +1545,28 @@ GtpyDecorator::ident(GtAbstractProperty* prop)
     }
 
     return prop->ident();
+}
+
+QList<GtAbstractProperty*>
+GtpyDecorator::properties(GtAbstractProperty* prop)
+{
+    if (prop == nullptr)
+    {
+        return QList<GtAbstractProperty*>();
+    }
+
+    return prop->properties();
+}
+
+QString
+GtpyDecorator::brief(GtAbstractProperty* prop)
+{
+    if (prop == nullptr)
+    {
+        return QString();
+    }
+
+    return prop->brief();
 }
 
 bool
