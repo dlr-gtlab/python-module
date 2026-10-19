@@ -176,8 +176,7 @@ add_gtlab_module(GTlabPython SOURCES ${HEADERS} ${SOURCES}
     CHANGELOG_FILE "${PROJECT_SOURCE_DIR}/CHANGELOG.md"
 )
 
-set_target_properties(GTlabPython PROPERTIES OUTPUT_NAME
-    GTlabPython${Python3_VERSION_SUFFIX})
+gtlab_set_python_name(GTlabPython "${Python3_VERSION_SUFFIX}")
 
 add_library(GTlab::Python ALIAS GTlabPython)
 

@@ -14,6 +14,9 @@ project(GTlab-Python VERSION 1.5.0)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+
+include(GTlabPythonHelpers)
+
 find_package(Python3 REQUIRED COMPONENTS Development)
 
 set(Python3_VERSION_SUFFIX "${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")

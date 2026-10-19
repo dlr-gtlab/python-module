@@ -3,7 +3,7 @@
 
 include(CMakeFindDependencyMacro)
 
-find_dependency(Qt5 COMPONENTS Core Widgets Xml)
+find_dependency(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets Xml)
 
 # support for monobuilds
 
