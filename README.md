@@ -130,9 +130,9 @@ Example: If you are using a conda environment, the variable could look like this
 ```
 -DPython3_ROOT_DIR=C:\ProgramData\Miniforge3\envs\py312
 ```
-A new `GTlabPythonXXX.dll` should appear with the version number.
+A new `GTlabPythonXXX.dll` or `GTlabPythonXXX.so` should appear with the version number.
 
-Normally not required, but if any ambiguity happens, try changing in `CMakeList.txt` to require a specific version:
+Normally not required, but if any ambiguity happens, try changing in `CMakeList.txt` to require a specific version, e.g.:
 ```
 find_package(Python3 3.12 EXACT REQUIRED COMPONENTS Development)
 ```
