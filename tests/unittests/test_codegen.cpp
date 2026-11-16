@@ -30,7 +30,11 @@ protected:
         testCalcData->author = "Author";
 
         // register calculator data in the calculator factory
+#if GT_VERSION >= GT_VERSION_CHECK(2, 1, 0)
+        gtCalculatorFactory->registerCalculatorData(testCalcData, "Python Unit Tests");
+#else
         gtCalculatorFactory->registerCalculatorData(testCalcData);
+#endif
 
         // setup calculator
         calc.setObjectName("My GtCalculator");
