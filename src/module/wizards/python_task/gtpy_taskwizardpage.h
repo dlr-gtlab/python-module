@@ -58,11 +58,6 @@ private:
     virtual bool validation() override;
 
     /**
-     * @brief Saves the script into the task instance.
-     */
-    virtual void saveScript() override;
-
-    /**
      * @brief Returns the uuid of the restored GtpyScriptCalculator.
      * @return uuid of the restored GtpyScriptCalculator
      */
