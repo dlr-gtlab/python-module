@@ -151,7 +151,7 @@ GtpyAbstractScriptComponent::GtpyAbstractScriptComponent() :
         if (!pkg) return;
 
         auto pathProp = new GtObjectPathProperty(
-                    QStringLiteral(""), QStringLiteral(""), QStringLiteral(""),
+                    pkg->objectName(), QStringLiteral(""), QStringLiteral(""),
                     pkg->objectName(), nullptr,
                     QStringList() << pkg->metaObject()->className());
 
