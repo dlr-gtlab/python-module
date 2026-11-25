@@ -88,7 +88,7 @@ testWin_2.0:
   image: at-twk-hal9000.intra.dlr.de:5000/dlr-at/gtlabdev-2_0-win
   needs: ["windowsBuildDebug_2.0"]
   before_script:
-    - '& $env:GTLAB_UPDATE_TOOL up --confirm-command; $null'
+    - !reference [.update_devtools_win, script]
   script:
     - $env:path = "$env:PYTHON3_HOME;$env:GTLAB_DEV_TOOLS\binDebug;$env:path"
     - cd build
@@ -107,7 +107,7 @@ testLinux_2.0:
   needs: ["linuxBuildDebug_2.0"]
   before_script:
     # update to latest dev tools
-    - '"$GTLAB_UPDATE_TOOL" up --confirm-command'
+    - !reference [.update_devtools_linux, script]
   script:
     - cd build
     - LD_LIBRARY_PATH="$GTLAB_DEV_TOOLS/binDebug" ./GTlabPythonUnitTest --gtest_output=xml:unittests.xml
