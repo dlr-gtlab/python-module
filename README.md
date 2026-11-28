@@ -116,3 +116,25 @@ cmake -S . -B build_dir -DQt5_DIR=<path/to/cmake/Qt5> -DCMAKE_PREFIX_PATH=<path/
 cmake --build build_dir
 cmake --build build_dir --target install
 ```
+
+#### Building for a specific Python version
+
+To build the module with a specific Python version, add the variable `Python3_ROOT_DIR` to CMake config:
+
+```
+-DPython3_ROOT_DIR=<path/to/env>
+```
+
+or create the variable `Python3_ROOT_DIR` in Qt's CMake current config.
+Example: If you are using a conda environment, the variable could look like this:
+```
+-DPython3_ROOT_DIR=C:\ProgramData\Miniforge3\envs\py312
+```
+A new `GTlabPythonXXX.dll` or `GTlabPythonXXX.so` should appear with the version number.
+
+Normally not required, but if any ambiguity happens, try changing in `CMakeList.txt` to require a specific version, e.g.:
+```
+find_package(Python3 3.12 EXACT REQUIRED COMPONENTS Development)
+```
+
+After building, start GTlab and change the used Python version under `Settings > Python` to the correct env, e.g. `C:\ProgramData\Miniforge3\envs\py312\bin\python.exe`
